@@ -14,7 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      payments: {
+        Row: {
+          access_expires_at: string | null
+          amount: number
+          created_at: string
+          currency: string
+          email: string
+          id: string
+          package: string
+          paystack_reference: string | null
+          paystack_transaction_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          access_expires_at?: string | null
+          amount: number
+          created_at?: string
+          currency?: string
+          email: string
+          id?: string
+          package: string
+          paystack_reference?: string | null
+          paystack_transaction_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          access_expires_at?: string | null
+          amount?: number
+          created_at?: string
+          currency?: string
+          email?: string
+          id?: string
+          package?: string
+          paystack_reference?: string | null
+          paystack_transaction_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
