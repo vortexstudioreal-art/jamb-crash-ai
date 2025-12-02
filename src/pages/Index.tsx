@@ -1,17 +1,43 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { HeroSection } from '@/components/HeroSection';
 import { PricingSection } from '@/components/PricingSection';
 import { UploadSection } from '@/components/UploadSection';
 import { PersonalizationForm } from '@/components/PersonalizationForm';
+import { PaymentModal } from '@/components/PaymentModal';
 import { Footer } from '@/components/Footer';
 import { toast } from 'sonner';
 
-type Step = 'landing' | 'payment' | 'upload' | 'personalize' | 'processing';
+type Step = 'landing' | 'upload' | 'personalize' | 'processing';
+
+const plans = {
+  basic: { name: 'Basic', price: 7500 },
+  pro: { name: 'Pro', price: 12000 },
+  ultimate: { name: 'Ultimate', price: 30000 },
+};
 
 const Index = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [currentStep, setCurrentStep] = useState<Step>('landing');
-  const [selectedPlan, setSelectedPlan] = useState<string>('');
+  const [selectedPlan, setSelectedPlan] = useState<keyof typeof plans | null>(null);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
+
+  // Check for step param from payment success redirect
+  useEffect(() => {
+    const step = searchParams.get('step');
+    if (step === 'upload') {
+      const paymentData = sessionStorage.getItem('jamb_payment');
+      if (paymentData) {
+        const parsed = JSON.parse(paymentData);
+        setUserEmail(parsed.email);
+        setCurrentStep('upload');
+        // Clear the search param
+        setSearchParams({});
+      }
+    }
+  }, [searchParams, setSearchParams]);
 
   const handleGetStarted = () => {
     const pricingSection = document.getElementById('pricing');
@@ -19,9 +45,23 @@ const Index = () => {
   };
 
   const handleSelectPlan = (plan: string) => {
-    setSelectedPlan(plan);
-    toast.success(`${plan.charAt(0).toUpperCase() + plan.slice(1)} plan selected!`);
-    // In production, this would redirect to Paystack
+    const planKey = plan as keyof typeof plans;
+    setSelectedPlan(planKey);
+    setIsPaymentModalOpen(true);
+  };
+
+  const handlePaymentSuccess = (reference: string, email: string) => {
+    setIsPaymentModalOpen(false);
+    setUserEmail(email);
+    toast.success('Payment successful! Redirecting...');
+    
+    // Store payment info and navigate to upload
+    sessionStorage.setItem('jamb_payment', JSON.stringify({
+      reference,
+      email,
+      package: selectedPlan,
+    }));
+    
     setCurrentStep('upload');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -32,11 +72,10 @@ const Index = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleFormSubmit = (data: any) => {
+  const handleFormSubmit = (data: unknown) => {
     console.log('Form data:', data);
     toast.success('Generating your personalized study plan...');
     setCurrentStep('processing');
-    // In production, this would trigger the backend processing
   };
 
   if (currentStep === 'upload') {
@@ -85,6 +124,15 @@ const Index = () => {
         <PricingSection onSelectPlan={handleSelectPlan} />
       </div>
       <Footer />
+
+      {selectedPlan && (
+        <PaymentModal
+          isOpen={isPaymentModalOpen}
+          onClose={() => setIsPaymentModalOpen(false)}
+          plan={plans[selectedPlan]}
+          onSuccess={handlePaymentSuccess}
+        />
+      )}
     </div>
   );
 };

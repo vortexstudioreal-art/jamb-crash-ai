@@ -1,0 +1,98 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-paystack-signature",
+};
+
+// Helper function to compute HMAC-SHA512
+async function computeHmacSha512(key: string, data: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(key);
+  const dataData = encoder.encode(data);
+  
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw",
+    keyData,
+    { name: "HMAC", hash: "SHA-512" },
+    false,
+    ["sign"]
+  );
+  
+  const signature = await crypto.subtle.sign("HMAC", cryptoKey, dataData);
+  const hashArray = Array.from(new Uint8Array(signature));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const paystackSecretKey = Deno.env.get("PAYSTACK_SECRET_KEY");
+    if (!paystackSecretKey) {
+      console.error("PAYSTACK_SECRET_KEY not configured");
+      return new Response("Server error", { status: 500 });
+    }
+
+    // Get the raw body for signature verification
+    const body = await req.text();
+    const signature = req.headers.get("x-paystack-signature");
+
+    // Verify webhook signature
+    if (signature) {
+      const expectedSignature = await computeHmacSha512(paystackSecretKey, body);
+
+      if (signature !== expectedSignature) {
+        console.error("Invalid webhook signature");
+        return new Response("Invalid signature", { status: 401 });
+      }
+    }
+
+    const event = JSON.parse(body);
+    console.log("Webhook event received:", event.event);
+
+    if (event.event === "charge.success") {
+      const { reference, id, customer, amount, metadata } = event.data;
+
+      console.log("Payment successful:", { reference, id, amount });
+
+      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+      const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const supabase = createClient(supabaseUrl, supabaseKey);
+
+      // Determine access duration based on package
+      const packageName = metadata?.package || "basic";
+      const accessDays = packageName === "ultimate" ? 90 : 30;
+      const accessExpiresAt = new Date();
+      accessExpiresAt.setDate(accessExpiresAt.getDate() + accessDays);
+
+      // Update payment record
+      const { error: updateError } = await supabase
+        .from("payments")
+        .update({
+          status: "success",
+          paystack_transaction_id: id.toString(),
+          access_expires_at: accessExpiresAt.toISOString(),
+        })
+        .eq("paystack_reference", reference);
+
+      if (updateError) {
+        console.error("Error updating payment:", updateError);
+      } else {
+        console.log("Payment record updated successfully");
+      }
+    }
+
+    return new Response(JSON.stringify({ received: true }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    console.error("Webhook error:", error);
+    return new Response("Webhook error", { status: 500 });
+  }
+});
