@@ -9,11 +9,12 @@ import { AdminBadge } from './AdminBadge';
 interface PremiumDashboardProps {
   userEmail: string;
   isAdmin: boolean;
+  adminRole?: 'owner' | 'collaborator' | null;
   targetScore?: number;
   weakSubject?: string;
 }
 
-export const PremiumDashboard = ({ userEmail, isAdmin, targetScore, weakSubject }: PremiumDashboardProps) => {
+export const PremiumDashboard = ({ userEmail, isAdmin, adminRole, targetScore, weakSubject }: PremiumDashboardProps) => {
   const [showResultCard, setShowResultCard] = useState(false);
   const [predictedScores, setPredictedScores] = useState<{ min: number; max: number } | null>(null);
 
@@ -32,7 +33,7 @@ export const PremiumDashboard = ({ userEmail, isAdmin, targetScore, weakSubject 
         >
           <div className="flex items-center justify-center gap-2 mb-2">
             <h1 className="text-3xl font-bold text-foreground">Your Study Dashboard</h1>
-            {isAdmin && <AdminBadge />}
+            {isAdmin && <AdminBadge role={adminRole} />}
           </div>
           <p className="text-muted-foreground">
             Access all your premium features below

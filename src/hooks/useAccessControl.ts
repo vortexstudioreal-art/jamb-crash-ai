@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 interface AccessStatus {
   hasAccess: boolean;
   isAdmin: boolean;
+  adminRole: 'owner' | 'collaborator' | null;
   package: string | null;
   expiresAt: Date | null;
   isLoading: boolean;
@@ -16,6 +17,7 @@ export const useAccessControl = () => {
   const [accessStatus, setAccessStatus] = useState<AccessStatus>({
     hasAccess: false,
     isAdmin: false,
+    adminRole: null,
     package: null,
     expiresAt: null,
     isLoading: true,
@@ -27,6 +29,7 @@ export const useAccessControl = () => {
       setAccessStatus({
         hasAccess: false,
         isAdmin: false,
+        adminRole: null,
         package: null,
         expiresAt: null,
         isLoading: false,
@@ -45,6 +48,7 @@ export const useAccessControl = () => {
         setAccessStatus({
           hasAccess: false,
           isAdmin: false,
+          adminRole: null,
           package: null,
           expiresAt: null,
           isLoading: false,
@@ -58,6 +62,7 @@ export const useAccessControl = () => {
         setAccessStatus({
           hasAccess: result.has_access || false,
           isAdmin: result.is_admin || false,
+          adminRole: result.admin_role as 'owner' | 'collaborator' | null,
           package: result.package || null,
           expiresAt: result.expires_at ? new Date(result.expires_at) : null,
           isLoading: false,
@@ -67,6 +72,7 @@ export const useAccessControl = () => {
         setAccessStatus({
           hasAccess: false,
           isAdmin: false,
+          adminRole: null,
           package: null,
           expiresAt: null,
           isLoading: false,
@@ -78,6 +84,7 @@ export const useAccessControl = () => {
       setAccessStatus({
         hasAccess: false,
         isAdmin: false,
+        adminRole: null,
         package: null,
         expiresAt: null,
         isLoading: false,
@@ -96,6 +103,7 @@ export const useAccessControl = () => {
     setAccessStatus({
       hasAccess: false,
       isAdmin: false,
+      adminRole: null,
       package: null,
       expiresAt: null,
       isLoading: false,

@@ -184,6 +184,7 @@ export type Database = {
       check_user_access: {
         Args: { user_email: string }
         Returns: {
+          admin_role: string
           expires_at: string
           has_access: boolean
           is_admin: boolean

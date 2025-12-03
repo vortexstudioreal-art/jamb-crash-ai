@@ -34,7 +34,7 @@ const Index = () => {
   const [selectedPlan, setSelectedPlan] = useState<keyof typeof plans | null>(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [personalizationData, setPersonalizationData] = useState<FormData | null>(null);
-  const { hasAccess, isAdmin, isLoading, setUserEmail, userEmail } = useAccessControl();
+  const { hasAccess, isAdmin, adminRole, isLoading, setUserEmail, userEmail } = useAccessControl();
 
   // Check for step param from payment success redirect
   useEffect(() => {
@@ -114,7 +114,7 @@ const Index = () => {
           <div className="pt-16">
             {isAdmin && (
               <div className="fixed top-20 right-4 z-50">
-                <AdminBadge />
+                <AdminBadge role={adminRole} />
               </div>
             )}
             
@@ -142,6 +142,7 @@ const Index = () => {
               <PremiumDashboard
                 userEmail={userEmail}
                 isAdmin={isAdmin}
+                adminRole={adminRole}
                 targetScore={personalizationData?.targetScore ? parseInt(personalizationData.targetScore) : undefined}
                 weakSubject={personalizationData?.weakestSubject}
               />
@@ -159,7 +160,7 @@ const Index = () => {
       <div className="pt-16">
         {isAdmin && (
           <div className="fixed top-20 right-4 z-50">
-            <AdminBadge />
+            <AdminBadge role={adminRole} />
           </div>
         )}
         <HeroSection onGetStarted={handleGetStarted} />
