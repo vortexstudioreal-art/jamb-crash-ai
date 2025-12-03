@@ -8,11 +8,19 @@ import { PersonalizationForm } from '@/components/PersonalizationForm';
 import { PaymentModal } from '@/components/PaymentModal';
 import { PaywallGate } from '@/components/PaywallGate';
 import { AdminBadge } from '@/components/AdminBadge';
+import { PremiumDashboard } from '@/components/PremiumDashboard';
 import { Footer } from '@/components/Footer';
 import { useAccessControl } from '@/hooks/useAccessControl';
 import { toast } from 'sonner';
 
-type Step = 'landing' | 'upload' | 'personalize' | 'processing';
+type Step = 'landing' | 'upload' | 'personalize' | 'processing' | 'dashboard';
+
+interface FormData {
+  targetScore: string;
+  hoursPerDay: string;
+  weakestSubject: string;
+  examDate: string;
+}
 
 const plans = {
   basic: { name: 'Basic', price: 7500 },
@@ -25,6 +33,7 @@ const Index = () => {
   const [currentStep, setCurrentStep] = useState<Step>('landing');
   const [selectedPlan, setSelectedPlan] = useState<keyof typeof plans | null>(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [personalizationData, setPersonalizationData] = useState<FormData | null>(null);
   const { hasAccess, isAdmin, isLoading, setUserEmail, userEmail } = useAccessControl();
 
   // Check for step param from payment success redirect
@@ -75,8 +84,15 @@ const Index = () => {
 
   const handleFormSubmit = (data: unknown) => {
     console.log('Form data:', data);
+    setPersonalizationData(data as FormData);
     toast.success('Generating your personalized study plan...');
     setCurrentStep('processing');
+    
+    // Simulate processing then go to dashboard
+    setTimeout(() => {
+      setCurrentStep('dashboard');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 3000);
   };
 
   const handleUpgradeClick = () => {
@@ -121,8 +137,17 @@ const Index = () => {
                 </div>
               </div>
             )}
+
+            {currentStep === 'dashboard' && userEmail && (
+              <PremiumDashboard
+                userEmail={userEmail}
+                isAdmin={isAdmin}
+                targetScore={personalizationData?.targetScore ? parseInt(personalizationData.targetScore) : undefined}
+                weakSubject={personalizationData?.weakestSubject}
+              />
+            )}
           </div>
-          <Footer />
+          {currentStep !== 'dashboard' && <Footer />}
         </div>
       </PaywallGate>
     );
