@@ -114,7 +114,7 @@ const Index = () => {
           <div className="pt-16">
             {isAdmin && (
               <div className="fixed top-20 right-4 z-50">
-                <AdminBadge role={adminRole} />
+                <AdminBadge role={adminRole} linkToAdmin />
               </div>
             )}
             
@@ -160,7 +160,7 @@ const Index = () => {
       <div className="pt-16">
         {isAdmin && (
           <div className="fixed top-20 right-4 z-50">
-            <AdminBadge role={adminRole} />
+            <AdminBadge role={adminRole} linkToAdmin />
           </div>
         )}
         <HeroSection onGetStarted={handleGetStarted} />
