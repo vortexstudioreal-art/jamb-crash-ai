@@ -74,6 +74,105 @@ export type Database = {
         }
         Relationships: []
       }
+      referrals: {
+        Row: {
+          created_at: string | null
+          discount_amount: number | null
+          id: string
+          is_used: boolean | null
+          referral_code: string
+          referred_email: string | null
+          referrer_email: string
+        }
+        Insert: {
+          created_at?: string | null
+          discount_amount?: number | null
+          id?: string
+          is_used?: boolean | null
+          referral_code: string
+          referred_email?: string | null
+          referrer_email: string
+        }
+        Update: {
+          created_at?: string | null
+          discount_amount?: number | null
+          id?: string
+          is_used?: boolean | null
+          referral_code?: string
+          referred_email?: string | null
+          referrer_email?: string
+        }
+        Relationships: []
+      }
+      user_progress: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          plan_completed: boolean | null
+          predicted_score_max: number | null
+          predicted_score_min: number | null
+          questions_completed: number | null
+          study_days_completed: number | null
+          target_score: number | null
+          updated_at: string | null
+          weak_subject: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          plan_completed?: boolean | null
+          predicted_score_max?: number | null
+          predicted_score_min?: number | null
+          questions_completed?: number | null
+          study_days_completed?: number | null
+          target_score?: number | null
+          updated_at?: string | null
+          weak_subject?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          plan_completed?: boolean | null
+          predicted_score_max?: number | null
+          predicted_score_min?: number | null
+          questions_completed?: number | null
+          study_days_completed?: number | null
+          target_score?: number | null
+          updated_at?: string | null
+          weak_subject?: string | null
+        }
+        Relationships: []
+      }
+      whatsapp_reminders: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          is_active: boolean | null
+          phone_number: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          is_active?: boolean | null
+          phone_number: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          is_active?: boolean | null
+          phone_number?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -88,6 +187,7 @@ export type Database = {
           package: string
         }[]
       }
+      generate_referral_code: { Args: { user_email: string }; Returns: string }
     }
     Enums: {
       [_ in never]: never
