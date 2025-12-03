@@ -4,11 +4,13 @@ import { motion } from 'framer-motion';
 import { CheckCircle, Loader2, Mail, ArrowRight, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePaystack } from '@/hooks/usePaystack';
+import { useAccessControl } from '@/hooks/useAccessControl';
 
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { verifyPayment } = usePaystack();
+  const { setUserEmail } = useAccessControl();
   const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying');
   const [paymentData, setPaymentData] = useState<{
     email: string;
@@ -28,6 +30,10 @@ const PaymentSuccess = () => {
         const data = await verifyPayment(reference);
         setPaymentData(data);
         setStatus('success');
+        // Store user email for access control
+        if (data?.email) {
+          setUserEmail(data.email);
+        }
       } catch (error) {
         console.error('Verification failed:', error);
         setStatus('error');

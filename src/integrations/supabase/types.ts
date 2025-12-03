@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_users: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           access_expires_at: string | null
@@ -61,7 +79,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_user_access: {
+        Args: { user_email: string }
+        Returns: {
+          expires_at: string
+          has_access: boolean
+          is_admin: boolean
+          package: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

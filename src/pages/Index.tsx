@@ -6,7 +6,10 @@ import { PricingSection } from '@/components/PricingSection';
 import { UploadSection } from '@/components/UploadSection';
 import { PersonalizationForm } from '@/components/PersonalizationForm';
 import { PaymentModal } from '@/components/PaymentModal';
+import { PaywallGate } from '@/components/PaywallGate';
+import { AdminBadge } from '@/components/AdminBadge';
 import { Footer } from '@/components/Footer';
+import { useAccessControl } from '@/hooks/useAccessControl';
 import { toast } from 'sonner';
 
 type Step = 'landing' | 'upload' | 'personalize' | 'processing';
@@ -22,7 +25,7 @@ const Index = () => {
   const [currentStep, setCurrentStep] = useState<Step>('landing');
   const [selectedPlan, setSelectedPlan] = useState<keyof typeof plans | null>(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  const [userEmail, setUserEmail] = useState('');
+  const { hasAccess, isAdmin, isLoading, setUserEmail, userEmail } = useAccessControl();
 
   // Check for step param from payment success redirect
   useEffect(() => {
@@ -33,11 +36,10 @@ const Index = () => {
         const parsed = JSON.parse(paymentData);
         setUserEmail(parsed.email);
         setCurrentStep('upload');
-        // Clear the search param
         setSearchParams({});
       }
     }
-  }, [searchParams, setSearchParams]);
+  }, [searchParams, setSearchParams, setUserEmail]);
 
   const handleGetStarted = () => {
     const pricingSection = document.getElementById('pricing');
@@ -55,7 +57,6 @@ const Index = () => {
     setUserEmail(email);
     toast.success('Payment successful! Redirecting...');
     
-    // Store payment info and navigate to upload
     sessionStorage.setItem('jamb_payment', JSON.stringify({
       reference,
       email,
@@ -78,41 +79,52 @@ const Index = () => {
     setCurrentStep('processing');
   };
 
-  if (currentStep === 'upload') {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header onGetStarted={handleGetStarted} />
-        <div className="pt-16">
-          <UploadSection onUploadComplete={handleUploadComplete} />
-        </div>
-        <Footer />
-      </div>
-    );
-  }
+  const handleUpgradeClick = () => {
+    setCurrentStep('landing');
+    setTimeout(() => {
+      const pricingSection = document.getElementById('pricing');
+      pricingSection?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
 
-  if (currentStep === 'personalize') {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header onGetStarted={handleGetStarted} />
-        <div className="pt-16">
-          <PersonalizationForm onSubmit={handleFormSubmit} />
-        </div>
-        <Footer />
-      </div>
-    );
-  }
+  // Protected steps require access
+  const isProtectedStep = currentStep !== 'landing';
 
-  if (currentStep === 'processing') {
+  if (isProtectedStep) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-20 h-20 rounded-full gradient-primary animate-pulse mx-auto mb-6 flex items-center justify-center">
-            <span className="text-3xl">🚀</span>
+      <PaywallGate hasAccess={hasAccess} isLoading={isLoading} onUpgrade={handleUpgradeClick}>
+        <div className="min-h-screen bg-background">
+          <Header onGetStarted={handleGetStarted} />
+          <div className="pt-16">
+            {isAdmin && (
+              <div className="fixed top-20 right-4 z-50">
+                <AdminBadge />
+              </div>
+            )}
+            
+            {currentStep === 'upload' && (
+              <UploadSection onUploadComplete={handleUploadComplete} />
+            )}
+            
+            {currentStep === 'personalize' && (
+              <PersonalizationForm onSubmit={handleFormSubmit} />
+            )}
+            
+            {currentStep === 'processing' && (
+              <div className="min-h-[60vh] flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-20 h-20 rounded-full gradient-primary animate-pulse mx-auto mb-6 flex items-center justify-center">
+                    <span className="text-3xl">🚀</span>
+                  </div>
+                  <h2 className="text-2xl font-bold text-foreground mb-2">Processing Your Materials</h2>
+                  <p className="text-muted-foreground">Our AI is analyzing your past questions...</p>
+                </div>
+              </div>
+            )}
           </div>
-          <h2 className="text-2xl font-bold text-foreground mb-2">Processing Your Materials</h2>
-          <p className="text-muted-foreground">Our AI is analyzing your past questions...</p>
+          <Footer />
         </div>
-      </div>
+      </PaywallGate>
     );
   }
 
@@ -120,6 +132,11 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header onGetStarted={handleGetStarted} />
       <div className="pt-16">
+        {isAdmin && (
+          <div className="fixed top-20 right-4 z-50">
+            <AdminBadge />
+          </div>
+        )}
         <HeroSection onGetStarted={handleGetStarted} />
         <PricingSection onSelectPlan={handleSelectPlan} />
       </div>
