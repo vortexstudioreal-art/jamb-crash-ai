@@ -6,6 +6,7 @@ import { PricingSection } from '@/components/PricingSection';
 import { UploadSection } from '@/components/UploadSection';
 import { PersonalizationForm } from '@/components/PersonalizationForm';
 import { PaymentModal } from '@/components/PaymentModal';
+import { EmailPromptModal } from '@/components/EmailPromptModal';
 import { PaywallGate } from '@/components/PaywallGate';
 import { AdminBadge } from '@/components/AdminBadge';
 import { PremiumDashboard } from '@/components/PremiumDashboard';
@@ -33,8 +34,10 @@ const Index = () => {
   const [currentStep, setCurrentStep] = useState<Step>('landing');
   const [selectedPlan, setSelectedPlan] = useState<keyof typeof plans | null>(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isEmailPromptOpen, setIsEmailPromptOpen] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
   const [personalizationData, setPersonalizationData] = useState<FormData | null>(null);
-  const { hasAccess, isAdmin, adminRole, isLoading, setUserEmail, userEmail } = useAccessControl();
+  const { hasAccess, isAdmin, adminRole, isLoading, setUserEmail, userEmail, refreshAccess } = useAccessControl();
 
   // Check for step param from payment success redirect
   useEffect(() => {
@@ -51,13 +54,40 @@ const Index = () => {
   }, [searchParams, setSearchParams, setUserEmail]);
 
   const handleGetStarted = () => {
-    const pricingSection = document.getElementById('pricing');
-    pricingSection?.scrollIntoView({ behavior: 'smooth' });
+    // Show email prompt first
+    setIsEmailPromptOpen(true);
   };
 
   const handleSelectPlan = (plan: string) => {
     const planKey = plan as keyof typeof plans;
     setSelectedPlan(planKey);
+    // Show email prompt first before payment
+    setIsEmailPromptOpen(true);
+  };
+
+  // Owner/paid user bypasses payment
+  const handleOwnerAccess = (email: string) => {
+    setIsEmailPromptOpen(false);
+    setUserEmail(email);
+    toast.success('Welcome back! Access granted.');
+    setCurrentStep('dashboard');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Non-owner proceeds to payment
+  const handleProceedToPayment = (email: string) => {
+    setIsEmailPromptOpen(false);
+    setPendingEmail(email);
+    
+    // If no plan selected yet, scroll to pricing
+    if (!selectedPlan) {
+      const pricingSection = document.getElementById('pricing');
+      pricingSection?.scrollIntoView({ behavior: 'smooth' });
+      toast.info('Select a plan to continue');
+      return;
+    }
+    
+    // Open payment modal with the email
     setIsPaymentModalOpen(true);
   };
 
@@ -168,12 +198,22 @@ const Index = () => {
       </div>
       <Footer />
 
+      {/* Email Prompt Modal - shown FIRST before payment */}
+      <EmailPromptModal
+        isOpen={isEmailPromptOpen}
+        onClose={() => setIsEmailPromptOpen(false)}
+        onOwnerAccess={handleOwnerAccess}
+        onProceedToPayment={handleProceedToPayment}
+      />
+
+      {/* Payment Modal - shown only for non-owners after email check */}
       {selectedPlan && (
         <PaymentModal
           isOpen={isPaymentModalOpen}
           onClose={() => setIsPaymentModalOpen(false)}
           plan={plans[selectedPlan]}
           onSuccess={handlePaymentSuccess}
+          initialEmail={pendingEmail || undefined}
         />
       )}
     </div>
