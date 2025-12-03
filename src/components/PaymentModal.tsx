@@ -15,12 +15,13 @@ interface PaymentModalProps {
     price: number;
   };
   onSuccess: (reference: string, email: string) => void;
+  initialEmail?: string;
 }
 
 const emailSchema = z.string().email('Please enter a valid email address');
 
-export const PaymentModal = ({ isOpen, onClose, plan, onSuccess }: PaymentModalProps) => {
-  const [email, setEmail] = useState('');
+export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }: PaymentModalProps) => {
+  const [email, setEmail] = useState(initialEmail || '');
   const [emailError, setEmailError] = useState('');
   const { isLoading, initializePayment } = usePaystack();
 
