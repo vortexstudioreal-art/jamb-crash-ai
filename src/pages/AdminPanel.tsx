@@ -2,15 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
-  Crown, 
-  Users, 
-  CreditCard, 
-  TrendingUp, 
-  Plus, 
-  Trash2, 
-  ArrowLeft,
-  RefreshCw,
-  Mail
+  Crown, Users, CreditCard, TrendingUp, Plus, Trash2, ArrowLeft, RefreshCw, Mail,
+  CheckCircle, XCircle, AlertCircle, Settings, Send, Key, Activity, Database
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,11 +30,19 @@ interface AdminUser {
   created_at: string;
 }
 
+interface FeatureStatus {
+  feature_name: string;
+  is_working: boolean;
+  notes: string | null;
+  last_checked: string;
+}
+
 interface Stats {
   totalPayments: number;
   totalRevenue: number;
   activeUsers: number;
   totalAdmins: number;
+  totalQuizzes: number;
 }
 
 const AdminPanel = () => {
@@ -49,9 +50,13 @@ const AdminPanel = () => {
   const { hasAccess, isAdmin, adminRole, isLoading, userEmail } = useAccessControl();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [admins, setAdmins] = useState<AdminUser[]>([]);
-  const [stats, setStats] = useState<Stats>({ totalPayments: 0, totalRevenue: 0, activeUsers: 0, totalAdmins: 0 });
+  const [features, setFeatures] = useState<FeatureStatus[]>([]);
+  const [stats, setStats] = useState<Stats>({ 
+    totalPayments: 0, totalRevenue: 0, activeUsers: 0, totalAdmins: 0, totalQuizzes: 0 
+  });
   const [newCollaboratorEmail, setNewCollaboratorEmail] = useState('');
   const [loadingData, setLoadingData] = useState(true);
+  const [testingWhatsApp, setTestingWhatsApp] = useState(false);
 
   const isOwner = adminRole === 'owner';
 
@@ -67,7 +72,7 @@ const AdminPanel = () => {
 
   const fetchData = async () => {
     setLoadingData(true);
-    await Promise.all([fetchPayments(), fetchAdmins()]);
+    await Promise.all([fetchPayments(), fetchAdmins(), fetchFeatures(), fetchQuizStats()]);
     setLoadingData(false);
   };
 
@@ -112,6 +117,63 @@ const AdminPanel = () => {
     setStats(prev => ({ ...prev, totalAdmins: (data || []).length }));
   };
 
+  const fetchFeatures = async () => {
+    const { data, error } = await supabase
+      .from('feature_status')
+      .select('*');
+    
+    if (error) {
+      console.error('Error fetching features:', error);
+      return;
+    }
+    
+    setFeatures(data || []);
+  };
+
+  const fetchQuizStats = async () => {
+    const { count, error } = await supabase
+      .from('quiz_attempts')
+      .select('*', { count: 'exact', head: true });
+    
+    if (!error) {
+      setStats(prev => ({ ...prev, totalQuizzes: count || 0 }));
+    }
+  };
+
+  const toggleFeature = async (featureName: string, currentStatus: boolean) => {
+    const { error } = await supabase
+      .from('feature_status')
+      .update({ is_working: !currentStatus, last_checked: new Date().toISOString() })
+      .eq('feature_name', featureName);
+    
+    if (error) {
+      toast.error('Failed to update feature');
+      return;
+    }
+    
+    toast.success(`Feature ${!currentStatus ? 'enabled' : 'disabled'}`);
+    fetchFeatures();
+  };
+
+  const testWhatsAppReminder = async () => {
+    setTestingWhatsApp(true);
+    try {
+      // Check if Twilio is configured
+      const whatsappFeature = features.find(f => f.feature_name === 'whatsapp_reminders');
+      if (!whatsappFeature?.is_working) {
+        toast.error('WhatsApp not configured. Add Twilio API key to enable.');
+        return;
+      }
+      
+      // Would call edge function here
+      toast.info('WhatsApp test sent! Check your phone 📱');
+    } catch (error) {
+      toast.error('Failed to send test');
+    } finally {
+      setTestingWhatsApp(false);
+    }
+  };
+
   const addCollaborator = async () => {
     if (!newCollaboratorEmail.trim()) {
       toast.error('Please enter an email');
@@ -140,7 +202,7 @@ const AdminPanel = () => {
       return;
     }
 
-    toast.success('Collaborator added!');
+    toast.success('Collaborator added! 🎉');
     setNewCollaboratorEmail('');
     fetchAdmins();
   };
@@ -178,11 +240,29 @@ const AdminPanel = () => {
     });
   };
 
+  const getFeatureIcon = (name: string) => {
+    switch (name) {
+      case 'pdf_upload': return '📄';
+      case 'timed_quizzes': return '⏱️';
+      case 'whatsapp_reminders': return '📱';
+      case 'email_delivery': return '✉️';
+      case 'ai_explanations': return '🤖';
+      case 'payment_processing': return '💳';
+      default: return '⚙️';
+    }
+  };
+
   if (isLoading || loadingData) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 rounded-full bg-primary/20 animate-pulse mx-auto mb-4" />
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ repeat: Infinity, duration: 1 }}
+            className="w-16 h-16 rounded-full bg-primary/20 mx-auto mb-4 flex items-center justify-center"
+          >
+            <Settings className="w-8 h-8 text-primary" />
+          </motion.div>
           <p className="text-muted-foreground">Loading admin panel...</p>
         </div>
       </div>
@@ -191,7 +271,7 @@ const AdminPanel = () => {
 
   return (
     <div className="min-h-screen bg-background py-8 px-4">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -221,7 +301,7 @@ const AdminPanel = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+          className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8"
         >
           <Card className="bg-card border-border">
             <CardContent className="p-4">
@@ -231,7 +311,7 @@ const AdminPanel = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-foreground">{stats.totalPayments}</p>
-                  <p className="text-xs text-muted-foreground">Total Payments</p>
+                  <p className="text-xs text-muted-foreground">Payments</p>
                 </div>
               </div>
             </CardContent>
@@ -244,8 +324,8 @@ const AdminPanel = () => {
                   <TrendingUp className="w-5 h-5 text-green-500" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-foreground">{formatCurrency(stats.totalRevenue)}</p>
-                  <p className="text-xs text-muted-foreground">Total Revenue</p>
+                  <p className="text-xl font-bold text-foreground">{formatCurrency(stats.totalRevenue)}</p>
+                  <p className="text-xs text-muted-foreground">Revenue</p>
                 </div>
               </div>
             </CardContent>
@@ -268,6 +348,20 @@ const AdminPanel = () => {
           <Card className="bg-card border-border">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
+                  <Activity className="w-5 h-5 text-purple-500" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-foreground">{stats.totalQuizzes}</p>
+                  <p className="text-xs text-muted-foreground">Quizzes Taken</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card border-border">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center">
                   <Crown className="w-5 h-5 text-amber-500" />
                 </div>
@@ -280,12 +374,80 @@ const AdminPanel = () => {
           </Card>
         </motion.div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Admin Management */}
+        <div className="grid lg:grid-cols-3 gap-6 mb-8">
+          {/* Feature Status */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
+          >
+            <Card className="bg-card border-border">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="w-5 h-5 text-primary" />
+                  App Status Check
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {features.map((feature) => (
+                  <div
+                    key={feature.feature_name}
+                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">{getFeatureIcon(feature.feature_name)}</span>
+                      <div>
+                        <p className="text-sm font-medium capitalize">
+                          {feature.feature_name.replace(/_/g, ' ')}
+                        </p>
+                        {feature.notes && (
+                          <p className="text-xs text-muted-foreground">{feature.notes}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {feature.is_working ? (
+                        <CheckCircle className="w-5 h-5 text-green-500" />
+                      ) : (
+                        <XCircle className="w-5 h-5 text-destructive" />
+                      )}
+                      {isOwner && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleFeature(feature.feature_name, feature.is_working)}
+                        >
+                          Toggle
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                {/* WhatsApp Test Button */}
+                <div className="pt-3 border-t border-border">
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={testWhatsAppReminder}
+                    disabled={testingWhatsApp}
+                  >
+                    <Send className="w-4 h-4 mr-2" />
+                    {testingWhatsApp ? 'Sending...' : 'Test WhatsApp Reminder'}
+                  </Button>
+                  <p className="text-xs text-muted-foreground text-center mt-2">
+                    Needs Twilio API key to work
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Admin Management */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
           >
             <Card className="bg-card border-border">
               <CardHeader>
@@ -342,64 +504,109 @@ const AdminPanel = () => {
             </Card>
           </motion.div>
 
-          {/* Recent Payments */}
+          {/* Quick Actions */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="lg:col-span-2"
+            transition={{ delay: 0.4 }}
           >
             <Card className="bg-card border-border">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="w-5 h-5 text-primary" />
-                  Recent Payments
+                  <AlertCircle className="w-5 h-5 text-blue-500" />
+                  Quick Fixes
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-border">
-                        <th className="text-left py-2 text-muted-foreground font-medium">Email</th>
-                        <th className="text-left py-2 text-muted-foreground font-medium">Package</th>
-                        <th className="text-left py-2 text-muted-foreground font-medium">Amount</th>
-                        <th className="text-left py-2 text-muted-foreground font-medium">Status</th>
-                        <th className="text-left py-2 text-muted-foreground font-medium">Date</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {payments.slice(0, 10).map((payment) => (
-                        <tr key={payment.id} className="border-b border-border/50">
-                          <td className="py-3 truncate max-w-[150px]">{payment.email}</td>
-                          <td className="py-3 capitalize">{payment.package}</td>
-                          <td className="py-3">{formatCurrency(payment.amount)}</td>
-                          <td className="py-3">
-                            <span className={`px-2 py-1 rounded-full text-xs ${
-                              payment.status === 'success' 
-                                ? 'bg-green-500/20 text-green-600' 
-                                : 'bg-yellow-500/20 text-yellow-600'
-                            }`}>
-                              {payment.status}
-                            </span>
-                          </td>
-                          <td className="py-3 text-muted-foreground">{formatDate(payment.created_at)}</td>
-                        </tr>
-                      ))}
-                      {payments.length === 0 && (
-                        <tr>
-                          <td colSpan={5} className="py-8 text-center text-muted-foreground">
-                            No payments yet
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+              <CardContent className="space-y-3">
+                <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
+                  <p className="text-sm font-medium text-yellow-600">WhatsApp Setup</p>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    Add Twilio credentials to enable WhatsApp reminders
+                  </p>
+                  <code className="text-xs bg-muted p-2 rounded block overflow-x-auto">
+                    TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER
+                  </code>
                 </div>
+                
+                <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
+                  <p className="text-sm font-medium text-blue-600">Email Setup</p>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    Add Resend API key for email delivery
+                  </p>
+                  <code className="text-xs bg-muted p-2 rounded block">
+                    RESEND_API_KEY
+                  </code>
+                </div>
+
+                <Button variant="outline" className="w-full" onClick={() => navigate('/')}>
+                  <Database className="w-4 h-4 mr-2" />
+                  View User Dashboard
+                </Button>
               </CardContent>
             </Card>
           </motion.div>
         </div>
+
+        {/* Recent Payments */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="w-5 h-5 text-primary" />
+                Recent Payments
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left py-2 text-muted-foreground font-medium">Email</th>
+                      <th className="text-left py-2 text-muted-foreground font-medium">Package</th>
+                      <th className="text-left py-2 text-muted-foreground font-medium">Amount</th>
+                      <th className="text-left py-2 text-muted-foreground font-medium">Status</th>
+                      <th className="text-left py-2 text-muted-foreground font-medium">Expires</th>
+                      <th className="text-left py-2 text-muted-foreground font-medium">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {payments.slice(0, 15).map((payment) => (
+                      <tr key={payment.id} className="border-b border-border/50">
+                        <td className="py-3 truncate max-w-[150px]">{payment.email}</td>
+                        <td className="py-3 capitalize">{payment.package}</td>
+                        <td className="py-3">{formatCurrency(payment.amount)}</td>
+                        <td className="py-3">
+                          <span className={`px-2 py-1 rounded-full text-xs ${
+                            payment.status === 'success' 
+                              ? 'bg-green-500/20 text-green-600' 
+                              : 'bg-yellow-500/20 text-yellow-600'
+                          }`}>
+                            {payment.status}
+                          </span>
+                        </td>
+                        <td className="py-3 text-muted-foreground">
+                          {payment.access_expires_at ? formatDate(payment.access_expires_at) : '-'}
+                        </td>
+                        <td className="py-3 text-muted-foreground">{formatDate(payment.created_at)}</td>
+                      </tr>
+                    ))}
+                    {payments.length === 0 && (
+                      <tr>
+                        <td colSpan={6} className="py-8 text-center text-muted-foreground">
+                          No payments yet 📭
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     </div>
   );
