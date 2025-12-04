@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.process-upload]
 verify_jwt = false
+
+[functions.send-whatsapp-reminder]
+verify_jwt = false

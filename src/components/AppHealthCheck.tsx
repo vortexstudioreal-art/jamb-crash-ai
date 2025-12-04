@@ -215,11 +215,23 @@ export const AppHealthCheck = () => {
 
         case 'WhatsApp reminder test': {
           const { count } = await supabase.from('whatsapp_reminders').select('*', { count: 'exact', head: true });
-          // Check if Twilio is configured (we can't actually verify secrets)
-          return { 
-            working: false, // Marking as not working since Twilio isn't configured
-            details: 'Twilio API keys needed. ' + (count || 0) + ' users signed up for reminders'
-          };
+          // Test if the send-whatsapp-reminder edge function is configured
+          try {
+            const response = await supabase.functions.invoke('send-whatsapp-reminder', {
+              body: { test_mode: true }
+            });
+            return { 
+              working: response.data?.configured === true,
+              details: response.data?.configured 
+                ? `Twilio configured. ${count || 0} users signed up for reminders`
+                : 'Twilio API keys needed. ' + (count || 0) + ' users signed up'
+            };
+          } catch {
+            return { 
+              working: false,
+              details: 'Edge function not responding. ' + (count || 0) + ' users signed up'
+            };
+          }
         }
 
         case 'Referral system': {
