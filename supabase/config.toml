@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.paystack-config]
 verify_jwt = false
+
+[functions.process-upload]
+verify_jwt = false
