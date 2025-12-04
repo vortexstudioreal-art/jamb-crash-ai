@@ -12,7 +12,19 @@ serve(async (req) => {
   }
 
   try {
-    const { imageBase64, fileType, subject } = await req.json();
+    const body = await req.json();
+    
+    // Handle health check test ping
+    if (body.test === true) {
+      return new Response(JSON.stringify({ 
+        status: 'ok', 
+        message: 'Process upload function is working!' 
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
+    const { imageBase64, fileType, subject } = body;
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     if (!LOVABLE_API_KEY) {
