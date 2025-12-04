@@ -1,15 +1,33 @@
 import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Upload, Camera, FileText, X, CheckCircle } from 'lucide-react';
+import { Upload, Camera, FileText, X, CheckCircle, Sparkles, Loader2, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+interface ExtractedQuestion {
+  question: string;
+  option_a: string;
+  option_b: string;
+  option_c: string;
+  option_d: string;
+  correct_answer: string;
+  explanation: string;
+  year?: number;
+  subject?: string;
+}
 
 interface UploadSectionProps {
   onUploadComplete: (files: File[]) => void;
+  userSubjects?: string[];
 }
 
-export const UploadSection = ({ onUploadComplete }: UploadSectionProps) => {
+export const UploadSection = ({ onUploadComplete, userSubjects = [] }: UploadSectionProps) => {
   const [files, setFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [extractedQuestions, setExtractedQuestions] = useState<ExtractedQuestion[]>([]);
+  const [aiMessage, setAiMessage] = useState('');
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -45,19 +63,82 @@ export const UploadSection = ({ onUploadComplete }: UploadSectionProps) => {
     input.click();
   };
 
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+
+  const processWithAI = async () => {
+    if (files.length === 0) return;
+
+    setIsProcessing(true);
+    setExtractedQuestions([]);
+    
+    try {
+      const allQuestions: ExtractedQuestion[] = [];
+      const defaultSubject = userSubjects[0] || 'english';
+
+      for (const file of files) {
+        // Convert file to base64
+        const base64 = await fileToBase64(file);
+        
+        const { data, error } = await supabase.functions.invoke('process-upload', {
+          body: {
+            imageBase64: base64,
+            fileType: file.type.includes('pdf') ? 'PDF' : 'image',
+            subject: defaultSubject
+          }
+        });
+
+        if (error) {
+          console.error('Processing error:', error);
+          toast.error(`Failed to process ${file.name}`);
+          continue;
+        }
+
+        if (data.questions && data.questions.length > 0) {
+          allQuestions.push(...data.questions);
+        }
+        
+        if (data.message) {
+          setAiMessage(data.message);
+        }
+      }
+
+      setExtractedQuestions(allQuestions);
+      
+      if (allQuestions.length > 0) {
+        toast.success(`🎉 Extracted ${allQuestions.length} questions! You're crushing it!`);
+      } else {
+        toast.info('No questions found. Try a clearer image! 📸');
+      }
+
+      onUploadComplete(files);
+    } catch (err) {
+      console.error('Error processing files:', err);
+      toast.error('Oops! Something went wrong. Try again! 💪');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <section className="py-16 md:py-24">
-      <div className="container max-w-3xl">
+      <div className="container max-w-4xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-10"
         >
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Upload Your Past Questions
+            📚 Upload JAMB Past Questions
           </h2>
           <p className="text-lg text-muted-foreground">
-            Upload PDFs or take photos of your JAMB past question papers
+            Upload PDFs or snap photos — our AI extracts & explains every question! ✨
           </p>
         </motion.div>
 
@@ -78,10 +159,10 @@ export const UploadSection = ({ onUploadComplete }: UploadSectionProps) => {
               <Upload className="w-8 h-8 text-primary" />
             </div>
             <p className="text-lg font-medium text-foreground mb-2">
-              Drag & drop your files here
+              🎯 Drag & drop your files here
             </p>
             <p className="text-sm text-muted-foreground mb-6">
-              Supports PDF and image files (JPG, PNG)
+              Supports PDF and image files (JPG, PNG) — we'll do the magic! ✨
             </p>
             
             <div className="flex flex-col sm:flex-row gap-3">
@@ -91,7 +172,7 @@ export const UploadSection = ({ onUploadComplete }: UploadSectionProps) => {
                   Choose PDF
                   <input
                     type="file"
-                    accept=".pdf"
+                    accept=".pdf,image/*"
                     multiple
                     className="hidden"
                     onChange={handleFileSelect}
@@ -100,7 +181,7 @@ export const UploadSection = ({ onUploadComplete }: UploadSectionProps) => {
               </Button>
               <Button variant="outline" size="lg" onClick={handleCameraCapture}>
                 <Camera className="w-5 h-5 mr-2" />
-                Take Photo
+                📸 Take Photo
               </Button>
             </div>
           </div>
@@ -147,11 +228,94 @@ export const UploadSection = ({ onUploadComplete }: UploadSectionProps) => {
               variant="hero"
               size="xl"
               className="w-full mt-6"
-              onClick={() => onUploadComplete(files)}
+              onClick={processWithAI}
+              disabled={isProcessing}
             >
-              <CheckCircle className="w-5 h-5 mr-2" />
-              Process {files.length} File{files.length > 1 ? 's' : ''} with AI
+              {isProcessing ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  AI is working its magic... ✨
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  🚀 Process {files.length} File{files.length > 1 ? 's' : ''} with AI Magic!
+                </>
+              )}
             </Button>
+          </motion.div>
+        )}
+
+        {/* AI Message */}
+        {aiMessage && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="mt-6 p-4 rounded-xl bg-primary/10 border border-primary/20 text-center"
+          >
+            <p className="text-primary font-medium">{aiMessage}</p>
+          </motion.div>
+        )}
+
+        {/* Extracted Questions */}
+        {extractedQuestions.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-8 space-y-4"
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-primary" />
+                📝 Extracted Questions ({extractedQuestions.length})
+              </h3>
+              <Button variant="outline" size="sm">
+                Quiz These Questions
+              </Button>
+            </div>
+
+            <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+              {extractedQuestions.map((q, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="p-4 rounded-xl bg-card border border-border"
+                >
+                  <p className="font-medium text-foreground mb-3">
+                    <span className="text-primary">Q{index + 1}.</span> {q.question}
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
+                    {['A', 'B', 'C', 'D'].map((letter) => {
+                      const optionKey = `option_${letter.toLowerCase()}` as keyof ExtractedQuestion;
+                      const isCorrect = q.correct_answer === letter;
+                      return (
+                        <div
+                          key={letter}
+                          className={`p-2 rounded-lg text-sm ${
+                            isCorrect 
+                              ? 'bg-green-500/20 border border-green-500/50 text-green-700 dark:text-green-400 font-bold' 
+                              : 'bg-muted/50'
+                          }`}
+                        >
+                          <span className={`font-medium ${isCorrect ? 'underline' : ''}`}>
+                            {letter}.
+                          </span> {q[optionKey]}
+                          {isCorrect && ' ✓'}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="p-3 rounded-lg bg-accent/50 text-sm">
+                    <p className="text-muted-foreground">
+                      <span className="font-medium text-foreground">💡 Why {q.correct_answer} is correct:</span>{' '}
+                      {q.explanation}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </motion.div>
         )}
       </div>
