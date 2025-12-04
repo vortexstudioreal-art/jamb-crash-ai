@@ -10,11 +10,21 @@ import { EmailPromptModal } from '@/components/EmailPromptModal';
 import { PaywallGate } from '@/components/PaywallGate';
 import { AdminBadge } from '@/components/AdminBadge';
 import { PremiumDashboard } from '@/components/PremiumDashboard';
+import { SubjectSelector } from '@/components/SubjectSelector';
+import { FreeTrialBanner } from '@/components/FreeTrialBanner';
+import { DemoQuizFlow } from '@/components/DemoQuizFlow';
+import { TimedQuiz } from '@/components/TimedQuiz';
+import { QuizResults } from '@/components/QuizResults';
+import { StudyStats } from '@/components/StudyStats';
 import { Footer } from '@/components/Footer';
 import { useAccessControl } from '@/hooks/useAccessControl';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { Play, FileText, Target, Calendar, BookOpen, Zap } from 'lucide-react';
 
-type Step = 'landing' | 'upload' | 'personalize' | 'processing' | 'dashboard';
+type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'demo';
 
 interface FormData {
   targetScore: string;
@@ -37,7 +47,28 @@ const Index = () => {
   const [isEmailPromptOpen, setIsEmailPromptOpen] = useState(false);
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
   const [personalizationData, setPersonalizationData] = useState<FormData | null>(null);
+  const [userSubjects, setUserSubjects] = useState<string[]>([]);
+  const [quizType, setQuizType] = useState<'full' | 'mini'>('full');
+  const [quizResults, setQuizResults] = useState<any>(null);
   const { hasAccess, isAdmin, adminRole, isLoading, setUserEmail, userEmail, refreshAccess } = useAccessControl();
+
+  // Load user subjects if they exist
+  useEffect(() => {
+    const loadUserSubjects = async () => {
+      if (userEmail) {
+        const { data } = await supabase
+          .from('user_subjects')
+          .select('subjects')
+          .eq('email', userEmail)
+          .single();
+        
+        if (data?.subjects) {
+          setUserSubjects(data.subjects as string[]);
+        }
+      }
+    };
+    loadUserSubjects();
+  }, [userEmail]);
 
   // Check for step param from payment success redirect
   useEffect(() => {
@@ -47,39 +78,40 @@ const Index = () => {
       if (paymentData) {
         const parsed = JSON.parse(paymentData);
         setUserEmail(parsed.email);
-        setCurrentStep('upload');
+        // Go to subject selection first if no subjects chosen
+        setCurrentStep('subject-select');
         setSearchParams({});
       }
     }
   }, [searchParams, setSearchParams, setUserEmail]);
 
   const handleGetStarted = () => {
-    // Show email prompt first
     setIsEmailPromptOpen(true);
   };
 
   const handleSelectPlan = (plan: string) => {
     const planKey = plan as keyof typeof plans;
     setSelectedPlan(planKey);
-    // Show email prompt first before payment
     setIsEmailPromptOpen(true);
   };
 
-  // Owner/paid user bypasses payment
   const handleOwnerAccess = (email: string) => {
     setIsEmailPromptOpen(false);
     setUserEmail(email);
-    toast.success('Welcome back! Access granted.');
-    setCurrentStep('dashboard');
+    toast.success('Welcome back, boss! 👑');
+    // Check if subjects are selected
+    if (userSubjects.length === 0) {
+      setCurrentStep('subject-select');
+    } else {
+      setCurrentStep('dashboard');
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Non-owner proceeds to payment
   const handleProceedToPayment = (email: string) => {
     setIsEmailPromptOpen(false);
     setPendingEmail(email);
     
-    // If no plan selected yet, scroll to pricing
     if (!selectedPlan) {
       const pricingSection = document.getElementById('pricing');
       pricingSection?.scrollIntoView({ behavior: 'smooth' });
@@ -87,14 +119,13 @@ const Index = () => {
       return;
     }
     
-    // Open payment modal with the email
     setIsPaymentModalOpen(true);
   };
 
   const handlePaymentSuccess = (reference: string, email: string) => {
     setIsPaymentModalOpen(false);
     setUserEmail(email);
-    toast.success('Payment successful! Redirecting...');
+    toast.success('Payment successful! 🎉 Let\'s pick your subjects!');
     
     sessionStorage.setItem('jamb_payment', JSON.stringify({
       reference,
@@ -102,27 +133,45 @@ const Index = () => {
       package: selectedPlan,
     }));
     
+    setCurrentStep('subject-select');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSubjectsSelected = (subjects: string[]) => {
+    setUserSubjects(subjects);
     setCurrentStep('upload');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleUploadComplete = (files: File[]) => {
-    toast.success(`${files.length} file(s) ready for AI processing`);
+    toast.success(`${files.length} file(s) ready for AI magic! ✨`);
     setCurrentStep('personalize');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleFormSubmit = (data: unknown) => {
-    console.log('Form data:', data);
     setPersonalizationData(data as FormData);
-    toast.success('Generating your personalized study plan...');
+    toast.success('Generating your personalized study plan... 🚀');
     setCurrentStep('processing');
     
-    // Simulate processing then go to dashboard
     setTimeout(() => {
       setCurrentStep('dashboard');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }, 3000);
+  };
+
+  const handleStartQuiz = (type: 'full' | 'mini') => {
+    setQuizType(type);
+    setCurrentStep('quiz');
+  };
+
+  const handleQuizComplete = (results: any) => {
+    setQuizResults(results);
+    setCurrentStep('quiz-results');
+  };
+
+  const handleStartTrial = () => {
+    setCurrentStep('demo');
   };
 
   const handleUpgradeClick = () => {
@@ -133,8 +182,53 @@ const Index = () => {
     }, 100);
   };
 
+  // Quiz step
+  if (currentStep === 'quiz' && userEmail && userSubjects.length > 0) {
+    return (
+      <TimedQuiz
+        userEmail={userEmail}
+        subjects={userSubjects}
+        quizType={quizType}
+        onComplete={handleQuizComplete}
+        onExit={() => setCurrentStep('dashboard')}
+      />
+    );
+  }
+
+  // Quiz results step
+  if (currentStep === 'quiz-results' && quizResults) {
+    return (
+      <QuizResults
+        results={quizResults}
+        quizType={quizType}
+        onRetry={() => setCurrentStep('dashboard')}
+        onHome={() => setCurrentStep('dashboard')}
+      />
+    );
+  }
+
+  // Demo quiz flow
+  if (currentStep === 'demo') {
+    return (
+      <DemoQuizFlow
+        onComplete={() => setCurrentStep('landing')}
+        onUpgrade={handleUpgradeClick}
+      />
+    );
+  }
+
+  // Subject selection step (after payment)
+  if (currentStep === 'subject-select' && userEmail) {
+    return (
+      <SubjectSelector
+        userEmail={userEmail}
+        onComplete={handleSubjectsSelected}
+      />
+    );
+  }
+
   // Protected steps require access
-  const isProtectedStep = currentStep !== 'landing';
+  const isProtectedStep = ['upload', 'personalize', 'processing', 'dashboard', 'quiz', 'quiz-results'].includes(currentStep);
 
   if (isProtectedStep) {
     return (
@@ -159,23 +253,152 @@ const Index = () => {
             {currentStep === 'processing' && (
               <div className="min-h-[60vh] flex items-center justify-center">
                 <div className="text-center">
-                  <div className="w-20 h-20 rounded-full gradient-primary animate-pulse mx-auto mb-6 flex items-center justify-center">
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                    className="w-20 h-20 rounded-full gradient-primary mx-auto mb-6 flex items-center justify-center"
+                  >
                     <span className="text-3xl">🚀</span>
-                  </div>
+                  </motion.div>
                   <h2 className="text-2xl font-bold text-foreground mb-2">Processing Your Materials</h2>
                   <p className="text-muted-foreground">Our AI is analyzing your past questions...</p>
+                  <p className="text-sm text-primary mt-2">You're crushing this! 💪</p>
                 </div>
               </div>
             )}
 
             {currentStep === 'dashboard' && userEmail && (
-              <PremiumDashboard
-                userEmail={userEmail}
-                isAdmin={isAdmin}
-                adminRole={adminRole}
-                targetScore={personalizationData?.targetScore ? parseInt(personalizationData.targetScore) : undefined}
-                weakSubject={personalizationData?.weakestSubject}
-              />
+              <div className="py-8 px-4">
+                <div className="max-w-6xl mx-auto">
+                  {/* Welcome Message */}
+                  <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-center mb-8"
+                  >
+                    <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
+                      Welcome back, future uni star! 🌟
+                    </h1>
+                    <p className="text-muted-foreground">
+                      Your personalized JAMB prep dashboard. Let's crush that 300+!
+                    </p>
+                  </motion.div>
+
+                  {/* Quick Actions */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+                  >
+                    <Button
+                      variant="outline"
+                      className="h-auto py-6 flex flex-col gap-2"
+                      onClick={() => handleStartQuiz('full')}
+                    >
+                      <Play className="w-8 h-8 text-primary" />
+                      <span className="font-bold">Full Quiz</span>
+                      <span className="text-xs text-muted-foreground">60 questions • 90 min</span>
+                    </Button>
+                    
+                    <Button
+                      variant="outline"
+                      className="h-auto py-6 flex flex-col gap-2"
+                      onClick={() => handleStartQuiz('mini')}
+                    >
+                      <Zap className="w-8 h-8 text-yellow-500" />
+                      <span className="font-bold">Mini Quiz</span>
+                      <span className="text-xs text-muted-foreground">20 questions • 30 min</span>
+                    </Button>
+                    
+                    <Button
+                      variant="outline"
+                      className="h-auto py-6 flex flex-col gap-2"
+                      onClick={() => setCurrentStep('upload')}
+                    >
+                      <FileText className="w-8 h-8 text-blue-500" />
+                      <span className="font-bold">Upload PDF</span>
+                      <span className="text-xs text-muted-foreground">AI magic ✨</span>
+                    </Button>
+                    
+                    <Button
+                      variant="outline"
+                      className="h-auto py-6 flex flex-col gap-2"
+                      onClick={() => setCurrentStep('personalize')}
+                    >
+                      <Target className="w-8 h-8 text-green-500" />
+                      <span className="font-bold">Study Plan</span>
+                      <span className="text-xs text-muted-foreground">Personalized</span>
+                    </Button>
+                  </motion.div>
+
+                  {/* Subject Tags */}
+                  {userSubjects.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.2 }}
+                      className="flex flex-wrap gap-2 justify-center mb-8"
+                    >
+                      <span className="text-sm text-muted-foreground">Your subjects:</span>
+                      {userSubjects.map(subject => (
+                        <span
+                          key={subject}
+                          className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium capitalize"
+                        >
+                          {subject.replace('_', ' ')}
+                        </span>
+                      ))}
+                    </motion.div>
+                  )}
+
+                  {/* Study Stats */}
+                  <div className="mb-8">
+                    <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                      <BookOpen className="w-5 h-5 text-primary" />
+                      Your Study Stats 📊
+                    </h2>
+                    <StudyStats userEmail={userEmail} />
+                  </div>
+
+                  {/* Premium Dashboard Features */}
+                  <PremiumDashboard
+                    userEmail={userEmail}
+                    isAdmin={isAdmin}
+                    adminRole={adminRole}
+                    targetScore={personalizationData?.targetScore ? parseInt(personalizationData.targetScore) : undefined}
+                    weakSubject={personalizationData?.weakestSubject}
+                  />
+
+                  {/* UTME Countdown */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className="mt-8 bg-gradient-to-r from-primary/20 to-green-500/20 rounded-2xl p-6 text-center border border-primary/30"
+                  >
+                    <Calendar className="w-10 h-10 text-primary mx-auto mb-3" />
+                    <h3 className="text-xl font-bold text-foreground mb-1">2026 UTME Countdown</h3>
+                    <p className="text-muted-foreground mb-3">Stay focused, stay winning! 🔥</p>
+                    <div className="text-4xl font-bold text-primary">
+                      {Math.ceil((new Date('2026-04-01').getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-2">until UTME 2026</p>
+                  </motion.div>
+
+                  {/* Motivational Quote */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                    className="mt-8 text-center"
+                  >
+                    <p className="text-lg text-muted-foreground italic">
+                      "You got this, future uni star! Every question you practice brings you closer to that 300+!" 💪
+                    </p>
+                  </motion.div>
+                </div>
+              </div>
             )}
           </div>
           {currentStep !== 'dashboard' && <Footer />}
@@ -198,7 +421,12 @@ const Index = () => {
       </div>
       <Footer />
 
-      {/* Email Prompt Modal - shown FIRST before payment */}
+      {/* Free Trial Banner */}
+      {!hasAccess && !isLoading && (
+        <FreeTrialBanner onStartTrial={handleStartTrial} userEmail={userEmail || undefined} />
+      )}
+
+      {/* Email Prompt Modal */}
       <EmailPromptModal
         isOpen={isEmailPromptOpen}
         onClose={() => setIsEmailPromptOpen(false)}
@@ -206,7 +434,7 @@ const Index = () => {
         onProceedToPayment={handleProceedToPayment}
       />
 
-      {/* Payment Modal - shown only for non-owners after email check */}
+      {/* Payment Modal */}
       {selectedPlan && (
         <PaymentModal
           isOpen={isPaymentModalOpen}

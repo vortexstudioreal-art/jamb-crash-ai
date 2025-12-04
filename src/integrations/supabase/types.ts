@@ -35,6 +35,93 @@ export type Database = {
         }
         Relationships: []
       }
+      demo_usage: {
+        Row: {
+          device_fingerprint: string | null
+          email: string | null
+          id: string
+          used_at: string | null
+        }
+        Insert: {
+          device_fingerprint?: string | null
+          email?: string | null
+          id?: string
+          used_at?: string | null
+        }
+        Update: {
+          device_fingerprint?: string | null
+          email?: string | null
+          id?: string
+          used_at?: string | null
+        }
+        Relationships: []
+      }
+      feature_status: {
+        Row: {
+          feature_name: string
+          id: string
+          is_working: boolean | null
+          last_checked: string | null
+          notes: string | null
+        }
+        Insert: {
+          feature_name: string
+          id?: string
+          is_working?: boolean | null
+          last_checked?: string | null
+          notes?: string | null
+        }
+        Update: {
+          feature_name?: string
+          id?: string
+          is_working?: boolean | null
+          last_checked?: string | null
+          notes?: string | null
+        }
+        Relationships: []
+      }
+      jamb_questions: {
+        Row: {
+          correct_answer: string
+          created_at: string | null
+          explanation: string | null
+          id: string
+          option_a: string
+          option_b: string
+          option_c: string
+          option_d: string
+          question: string
+          subject: Database["public"]["Enums"]["jamb_subject"]
+          year: number | null
+        }
+        Insert: {
+          correct_answer: string
+          created_at?: string | null
+          explanation?: string | null
+          id?: string
+          option_a: string
+          option_b: string
+          option_c: string
+          option_d: string
+          question: string
+          subject: Database["public"]["Enums"]["jamb_subject"]
+          year?: number | null
+        }
+        Update: {
+          correct_answer?: string
+          created_at?: string | null
+          explanation?: string | null
+          id?: string
+          option_a?: string
+          option_b?: string
+          option_c?: string
+          option_d?: string
+          question?: string
+          subject?: Database["public"]["Enums"]["jamb_subject"]
+          year?: number | null
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           access_expires_at: string | null
@@ -74,6 +161,42 @@ export type Database = {
           paystack_transaction_id?: string | null
           status?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      quiz_attempts: {
+        Row: {
+          correct_answers: number
+          created_at: string | null
+          email: string
+          id: string
+          questions_data: Json | null
+          quiz_type: string
+          subjects: Database["public"]["Enums"]["jamb_subject"][]
+          time_taken_seconds: number | null
+          total_questions: number
+        }
+        Insert: {
+          correct_answers: number
+          created_at?: string | null
+          email: string
+          id?: string
+          questions_data?: Json | null
+          quiz_type?: string
+          subjects: Database["public"]["Enums"]["jamb_subject"][]
+          time_taken_seconds?: number | null
+          total_questions: number
+        }
+        Update: {
+          correct_answers?: number
+          created_at?: string | null
+          email?: string
+          id?: string
+          questions_data?: Json | null
+          quiz_type?: string
+          subjects?: Database["public"]["Enums"]["jamb_subject"][]
+          time_taken_seconds?: number | null
+          total_questions?: number
         }
         Relationships: []
       }
@@ -149,6 +272,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_subjects: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          subjects: Database["public"]["Enums"]["jamb_subject"][]
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          subjects: Database["public"]["Enums"]["jamb_subject"][]
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          subjects?: Database["public"]["Enums"]["jamb_subject"][]
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       whatsapp_reminders: {
         Row: {
           created_at: string | null
@@ -194,7 +341,21 @@ export type Database = {
       generate_referral_code: { Args: { user_email: string }; Returns: string }
     }
     Enums: {
-      [_ in never]: never
+      jamb_subject:
+        | "english"
+        | "mathematics"
+        | "physics"
+        | "chemistry"
+        | "biology"
+        | "literature"
+        | "government"
+        | "economics"
+        | "crs"
+        | "irs"
+        | "geography"
+        | "accounting"
+        | "commerce"
+        | "agricultural_science"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -321,6 +482,23 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      jamb_subject: [
+        "english",
+        "mathematics",
+        "physics",
+        "chemistry",
+        "biology",
+        "literature",
+        "government",
+        "economics",
+        "crs",
+        "irs",
+        "geography",
+        "accounting",
+        "commerce",
+        "agricultural_science",
+      ],
+    },
   },
 } as const
