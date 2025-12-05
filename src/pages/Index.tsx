@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { HeroSection } from '@/components/HeroSection';
+import { HowItWorksSection } from '@/components/HowItWorksSection';
 import { PricingSection } from '@/components/PricingSection';
 import { UploadSection } from '@/components/UploadSection';
 import { PersonalizationForm } from '@/components/PersonalizationForm';
@@ -47,6 +48,7 @@ const Index = () => {
   const [userSubjects, setUserSubjects] = useState<string[]>([]);
   const [quizType, setQuizType] = useState<'full' | 'mini'>('full');
   const [quizResults, setQuizResults] = useState<any>(null);
+  const [highlightStandard, setHighlightStandard] = useState(false);
   
   const { user, isLoading, hasAccess, isAdmin, isOwner, userRole, signOut, refreshAccess } = useAuth();
   const navigate = useNavigate();
@@ -59,6 +61,9 @@ const Index = () => {
   }, [user, isLoading, navigate]);
 
   const userEmail = user?.email || null;
+
+  // Effective access check (owner always has access)
+  const effectiveAccess = hasAccess || isOwner;
 
   // Load user subjects (no auto-redirect - users see landing page first)
   useEffect(() => {
@@ -91,19 +96,29 @@ const Index = () => {
   const handleGetStarted = () => {
     if (user) {
       // Already logged in
-      if (hasAccess || isOwner) {
+      if (effectiveAccess) {
+        // Paid user or owner - go to dashboard
         if (userSubjects.length === 0) {
           setCurrentStep('subject-select');
         } else {
           setCurrentStep('dashboard');
         }
       } else {
-        const pricingSection = document.getElementById('pricing');
-        pricingSection?.scrollIntoView({ behavior: 'smooth' });
+        // Unpaid user - scroll to pricing and highlight Standard
+        setHighlightStandard(true);
+        setTimeout(() => {
+          const pricingSection = document.getElementById('pricing');
+          pricingSection?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
       }
     } else {
       navigate('/auth');
     }
+  };
+
+  const handleSeeHowItWorks = () => {
+    const section = document.getElementById('how-it-works');
+    section?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handleSelectPlan = (plan: string) => {
@@ -175,6 +190,7 @@ const Index = () => {
 
   const handleUpgradeClick = () => {
     setCurrentStep('landing');
+    setHighlightStandard(true);
     setTimeout(() => {
       const pricingSection = document.getElementById('pricing');
       pricingSection?.scrollIntoView({ behavior: 'smooth' });
@@ -236,9 +252,6 @@ const Index = () => {
   const isProtectedStep = ['upload', 'personalize', 'processing', 'dashboard', 'quiz', 'quiz-results'].includes(currentStep);
 
   if (isProtectedStep) {
-    // Owner bypasses paywall
-    const effectiveAccess = hasAccess || isOwner;
-    
     return (
       <PaywallGate hasAccess={effectiveAccess} isLoading={isLoading} onUpgrade={handleUpgradeClick}>
         <div className="min-h-screen bg-background">
@@ -442,13 +455,18 @@ const Index = () => {
             </Button>
           </div>
         )}
-        <HeroSection onGetStarted={handleGetStarted} />
-        <PricingSection onSelectPlan={handleSelectPlan} />
+        <HeroSection 
+          onGetStarted={handleGetStarted} 
+          hasAccess={effectiveAccess}
+          onSeeHowItWorks={handleSeeHowItWorks}
+        />
+        <HowItWorksSection onStartTrial={handleStartTrial} />
+        <PricingSection onSelectPlan={handleSelectPlan} highlightStandard={highlightStandard} />
       </div>
       <Footer />
 
-      {/* Free Trial Banner - only for non-logged in or non-access users */}
-      {!user && !isLoading && (
+      {/* Free Trial Banner - only for non-access users */}
+      {!effectiveAccess && !isLoading && (
         <FreeTrialBanner onStartTrial={handleStartTrial} userEmail={userEmail || undefined} />
       )}
 
