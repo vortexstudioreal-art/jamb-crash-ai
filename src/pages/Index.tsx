@@ -60,12 +60,11 @@ const Index = () => {
 
   const userEmail = user?.email || null;
 
-  // Load user subjects and auto-redirect to dashboard if user has access
+  // Load user subjects (no auto-redirect - users see landing page first)
   useEffect(() => {
-    const loadUserSubjectsAndRedirect = async () => {
+    const loadUserSubjects = async () => {
       if (!userEmail || isLoading) return;
       
-      // Load subjects
       const { data } = await supabase
         .from('user_subjects')
         .select('subjects')
@@ -75,21 +74,10 @@ const Index = () => {
       if (data?.subjects) {
         setUserSubjects(data.subjects as string[]);
       }
-      
-      // Auto-redirect users with access to dashboard (owners, admins, paid users)
-      const effectiveAccess = hasAccess || isOwner || isAdmin;
-      
-      if (effectiveAccess && currentStep === 'landing') {
-        if (data?.subjects && data.subjects.length > 0) {
-          setCurrentStep('dashboard');
-        } else {
-          setCurrentStep('subject-select');
-        }
-      }
     };
     
-    loadUserSubjectsAndRedirect();
-  }, [userEmail, isLoading, hasAccess, isOwner, isAdmin, currentStep]);
+    loadUserSubjects();
+  }, [userEmail, isLoading]);
 
   // Check for step param from payment success redirect
   useEffect(() => {
