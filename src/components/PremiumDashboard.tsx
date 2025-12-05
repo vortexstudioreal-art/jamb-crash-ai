@@ -9,7 +9,7 @@ import { AdminBadge } from './AdminBadge';
 interface PremiumDashboardProps {
   userEmail: string;
   isAdmin: boolean;
-  adminRole?: 'owner' | 'collaborator' | null;
+  adminRole?: 'owner' | 'admin' | 'collaborator' | null;
   targetScore?: number;
   weakSubject?: string;
 }
