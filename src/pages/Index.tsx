@@ -34,8 +34,8 @@ interface FormData {
 
 const plans = {
   basic: { name: 'Basic', price: 7500 },
-  pro: { name: 'Pro', price: 12000 },
-  ultimate: { name: 'Ultimate', price: 30000 },
+  standard: { name: 'Standard', price: 12000 },
+  premium: { name: 'Premium', price: 30000 },
 };
 
 const Index = () => {
@@ -50,6 +50,13 @@ const Index = () => {
   
   const { user, isLoading, hasAccess, isAdmin, isOwner, userRole, signOut, refreshAccess } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect unauthenticated users to login first
+  useEffect(() => {
+    if (!isLoading && !user) {
+      navigate('/auth');
+    }
+  }, [user, isLoading, navigate]);
 
   const userEmail = user?.email || null;
 
