@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 
 interface HeaderProps {
   onGetStarted: () => void;
+  hasAccess?: boolean;
 }
 
-export const Header = ({ onGetStarted }: HeaderProps) => {
+export const Header = ({ onGetStarted, hasAccess }: HeaderProps) => {
   return (
     <motion.header
       initial={{ opacity: 0, y: -20 }}
@@ -30,9 +31,12 @@ export const Header = ({ onGetStarted }: HeaderProps) => {
           </a>
         </nav>
 
-        <Button variant="default" size="sm" onClick={onGetStarted}>
-          Get Started
-        </Button>
+        {/* Hide Get Started for paid users */}
+        {!hasAccess && (
+          <Button variant="default" size="sm" onClick={onGetStarted}>
+            Get Started
+          </Button>
+        )}
       </div>
     </motion.header>
   );
