@@ -27,9 +27,10 @@ export default function Auth() {
 
   const isOwnerEmail = email.toLowerCase().trim() === OWNER_EMAIL;
 
-  // Redirect if already logged in
+  // Redirect if already logged in - use replace to prevent back button returning here
   useEffect(() => {
     if (user && !isLoading) {
+      // Always go to main page, which will redirect to dashboard if they have access
       navigate('/', { replace: true });
     }
   }, [user, isLoading, navigate]);
