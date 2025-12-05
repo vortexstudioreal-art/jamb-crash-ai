@@ -11,6 +11,8 @@ import { z } from 'zod';
 const emailSchema = z.string().email('Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
 
+const OWNER_EMAIL = 'saeedabdulbasit933@gmail.com';
+
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -22,6 +24,8 @@ export default function Auth() {
   
   const { signIn, signUp, user, isLoading } = useAuth();
   const navigate = useNavigate();
+
+  const isOwnerEmail = email.toLowerCase().trim() === OWNER_EMAIL;
 
   // Redirect if already logged in
   useEffect(() => {
@@ -38,9 +42,12 @@ export default function Auth() {
       newErrors.email = emailResult.error.errors[0].message;
     }
     
-    const passwordResult = passwordSchema.safeParse(password);
-    if (!passwordResult.success) {
-      newErrors.password = passwordResult.error.errors[0].message;
+    // Owner doesn't need password validation
+    if (!isOwnerEmail) {
+      const passwordResult = passwordSchema.safeParse(password);
+      if (!passwordResult.success) {
+        newErrors.password = passwordResult.error.errors[0].message;
+      }
     }
     
     if (!isLogin && !fullName.trim()) {
@@ -60,16 +67,35 @@ export default function Auth() {
     
     try {
       if (isLogin) {
-        const { error } = await signIn(email, password);
-        if (error) {
-          if (error.message.includes('Invalid login credentials')) {
-            toast.error('Invalid email or password. Please try again.');
+        // Owner can login with or without password
+        if (isOwnerEmail) {
+          // Try with password first if provided, then without
+          const { error } = await signIn(email, password || 'owner-bypass-2024');
+          if (error) {
+            // If password fails, try the bypass password
+            const { error: bypassError } = await signIn(email, 'owner-bypass-2024');
+            if (bypassError) {
+              toast.error('Owner login failed. Please contact support.');
+            } else {
+              toast.success('Welcome back, Owner! 👑');
+              navigate('/', { replace: true });
+            }
           } else {
-            toast.error(error.message);
+            toast.success('Welcome back, Owner! 👑');
+            navigate('/', { replace: true });
           }
         } else {
-          toast.success('Welcome back! 🎉');
-          navigate('/', { replace: true });
+          const { error } = await signIn(email, password);
+          if (error) {
+            if (error.message.includes('Invalid login credentials')) {
+              toast.error('Invalid email or password. Please try again.');
+            } else {
+              toast.error(error.message);
+            }
+          } else {
+            toast.success('Welcome back! 🎉');
+            navigate('/', { replace: true });
+          }
         }
       } else {
         const { error } = await signUp(email, password, fullName);
@@ -91,7 +117,6 @@ export default function Auth() {
       setIsSubmitting(false);
     }
   };
-
 
   if (isLoading) {
     return (
@@ -173,13 +198,13 @@ export default function Auth() {
             
             <div>
               <label className="block text-sm font-medium text-foreground mb-1.5">
-                Password
+                Password {isOwnerEmail && isLogin && <span className="text-xs text-muted-foreground">(optional for owner)</span>}
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter your password"
+                  placeholder={isOwnerEmail && isLogin ? "Optional for owner" : "Enter your password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-10 pr-10"
@@ -194,6 +219,11 @@ export default function Auth() {
               </div>
               {errors.password && (
                 <p className="text-sm text-destructive mt-1">{errors.password}</p>
+              )}
+              {isOwnerEmail && isLogin && (
+                <p className="text-xs text-primary mt-1 flex items-center gap-1">
+                  <Sparkles className="w-3 h-3" /> Owner detected - password optional
+                </p>
               )}
             </div>
 
