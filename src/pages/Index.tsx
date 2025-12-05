@@ -54,46 +54,47 @@ const Index = () => {
   // Redirect unauthenticated users to login first
   useEffect(() => {
     if (!isLoading && !user) {
-      navigate('/auth');
+      navigate('/auth', { replace: true });
     }
   }, [user, isLoading, navigate]);
 
   const userEmail = user?.email || null;
 
-  // Load user subjects if they exist
+  // Load user subjects and auto-redirect to dashboard if user has access
   useEffect(() => {
-    const loadUserSubjects = async () => {
-      if (userEmail) {
-        const { data } = await supabase
-          .from('user_subjects')
-          .select('subjects')
-          .eq('email', userEmail)
-          .single();
-        
-        if (data?.subjects) {
-          setUserSubjects(data.subjects as string[]);
+    const loadUserSubjectsAndRedirect = async () => {
+      if (!userEmail || isLoading) return;
+      
+      // Load subjects
+      const { data } = await supabase
+        .from('user_subjects')
+        .select('subjects')
+        .eq('email', userEmail)
+        .single();
+      
+      if (data?.subjects) {
+        setUserSubjects(data.subjects as string[]);
+      }
+      
+      // Auto-redirect users with access to dashboard (owners, admins, paid users)
+      const effectiveAccess = hasAccess || isOwner || isAdmin;
+      
+      if (effectiveAccess && currentStep === 'landing') {
+        if (data?.subjects && data.subjects.length > 0) {
+          setCurrentStep('dashboard');
+        } else {
+          setCurrentStep('subject-select');
         }
       }
     };
-    loadUserSubjects();
-  }, [userEmail]);
-
-  // Auto-redirect owner to dashboard
-  useEffect(() => {
-    if (isOwner && currentStep === 'landing') {
-      if (userSubjects.length > 0) {
-        setCurrentStep('dashboard');
-      } else if (userEmail) {
-        setCurrentStep('subject-select');
-      }
-    }
-  }, [isOwner, currentStep, userSubjects.length, userEmail]);
+    
+    loadUserSubjectsAndRedirect();
+  }, [userEmail, isLoading, hasAccess, isOwner, isAdmin, currentStep]);
 
   // Check for step param from payment success redirect
   useEffect(() => {
     const step = searchParams.get('step');
     if (step === 'upload' && userEmail) {
-      // Go to subject selection first if no subjects chosen
       setCurrentStep('subject-select');
       setSearchParams({});
     }
