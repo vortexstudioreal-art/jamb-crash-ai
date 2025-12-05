@@ -17,6 +17,7 @@ import { TimedQuiz } from '@/components/TimedQuiz';
 import { QuizResults } from '@/components/QuizResults';
 import { StudyStats } from '@/components/StudyStats';
 import { Footer } from '@/components/Footer';
+import { BackButton } from '@/components/BackButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -104,11 +105,16 @@ const Index = () => {
           setCurrentStep('dashboard');
         }
       } else {
-        // Unpaid user - scroll to pricing and highlight Standard
+        // Unpaid user - scroll to TOP of pricing section and highlight Standard
         setHighlightStandard(true);
         setTimeout(() => {
           const pricingSection = document.getElementById('pricing');
-          pricingSection?.scrollIntoView({ behavior: 'smooth' });
+          if (pricingSection) {
+            const headerOffset = 80; // Account for fixed header
+            const elementPosition = pricingSection.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+            window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+          }
         }, 100);
       }
     } else {
@@ -193,7 +199,12 @@ const Index = () => {
     setHighlightStandard(true);
     setTimeout(() => {
       const pricingSection = document.getElementById('pricing');
-      pricingSection?.scrollIntoView({ behavior: 'smooth' });
+      if (pricingSection) {
+        const headerOffset = 80;
+        const elementPosition = pricingSection.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+        window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+      }
     }, 100);
   };
 
@@ -206,45 +217,57 @@ const Index = () => {
   // Quiz step
   if (currentStep === 'quiz' && userEmail && userSubjects.length > 0) {
     return (
-      <TimedQuiz
-        userEmail={userEmail}
-        subjects={userSubjects}
-        quizType={quizType}
-        onComplete={handleQuizComplete}
-        onExit={() => setCurrentStep('dashboard')}
-      />
+      <>
+        <BackButton onClick={() => setCurrentStep('dashboard')} />
+        <TimedQuiz
+          userEmail={userEmail}
+          subjects={userSubjects}
+          quizType={quizType}
+          onComplete={handleQuizComplete}
+          onExit={() => setCurrentStep('dashboard')}
+        />
+      </>
     );
   }
 
   // Quiz results step
   if (currentStep === 'quiz-results' && quizResults) {
     return (
-      <QuizResults
-        results={quizResults}
-        quizType={quizType}
-        onRetry={() => setCurrentStep('dashboard')}
-        onHome={() => setCurrentStep('dashboard')}
-      />
+      <>
+        <BackButton onClick={() => setCurrentStep('dashboard')} />
+        <QuizResults
+          results={quizResults}
+          quizType={quizType}
+          onRetry={() => setCurrentStep('dashboard')}
+          onHome={() => setCurrentStep('dashboard')}
+        />
+      </>
     );
   }
 
   // Demo quiz flow
   if (currentStep === 'demo') {
     return (
-      <DemoQuizFlow
-        onComplete={() => setCurrentStep('landing')}
-        onUpgrade={handleUpgradeClick}
-      />
+      <>
+        <BackButton onClick={() => setCurrentStep('landing')} />
+        <DemoQuizFlow
+          onComplete={() => setCurrentStep('landing')}
+          onUpgrade={handleUpgradeClick}
+        />
+      </>
     );
   }
 
   // Subject selection step (after payment or for owner)
   if (currentStep === 'subject-select' && userEmail) {
     return (
-      <SubjectSelector
-        userEmail={userEmail}
-        onComplete={handleSubjectsSelected}
-      />
+      <>
+        <BackButton onClick={() => setCurrentStep('landing')} />
+        <SubjectSelector
+          userEmail={userEmail}
+          onComplete={handleSubjectsSelected}
+        />
+      </>
     );
   }
 
@@ -255,7 +278,9 @@ const Index = () => {
     return (
       <PaywallGate hasAccess={effectiveAccess} isLoading={isLoading} onUpgrade={handleUpgradeClick}>
         <div className="min-h-screen bg-background">
-          <Header onGetStarted={handleGetStarted} />
+          <Header onGetStarted={handleGetStarted} hasAccess={effectiveAccess} />
+          {/* Back Button */}
+          <BackButton onClick={() => setCurrentStep(currentStep === 'dashboard' ? 'landing' : 'dashboard')} />
           <div className="pt-16">
             {/* Admin Badge and Sign Out */}
             {user && (
@@ -439,7 +464,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header onGetStarted={handleGetStarted} />
+      <Header onGetStarted={handleGetStarted} hasAccess={effectiveAccess} />
       <div className="pt-16">
         {/* Admin Badge and Sign Out for logged in users */}
         {user && (
