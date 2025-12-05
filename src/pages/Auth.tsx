@@ -96,7 +96,14 @@ export default function Auth() {
     setIsSubmitting(true);
     const { error } = await signInWithGoogle();
     if (error) {
-      toast.error('Google sign-in failed. Please try again.');
+      // Check if it's a provider not enabled error
+      if (error.message?.includes('provider') || error.message?.includes('not enabled')) {
+        toast.error('Google sign-in is not available yet. Please use email and password to sign up.', {
+          duration: 5000,
+        });
+      } else {
+        toast.error('Google sign-in failed. Please use email and password instead.');
+      }
       setIsSubmitting(false);
     }
   };
