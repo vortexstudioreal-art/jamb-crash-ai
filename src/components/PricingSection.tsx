@@ -1,9 +1,11 @@
 import { motion } from 'framer-motion';
 import { PricingCard } from './PricingCard';
 import { Shield, CreditCard } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface PricingSectionProps {
   onSelectPlan: (plan: string) => void;
+  highlightStandard?: boolean;
 }
 
 const plans = [
@@ -45,7 +47,18 @@ const plans = [
   },
 ];
 
-export const PricingSection = ({ onSelectPlan }: PricingSectionProps) => {
+export const PricingSection = ({ onSelectPlan, highlightStandard }: PricingSectionProps) => {
+  const [isHighlighted, setIsHighlighted] = useState(false);
+
+  useEffect(() => {
+    if (highlightStandard) {
+      setIsHighlighted(true);
+      // Remove highlight after 3 seconds
+      const timer = setTimeout(() => setIsHighlighted(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [highlightStandard]);
+
   return (
     <section id="pricing" className="py-16 md:py-24 bg-secondary/30">
       <div className="container">
@@ -65,12 +78,20 @@ export const PricingSection = ({ onSelectPlan }: PricingSectionProps) => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto">
           {plans.map((plan, index) => (
-            <PricingCard
+            <div
               key={plan.name}
-              {...plan}
-              delay={index * 0.1}
-              onSelect={() => onSelectPlan(plan.name.toLowerCase())}
-            />
+              className={`transition-all duration-500 ${
+                plan.name === 'Standard' && isHighlighted
+                  ? 'ring-4 ring-primary ring-offset-4 ring-offset-background animate-pulse rounded-2xl scale-105'
+                  : ''
+              }`}
+            >
+              <PricingCard
+                {...plan}
+                delay={index * 0.1}
+                onSelect={() => onSelectPlan(plan.name.toLowerCase())}
+              />
+            </div>
           ))}
         </div>
 

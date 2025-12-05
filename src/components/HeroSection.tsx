@@ -6,9 +6,11 @@ import { LiveCounter } from './LiveCounter';
 
 interface HeroSectionProps {
   onGetStarted: () => void;
+  hasAccess?: boolean;
+  onSeeHowItWorks: () => void;
 }
 
-export const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
+export const HeroSection = ({ onGetStarted, hasAccess, onSeeHowItWorks }: HeroSectionProps) => {
   return (
     <section className="relative min-h-screen gradient-hero overflow-hidden">
       {/* Background pattern */}
@@ -59,18 +61,20 @@ export const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
             and daily WhatsApp reminders. Score 300+ guaranteed.
           </motion.p>
 
-          {/* CTA Buttons */}
+          {/* CTA Buttons - Hide "Get Started" for paid users */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
             className="flex flex-col sm:flex-row gap-4 justify-center mb-16"
           >
-            <Button variant="hero" size="xl" onClick={onGetStarted}>
-              Start Preparing Now
-              <ArrowRight className="w-5 h-5" />
-            </Button>
-            <Button variant="outline" size="xl">
+            {!hasAccess && (
+              <Button variant="hero" size="xl" onClick={onGetStarted}>
+                Start Preparing Now
+                <ArrowRight className="w-5 h-5" />
+              </Button>
+            )}
+            <Button variant="outline" size="xl" onClick={onSeeHowItWorks}>
               See How It Works
             </Button>
           </motion.div>
