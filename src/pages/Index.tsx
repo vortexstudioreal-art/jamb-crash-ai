@@ -110,6 +110,17 @@ const Index = () => {
     const planKey = plan as keyof typeof plans;
     setSelectedPlan(planKey);
     
+    // Owner bypasses payment completely - instant access
+    if (isOwner) {
+      toast.success('Owner access granted! 👑');
+      if (userSubjects.length === 0) {
+        setCurrentStep('subject-select');
+      } else {
+        setCurrentStep('dashboard');
+      }
+      return;
+    }
+    
     if (user) {
       setIsPaymentModalOpen(true);
     } else {

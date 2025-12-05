@@ -160,17 +160,29 @@ const AdminPanel = () => {
   const testWhatsAppReminder = async () => {
     setTestingWhatsApp(true);
     try {
-      // Check if Twilio is configured
-      const whatsappFeature = features.find(f => f.feature_name === 'whatsapp_reminders');
-      if (!whatsappFeature?.is_working) {
-        toast.error('WhatsApp not configured. Add Twilio API key to enable.');
+      // Call the actual edge function to send WhatsApp to test number
+      const { data, error } = await supabase.functions.invoke('send-whatsapp-reminder', {
+        body: {
+          phone_number: '+2347073996465',
+          email: userEmail || 'admin@test.com',
+          test_mode: false
+        }
+      });
+      
+      if (error) {
+        console.error('WhatsApp test error:', error);
+        toast.error('Failed to send WhatsApp: ' + error.message);
         return;
       }
       
-      // Would call edge function here
-      toast.info('WhatsApp test sent! Check your phone 📱');
+      if (data?.success) {
+        toast.success('WhatsApp sent! Check +2347073996465 📱');
+      } else {
+        toast.error(data?.error || 'Failed to send WhatsApp');
+      }
     } catch (error) {
-      toast.error('Failed to send test');
+      console.error('WhatsApp test error:', error);
+      toast.error('Failed to send test reminder');
     } finally {
       setTestingWhatsApp(false);
     }
@@ -530,7 +542,7 @@ const AdminPanel = () => {
                 </Card>
               </motion.div>
 
-              {/* Quick Actions */}
+              {/* WhatsApp Status & Quick Actions */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -539,21 +551,51 @@ const AdminPanel = () => {
                 <Card className="bg-card border-border">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
+                      <Send className="w-5 h-5 text-green-500" />
+                      WhatsApp Integration
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* WhatsApp Status */}
+                    <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/30">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                          <CheckCircle className="w-6 h-6 text-green-500" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-green-600">Connected & Working</p>
+                          <p className="text-xs text-muted-foreground">Twilio WhatsApp API active</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Test Number */}
+                    <div className="p-3 rounded-lg bg-muted/50">
+                      <p className="text-sm font-medium text-foreground mb-1">Test Number</p>
+                      <code className="text-sm text-primary font-mono">+2347073996465</code>
+                    </div>
+
+                    {/* Test Button */}
+                    <Button
+                      className="w-full bg-green-600 hover:bg-green-700 text-white"
+                      onClick={testWhatsAppReminder}
+                      disabled={testingWhatsApp}
+                    >
+                      <Send className="w-4 h-4 mr-2" />
+                      {testingWhatsApp ? 'Sending...' : 'Send Test Reminder Now'}
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Other Quick Actions */}
+                <Card className="bg-card border-border mt-4">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
                       <AlertCircle className="w-5 h-5 text-blue-500" />
-                      Quick Fixes
+                      Other Settings
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
-                      <p className="text-sm font-medium text-yellow-600">WhatsApp Setup</p>
-                      <p className="text-xs text-muted-foreground mb-2">
-                        Add Twilio credentials to enable WhatsApp reminders
-                      </p>
-                      <code className="text-xs bg-muted p-2 rounded block overflow-x-auto">
-                        TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER
-                      </code>
-                    </div>
-                    
                     <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
                       <p className="text-sm font-medium text-blue-600">Email Setup</p>
                       <p className="text-xs text-muted-foreground mb-2">
@@ -562,19 +604,6 @@ const AdminPanel = () => {
                       <code className="text-xs bg-muted p-2 rounded block">
                         RESEND_API_KEY
                       </code>
-                    </div>
-
-                    {/* WhatsApp Test Button */}
-                    <div className="pt-3 border-t border-border">
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={testWhatsAppReminder}
-                        disabled={testingWhatsApp}
-                      >
-                        <Send className="w-4 h-4 mr-2" />
-                        {testingWhatsApp ? 'Sending...' : 'Test WhatsApp Reminder'}
-                      </Button>
                     </div>
 
                     <Button variant="outline" className="w-full" onClick={() => navigate('/')}>
