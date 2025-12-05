@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { HeroSection } from '@/components/HeroSection';
 import { PricingSection } from '@/components/PricingSection';
 import { UploadSection } from '@/components/UploadSection';
 import { PersonalizationForm } from '@/components/PersonalizationForm';
 import { PaymentModal } from '@/components/PaymentModal';
-import { EmailPromptModal } from '@/components/EmailPromptModal';
 import { PaywallGate } from '@/components/PaywallGate';
 import { AdminBadge } from '@/components/AdminBadge';
 import { PremiumDashboard } from '@/components/PremiumDashboard';
@@ -17,12 +16,12 @@ import { TimedQuiz } from '@/components/TimedQuiz';
 import { QuizResults } from '@/components/QuizResults';
 import { StudyStats } from '@/components/StudyStats';
 import { Footer } from '@/components/Footer';
-import { useAccessControl } from '@/hooks/useAccessControl';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Play, FileText, Target, Calendar, BookOpen, Zap } from 'lucide-react';
+import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut } from 'lucide-react';
 
 type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'demo';
 
@@ -44,13 +43,15 @@ const Index = () => {
   const [currentStep, setCurrentStep] = useState<Step>('landing');
   const [selectedPlan, setSelectedPlan] = useState<keyof typeof plans | null>(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  const [isEmailPromptOpen, setIsEmailPromptOpen] = useState(false);
-  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
   const [personalizationData, setPersonalizationData] = useState<FormData | null>(null);
   const [userSubjects, setUserSubjects] = useState<string[]>([]);
   const [quizType, setQuizType] = useState<'full' | 'mini'>('full');
   const [quizResults, setQuizResults] = useState<any>(null);
-  const { hasAccess, isAdmin, adminRole, isLoading, setUserEmail, userEmail, refreshAccess } = useAccessControl();
+  
+  const { user, isLoading, hasAccess, isAdmin, isOwner, userRole, signOut, refreshAccess } = useAuth();
+  const navigate = useNavigate();
+
+  const userEmail = user?.email || null;
 
   // Load user subjects if they exist
   useEffect(() => {
@@ -70,69 +71,60 @@ const Index = () => {
     loadUserSubjects();
   }, [userEmail]);
 
+  // Auto-redirect owner to dashboard
+  useEffect(() => {
+    if (isOwner && currentStep === 'landing') {
+      if (userSubjects.length > 0) {
+        setCurrentStep('dashboard');
+      } else if (userEmail) {
+        setCurrentStep('subject-select');
+      }
+    }
+  }, [isOwner, currentStep, userSubjects.length, userEmail]);
+
   // Check for step param from payment success redirect
   useEffect(() => {
     const step = searchParams.get('step');
-    if (step === 'upload') {
-      const paymentData = sessionStorage.getItem('jamb_payment');
-      if (paymentData) {
-        const parsed = JSON.parse(paymentData);
-        setUserEmail(parsed.email);
-        // Go to subject selection first if no subjects chosen
-        setCurrentStep('subject-select');
-        setSearchParams({});
-      }
+    if (step === 'upload' && userEmail) {
+      // Go to subject selection first if no subjects chosen
+      setCurrentStep('subject-select');
+      setSearchParams({});
     }
-  }, [searchParams, setSearchParams, setUserEmail]);
+  }, [searchParams, setSearchParams, userEmail]);
 
   const handleGetStarted = () => {
-    setIsEmailPromptOpen(true);
+    if (user) {
+      // Already logged in
+      if (hasAccess || isOwner) {
+        if (userSubjects.length === 0) {
+          setCurrentStep('subject-select');
+        } else {
+          setCurrentStep('dashboard');
+        }
+      } else {
+        const pricingSection = document.getElementById('pricing');
+        pricingSection?.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      navigate('/auth');
+    }
   };
 
   const handleSelectPlan = (plan: string) => {
     const planKey = plan as keyof typeof plans;
     setSelectedPlan(planKey);
-    setIsEmailPromptOpen(true);
-  };
-
-  const handleOwnerAccess = (email: string) => {
-    setIsEmailPromptOpen(false);
-    setUserEmail(email);
-    toast.success('Welcome back, boss! 👑');
-    // Check if subjects are selected
-    if (userSubjects.length === 0) {
-      setCurrentStep('subject-select');
+    
+    if (user) {
+      setIsPaymentModalOpen(true);
     } else {
-      setCurrentStep('dashboard');
+      navigate('/auth');
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleProceedToPayment = (email: string) => {
-    setIsEmailPromptOpen(false);
-    setPendingEmail(email);
-    
-    if (!selectedPlan) {
-      const pricingSection = document.getElementById('pricing');
-      pricingSection?.scrollIntoView({ behavior: 'smooth' });
-      toast.info('Select a plan to continue');
-      return;
-    }
-    
-    setIsPaymentModalOpen(true);
-  };
-
-  const handlePaymentSuccess = (reference: string, email: string) => {
+  const handlePaymentSuccess = async (reference: string, email: string) => {
     setIsPaymentModalOpen(false);
-    setUserEmail(email);
+    await refreshAccess();
     toast.success('Payment successful! 🎉 Let\'s pick your subjects!');
-    
-    sessionStorage.setItem('jamb_payment', JSON.stringify({
-      reference,
-      email,
-      package: selectedPlan,
-    }));
-    
     setCurrentStep('subject-select');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -182,6 +174,12 @@ const Index = () => {
     }, 100);
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+    setCurrentStep('landing');
+    toast.success('Signed out successfully');
+  };
+
   // Quiz step
   if (currentStep === 'quiz' && userEmail && userSubjects.length > 0) {
     return (
@@ -217,7 +215,7 @@ const Index = () => {
     );
   }
 
-  // Subject selection step (after payment)
+  // Subject selection step (after payment or for owner)
   if (currentStep === 'subject-select' && userEmail) {
     return (
       <SubjectSelector
@@ -231,14 +229,26 @@ const Index = () => {
   const isProtectedStep = ['upload', 'personalize', 'processing', 'dashboard', 'quiz', 'quiz-results'].includes(currentStep);
 
   if (isProtectedStep) {
+    // Owner bypasses paywall
+    const effectiveAccess = hasAccess || isOwner;
+    
     return (
-      <PaywallGate hasAccess={hasAccess} isLoading={isLoading} onUpgrade={handleUpgradeClick}>
+      <PaywallGate hasAccess={effectiveAccess} isLoading={isLoading} onUpgrade={handleUpgradeClick}>
         <div className="min-h-screen bg-background">
           <Header onGetStarted={handleGetStarted} />
           <div className="pt-16">
-            {isAdmin && (
-              <div className="fixed top-20 right-4 z-50">
-                <AdminBadge role={adminRole} linkToAdmin />
+            {/* Admin Badge and Sign Out */}
+            {user && (
+              <div className="fixed top-20 right-4 z-50 flex items-center gap-2">
+                {isAdmin && <AdminBadge role={userRole} linkToAdmin />}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSignOut}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <LogOut className="w-4 h-4" />
+                </Button>
               </div>
             )}
             
@@ -365,7 +375,7 @@ const Index = () => {
                   <PremiumDashboard
                     userEmail={userEmail}
                     isAdmin={isAdmin}
-                    adminRole={adminRole}
+                    adminRole={userRole}
                     targetScore={personalizationData?.targetScore ? parseInt(personalizationData.targetScore) : undefined}
                     weakSubject={personalizationData?.weakestSubject}
                   />
@@ -411,9 +421,18 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header onGetStarted={handleGetStarted} />
       <div className="pt-16">
-        {isAdmin && (
-          <div className="fixed top-20 right-4 z-50">
-            <AdminBadge role={adminRole} linkToAdmin />
+        {/* Admin Badge and Sign Out for logged in users */}
+        {user && (
+          <div className="fixed top-20 right-4 z-50 flex items-center gap-2">
+            {isAdmin && <AdminBadge role={userRole} linkToAdmin />}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleSignOut}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <LogOut className="w-4 h-4" />
+            </Button>
           </div>
         )}
         <HeroSection onGetStarted={handleGetStarted} />
@@ -421,27 +440,19 @@ const Index = () => {
       </div>
       <Footer />
 
-      {/* Free Trial Banner */}
-      {!hasAccess && !isLoading && (
+      {/* Free Trial Banner - only for non-logged in or non-access users */}
+      {!user && !isLoading && (
         <FreeTrialBanner onStartTrial={handleStartTrial} userEmail={userEmail || undefined} />
       )}
 
-      {/* Email Prompt Modal */}
-      <EmailPromptModal
-        isOpen={isEmailPromptOpen}
-        onClose={() => setIsEmailPromptOpen(false)}
-        onOwnerAccess={handleOwnerAccess}
-        onProceedToPayment={handleProceedToPayment}
-      />
-
       {/* Payment Modal */}
-      {selectedPlan && (
+      {selectedPlan && user && (
         <PaymentModal
           isOpen={isPaymentModalOpen}
           onClose={() => setIsPaymentModalOpen(false)}
           plan={plans[selectedPlan]}
           onSuccess={handlePaymentSuccess}
-          initialEmail={pendingEmail || undefined}
+          initialEmail={userEmail || undefined}
         />
       )}
     </div>
