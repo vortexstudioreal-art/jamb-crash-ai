@@ -16,6 +16,7 @@ import { DemoQuizFlow } from '@/components/DemoQuizFlow';
 import { TimedQuiz } from '@/components/TimedQuiz';
 import { QuizResults } from '@/components/QuizResults';
 import { StudyStats } from '@/components/StudyStats';
+import { StudyPlanGenerator } from '@/components/StudyPlanGenerator';
 import { Footer } from '@/components/Footer';
 import { BackButton } from '@/components/BackButton';
 import { useAuth } from '@/contexts/AuthContext';
@@ -25,7 +26,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut } from 'lucide-react';
 
-type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'demo';
+type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'demo' | 'study-plan';
 
 interface FormData {
   targetScore: string;
@@ -171,13 +172,14 @@ const Index = () => {
 
   const handleFormSubmit = (data: unknown) => {
     setPersonalizationData(data as FormData);
-    toast.success('Generating your personalized study plan... 🚀');
-    setCurrentStep('processing');
-    
-    setTimeout(() => {
-      setCurrentStep('dashboard');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 3000);
+    toast.success('Creating your personalized study plan... 🚀');
+    setCurrentStep('study-plan');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleGenerateStudyPlan = () => {
+    setCurrentStep('study-plan');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleStartQuiz = (type: 'full' | 'mini') => {
@@ -271,8 +273,26 @@ const Index = () => {
     );
   }
 
+  // Study Plan Generator step
+  if (currentStep === 'study-plan' && userEmail && userSubjects.length > 0) {
+    return (
+      <>
+        <BackButton onClick={() => setCurrentStep('dashboard')} />
+        <StudyPlanGenerator
+          userEmail={userEmail}
+          subjects={userSubjects}
+          targetScore={personalizationData?.targetScore ? parseInt(personalizationData.targetScore) : 300}
+          hoursPerDay={personalizationData?.hoursPerDay ? parseInt(personalizationData.hoursPerDay) : 4}
+          weakestSubject={personalizationData?.weakestSubject}
+          examDate={personalizationData?.examDate}
+          onBack={() => setCurrentStep('dashboard')}
+        />
+      </>
+    );
+  }
+
   // Protected steps require access
-  const isProtectedStep = ['upload', 'personalize', 'processing', 'dashboard', 'quiz', 'quiz-results'].includes(currentStep);
+  const isProtectedStep = ['upload', 'personalize', 'processing', 'dashboard', 'quiz', 'quiz-results', 'study-plan'].includes(currentStep);
 
   if (isProtectedStep) {
     return (
@@ -378,12 +398,12 @@ const Index = () => {
                     
                     <Button
                       variant="outline"
-                      className="h-auto py-6 flex flex-col gap-2"
-                      onClick={() => setCurrentStep('personalize')}
+                      className="h-auto py-6 flex flex-col gap-2 border-2 border-green-500/50 hover:bg-green-500/10"
+                      onClick={handleGenerateStudyPlan}
                     >
                       <Target className="w-8 h-8 text-green-500" />
-                      <span className="font-bold">Study Plan</span>
-                      <span className="text-xs text-muted-foreground">Personalized</span>
+                      <span className="font-bold text-green-600">Generate Plan</span>
+                      <span className="text-xs text-muted-foreground">48-72hr timetable</span>
                     </Button>
                   </motion.div>
 
