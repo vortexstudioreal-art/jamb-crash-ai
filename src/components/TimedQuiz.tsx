@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, CheckCircle, XCircle, Pause, Play, Flag, ChevronLeft, ChevronRight, Sparkles, Headphones, BookOpen, GraduationCap, Volume2, VolumeX, Calendar } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, Pause, Play, Flag, ChevronLeft, ChevronRight, Sparkles, Headphones, BookOpen, GraduationCap, Volume2, VolumeX, Calendar, Music, CloudRain, Coffee, TreePine, Waves } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 interface Question {
   id: string;
@@ -37,6 +38,7 @@ interface QuizResults {
 }
 
 type QuizMode = 'practice' | 'exam';
+type AmbientSound = 'rain' | 'forest' | 'ocean' | 'coffee';
 
 const MOTIVATIONAL_MESSAGES = [
   "You're crushing this! 💪",
@@ -46,7 +48,29 @@ const MOTIVATIONAL_MESSAGES = [
   "Stay focused, stay winning! 🔥",
 ];
 
-const AMBIENT_SOUND_URL = "https://assets.mixkit.co/sfx/preview/mixkit-relaxing-in-nature-522.mp3";
+// Free royalty-free ambient sounds
+const AMBIENT_SOUNDS: Record<AmbientSound, { url: string; label: string; icon: typeof CloudRain }> = {
+  rain: {
+    url: "https://assets.mixkit.co/active_storage/sfx/212/212-preview.mp3",
+    label: "Rain",
+    icon: CloudRain
+  },
+  forest: {
+    url: "https://assets.mixkit.co/active_storage/sfx/1224/1224-preview.mp3",
+    label: "Forest",
+    icon: TreePine
+  },
+  ocean: {
+    url: "https://assets.mixkit.co/active_storage/sfx/1189/1189-preview.mp3",
+    label: "Ocean",
+    icon: Waves
+  },
+  coffee: {
+    url: "https://assets.mixkit.co/active_storage/sfx/2515/2515-preview.mp3",
+    label: "Coffee Shop",
+    icon: Coffee
+  }
+};
 
 const ALL_SUBJECTS = [
   'english', 'mathematics', 'physics', 'chemistry', 'biology',
@@ -92,13 +116,20 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
   
   // Audio state
   const [isSoundPlaying, setIsSoundPlaying] = useState(false);
+  const [currentSound, setCurrentSound] = useState<AmbientSound>('rain');
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Initialize audio
+  // Initialize audio with selected sound
   useEffect(() => {
-    audioRef.current = new Audio(AMBIENT_SOUND_URL);
+    const sound = AMBIENT_SOUNDS[currentSound];
+    audioRef.current = new Audio(sound.url);
     audioRef.current.loop = true;
     audioRef.current.volume = 0.3;
+    
+    // If sound was playing, continue with new sound
+    if (isSoundPlaying && audioRef.current) {
+      audioRef.current.play().catch(console.error);
+    }
     
     return () => {
       if (audioRef.current) {
@@ -106,7 +137,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
         audioRef.current = null;
       }
     };
-  }, []);
+  }, [currentSound]);
 
   // Handle sound toggle
   const toggleSound = () => {
@@ -118,6 +149,15 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
       }
       setIsSoundPlaying(!isSoundPlaying);
     }
+  };
+
+  // Change ambient sound
+  const changeSound = (sound: AmbientSound) => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    setCurrentSound(sound);
+    // Will auto-play via useEffect if isSoundPlaying is true
   };
 
   // Start quiz with selected mode
@@ -135,8 +175,11 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
     setShowHeadphoneAdvice(false);
     setTimeLeft(totalTimeSeconds);
     
+    // Auto-start ambient sound
     if (audioRef.current) {
-      audioRef.current.play().catch(console.error);
+      audioRef.current.play().catch((e) => {
+        console.log('Auto-play blocked, user can enable manually:', e);
+      });
       setIsSoundPlaying(true);
     }
   };
@@ -471,14 +514,62 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
             </div>
             
             <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleSound}
-                className="h-10 w-10"
-              >
-                {isSoundPlaying ? <Volume2 className="w-5 h-5 text-primary" /> : <VolumeX className="w-5 h-5" />}
-              </Button>
+              {/* Sound Selector Popover */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={isSoundPlaying ? "default" : "ghost"}
+                    size="icon"
+                    className={`h-10 w-10 ${isSoundPlaying ? 'bg-primary/20 text-primary hover:bg-primary/30' : ''}`}
+                  >
+                    {isSoundPlaying ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-56 p-3" align="end">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-sm">Ambient Sound</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={toggleSound}
+                        className="h-8 px-2"
+                      >
+                        {isSoundPlaying ? 'Mute' : 'Play'}
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {(Object.entries(AMBIENT_SOUNDS) as [AmbientSound, typeof AMBIENT_SOUNDS[AmbientSound]][]).map(([key, sound]) => {
+                        const Icon = sound.icon;
+                        const isActive = currentSound === key;
+                        return (
+                          <button
+                            key={key}
+                            onClick={() => {
+                              changeSound(key);
+                              if (!isSoundPlaying) {
+                                toggleSound();
+                              }
+                            }}
+                            className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all ${
+                              isActive 
+                                ? 'border-primary bg-primary/10 text-primary' 
+                                : 'border-border hover:border-primary/50'
+                            }`}
+                          >
+                            <Icon className="w-5 h-5" />
+                            <span className="text-xs font-medium">{sound.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="text-xs text-muted-foreground text-center">
+                      🎧 Volume at 30% for focus
+                    </p>
+                  </div>
+                </PopoverContent>
+              </Popover>
+              
               <Button
                 variant="outline"
                 size="icon"
