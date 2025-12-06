@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, CheckCircle, XCircle, Pause, Play, Flag, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, Pause, Play, Flag, ChevronLeft, ChevronRight, Sparkles, Headphones, BookOpen, GraduationCap, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface Question {
   id: string;
@@ -33,6 +34,8 @@ interface QuizResults {
   questions: Array<Question & { userAnswer: string }>;
 }
 
+type QuizMode = 'practice' | 'exam';
+
 const MOTIVATIONAL_MESSAGES = [
   "You're crushing this! 💪",
   "Keep going, future uni star! ⭐",
@@ -41,48 +44,18 @@ const MOTIVATIONAL_MESSAGES = [
   "Stay focused, stay winning! 🔥",
 ];
 
-// Sample questions for demo (will be replaced with real ones from DB)
-const SAMPLE_QUESTIONS: Question[] = [
-  {
-    id: '1',
-    question: 'What is the chemical symbol for water?',
-    option_a: 'H2O',
-    option_b: 'CO2',
-    option_c: 'NaCl',
-    option_d: 'O2',
-    correct_answer: 'A',
-    explanation: 'Water is made of 2 hydrogen atoms and 1 oxygen atom, hence H2O! 💧',
-    subject: 'chemistry'
-  },
-  {
-    id: '2',
-    question: 'Who wrote "Things Fall Apart"?',
-    option_a: 'Wole Soyinka',
-    option_b: 'Chinua Achebe',
-    option_c: 'Chimamanda Adichie',
-    option_d: 'Ben Okri',
-    correct_answer: 'B',
-    explanation: 'Chinua Achebe wrote this classic Nigerian novel in 1958! 📚',
-    subject: 'literature'
-  },
-  {
-    id: '3',
-    question: 'What is 15% of 200?',
-    option_a: '20',
-    option_b: '25',
-    option_c: '30',
-    option_d: '35',
-    correct_answer: 'C',
-    explanation: '15% of 200 = (15/100) × 200 = 30. Quick trick: 10% is 20, 5% is 10, so 15% is 30! 🧮',
-    subject: 'mathematics'
-  },
-  // Add more sample questions...
-];
+// Ambient sound URL (royalty-free relaxing study music)
+const AMBIENT_SOUND_URL = "https://assets.mixkit.co/sfx/preview/mixkit-relaxing-in-nature-522.mp3";
 
 export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }: TimedQuizProps) => {
   const totalQuestions = quizType === 'full' ? 60 : 20;
-  const totalTimeSeconds = quizType === 'full' ? 90 * 60 : 30 * 60; // 90 or 30 minutes
+  const totalTimeSeconds = quizType === 'full' ? 90 * 60 : 30 * 60;
   
+  // Pre-quiz state
+  const [quizMode, setQuizMode] = useState<QuizMode | null>(null);
+  const [showHeadphoneAdvice, setShowHeadphoneAdvice] = useState(true);
+  
+  // Quiz state
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -91,52 +64,94 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
   const [isLoading, setIsLoading] = useState(true);
   const [showMotivation, setShowMotivation] = useState(false);
   const [motivationMsg, setMotivationMsg] = useState('');
+  const [selectedSubjectFilter, setSelectedSubjectFilter] = useState<string>('all');
+  const [showAnswerFeedback, setShowAnswerFeedback] = useState<string | null>(null);
+  
+  // Audio state
+  const [isSoundPlaying, setIsSoundPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Load questions - fresh random selection, no repeats
+  // Initialize audio
   useEffect(() => {
+    audioRef.current = new Audio(AMBIENT_SOUND_URL);
+    audioRef.current.loop = true;
+    audioRef.current.volume = 0.3;
+    
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
+  // Handle sound toggle
+  const toggleSound = () => {
+    if (audioRef.current) {
+      if (isSoundPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play().catch(console.error);
+      }
+      setIsSoundPlaying(!isSoundPlaying);
+    }
+  };
+
+  // Start quiz with selected mode
+  const startQuiz = (mode: QuizMode) => {
+    setQuizMode(mode);
+    setShowHeadphoneAdvice(false);
+    // Start ambient sound
+    if (audioRef.current) {
+      audioRef.current.play().catch(console.error);
+      setIsSoundPlaying(true);
+    }
+  };
+
+  // Load questions
+  useEffect(() => {
+    if (!quizMode) return;
+    
     const loadQuestions = async () => {
       try {
-        // Fetch MORE questions than needed to ensure variety
         const { data, error } = await supabase
           .from('jamb_questions')
           .select('*')
           .in('subject', subjects as any)
-          .limit(500); // Get large pool
+          .limit(500);
 
         if (error) throw error;
 
         if (data && data.length >= totalQuestions) {
-          // Shuffle using Fisher-Yates for true randomness
           const shuffled = [...data];
           for (let i = shuffled.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
           }
-          // Take only needed amount - guaranteed no repeats
           setQuestions(shuffled.slice(0, totalQuestions) as Question[]);
         } else if (data && data.length > 0) {
-          // Use what we have
           const shuffled = [...data].sort(() => Math.random() - 0.5);
           setQuestions(shuffled as Question[]);
         } else {
-          // Fallback to samples
-          const shuffled = [...SAMPLE_QUESTIONS].sort(() => Math.random() - 0.5);
-          setQuestions(shuffled.slice(0, Math.min(totalQuestions, SAMPLE_QUESTIONS.length)));
+          toast({
+            title: "Not enough questions",
+            description: "Loading available questions...",
+            variant: "destructive"
+          });
         }
       } catch (error) {
         console.error('Error loading questions:', error);
-        setQuestions(SAMPLE_QUESTIONS.slice(0, totalQuestions));
       } finally {
         setIsLoading(false);
       }
     };
 
     loadQuestions();
-  }, [subjects, totalQuestions]);
+  }, [subjects, totalQuestions, quizMode]);
 
   // Timer
   useEffect(() => {
-    if (isPaused || isLoading || timeLeft <= 0) return;
+    if (!quizMode || isPaused || isLoading || timeLeft <= 0) return;
 
     const interval = setInterval(() => {
       setTimeLeft(prev => {
@@ -149,9 +164,9 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isPaused, isLoading, timeLeft]);
+  }, [quizMode, isPaused, isLoading, timeLeft]);
 
-  // Show motivation at milestones
+  // Motivation at milestones
   useEffect(() => {
     const answeredCount = Object.keys(answers).length;
     if (answeredCount > 0 && answeredCount % 10 === 0) {
@@ -168,13 +183,33 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
   };
 
   const handleAnswer = (answer: string) => {
+    const currentQuestion = questions[currentIndex];
+    
     setAnswers(prev => ({
       ...prev,
-      [questions[currentIndex].id]: answer
+      [currentQuestion.id]: answer
     }));
+
+    // Practice mode: show immediate feedback
+    if (quizMode === 'practice') {
+      setShowAnswerFeedback(currentQuestion.correct_answer);
+      
+      // Auto-advance after 2 seconds
+      setTimeout(() => {
+        setShowAnswerFeedback(null);
+        if (currentIndex < questions.length - 1) {
+          setCurrentIndex(prev => prev + 1);
+        }
+      }, 2000);
+    }
   };
 
   const handleSubmit = useCallback(async () => {
+    // Stop audio
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    
     const timeTaken = totalTimeSeconds - timeLeft;
     let correctCount = 0;
     
@@ -184,7 +219,6 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
       return { ...q, userAnswer };
     });
 
-    // Save to database
     try {
       await supabase.from('quiz_attempts').insert({
         email: userEmail,
@@ -207,6 +241,91 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
     });
   }, [questions, answers, timeLeft, totalTimeSeconds, userEmail, quizType, subjects, totalQuestions, onComplete]);
 
+  // Get filtered questions by subject
+  const filteredQuestions = selectedSubjectFilter === 'all' 
+    ? questions 
+    : questions.filter(q => q.subject === selectedSubjectFilter);
+
+  const currentQuestionIndex = filteredQuestions.findIndex(q => q.id === questions[currentIndex]?.id);
+
+  // Headphone advice screen
+  if (showHeadphoneAdvice && !quizMode) {
+    return (
+      <div className="fixed inset-0 bg-background z-50 flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-md w-full bg-card rounded-3xl p-8 border border-border shadow-2xl text-center"
+        >
+          <motion.div
+            animate={{ y: [0, -10, 0] }}
+            transition={{ repeat: Infinity, duration: 2 }}
+            className="text-6xl mb-6"
+          >
+            🎧
+          </motion.div>
+          
+          <h2 className="text-2xl font-bold mb-4 text-foreground">Ready to Focus?</h2>
+          
+          <p className="text-muted-foreground mb-6">
+            For the best experience, we recommend using <span className="text-primary font-semibold">headphones</span>. 
+            Relaxing ambient sounds will play to help you concentrate and think clearly! 🧘‍♀️
+          </p>
+
+          <div className="bg-primary/10 rounded-2xl p-4 mb-6">
+            <div className="flex items-center justify-center gap-2 text-primary font-medium mb-2">
+              <Headphones className="w-5 h-5" />
+              Ambient study sounds included
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Calming background music to boost your focus
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="font-semibold text-foreground">Choose Your Mode:</h3>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => startQuiz('practice')}
+                className="p-4 rounded-2xl border-2 border-primary bg-primary/10 hover:bg-primary/20 transition-all"
+              >
+                <BookOpen className="w-8 h-8 mx-auto mb-2 text-primary" />
+                <h4 className="font-bold text-primary">Practice Mode</h4>
+                <p className="text-xs text-muted-foreground mt-1">
+                  See answers immediately after each question
+                </p>
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => startQuiz('exam')}
+                className="p-4 rounded-2xl border-2 border-orange-500 bg-orange-500/10 hover:bg-orange-500/20 transition-all"
+              >
+                <GraduationCap className="w-8 h-8 mx-auto mb-2 text-orange-500" />
+                <h4 className="font-bold text-orange-500">Exam Mode</h4>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Like real JAMB - see results only at end
+                </p>
+              </motion.button>
+            </div>
+          </div>
+
+          <Button 
+            variant="ghost" 
+            className="mt-6 text-muted-foreground"
+            onClick={onExit}
+          >
+            <ChevronLeft className="w-4 h-4 mr-1" /> Go Back
+          </Button>
+        </motion.div>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
@@ -222,9 +341,22 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
     );
   }
 
+  if (questions.length === 0) {
+    return (
+      <div className="fixed inset-0 bg-background z-50 flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="text-6xl mb-4">😕</div>
+          <h3 className="text-xl font-bold mb-2">No questions available</h3>
+          <p className="text-muted-foreground mb-4">Please select different subjects or try again later.</p>
+          <Button onClick={onExit}>Go Back</Button>
+        </div>
+      </div>
+    );
+  }
+
   const currentQuestion = questions[currentIndex];
   const progress = (Object.keys(answers).length / totalQuestions) * 100;
-  const isLowTime = timeLeft < 300; // Less than 5 minutes
+  const isLowTime = timeLeft < 300;
 
   return (
     <div className="fixed inset-0 bg-background z-50 flex flex-col">
@@ -235,8 +367,15 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
             <Button variant="ghost" size="sm" onClick={onExit}>
               <ChevronLeft className="w-4 h-4 mr-1" /> Exit
             </Button>
-            <div className="text-sm text-muted-foreground">
-              Question {currentIndex + 1}/{totalQuestions}
+            <div className="hidden sm:flex items-center gap-2">
+              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                quizMode === 'practice' ? 'bg-primary/20 text-primary' : 'bg-orange-500/20 text-orange-500'
+              }`}>
+                {quizMode === 'practice' ? '📖 Practice' : '📝 Exam'}
+              </span>
+              <span className="text-sm text-muted-foreground">
+                Q{currentIndex + 1}/{totalQuestions}
+              </span>
             </div>
           </div>
           
@@ -247,14 +386,24 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
             {formatTime(timeLeft)}
           </div>
           
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsPaused(!isPaused)}
-          >
-            {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
-            {isPaused ? 'Resume' : 'Pause'}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleSound}
+              className="hidden sm:flex"
+            >
+              {isSoundPlaying ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsPaused(!isPaused)}
+            >
+              {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+              <span className="hidden sm:inline ml-1">{isPaused ? 'Resume' : 'Pause'}</span>
+            </Button>
+          </div>
         </div>
         
         <div className="max-w-4xl mx-auto mt-3">
@@ -265,6 +414,30 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
         </div>
       </div>
 
+      {/* Subject Filter Tabs */}
+      <div className="border-b border-border bg-card/50 py-2 px-4 overflow-x-auto">
+        <Tabs value={selectedSubjectFilter} onValueChange={setSelectedSubjectFilter} className="max-w-4xl mx-auto">
+          <TabsList className="bg-muted/50 h-auto flex-wrap">
+            <TabsTrigger value="all" className="text-xs px-3 py-1.5">
+              All ({questions.length})
+            </TabsTrigger>
+            {subjects.map(subject => {
+              const count = questions.filter(q => q.subject === subject).length;
+              const answered = questions.filter(q => q.subject === subject && answers[q.id]).length;
+              return (
+                <TabsTrigger 
+                  key={subject} 
+                  value={subject}
+                  className="text-xs px-3 py-1.5 capitalize"
+                >
+                  {subject} ({answered}/{count})
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+        </Tabs>
+      </div>
+
       {/* Motivation popup */}
       <AnimatePresence>
         {showMotivation && (
@@ -272,7 +445,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -50 }}
-            className="absolute top-20 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-6 py-3 rounded-full shadow-lg z-50 flex items-center gap-2"
+            className="absolute top-24 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-6 py-3 rounded-full shadow-lg z-50 flex items-center gap-2"
           >
             <Sparkles className="w-5 h-5" />
             {motivationMsg}
@@ -313,6 +486,11 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
               <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium capitalize">
                 {currentQuestion.subject}
               </span>
+              {quizMode === 'practice' && (
+                <span className="px-3 py-1 bg-green-500/10 text-green-600 rounded-full text-xs font-medium">
+                  Learn as you go!
+                </span>
+              )}
             </div>
             <h3 className="text-lg md:text-xl font-medium text-foreground leading-relaxed">
               {currentQuestion.question}
@@ -323,24 +501,38 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
             {['A', 'B', 'C', 'D'].map((letter) => {
               const optionKey = `option_${letter.toLowerCase()}` as keyof Question;
               const isSelected = answers[currentQuestion.id] === letter;
+              const isCorrect = showAnswerFeedback === letter;
+              const isWrong = showAnswerFeedback && isSelected && !isCorrect;
               
               return (
                 <motion.button
                   key={letter}
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
-                  onClick={() => handleAnswer(letter)}
+                  onClick={() => !showAnswerFeedback && handleAnswer(letter)}
+                  disabled={!!showAnswerFeedback}
                   className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
-                    isSelected
+                    isCorrect && showAnswerFeedback
+                      ? 'border-green-500 bg-green-500/20'
+                      : isWrong
+                      ? 'border-red-500 bg-red-500/20'
+                      : isSelected
                       ? 'border-primary bg-primary/10'
                       : 'border-border hover:border-primary/50 bg-card'
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <span className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                      isSelected ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                      isCorrect && showAnswerFeedback
+                        ? 'bg-green-500 text-white'
+                        : isWrong
+                        ? 'bg-red-500 text-white'
+                        : isSelected 
+                        ? 'bg-primary text-primary-foreground' 
+                        : 'bg-muted text-muted-foreground'
                     }`}>
-                      {letter}
+                      {isCorrect && showAnswerFeedback ? <CheckCircle className="w-5 h-5" /> : 
+                       isWrong ? <XCircle className="w-5 h-5" /> : letter}
                     </span>
                     <span className="text-foreground">{currentQuestion[optionKey] as string}</span>
                   </div>
@@ -348,6 +540,24 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
               );
             })}
           </div>
+
+          {/* Practice mode explanation */}
+          {showAnswerFeedback && quizMode === 'practice' && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-4 p-4 bg-green-500/10 border border-green-500/30 rounded-xl"
+            >
+              <div className="flex items-center gap-2 text-green-600 font-semibold mb-2">
+                <CheckCircle className="w-5 h-5" />
+                Correct Answer: {showAnswerFeedback}
+              </div>
+              {currentQuestion.explanation && (
+                <p className="text-sm text-muted-foreground">{currentQuestion.explanation}</p>
+              )}
+              <p className="text-xs text-muted-foreground mt-2">Moving to next question...</p>
+            </motion.div>
+          )}
         </div>
       </div>
 
@@ -357,7 +567,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
           <Button
             variant="outline"
             onClick={() => setCurrentIndex(prev => Math.max(0, prev - 1))}
-            disabled={currentIndex === 0}
+            disabled={currentIndex === 0 || !!showAnswerFeedback}
           >
             <ChevronLeft className="w-4 h-4 mr-1" /> Previous
           </Button>
@@ -371,7 +581,8 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
               return (
                 <button
                   key={q.id}
-                  onClick={() => setCurrentIndex(actualIndex)}
+                  onClick={() => !showAnswerFeedback && setCurrentIndex(actualIndex)}
+                  disabled={!!showAnswerFeedback}
                   className={`w-8 h-8 rounded-full text-xs font-medium transition-all ${
                     isCurrent
                       ? 'bg-primary text-primary-foreground'
@@ -387,12 +598,13 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
           </div>
 
           {currentIndex === totalQuestions - 1 ? (
-            <Button variant="hero" onClick={handleSubmit}>
+            <Button variant="hero" onClick={handleSubmit} disabled={!!showAnswerFeedback}>
               <Flag className="w-4 h-4 mr-1" /> Submit Quiz
             </Button>
           ) : (
             <Button
               onClick={() => setCurrentIndex(prev => Math.min(totalQuestions - 1, prev + 1))}
+              disabled={!!showAnswerFeedback}
             >
               Next <ChevronRight className="w-4 h-4 ml-1" />
             </Button>
