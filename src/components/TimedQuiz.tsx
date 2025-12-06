@@ -92,41 +92,40 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
   const [showMotivation, setShowMotivation] = useState(false);
   const [motivationMsg, setMotivationMsg] = useState('');
 
-  // Load questions
+  // Load questions - fresh random selection, no repeats
   useEffect(() => {
     const loadQuestions = async () => {
       try {
-        // Try to fetch from database first
+        // Fetch MORE questions than needed to ensure variety
         const { data, error } = await supabase
           .from('jamb_questions')
           .select('*')
           .in('subject', subjects as any)
-          .limit(totalQuestions);
+          .limit(500); // Get large pool
 
         if (error) throw error;
 
         if (data && data.length >= totalQuestions) {
-          // Shuffle and take required number
-          const shuffled = data.sort(() => Math.random() - 0.5).slice(0, totalQuestions);
+          // Shuffle using Fisher-Yates for true randomness
+          const shuffled = [...data];
+          for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+          }
+          // Take only needed amount - guaranteed no repeats
+          setQuestions(shuffled.slice(0, totalQuestions) as Question[]);
+        } else if (data && data.length > 0) {
+          // Use what we have
+          const shuffled = [...data].sort(() => Math.random() - 0.5);
           setQuestions(shuffled as Question[]);
         } else {
-          // Use sample questions for now
-          const repeated = Array(Math.ceil(totalQuestions / SAMPLE_QUESTIONS.length))
-            .fill(SAMPLE_QUESTIONS)
-            .flat()
-            .slice(0, totalQuestions)
-            .map((q, i) => ({ ...q, id: `${q.id}-${i}` }));
-          setQuestions(repeated);
+          // Fallback to samples
+          const shuffled = [...SAMPLE_QUESTIONS].sort(() => Math.random() - 0.5);
+          setQuestions(shuffled.slice(0, Math.min(totalQuestions, SAMPLE_QUESTIONS.length)));
         }
       } catch (error) {
         console.error('Error loading questions:', error);
-        // Fallback to sample questions
-        const repeated = Array(Math.ceil(totalQuestions / SAMPLE_QUESTIONS.length))
-          .fill(SAMPLE_QUESTIONS)
-          .flat()
-          .slice(0, totalQuestions)
-          .map((q, i) => ({ ...q, id: `${q.id}-${i}` }));
-        setQuestions(repeated);
+        setQuestions(SAMPLE_QUESTIONS.slice(0, totalQuestions));
       } finally {
         setIsLoading(false);
       }

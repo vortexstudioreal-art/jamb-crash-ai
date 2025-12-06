@@ -1,5 +1,8 @@
 project_id = "otpczgpmpnabbvzthvjv"
 
+[functions.seed-jamb-questions]
+verify_jwt = false
+
 [functions.paystack-initialize]
 verify_jwt = false
 
