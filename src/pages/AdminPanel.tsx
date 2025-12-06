@@ -45,6 +45,7 @@ interface Stats {
   activeUsers: number;
   totalAdmins: number;
   totalQuizzes: number;
+  totalQuestions: number;
 }
 
 const AdminPanel = () => {
@@ -54,7 +55,7 @@ const AdminPanel = () => {
   const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [features, setFeatures] = useState<FeatureStatus[]>([]);
   const [stats, setStats] = useState<Stats>({ 
-    totalPayments: 0, totalRevenue: 0, activeUsers: 0, totalAdmins: 0, totalQuizzes: 0 
+    totalPayments: 0, totalRevenue: 0, activeUsers: 0, totalAdmins: 0, totalQuizzes: 0, totalQuestions: 0 
   });
   const [newCollaboratorEmail, setNewCollaboratorEmail] = useState('');
   const [loadingData, setLoadingData] = useState(true);
@@ -74,7 +75,7 @@ const AdminPanel = () => {
 
   const fetchData = async () => {
     setLoadingData(true);
-    await Promise.all([fetchPayments(), fetchAdmins(), fetchFeatures(), fetchQuizStats()]);
+    await Promise.all([fetchPayments(), fetchAdmins(), fetchFeatures(), fetchQuizStats(), fetchQuestionCount()]);
     setLoadingData(false);
   };
 
@@ -139,6 +140,16 @@ const AdminPanel = () => {
     
     if (!error) {
       setStats(prev => ({ ...prev, totalQuizzes: count || 0 }));
+    }
+  };
+
+  const fetchQuestionCount = async () => {
+    const { count, error } = await supabase
+      .from('jamb_questions')
+      .select('*', { count: 'exact', head: true });
+    
+    if (!error) {
+      setStats(prev => ({ ...prev, totalQuestions: count || 0 }));
     }
   };
 
@@ -411,6 +422,20 @@ const AdminPanel = () => {
                     <div>
                       <p className="text-2xl font-bold text-foreground">{stats.totalAdmins}</p>
                       <p className="text-xs text-muted-foreground">Admins</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card border-border border-green-500/50">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                      <Database className="w-5 h-5 text-green-500" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-green-600">{stats.totalQuestions}+</p>
+                      <p className="text-xs text-muted-foreground">Questions ✓</p>
                     </div>
                   </div>
                 </CardContent>

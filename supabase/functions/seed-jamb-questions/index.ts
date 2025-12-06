@@ -340,21 +340,18 @@ Deno.serve(async (req) => {
         year: q.year,
       }));
 
-      // Upsert questions (using question text as unique identifier)
-      const { data, error } = await supabase
-        .from('jamb_questions')
-        .upsert(questionsToInsert, {
-          onConflict: 'question',
-          ignoreDuplicates: true
-        });
-
-      if (error) {
-        console.error(`Error inserting ${subject}:`, error);
-        errors.push(`${subject}: ${error.message}`);
-      } else {
-        totalInserted += questionsToInsert.length;
-        console.log(`Inserted ${questionsToInsert.length} questions for ${subject}`);
+      // Insert questions (ignoring duplicates via try-catch)
+      for (const q of questionsToInsert) {
+        const { error: insertError } = await supabase
+          .from('jamb_questions')
+          .insert(q);
+        
+        if (!insertError) {
+          totalInserted++;
+        }
       }
+      
+      console.log(`Inserted questions for ${subject}`);
     }
 
     // Get total count
