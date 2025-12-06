@@ -84,13 +84,15 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
   // Quiz config based on type
   const getQuizConfig = () => {
     switch (quizType) {
-      case 'full': return { questions: 60, time: 70 * 60 }; // 70 minutes
-      case 'mini': return { questions: 20, time: 30 * 60 }; // 30 minutes
-      case 'subject': return { questions: 40, time: 50 * 60 }; // 50 minutes
-      case 'demo': return { questions: 20, time: 30 * 60 }; // 30 minutes
-      default: return { questions: 60, time: 70 * 60 };
+      case 'full': return { questions: 60, time: 70 * 60, untimed: false }; // 70 minutes
+      case 'mini': return { questions: 20, time: 30 * 60, untimed: false }; // 30 minutes
+      case 'subject': return { questions: 40, time: 0, untimed: true }; // Untimed practice
+      case 'demo': return { questions: 20, time: 30 * 60, untimed: false }; // 30 minutes
+      default: return { questions: 60, time: 70 * 60, untimed: false };
     }
   };
+  
+  const isUntimed = getQuizConfig().untimed;
 
   const config = getQuizConfig();
   const [totalQuestions, setTotalQuestions] = useState(config.questions);
@@ -235,9 +237,10 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
     loadQuestions();
   }, [subjects, totalQuestions, quizMode, quizType, selectedSingleSubject, selectedYear]);
 
-  // Timer
+  // Timer (skip for untimed mode)
   useEffect(() => {
-    if (!quizMode || isPaused || isLoading || timeLeft <= 0) return;
+    if (!quizMode || isPaused || isLoading || isUntimed) return;
+    if (timeLeft <= 0) return;
 
     const interval = setInterval(() => {
       setTimeLeft(prev => {
@@ -250,7 +253,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [quizMode, isPaused, isLoading, timeLeft]);
+  }, [quizMode, isPaused, isLoading, timeLeft, isUntimed]);
 
   // Motivation at milestones
   useEffect(() => {
@@ -398,7 +401,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
               </div>
               
               <p className="text-xs text-muted-foreground text-center">
-                40 questions • 50 minutes • No repeats
+                40 questions • Untimed • Instant feedback
               </p>
             </div>
           )}
@@ -418,37 +421,56 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
             </div>
           )}
 
-          <div className="space-y-4">
-            <h3 className="font-semibold text-foreground text-center">Choose Your Mode:</h3>
-            
-            <div className="grid grid-cols-2 gap-4">
+          {/* For subject mode - auto start practice mode */}
+          {quizType === 'subject' ? (
+            <div className="space-y-4">
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => startQuiz('practice')}
-                className="p-5 rounded-2xl border-2 border-primary bg-primary/10 hover:bg-primary/20 transition-all"
+                disabled={!selectedSingleSubject}
+                className="w-full p-6 rounded-2xl border-2 border-purple-500 bg-purple-500/10 hover:bg-purple-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <BookOpen className="w-10 h-10 mx-auto mb-3 text-primary" />
-                <h4 className="font-bold text-primary text-lg">Practice</h4>
-                <p className="text-xs text-muted-foreground mt-1">
-                  See answers after each question
-                </p>
-              </motion.button>
-
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => startQuiz('exam')}
-                className="p-5 rounded-2xl border-2 border-orange-500 bg-orange-500/10 hover:bg-orange-500/20 transition-all"
-              >
-                <GraduationCap className="w-10 h-10 mx-auto mb-3 text-orange-500" />
-                <h4 className="font-bold text-orange-500 text-lg">Exam</h4>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Like real JAMB CBT
+                <BookOpen className="w-12 h-12 mx-auto mb-3 text-purple-500" />
+                <h4 className="font-bold text-purple-600 text-xl">Start Practice</h4>
+                <p className="text-sm text-muted-foreground mt-2">
+                  40 questions • Untimed • See answers instantly
                 </p>
               </motion.button>
             </div>
-          </div>
+          ) : (
+            <div className="space-y-4">
+              <h3 className="font-semibold text-foreground text-center">Choose Your Mode:</h3>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => startQuiz('practice')}
+                  className="p-5 rounded-2xl border-2 border-primary bg-primary/10 hover:bg-primary/20 transition-all"
+                >
+                  <BookOpen className="w-10 h-10 mx-auto mb-3 text-primary" />
+                  <h4 className="font-bold text-primary text-lg">Practice</h4>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    See answers after each question
+                  </p>
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => startQuiz('exam')}
+                  className="p-5 rounded-2xl border-2 border-orange-500 bg-orange-500/10 hover:bg-orange-500/20 transition-all"
+                >
+                  <GraduationCap className="w-10 h-10 mx-auto mb-3 text-orange-500" />
+                  <h4 className="font-bold text-orange-500 text-lg">Exam</h4>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Like real JAMB CBT
+                  </p>
+                </motion.button>
+              </div>
+            </div>
+          )}
 
           <Button 
             variant="ghost" 
@@ -505,13 +527,20 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
               <ChevronLeft className="w-5 h-5 mr-1" /> Exit
             </Button>
             
-            {/* Big Timer - Center */}
-            <div className={`flex items-center gap-3 px-6 py-3 rounded-2xl font-mono text-2xl md:text-3xl font-bold ${
-              isLowTime ? 'bg-destructive text-destructive-foreground animate-pulse' : 'bg-primary/10 text-primary'
-            }`}>
-              <Clock className="w-6 h-6 md:w-8 md:h-8" />
-              {formatTime(timeLeft)}
-            </div>
+            {/* Big Timer - Center (or Untimed badge for subject mode) */}
+            {isUntimed ? (
+              <div className="flex items-center gap-3 px-6 py-3 rounded-2xl font-bold text-lg bg-purple-500/10 text-purple-600">
+                <Sparkles className="w-6 h-6" />
+                Practice Mode ✨
+              </div>
+            ) : (
+              <div className={`flex items-center gap-3 px-6 py-3 rounded-2xl font-mono text-2xl md:text-3xl font-bold ${
+                isLowTime ? 'bg-destructive text-destructive-foreground animate-pulse' : 'bg-primary/10 text-primary'
+              }`}>
+                <Clock className="w-6 h-6 md:w-8 md:h-8" />
+                {formatTime(timeLeft)}
+              </div>
+            )}
             
             <div className="flex items-center gap-2">
               {/* Sound Selector Popover */}

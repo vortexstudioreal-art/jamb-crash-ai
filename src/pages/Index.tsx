@@ -27,6 +27,7 @@ import { Button } from '@/components/ui/button';
 import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut } from 'lucide-react';
 
 type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'demo' | 'study-plan';
+type QuizType = 'full' | 'mini' | 'subject';
 
 interface FormData {
   targetScore: string;
@@ -48,7 +49,7 @@ const Index = () => {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [personalizationData, setPersonalizationData] = useState<FormData | null>(null);
   const [userSubjects, setUserSubjects] = useState<string[]>([]);
-  const [quizType, setQuizType] = useState<'full' | 'mini'>('full');
+  const [quizType, setQuizType] = useState<QuizType>('full');
   const [quizResults, setQuizResults] = useState<any>(null);
   const [highlightStandard, setHighlightStandard] = useState(false);
   
@@ -182,7 +183,7 @@ const Index = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleStartQuiz = (type: 'full' | 'mini') => {
+  const handleStartQuiz = (type: QuizType) => {
     setQuizType(type);
     setCurrentStep('quiz');
   };
@@ -364,7 +365,7 @@ const Index = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+                    className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6"
                   >
                     <Button
                       variant="outline"
@@ -373,7 +374,7 @@ const Index = () => {
                     >
                       <Play className="w-8 h-8 text-primary" />
                       <span className="font-bold">Full Quiz</span>
-                      <span className="text-xs text-muted-foreground">60 questions • 90 min</span>
+                      <span className="text-xs text-muted-foreground">60 questions • 70 min</span>
                     </Button>
                     
                     <Button
@@ -395,15 +396,44 @@ const Index = () => {
                       <span className="font-bold">Upload PDF</span>
                       <span className="text-xs text-muted-foreground">AI magic ✨</span>
                     </Button>
-                    
+                  </motion.div>
+
+                  {/* Practice by Subject - Paid Only */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.15 }}
+                    className="mb-6"
+                  >
                     <Button
                       variant="outline"
-                      className="h-auto py-6 flex flex-col gap-2 border-2 border-green-500/50 hover:bg-green-500/10"
+                      className="w-full h-auto py-6 flex flex-col gap-2 border-2 border-purple-500/50 hover:bg-purple-500/10 bg-gradient-to-r from-purple-500/5 to-primary/5"
+                      onClick={() => handleStartQuiz('subject')}
+                    >
+                      <div className="flex items-center gap-2">
+                        <BookOpen className="w-8 h-8 text-purple-500" />
+                        <span className="text-2xl">📚</span>
+                      </div>
+                      <span className="font-bold text-purple-600 text-lg">Practice by Subject & Year</span>
+                      <span className="text-xs text-muted-foreground">40 questions • Untimed • Instant feedback</span>
+                    </Button>
+                  </motion.div>
+
+                  {/* Generate Plan Button */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="mb-8"
+                  >
+                    <Button
+                      variant="outline"
+                      className="w-full h-auto py-6 flex flex-col gap-2 border-2 border-green-500/50 hover:bg-green-500/10"
                       onClick={handleGenerateStudyPlan}
                     >
                       <Target className="w-8 h-8 text-green-500" />
-                      <span className="font-bold text-green-600">Generate Plan</span>
-                      <span className="text-xs text-muted-foreground">48-72hr timetable</span>
+                      <span className="font-bold text-green-600">Generate Study Plan</span>
+                      <span className="text-xs text-muted-foreground">48-72hr personalized timetable</span>
                     </Button>
                   </motion.div>
 

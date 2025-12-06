@@ -24,7 +24,7 @@ interface QuizResultsProps {
     timeTaken: number;
     questions: Question[];
   };
-  quizType: 'full' | 'mini' | 'demo';
+  quizType: 'full' | 'mini' | 'demo' | 'subject';
   onRetry: () => void;
   onHome: () => void;
   onUpgrade?: () => void;
