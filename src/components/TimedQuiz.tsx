@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, CheckCircle, XCircle, Pause, Play, Flag, ChevronLeft, ChevronRight, Sparkles, Headphones, BookOpen, GraduationCap, Volume2, VolumeX } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, Pause, Play, Flag, ChevronLeft, ChevronRight, Sparkles, Headphones, BookOpen, GraduationCap, Volume2, VolumeX, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Question {
   id: string;
@@ -17,12 +18,13 @@ interface Question {
   correct_answer: string;
   explanation?: string;
   subject: string;
+  year?: number;
 }
 
 interface TimedQuizProps {
   userEmail: string;
   subjects: string[];
-  quizType: 'full' | 'mini' | 'demo';
+  quizType: 'full' | 'mini' | 'demo' | 'subject';
   onComplete: (results: QuizResults) => void;
   onExit: () => void;
 }
@@ -44,16 +46,37 @@ const MOTIVATIONAL_MESSAGES = [
   "Stay focused, stay winning! 🔥",
 ];
 
-// Ambient sound URL (royalty-free relaxing study music)
 const AMBIENT_SOUND_URL = "https://assets.mixkit.co/sfx/preview/mixkit-relaxing-in-nature-522.mp3";
 
+const ALL_SUBJECTS = [
+  'english', 'mathematics', 'physics', 'chemistry', 'biology',
+  'literature', 'government', 'economics', 'crs', 'geography',
+  'accounting', 'commerce', 'agricultural_science'
+];
+
+const YEARS = Array.from({ length: 26 }, (_, i) => 2000 + i);
+
 export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }: TimedQuizProps) => {
-  const totalQuestions = quizType === 'full' ? 60 : 20;
-  const totalTimeSeconds = quizType === 'full' ? 90 * 60 : 30 * 60;
+  // Quiz config based on type
+  const getQuizConfig = () => {
+    switch (quizType) {
+      case 'full': return { questions: 60, time: 70 * 60 }; // 70 minutes
+      case 'mini': return { questions: 20, time: 30 * 60 }; // 30 minutes
+      case 'subject': return { questions: 40, time: 50 * 60 }; // 50 minutes
+      case 'demo': return { questions: 20, time: 30 * 60 }; // 30 minutes
+      default: return { questions: 60, time: 70 * 60 };
+    }
+  };
+
+  const config = getQuizConfig();
+  const [totalQuestions, setTotalQuestions] = useState(config.questions);
+  const [totalTimeSeconds, setTotalTimeSeconds] = useState(config.time);
   
   // Pre-quiz state
   const [quizMode, setQuizMode] = useState<QuizMode | null>(null);
   const [showHeadphoneAdvice, setShowHeadphoneAdvice] = useState(true);
+  const [selectedSingleSubject, setSelectedSingleSubject] = useState<string>('');
+  const [selectedYear, setSelectedYear] = useState<string>('all');
   
   // Quiz state
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -99,9 +122,19 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
 
   // Start quiz with selected mode
   const startQuiz = (mode: QuizMode) => {
+    if (quizType === 'subject' && !selectedSingleSubject) {
+      toast({
+        title: "Select a subject",
+        description: "Please choose a subject to practice",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setQuizMode(mode);
     setShowHeadphoneAdvice(false);
-    // Start ambient sound
+    setTimeLeft(totalTimeSeconds);
+    
     if (audioRef.current) {
       audioRef.current.play().catch(console.error);
       setIsSoundPlaying(true);
@@ -114,15 +147,24 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
     
     const loadQuestions = async () => {
       try {
-        const { data, error } = await supabase
-          .from('jamb_questions')
-          .select('*')
-          .in('subject', subjects as any)
-          .limit(500);
+        let query = supabase.from('jamb_questions').select('*');
+        
+        if (quizType === 'subject' && selectedSingleSubject) {
+          query = query.eq('subject', selectedSingleSubject as any);
+        } else {
+          query = query.in('subject', subjects as any);
+        }
+        
+        if (selectedYear !== 'all') {
+          query = query.eq('year', parseInt(selectedYear));
+        }
+        
+        const { data, error } = await query.limit(500);
 
         if (error) throw error;
 
         if (data && data.length >= totalQuestions) {
+          // Fisher-Yates shuffle for true randomness
           const shuffled = [...data];
           for (let i = shuffled.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -132,6 +174,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
         } else if (data && data.length > 0) {
           const shuffled = [...data].sort(() => Math.random() - 0.5);
           setQuestions(shuffled as Question[]);
+          setTotalQuestions(shuffled.length);
         } else {
           toast({
             title: "Not enough questions",
@@ -147,7 +190,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
     };
 
     loadQuestions();
-  }, [subjects, totalQuestions, quizMode]);
+  }, [subjects, totalQuestions, quizMode, quizType, selectedSingleSubject, selectedYear]);
 
   // Timer
   useEffect(() => {
@@ -190,22 +233,19 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
       [currentQuestion.id]: answer
     }));
 
-    // Practice mode: show immediate feedback
     if (quizMode === 'practice') {
       setShowAnswerFeedback(currentQuestion.correct_answer);
       
-      // Auto-advance after 2 seconds
       setTimeout(() => {
         setShowAnswerFeedback(null);
         if (currentIndex < questions.length - 1) {
           setCurrentIndex(prev => prev + 1);
         }
-      }, 2000);
+      }, 2500);
     }
   };
 
   const handleSubmit = useCallback(async () => {
-    // Stop audio
     if (audioRef.current) {
       audioRef.current.pause();
     }
@@ -223,8 +263,8 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
       await supabase.from('quiz_attempts').insert({
         email: userEmail,
         quiz_type: quizType,
-        subjects: subjects as any,
-        total_questions: totalQuestions,
+        subjects: (quizType === 'subject' ? [selectedSingleSubject] : subjects) as any,
+        total_questions: questions.length,
         correct_answers: correctCount,
         time_taken_seconds: timeTaken,
         questions_data: resultsData
@@ -234,68 +274,121 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
     }
 
     onComplete({
-      totalQuestions,
+      totalQuestions: questions.length,
       correctAnswers: correctCount,
       timeTaken,
       questions: resultsData
     });
-  }, [questions, answers, timeLeft, totalTimeSeconds, userEmail, quizType, subjects, totalQuestions, onComplete]);
+  }, [questions, answers, timeLeft, totalTimeSeconds, userEmail, quizType, subjects, selectedSingleSubject, onComplete]);
 
   // Get filtered questions by subject
   const filteredQuestions = selectedSubjectFilter === 'all' 
     ? questions 
     : questions.filter(q => q.subject === selectedSubjectFilter);
 
-  const currentQuestionIndex = filteredQuestions.findIndex(q => q.id === questions[currentIndex]?.id);
-
-  // Headphone advice screen
+  // Headphone advice screen with subject/year picker for subject mode
   if (showHeadphoneAdvice && !quizMode) {
     return (
-      <div className="fixed inset-0 bg-background z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 bg-background z-50 flex items-center justify-center p-4 overflow-y-auto">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="max-w-md w-full bg-card rounded-3xl p-8 border border-border shadow-2xl text-center"
+          className="max-w-lg w-full bg-card rounded-3xl p-6 md:p-8 border border-border shadow-2xl"
         >
           <motion.div
             animate={{ y: [0, -10, 0] }}
             transition={{ repeat: Infinity, duration: 2 }}
-            className="text-6xl mb-6"
+            className="text-5xl md:text-6xl mb-4 text-center"
           >
             🎧
           </motion.div>
           
-          <h2 className="text-2xl font-bold mb-4 text-foreground">Ready to Focus?</h2>
+          <h2 className="text-2xl md:text-3xl font-bold mb-3 text-foreground text-center">Ready to Focus?</h2>
           
-          <p className="text-muted-foreground mb-6">
-            For the best experience, we recommend using <span className="text-primary font-semibold">headphones</span>. 
-            Relaxing ambient sounds will play to help you concentrate and think clearly! 🧘‍♀️
+          <p className="text-muted-foreground mb-6 text-center text-sm md:text-base">
+            Use <span className="text-primary font-semibold">headphones</span> for relaxing ambient sounds to help you concentrate! 🧘‍♀️
           </p>
 
-          <div className="bg-primary/10 rounded-2xl p-4 mb-6">
-            <div className="flex items-center justify-center gap-2 text-primary font-medium mb-2">
-              <Headphones className="w-5 h-5" />
-              Ambient study sounds included
+          {/* Subject picker for "Practice by Subject" mode */}
+          {quizType === 'subject' && (
+            <div className="bg-primary/5 rounded-2xl p-4 mb-6 space-y-4">
+              <h3 className="font-semibold text-foreground flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-primary" />
+                Choose Your Subject & Year
+              </h3>
+              
+              <div className="space-y-3">
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block">Subject</label>
+                  <Select value={selectedSingleSubject} onValueChange={setSelectedSingleSubject}>
+                    <SelectTrigger className="w-full h-12 text-base">
+                      <SelectValue placeholder="Select a subject..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ALL_SUBJECTS.map(subject => (
+                        <SelectItem key={subject} value={subject} className="capitalize text-base py-3">
+                          {subject.replace('_', ' ')}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block flex items-center gap-1">
+                    <Calendar className="w-4 h-4" /> Year (Optional)
+                  </label>
+                  <Select value={selectedYear} onValueChange={setSelectedYear}>
+                    <SelectTrigger className="w-full h-12 text-base">
+                      <SelectValue placeholder="All years" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all" className="text-base py-3">All Years (2000-2025)</SelectItem>
+                      {YEARS.map(year => (
+                        <SelectItem key={year} value={year.toString()} className="text-base py-3">
+                          {year}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <p className="text-xs text-muted-foreground text-center">
+                40 questions • 50 minutes • No repeats
+              </p>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Calming background music to boost your focus
-            </p>
-          </div>
+          )}
+
+          {/* Quiz info for other modes */}
+          {quizType !== 'subject' && (
+            <div className="bg-primary/10 rounded-2xl p-4 mb-6 text-center">
+              <div className="flex items-center justify-center gap-2 text-primary font-medium mb-1">
+                <Headphones className="w-5 h-5" />
+                Ambient study sounds included
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {quizType === 'full' ? '60 questions • 70 minutes' : 
+                 quizType === 'mini' ? '20 questions • 30 minutes' : 
+                 '20 questions • 30 minutes'}
+              </p>
+            </div>
+          )}
 
           <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">Choose Your Mode:</h3>
+            <h3 className="font-semibold text-foreground text-center">Choose Your Mode:</h3>
             
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-4">
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => startQuiz('practice')}
-                className="p-4 rounded-2xl border-2 border-primary bg-primary/10 hover:bg-primary/20 transition-all"
+                className="p-5 rounded-2xl border-2 border-primary bg-primary/10 hover:bg-primary/20 transition-all"
               >
-                <BookOpen className="w-8 h-8 mx-auto mb-2 text-primary" />
-                <h4 className="font-bold text-primary">Practice Mode</h4>
+                <BookOpen className="w-10 h-10 mx-auto mb-3 text-primary" />
+                <h4 className="font-bold text-primary text-lg">Practice</h4>
                 <p className="text-xs text-muted-foreground mt-1">
-                  See answers immediately after each question
+                  See answers after each question
                 </p>
               </motion.button>
 
@@ -303,12 +396,12 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => startQuiz('exam')}
-                className="p-4 rounded-2xl border-2 border-orange-500 bg-orange-500/10 hover:bg-orange-500/20 transition-all"
+                className="p-5 rounded-2xl border-2 border-orange-500 bg-orange-500/10 hover:bg-orange-500/20 transition-all"
               >
-                <GraduationCap className="w-8 h-8 mx-auto mb-2 text-orange-500" />
-                <h4 className="font-bold text-orange-500">Exam Mode</h4>
+                <GraduationCap className="w-10 h-10 mx-auto mb-3 text-orange-500" />
+                <h4 className="font-bold text-orange-500 text-lg">Exam</h4>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Like real JAMB - see results only at end
+                  Like real JAMB CBT
                 </p>
               </motion.button>
             </div>
@@ -316,7 +409,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
 
           <Button 
             variant="ghost" 
-            className="mt-6 text-muted-foreground"
+            className="mt-6 text-muted-foreground w-full"
             onClick={onExit}
           >
             <ChevronLeft className="w-4 h-4 mr-1" /> Go Back
@@ -328,15 +421,15 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
 
   if (isLoading) {
     return (
-      <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
+      <div className="fixed inset-0 bg-background z-50 flex items-center justify-center flex-col gap-4">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ repeat: Infinity, duration: 1 }}
-          className="text-6xl"
+          className="text-7xl"
         >
           📚
         </motion.div>
-        <p className="text-xl font-medium ml-4">Loading your questions...</p>
+        <p className="text-xl font-medium">Loading your questions...</p>
       </div>
     );
   }
@@ -345,98 +438,103 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
     return (
       <div className="fixed inset-0 bg-background z-50 flex items-center justify-center p-4">
         <div className="text-center">
-          <div className="text-6xl mb-4">😕</div>
-          <h3 className="text-xl font-bold mb-2">No questions available</h3>
-          <p className="text-muted-foreground mb-4">Please select different subjects or try again later.</p>
-          <Button onClick={onExit}>Go Back</Button>
+          <div className="text-7xl mb-4">😕</div>
+          <h3 className="text-2xl font-bold mb-2">No questions available</h3>
+          <p className="text-muted-foreground mb-6">Please select a different subject or year and try again.</p>
+          <Button onClick={onExit} size="lg">Go Back</Button>
         </div>
       </div>
     );
   }
 
   const currentQuestion = questions[currentIndex];
-  const progress = (Object.keys(answers).length / totalQuestions) * 100;
+  const progress = (Object.keys(answers).length / questions.length) * 100;
   const isLowTime = timeLeft < 300;
 
   return (
     <div className="fixed inset-0 bg-background z-50 flex flex-col">
-      {/* Header */}
-      <div className={`p-4 border-b border-border ${isLowTime ? 'bg-destructive/10' : 'bg-card'}`}>
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={onExit}>
-              <ChevronLeft className="w-4 h-4 mr-1" /> Exit
+      {/* Clean Header with Big Timer */}
+      <div className={`p-4 md:p-6 border-b border-border ${isLowTime ? 'bg-destructive/10' : 'bg-card'}`}>
+        <div className="max-w-4xl mx-auto">
+          {/* Top row: Exit, Timer, Sound */}
+          <div className="flex items-center justify-between mb-4">
+            <Button variant="ghost" size="sm" onClick={onExit} className="text-muted-foreground">
+              <ChevronLeft className="w-5 h-5 mr-1" /> Exit
             </Button>
-            <div className="hidden sm:flex items-center gap-2">
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                quizMode === 'practice' ? 'bg-primary/20 text-primary' : 'bg-orange-500/20 text-orange-500'
-              }`}>
-                {quizMode === 'practice' ? '📖 Practice' : '📝 Exam'}
-              </span>
-              <span className="text-sm text-muted-foreground">
-                Q{currentIndex + 1}/{totalQuestions}
-              </span>
+            
+            {/* Big Timer - Center */}
+            <div className={`flex items-center gap-3 px-6 py-3 rounded-2xl font-mono text-2xl md:text-3xl font-bold ${
+              isLowTime ? 'bg-destructive text-destructive-foreground animate-pulse' : 'bg-primary/10 text-primary'
+            }`}>
+              <Clock className="w-6 h-6 md:w-8 md:h-8" />
+              {formatTime(timeLeft)}
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleSound}
+                className="h-10 w-10"
+              >
+                {isSoundPlaying ? <Volume2 className="w-5 h-5 text-primary" /> : <VolumeX className="w-5 h-5" />}
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setIsPaused(!isPaused)}
+                className="h-10 w-10"
+              >
+                {isPaused ? <Play className="w-5 h-5" /> : <Pause className="w-5 h-5" />}
+              </Button>
             </div>
           </div>
           
-          <div className={`flex items-center gap-2 px-4 py-2 rounded-full font-mono text-lg font-bold ${
-            isLowTime ? 'bg-destructive text-destructive-foreground animate-pulse' : 'bg-primary/10 text-primary'
-          }`}>
-            <Clock className="w-5 h-5" />
-            {formatTime(timeLeft)}
+          {/* Question counter & mode badge */}
+          <div className="flex items-center justify-center gap-4 mb-3">
+            <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+              quizMode === 'practice' ? 'bg-primary/20 text-primary' : 'bg-orange-500/20 text-orange-500'
+            }`}>
+              {quizMode === 'practice' ? '📖 Practice Mode' : '📝 Exam Mode'}
+            </span>
+            <span className="text-lg font-bold text-foreground">
+              Question {currentIndex + 1} of {questions.length}
+            </span>
           </div>
           
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleSound}
-              className="hidden sm:flex"
-            >
-              {isSoundPlaying ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsPaused(!isPaused)}
-            >
-              {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
-              <span className="hidden sm:inline ml-1">{isPaused ? 'Resume' : 'Pause'}</span>
-            </Button>
-          </div>
-        </div>
-        
-        <div className="max-w-4xl mx-auto mt-3">
-          <Progress value={progress} className="h-2" />
-          <p className="text-xs text-muted-foreground mt-1 text-center">
-            {Object.keys(answers).length}/{totalQuestions} answered
+          {/* Progress bar */}
+          <Progress value={progress} className="h-3 rounded-full" />
+          <p className="text-sm text-muted-foreground mt-2 text-center">
+            {Object.keys(answers).length} of {questions.length} answered
           </p>
         </div>
       </div>
 
-      {/* Subject Filter Tabs */}
-      <div className="border-b border-border bg-card/50 py-2 px-4 overflow-x-auto">
-        <Tabs value={selectedSubjectFilter} onValueChange={setSelectedSubjectFilter} className="max-w-4xl mx-auto">
-          <TabsList className="bg-muted/50 h-auto flex-wrap">
-            <TabsTrigger value="all" className="text-xs px-3 py-1.5">
-              All ({questions.length})
-            </TabsTrigger>
-            {subjects.map(subject => {
-              const count = questions.filter(q => q.subject === subject).length;
-              const answered = questions.filter(q => q.subject === subject && answers[q.id]).length;
-              return (
-                <TabsTrigger 
-                  key={subject} 
-                  value={subject}
-                  className="text-xs px-3 py-1.5 capitalize"
-                >
-                  {subject} ({answered}/{count})
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
-        </Tabs>
-      </div>
+      {/* Subject Filter Tabs - Only show for multi-subject quizzes */}
+      {quizType !== 'subject' && subjects.length > 1 && (
+        <div className="border-b border-border bg-card/50 py-3 px-4 overflow-x-auto">
+          <Tabs value={selectedSubjectFilter} onValueChange={setSelectedSubjectFilter} className="max-w-4xl mx-auto">
+            <TabsList className="bg-muted/50 h-auto flex-wrap gap-1">
+              <TabsTrigger value="all" className="text-sm px-4 py-2">
+                All ({questions.length})
+              </TabsTrigger>
+              {subjects.map(subject => {
+                const count = questions.filter(q => q.subject === subject).length;
+                const answered = questions.filter(q => q.subject === subject && answers[q.id]).length;
+                return (
+                  <TabsTrigger 
+                    key={subject} 
+                    value={subject}
+                    className="text-sm px-4 py-2 capitalize"
+                  >
+                    {subject.replace('_', ' ')} ({answered}/{count})
+                  </TabsTrigger>
+                );
+              })}
+            </TabsList>
+          </Tabs>
+        </div>
+      )}
 
       {/* Motivation popup */}
       <AnimatePresence>
@@ -445,7 +543,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -50 }}
-            className="absolute top-24 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-6 py-3 rounded-full shadow-lg z-50 flex items-center gap-2"
+            className="absolute top-32 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-6 py-3 rounded-full shadow-lg z-50 flex items-center gap-2"
           >
             <Sparkles className="w-5 h-5" />
             {motivationMsg}
@@ -460,44 +558,50 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
             <motion.div
               animate={{ scale: [1, 1.1, 1] }}
               transition={{ repeat: Infinity, duration: 2 }}
-              className="text-6xl mb-4"
+              className="text-7xl mb-6"
             >
               ⏸️
             </motion.div>
-            <h3 className="text-2xl font-bold mb-2">Quiz Paused</h3>
-            <p className="text-muted-foreground mb-4">Timer is still running! ⏰</p>
-            <Button onClick={() => setIsPaused(false)} variant="hero">
-              <Play className="w-4 h-4 mr-2" /> Continue Quiz
+            <h3 className="text-3xl font-bold mb-3">Quiz Paused</h3>
+            <p className="text-muted-foreground mb-6 text-lg">Timer is still running! ⏰</p>
+            <Button onClick={() => setIsPaused(false)} variant="hero" size="lg">
+              <Play className="w-5 h-5 mr-2" /> Continue Quiz
             </Button>
           </div>
         </div>
       )}
 
-      {/* Question */}
+      {/* Question - Spacious Layout */}
       <div className="flex-1 overflow-y-auto p-4 md:p-8">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-3xl mx-auto">
           <motion.div
             key={currentIndex}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="bg-card rounded-2xl p-6 border border-border mb-6"
+            className="bg-card rounded-3xl p-6 md:p-8 border border-border mb-8 shadow-sm"
           >
-            <div className="flex items-center gap-2 mb-4">
-              <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium capitalize">
-                {currentQuestion.subject}
+            <div className="flex items-center gap-3 mb-6">
+              <span className="px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-semibold capitalize">
+                {currentQuestion.subject.replace('_', ' ')}
               </span>
+              {currentQuestion.year && (
+                <span className="px-3 py-1.5 bg-muted text-muted-foreground rounded-full text-xs font-medium">
+                  {currentQuestion.year}
+                </span>
+              )}
               {quizMode === 'practice' && (
-                <span className="px-3 py-1 bg-green-500/10 text-green-600 rounded-full text-xs font-medium">
-                  Learn as you go!
+                <span className="px-3 py-1.5 bg-green-500/10 text-green-600 rounded-full text-xs font-medium ml-auto">
+                  ✨ Learn as you go
                 </span>
               )}
             </div>
-            <h3 className="text-lg md:text-xl font-medium text-foreground leading-relaxed">
+            <h3 className="text-xl md:text-2xl font-medium text-foreground leading-relaxed">
               {currentQuestion.question}
             </h3>
           </motion.div>
 
-          <div className="space-y-3">
+          {/* Answer Options - Bigger & More Spacious */}
+          <div className="space-y-4">
             {['A', 'B', 'C', 'D'].map((letter) => {
               const optionKey = `option_${letter.toLowerCase()}` as keyof Question;
               const isSelected = answers[currentQuestion.id] === letter;
@@ -511,18 +615,18 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
                   whileTap={{ scale: 0.99 }}
                   onClick={() => !showAnswerFeedback && handleAnswer(letter)}
                   disabled={!!showAnswerFeedback}
-                  className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
+                  className={`w-full p-5 md:p-6 rounded-2xl border-2 text-left transition-all ${
                     isCorrect && showAnswerFeedback
                       ? 'border-green-500 bg-green-500/20'
                       : isWrong
                       ? 'border-red-500 bg-red-500/20'
                       : isSelected
                       ? 'border-primary bg-primary/10'
-                      : 'border-border hover:border-primary/50 bg-card'
+                      : 'border-border hover:border-primary/50 bg-card hover:bg-card/80'
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <span className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                  <div className="flex items-center gap-4">
+                    <span className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg flex-shrink-0 ${
                       isCorrect && showAnswerFeedback
                         ? 'bg-green-500 text-white'
                         : isWrong
@@ -531,10 +635,12 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
                         ? 'bg-primary text-primary-foreground' 
                         : 'bg-muted text-muted-foreground'
                     }`}>
-                      {isCorrect && showAnswerFeedback ? <CheckCircle className="w-5 h-5" /> : 
-                       isWrong ? <XCircle className="w-5 h-5" /> : letter}
+                      {isCorrect && showAnswerFeedback ? <CheckCircle className="w-6 h-6" /> : 
+                       isWrong ? <XCircle className="w-6 h-6" /> : letter}
                     </span>
-                    <span className="text-foreground">{currentQuestion[optionKey] as string}</span>
+                    <span className="text-foreground text-base md:text-lg leading-relaxed">
+                      {currentQuestion[optionKey] as string}
+                    </span>
                   </div>
                 </motion.button>
               );
@@ -546,35 +652,40 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-4 p-4 bg-green-500/10 border border-green-500/30 rounded-xl"
+              className="mt-6 p-6 bg-green-500/10 border border-green-500/30 rounded-2xl"
             >
-              <div className="flex items-center gap-2 text-green-600 font-semibold mb-2">
-                <CheckCircle className="w-5 h-5" />
+              <div className="flex items-center gap-2 text-green-600 font-bold text-lg mb-3">
+                <CheckCircle className="w-6 h-6" />
                 Correct Answer: {showAnswerFeedback}
               </div>
               {currentQuestion.explanation && (
-                <p className="text-sm text-muted-foreground">{currentQuestion.explanation}</p>
+                <p className="text-muted-foreground text-base leading-relaxed">{currentQuestion.explanation}</p>
               )}
-              <p className="text-xs text-muted-foreground mt-2">Moving to next question...</p>
+              <p className="text-sm text-muted-foreground mt-3 flex items-center gap-2">
+                <Sparkles className="w-4 h-4" /> Moving to next question...
+              </p>
             </motion.div>
           )}
         </div>
       </div>
 
-      {/* Navigation */}
-      <div className="p-4 border-t border-border bg-card">
-        <div className="max-w-2xl mx-auto flex items-center justify-between">
+      {/* Navigation - Clean & Spacious */}
+      <div className="p-4 md:p-6 border-t border-border bg-card">
+        <div className="max-w-3xl mx-auto flex items-center justify-between gap-4">
           <Button
             variant="outline"
+            size="lg"
             onClick={() => setCurrentIndex(prev => Math.max(0, prev - 1))}
             disabled={currentIndex === 0 || !!showAnswerFeedback}
+            className="px-6"
           >
-            <ChevronLeft className="w-4 h-4 mr-1" /> Previous
+            <ChevronLeft className="w-5 h-5 mr-1" /> Previous
           </Button>
 
-          <div className="flex gap-1 overflow-x-auto max-w-[200px] md:max-w-none">
-            {questions.slice(Math.max(0, currentIndex - 3), currentIndex + 4).map((q, i) => {
-              const actualIndex = Math.max(0, currentIndex - 3) + i;
+          {/* Question dots */}
+          <div className="hidden md:flex gap-1.5 overflow-x-auto max-w-md">
+            {questions.slice(Math.max(0, currentIndex - 4), currentIndex + 5).map((q, i) => {
+              const actualIndex = Math.max(0, currentIndex - 4) + i;
               const isAnswered = answers[q.id];
               const isCurrent = actualIndex === currentIndex;
               
@@ -583,12 +694,12 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
                   key={q.id}
                   onClick={() => !showAnswerFeedback && setCurrentIndex(actualIndex)}
                   disabled={!!showAnswerFeedback}
-                  className={`w-8 h-8 rounded-full text-xs font-medium transition-all ${
+                  className={`w-10 h-10 rounded-full text-sm font-semibold transition-all ${
                     isCurrent
-                      ? 'bg-primary text-primary-foreground'
+                      ? 'bg-primary text-primary-foreground scale-110'
                       : isAnswered
                       ? 'bg-green-500 text-white'
-                      : 'bg-muted text-muted-foreground'
+                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
                   }`}
                 >
                   {actualIndex + 1}
@@ -597,16 +708,18 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
             })}
           </div>
 
-          {currentIndex === totalQuestions - 1 ? (
-            <Button variant="hero" onClick={handleSubmit} disabled={!!showAnswerFeedback}>
-              <Flag className="w-4 h-4 mr-1" /> Submit Quiz
+          {currentIndex === questions.length - 1 ? (
+            <Button variant="hero" size="lg" onClick={handleSubmit} disabled={!!showAnswerFeedback} className="px-6">
+              <Flag className="w-5 h-5 mr-2" /> Submit Quiz
             </Button>
           ) : (
             <Button
-              onClick={() => setCurrentIndex(prev => Math.min(totalQuestions - 1, prev + 1))}
+              size="lg"
+              onClick={() => setCurrentIndex(prev => Math.min(questions.length - 1, prev + 1))}
               disabled={!!showAnswerFeedback}
+              className="px-6"
             >
-              Next <ChevronRight className="w-4 h-4 ml-1" />
+              Next <ChevronRight className="w-5 h-5 ml-1" />
             </Button>
           )}
         </div>
