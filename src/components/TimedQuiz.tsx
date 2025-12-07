@@ -48,26 +48,26 @@ const MOTIVATIONAL_MESSAGES = [
   "Stay focused, stay winning! 🔥",
 ];
 
-// Ambient sounds - variety of study-friendly background sounds
+// Ambient sounds - variety of study-friendly background sounds (verified working URLs)
 const AMBIENT_SOUNDS = {
   rain: {
-    url: "https://cdn.pixabay.com/audio/2022/05/13/audio_257112311e.mp3",
+    url: "https://www.soundjay.com/nature/sounds/rain-01.mp3",
     label: "🌧️ Soft Rain"
   },
   thunder: {
-    url: "https://cdn.pixabay.com/audio/2022/10/30/audio_666e287a96.mp3",
+    url: "https://www.soundjay.com/nature/sounds/thunder-01.mp3",
     label: "⛈️ Thunderstorm"
   },
   nature: {
-    url: "https://cdn.pixabay.com/audio/2021/08/04/audio_27f54de4e9.mp3",
+    url: "https://www.soundjay.com/nature/sounds/birds-1.mp3",
     label: "🌿 Forest Birds"
   },
   ocean: {
-    url: "https://cdn.pixabay.com/audio/2022/06/07/audio_b9bd4170e4.mp3",
+    url: "https://www.soundjay.com/nature/sounds/ocean-wave-1.mp3",
     label: "🌊 Ocean Waves"
   },
   fire: {
-    url: "https://cdn.pixabay.com/audio/2022/08/31/audio_419263fc1a.mp3",
+    url: "https://www.soundjay.com/nature/sounds/fire-1.mp3",
     label: "🔥 Fireplace"
   },
   cafe: {
@@ -79,15 +79,15 @@ const AMBIENT_SOUNDS = {
     label: "🎵 Lo-Fi Beats"
   },
   piano: {
-    url: "https://cdn.pixabay.com/audio/2022/02/07/audio_b9bd4170e4.mp3",
+    url: "https://cdn.pixabay.com/audio/2022/01/18/audio_d0c6ff1bab.mp3",
     label: "🎹 Soft Piano"
   },
   whitenoise: {
-    url: "https://cdn.pixabay.com/audio/2022/03/24/audio_1c0cce4ec1.mp3",
+    url: "https://www.soundjay.com/nature/sounds/water-stream-1.mp3",
     label: "📻 White Noise"
   },
   night: {
-    url: "https://cdn.pixabay.com/audio/2021/09/06/audio_0917bca0a7.mp3",
+    url: "https://www.soundjay.com/nature/sounds/crickets-1.mp3",
     label: "🌙 Night Crickets"
   }
 };
@@ -148,8 +148,8 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
   const [selectedSubjectFilter, setSelectedSubjectFilter] = useState<string>('all');
   const [showAnswerFeedback, setShowAnswerFeedback] = useState<string | null>(null);
   
-  // Audio state
-  const [isSoundPlaying, setIsSoundPlaying] = useState(true); // Auto-play by default
+  // Audio state - muted by default, user can enable
+  const [isSoundPlaying, setIsSoundPlaying] = useState(false);
   const [currentSound, setCurrentSound] = useState<AmbientSound>('rain');
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
