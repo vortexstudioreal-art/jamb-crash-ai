@@ -260,6 +260,9 @@ const Index = () => {
     localStorage.removeItem(BYPASS_STORAGE_KEY);
     await signOut();
     setCurrentStep('landing');
+    setUserSubjects([]);
+    setPersonalizationData(null);
+    navigate('/');
     toast.success('Signed out successfully');
   };
 
