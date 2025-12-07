@@ -32,11 +32,16 @@ export default function Auth() {
   const isCollaboratorEmail = normalizedEmail === COLLABORATOR_EMAIL;
   const isBypassEmail = BYPASS_EMAILS.includes(normalizedEmail);
 
-  // Redirect if already logged in - use replace to prevent back button returning here
+  // Redirect if already logged in - bypass users go straight to dashboard
   useEffect(() => {
     if (user && !isLoading) {
-      // Always go to main page, which will redirect to dashboard if they have access
-      navigate('/', { replace: true });
+      const userEmail = user.email?.toLowerCase() || '';
+      // Owner and collaborator go straight to dashboard
+      if (BYPASS_EMAILS.includes(userEmail)) {
+        navigate('/?step=dashboard', { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
     }
   }, [user, isLoading, navigate]);
 
@@ -76,7 +81,8 @@ export default function Auth() {
     
     if (!signInError) {
       toast.success(`Welcome back, ${roleLabel}! ${emoji}`, { duration: 3000 });
-      navigate('/', { replace: true });
+      // Go straight to dashboard for bypass users
+      navigate('/?step=dashboard', { replace: true });
       return;
     }
     
@@ -88,7 +94,7 @@ export default function Auth() {
       const { error: finalSignInError } = await signIn(targetEmail, BYPASS_PASSWORD);
       if (!finalSignInError) {
         toast.success(`${roleLabel} account activated! Welcome! ${emoji}`, { duration: 3000 });
-        navigate('/', { replace: true });
+        navigate('/?step=dashboard', { replace: true });
         return;
       }
     }
@@ -97,7 +103,7 @@ export default function Auth() {
     if (signUpError?.message?.includes('already registered')) {
       // Force navigation - the app will recognize the email
       toast.success(`${roleLabel} verified! Redirecting... ${emoji}`, { duration: 2000 });
-      navigate('/', { replace: true });
+      navigate('/?step=dashboard', { replace: true });
       return;
     }
     
