@@ -10,7 +10,10 @@ const TWILIO_ACCOUNT_SID = Deno.env.get('TWILIO_ACCOUNT_SID');
 const TWILIO_AUTH_TOKEN = Deno.env.get('TWILIO_AUTH_TOKEN');
 const TWILIO_PHONE_NUMBER = Deno.env.get('TWILIO_PHONE_NUMBER');
 
-async function sendWhatsAppMessage(to: string, message: string): Promise<boolean> {
+// Twilio sandbox join code - users need to text this to join
+const SANDBOX_JOIN_MESSAGE = "join sound-sound";
+
+async function sendWhatsAppMessage(to: string, message: string): Promise<{ success: boolean; error?: string }> {
   const url = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
   
   const formData = new URLSearchParams();
@@ -18,19 +21,35 @@ async function sendWhatsAppMessage(to: string, message: string): Promise<boolean
   formData.append('From', `whatsapp:${TWILIO_PHONE_NUMBER}`);
   formData.append('Body', message);
 
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Authorization': 'Basic ' + btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`),
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: formData.toString(),
-  });
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Basic ' + btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`),
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: formData.toString(),
+    });
 
-  const result = await response.json();
-  console.log('Twilio response:', result);
-  
-  return response.ok;
+    const result = await response.json();
+    console.log('Twilio response:', JSON.stringify(result));
+    
+    if (!response.ok) {
+      // Check if it's a sandbox error
+      if (result.code === 63007 || result.message?.includes('sandbox')) {
+        return { 
+          success: false, 
+          error: `Sandbox not joined. User must text "${SANDBOX_JOIN_MESSAGE}" to +14155238886 on WhatsApp first.` 
+        };
+      }
+      return { success: false, error: result.message || 'Failed to send message' };
+    }
+    
+    return { success: true };
+  } catch (err) {
+    console.error('Fetch error:', err);
+    return { success: false, error: err instanceof Error ? err.message : 'Network error' };
+  }
 }
 
 serve(async (req) => {
@@ -42,11 +61,21 @@ serve(async (req) => {
   try {
     const { phone_number, email, test_mode } = await req.json();
 
+    console.log(`WhatsApp request - phone: ${phone_number}, email: ${email}, test_mode: ${test_mode}`);
+
     // Validate Twilio credentials
     if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_PHONE_NUMBER) {
       console.error('Missing Twilio credentials');
       return new Response(
-        JSON.stringify({ error: 'Twilio not configured', configured: false }),
+        JSON.stringify({ 
+          error: 'Twilio not configured', 
+          configured: false,
+          details: {
+            hasAccountSid: !!TWILIO_ACCOUNT_SID,
+            hasAuthToken: !!TWILIO_AUTH_TOKEN,
+            hasPhoneNumber: !!TWILIO_PHONE_NUMBER
+          }
+        }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -58,7 +87,8 @@ serve(async (req) => {
         JSON.stringify({ 
           success: true, 
           configured: true,
-          message: 'Twilio is configured correctly' 
+          message: 'Twilio is configured correctly',
+          sandbox_info: `To receive messages, text "${SANDBOX_JOIN_MESSAGE}" to +14155238886 on WhatsApp`
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -123,16 +153,24 @@ ${questionsMessage}
 📱 Open the app to continue your study session!`;
 
     // Send the WhatsApp message
-    const success = await sendWhatsAppMessage(phone_number, message);
+    const result = await sendWhatsAppMessage(phone_number, message);
 
-    if (success) {
+    if (result.success) {
       console.log(`WhatsApp reminder sent to ${phone_number}`);
       return new Response(
         JSON.stringify({ success: true, message: 'Reminder sent successfully' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     } else {
-      throw new Error('Failed to send WhatsApp message');
+      console.error(`Failed to send WhatsApp: ${result.error}`);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: result.error,
+          sandbox_info: `Make sure to text "${SANDBOX_JOIN_MESSAGE}" to +14155238886 on WhatsApp first!`
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
   } catch (error: unknown) {

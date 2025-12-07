@@ -48,6 +48,8 @@ interface Stats {
   totalQuestions: number;
 }
 
+const OWNER_EMAIL = 'saeedabdulbasit933@gmail.com';
+
 const AdminPanel = () => {
   const navigate = useNavigate();
   const { hasAccess, isAdmin, adminRole, isLoading, userEmail } = useAccessControl();
@@ -60,8 +62,12 @@ const AdminPanel = () => {
   const [newCollaboratorEmail, setNewCollaboratorEmail] = useState('');
   const [loadingData, setLoadingData] = useState(true);
   const [testingWhatsApp, setTestingWhatsApp] = useState(false);
+  const [testingEmail, setTestingEmail] = useState(false);
+  const [emailConfigured, setEmailConfigured] = useState<boolean | null>(null);
+  const [whatsappConfigured, setWhatsappConfigured] = useState<boolean | null>(null);
 
-  const isOwner = adminRole === 'owner';
+  const isOwner = userEmail?.toLowerCase() === OWNER_EMAIL.toLowerCase();
+  const canEdit = isOwner; // Only owner can edit settings
 
   useEffect(() => {
     if (!isLoading && (!isAdmin || !hasAccess)) {
@@ -75,8 +81,38 @@ const AdminPanel = () => {
 
   const fetchData = async () => {
     setLoadingData(true);
-    await Promise.all([fetchPayments(), fetchAdmins(), fetchFeatures(), fetchQuizStats(), fetchQuestionCount()]);
+    await Promise.all([
+      fetchPayments(), 
+      fetchAdmins(), 
+      fetchFeatures(), 
+      fetchQuizStats(), 
+      fetchQuestionCount(),
+      checkEmailConfig(),
+      checkWhatsAppConfig()
+    ]);
     setLoadingData(false);
+  };
+
+  const checkEmailConfig = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('send-test-email', {
+        body: { test_mode: true }
+      });
+      setEmailConfigured(data?.configured || false);
+    } catch {
+      setEmailConfigured(false);
+    }
+  };
+
+  const checkWhatsAppConfig = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('send-whatsapp-reminder', {
+        body: { test_mode: true }
+      });
+      setWhatsappConfigured(data?.configured || false);
+    } catch {
+      setWhatsappConfigured(false);
+    }
   };
 
   const fetchPayments = async () => {
@@ -169,6 +205,10 @@ const AdminPanel = () => {
   };
 
   const testWhatsAppReminder = async () => {
+    if (!canEdit) {
+      toast.error('Only owner can send test messages');
+      return;
+    }
     setTestingWhatsApp(true);
     try {
       // Call the actual edge function to send WhatsApp to test number
@@ -188,8 +228,12 @@ const AdminPanel = () => {
       
       if (data?.success) {
         toast.success('WhatsApp sent! Check +2347073996465 📱');
+        setWhatsappConfigured(true);
       } else {
         toast.error(data?.error || 'Failed to send WhatsApp');
+        if (data?.sandbox_info) {
+          toast.info(data.sandbox_info, { duration: 8000 });
+        }
       }
     } catch (error) {
       console.error('WhatsApp test error:', error);
@@ -199,7 +243,45 @@ const AdminPanel = () => {
     }
   };
 
+  const testEmailSend = async () => {
+    if (!canEdit) {
+      toast.error('Only owner can send test emails');
+      return;
+    }
+    setTestingEmail(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-test-email', {
+        body: {
+          email: OWNER_EMAIL,
+          test_mode: false
+        }
+      });
+      
+      if (error) {
+        console.error('Email test error:', error);
+        toast.error('Failed to send email: ' + error.message);
+        return;
+      }
+      
+      if (data?.success) {
+        toast.success(`Email sent to ${OWNER_EMAIL}! 📧`);
+        setEmailConfigured(true);
+      } else {
+        toast.error(data?.error || 'Failed to send email');
+      }
+    } catch (error) {
+      console.error('Email test error:', error);
+      toast.error('Failed to send test email');
+    } finally {
+      setTestingEmail(false);
+    }
+  };
+
   const addCollaborator = async () => {
+    if (!canEdit) {
+      toast.error('Only owner can add collaborators');
+      return;
+    }
     if (!newCollaboratorEmail.trim()) {
       toast.error('Please enter an email');
       return;
@@ -233,6 +315,10 @@ const AdminPanel = () => {
   };
 
   const removeAdmin = async (id: string, email: string) => {
+    if (!canEdit) {
+      toast.error('Only owner can remove admins');
+      return;
+    }
     if (email === userEmail) {
       toast.error("You can't remove yourself");
       return;
@@ -252,6 +338,7 @@ const AdminPanel = () => {
     toast.success('Admin removed');
     fetchAdmins();
   };
+
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(amount);
@@ -506,6 +593,23 @@ const AdminPanel = () => {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
+            {/* Owner-only notice for collaborators */}
+            {!canEdit && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30"
+              >
+                <div className="flex items-center gap-3">
+                  <AlertCircle className="w-5 h-5 text-amber-500" />
+                  <div>
+                    <p className="font-semibold text-amber-600">View Only Mode</p>
+                    <p className="text-sm text-muted-foreground">Only the owner can change settings</p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
             <div className="grid lg:grid-cols-2 gap-6">
               {/* Admin Management */}
               <motion.div
@@ -520,7 +624,7 @@ const AdminPanel = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {isOwner && (
+                    {canEdit ? (
                       <div className="flex gap-2">
                         <Input
                           placeholder="collaborator@email.com"
@@ -531,6 +635,10 @@ const AdminPanel = () => {
                         <Button size="icon" onClick={addCollaborator}>
                           <Plus className="w-4 h-4" />
                         </Button>
+                      </div>
+                    ) : (
+                      <div className="p-3 rounded-lg bg-muted/50 text-center">
+                        <p className="text-sm text-muted-foreground">Only owner can add collaborators</p>
                       </div>
                     )}
                     <div className="space-y-2 max-h-64 overflow-y-auto">
@@ -550,7 +658,7 @@ const AdminPanel = () => {
                               {admin.role}
                             </span>
                           </div>
-                          {isOwner && admin.email !== userEmail && (
+                          {canEdit && admin.email !== userEmail && (
                             <Button
                               variant="ghost"
                               size="icon"
@@ -582,16 +690,30 @@ const AdminPanel = () => {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {/* WhatsApp Status */}
-                    <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/30">
+                    <div className={`p-4 rounded-lg ${whatsappConfigured ? 'bg-green-500/10 border border-green-500/30' : 'bg-yellow-500/10 border border-yellow-500/30'}`}>
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
-                          <CheckCircle className="w-6 h-6 text-green-500" />
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${whatsappConfigured ? 'bg-green-500/20' : 'bg-yellow-500/20'}`}>
+                          {whatsappConfigured ? (
+                            <CheckCircle className="w-6 h-6 text-green-500" />
+                          ) : (
+                            <AlertCircle className="w-6 h-6 text-yellow-500" />
+                          )}
                         </div>
                         <div>
-                          <p className="font-semibold text-green-600">Connected & Working</p>
-                          <p className="text-xs text-muted-foreground">Twilio WhatsApp API active</p>
+                          <p className={`font-semibold ${whatsappConfigured ? 'text-green-600' : 'text-yellow-600'}`}>
+                            {whatsappConfigured ? 'Connected & Working' : 'Checking...'}
+                          </p>
+                          <p className="text-xs text-muted-foreground">Twilio WhatsApp Sandbox (sound-sound)</p>
                         </div>
                       </div>
+                    </div>
+
+                    {/* Sandbox Info */}
+                    <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                      <p className="text-xs text-blue-600 font-medium">📱 Sandbox Join Code</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Text <code className="bg-muted px-1 rounded">join sound-sound</code> to +14155238886 on WhatsApp
+                      </p>
                     </div>
 
                     {/* Test Number */}
@@ -602,12 +724,58 @@ const AdminPanel = () => {
 
                     {/* Test Button */}
                     <Button
-                      className="w-full bg-green-600 hover:bg-green-700 text-white"
+                      className={`w-full ${canEdit ? 'bg-green-600 hover:bg-green-700' : 'bg-muted'} text-white`}
                       onClick={testWhatsAppReminder}
-                      disabled={testingWhatsApp}
+                      disabled={testingWhatsApp || !canEdit}
                     >
                       <Send className="w-4 h-4 mr-2" />
-                      {testingWhatsApp ? 'Sending...' : 'Send Test Reminder Now'}
+                      {!canEdit ? 'Only owner can test' : testingWhatsApp ? 'Sending...' : 'Send Test Reminder Now'}
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Email Integration */}
+                <Card className="bg-card border-border mt-4">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Mail className="w-5 h-5 text-blue-500" />
+                      Email Integration (Resend)
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Email Status */}
+                    <div className={`p-4 rounded-lg ${emailConfigured ? 'bg-green-500/10 border border-green-500/30' : 'bg-yellow-500/10 border border-yellow-500/30'}`}>
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${emailConfigured ? 'bg-green-500/20' : 'bg-yellow-500/20'}`}>
+                          {emailConfigured ? (
+                            <CheckCircle className="w-6 h-6 text-green-500" />
+                          ) : (
+                            <AlertCircle className="w-6 h-6 text-yellow-500" />
+                          )}
+                        </div>
+                        <div>
+                          <p className={`font-semibold ${emailConfigured ? 'text-green-600' : 'text-yellow-600'}`}>
+                            {emailConfigured ? 'Connected & Working' : emailConfigured === false ? 'Not Configured' : 'Checking...'}
+                          </p>
+                          <p className="text-xs text-muted-foreground">Resend Email API</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Test Email */}
+                    <div className="p-3 rounded-lg bg-muted/50">
+                      <p className="text-sm font-medium text-foreground mb-1">Test Email To</p>
+                      <code className="text-sm text-primary font-mono">{OWNER_EMAIL}</code>
+                    </div>
+
+                    {/* Test Button */}
+                    <Button
+                      className={`w-full ${canEdit ? 'bg-blue-600 hover:bg-blue-700' : 'bg-muted'} text-white`}
+                      onClick={testEmailSend}
+                      disabled={testingEmail || !canEdit}
+                    >
+                      <Mail className="w-4 h-4 mr-2" />
+                      {!canEdit ? 'Only owner can test' : testingEmail ? 'Sending...' : 'Send Test Email Now'}
                     </Button>
                   </CardContent>
                 </Card>
@@ -616,23 +784,13 @@ const AdminPanel = () => {
                 <Card className="bg-card border-border mt-4">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <AlertCircle className="w-5 h-5 text-blue-500" />
-                      Other Settings
+                      <Database className="w-5 h-5 text-purple-500" />
+                      Quick Actions
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
-                      <p className="text-sm font-medium text-blue-600">Email Setup</p>
-                      <p className="text-xs text-muted-foreground mb-2">
-                        Add Resend API key for email delivery
-                      </p>
-                      <code className="text-xs bg-muted p-2 rounded block">
-                        RESEND_API_KEY
-                      </code>
-                    </div>
-
                     <Button variant="outline" className="w-full" onClick={() => navigate('/')}>
-                      <Database className="w-4 h-4 mr-2" />
+                      <Key className="w-4 h-4 mr-2" />
                       View User Dashboard
                     </Button>
                   </CardContent>
