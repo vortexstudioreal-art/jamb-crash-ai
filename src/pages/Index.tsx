@@ -82,14 +82,22 @@ const Index = () => {
     loadUserSubjects();
   }, [userEmail, isLoading]);
 
-  // Check for step param from payment success redirect
+  // Check for step param from payment success redirect or bypass login
   useEffect(() => {
     const step = searchParams.get('step');
     if (step === 'upload' && userEmail) {
       setCurrentStep('subject-select');
       setSearchParams({});
+    } else if (step === 'dashboard' && userEmail) {
+      // Bypass users (owner/collaborator) go straight to dashboard
+      if (userSubjects.length > 0) {
+        setCurrentStep('dashboard');
+      } else {
+        setCurrentStep('subject-select');
+      }
+      setSearchParams({});
     }
-  }, [searchParams, setSearchParams, userEmail]);
+  }, [searchParams, setSearchParams, userEmail, userSubjects.length]);
 
   const handleGetStarted = () => {
     // Always scroll to pricing and highlight Standard package
