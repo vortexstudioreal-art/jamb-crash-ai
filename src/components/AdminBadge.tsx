@@ -13,7 +13,8 @@ export const AdminBadge = ({ role = 'collaborator', linkToAdmin = false }: Admin
   const getBadgeStyles = () => {
     if (isOwner) return 'bg-gradient-to-r from-yellow-400 to-amber-500 text-black';
     if (isAdmin) return 'bg-gradient-to-r from-blue-400 to-indigo-500 text-white';
-    return 'bg-gradient-to-r from-amber-300 to-yellow-400 text-black';
+    // Silver badge for collaborator
+    return 'bg-gradient-to-r from-gray-300 to-slate-400 text-gray-800';
   };
 
   const getBadgeLabel = () => {
