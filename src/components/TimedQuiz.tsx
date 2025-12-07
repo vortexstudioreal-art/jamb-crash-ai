@@ -149,44 +149,65 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
   const [showAnswerFeedback, setShowAnswerFeedback] = useState<string | null>(null);
   
   // Audio state
-  const [isSoundPlaying, setIsSoundPlaying] = useState(false);
-  const [currentSound, setCurrentSound] = useState<AmbientSound>('lofi');
+  const [isSoundPlaying, setIsSoundPlaying] = useState(true); // Auto-play by default
+  const [currentSound, setCurrentSound] = useState<AmbientSound>('rain');
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Initialize audio
+  // Initialize and manage audio - auto-play when quiz starts
   useEffect(() => {
-    const sound = AMBIENT_SOUNDS[currentSound];
-    audioRef.current = new Audio(sound.url);
-    audioRef.current.loop = true;
-    audioRef.current.volume = 0.15; // Lower volume for less distraction
+    // Only start audio after setup is complete (quiz has started)
+    if (showSetup) return;
     
-    if (isSoundPlaying && audioRef.current) {
-      audioRef.current.play().catch(console.error);
+    const sound = AMBIENT_SOUNDS[currentSound];
+    
+    // Create new audio element
+    const audio = new Audio(sound.url);
+    audio.loop = true;
+    audio.volume = 0.2;
+    audioRef.current = audio;
+    
+    // Auto-play if sound is enabled
+    if (isSoundPlaying) {
+      audio.play().catch((err) => {
+        console.log('Audio autoplay blocked, user interaction needed:', err);
+        // Still set up the audio, user can click to play
+      });
     }
     
     return () => {
+      audio.pause();
+      audio.src = '';
+      audioRef.current = null;
+    };
+  }, [currentSound, showSetup]);
+
+  // Handle play/pause state changes
+  useEffect(() => {
+    if (!audioRef.current || showSetup) return;
+    
+    if (isSoundPlaying) {
+      audioRef.current.play().catch(console.error);
+    } else {
+      audioRef.current.pause();
+    }
+  }, [isSoundPlaying, showSetup]);
+
+  // Cleanup audio on component unmount or exit
+  useEffect(() => {
+    return () => {
       if (audioRef.current) {
         audioRef.current.pause();
+        audioRef.current.src = '';
         audioRef.current = null;
       }
     };
-  }, [currentSound]);
+  }, []);
 
   const toggleSound = () => {
-    if (audioRef.current) {
-      if (isSoundPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play().catch(console.error);
-      }
-      setIsSoundPlaying(!isSoundPlaying);
-    }
+    setIsSoundPlaying(!isSoundPlaying);
   };
 
   const changeSound = (sound: AmbientSound) => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-    }
     setCurrentSound(sound);
   };
 
