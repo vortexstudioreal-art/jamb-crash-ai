@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { User, Mail, Crown, Shield, Calendar, Package, ArrowLeft, LogOut, Edit2, Check, X } from 'lucide-react';
+import { User, Mail, Crown, Shield, Calendar, Package, ArrowLeft, LogOut, Edit2, Check, X, HelpCircle, FileText, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -136,7 +136,8 @@ export default function Settings() {
   const handleSignOut = async () => {
     localStorage.removeItem(BYPASS_STORAGE_KEY);
     await signOut();
-    navigate('/auth');
+    navigate('/');
+    toast.success('Signed out successfully');
   };
 
   const getRoleBadge = () => {
@@ -344,11 +345,61 @@ export default function Settings() {
           </motion.div>
         )}
 
-        {/* Sign Out */}
+        {/* Help & Support Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
+        >
+          <Card className="mb-6">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2">
+                <HelpCircle className="w-5 h-5 text-primary" />
+                Help & Support
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <a 
+                href="mailto:support@jamb48hr.com" 
+                className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
+              >
+                <MessageCircle className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <p className="font-medium text-foreground">Contact Support</p>
+                  <p className="text-sm text-muted-foreground">Get help with your account</p>
+                </div>
+              </a>
+              <Separator />
+              <a 
+                href="#" 
+                className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
+              >
+                <FileText className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <p className="font-medium text-foreground">Terms of Service</p>
+                  <p className="text-sm text-muted-foreground">Read our terms</p>
+                </div>
+              </a>
+              <Separator />
+              <a 
+                href="#" 
+                className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
+              >
+                <Shield className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <p className="font-medium text-foreground">Privacy Policy</p>
+                  <p className="text-sm text-muted-foreground">How we protect your data</p>
+                </div>
+              </a>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Sign Out */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
         >
           <Button
             variant="outline"
