@@ -12,8 +12,7 @@ const emailSchema = z.string().email('Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
 
 const OWNER_EMAIL = 'saeedabdulbasit933@gmail.com';
-const COLLABORATOR_EMAIL = 'muzzyothmam@gmail.com';
-const BYPASS_EMAILS = [OWNER_EMAIL, COLLABORATOR_EMAIL];
+const BYPASS_EMAILS = [OWNER_EMAIL];
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -29,7 +28,6 @@ export default function Auth() {
 
   const normalizedEmail = email.toLowerCase().trim();
   const isOwnerEmail = normalizedEmail === OWNER_EMAIL;
-  const isCollaboratorEmail = normalizedEmail === COLLABORATOR_EMAIL;
   const isBypassEmail = BYPASS_EMAILS.includes(normalizedEmail);
 
   // Redirect if already logged in - bypass users go straight to dashboard
@@ -73,8 +71,8 @@ export default function Auth() {
 
   const handleBypassLogin = async () => {
     const targetEmail = normalizedEmail;
-    const roleLabel = isOwnerEmail ? 'Owner' : 'Collaborator';
-    const emoji = isOwnerEmail ? '👑' : '🛡️';
+    const roleLabel = 'Owner';
+    const emoji = '👑';
     
     // Step 1: Try to sign in with bypass password
     const { error: signInError } = await signIn(targetEmail, BYPASS_PASSWORD);
@@ -237,12 +235,10 @@ export default function Auth() {
             
             {/* Hide password field for bypass emails - show special message instead */}
             {isBypassEmail && isLogin ? (
-              <div className={`bg-gradient-to-r ${isOwnerEmail ? 'from-yellow-500/10 to-amber-500/10 border-yellow-500/30' : 'from-gray-400/10 to-slate-400/10 border-gray-400/30'} border rounded-lg p-4`}>
-                <div className={`flex items-center gap-2 ${isOwnerEmail ? 'text-yellow-600' : 'text-gray-600'}`}>
+              <div className="bg-gradient-to-r from-yellow-500/10 to-amber-500/10 border-yellow-500/30 border rounded-lg p-4">
+                <div className="flex items-center gap-2 text-yellow-600">
                   <Sparkles className="w-5 h-5" />
-                  <span className="font-semibold">
-                    {isOwnerEmail ? '👑 Owner Detected!' : '🛡️ Collaborator Detected!'}
-                  </span>
+                  <span className="font-semibold">👑 Owner Detected!</span>
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
                   Click "Sign In" for instant access - no password needed.
