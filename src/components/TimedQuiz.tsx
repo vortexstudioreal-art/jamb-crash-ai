@@ -48,29 +48,27 @@ const MOTIVATIONAL_MESSAGES = [
   "Stay focused, stay winning! 🔥",
 ];
 
-// Better quality ambient sounds - softer and cleaner
+// Soft ambient sounds - study-friendly background music
 const AMBIENT_SOUNDS = {
   lofi: {
     url: "https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3",
-    label: "Lo-Fi"
-  },
-  nature: {
-    url: "https://cdn.pixabay.com/audio/2022/03/10/audio_4dedf5bf94.mp3",
-    label: "Nature"
+    label: "Lo-Fi Beats"
   },
   piano: {
     url: "https://cdn.pixabay.com/audio/2022/02/07/audio_b9bd4170e4.mp3",
-    label: "Piano"
+    label: "Soft Piano"
+  },
+  ambient: {
+    url: "https://cdn.pixabay.com/audio/2022/08/02/audio_54ca0ffa52.mp3",
+    label: "Calm Ambient"
+  },
+  focus: {
+    url: "https://cdn.pixabay.com/audio/2022/10/25/audio_946bc6eb3c.mp3",
+    label: "Focus Mode"
   }
 };
 
 type AmbientSound = keyof typeof AMBIENT_SOUNDS;
-
-const ALL_SUBJECTS = [
-  'english', 'mathematics', 'physics', 'chemistry', 'biology',
-  'literature', 'government', 'economics', 'crs', 'geography',
-  'accounting', 'commerce', 'agricultural_science'
-];
 
 const YEARS = Array.from({ length: 26 }, (_, i) => 2000 + i);
 
@@ -79,18 +77,19 @@ const TIME_OPTIONS = [
   { value: 5, label: '5 min' },
   { value: 10, label: '10 min' },
   { value: 15, label: '15 min' },
+  { value: 20, label: '20 min' },
   { value: 30, label: '30 min' },
   { value: 45, label: '45 min' },
   { value: 60, label: '60 min' },
 ];
 
 export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }: TimedQuizProps) => {
-  // Quiz config based on type
+  // Quiz config based on type - subject practice is now unified with timed practice
   const getQuizConfig = () => {
     switch (quizType) {
       case 'full': return { questions: 60, time: 70 * 60, untimed: false };
       case 'mini': return { questions: 20, time: 30 * 60, untimed: false };
-      case 'subject': return { questions: 40, time: 0, untimed: true };
+      case 'subject': return { questions: 40, time: 30 * 60, untimed: false }; // Now timed too
       case 'timed-practice': return { questions: 40, time: 30 * 60, untimed: false };
       case 'demo': return { questions: 20, time: 30 * 60, untimed: false };
       default: return { questions: 60, time: 70 * 60, untimed: false };
@@ -342,38 +341,37 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
     });
   }, [questions, answers, timeLeft, totalTimeSeconds, userEmail, quizType, subjects, selectedSubjects, onComplete]);
 
-  // Setup screen with subject/time selection
+  // Unified setup screen - combines subject + year + time selection
   if (showSetup && !quizMode) {
+    const isPracticeMode = quizType === 'subject' || quizType === 'timed-practice';
+    
     return (
       <div className="fixed inset-0 bg-background z-50 flex items-center justify-center p-4 overflow-y-auto">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="max-w-xl w-full bg-card rounded-2xl p-6 border border-border shadow-xl my-8"
+          className="max-w-lg w-full bg-card rounded-2xl p-5 border border-border shadow-xl my-8"
         >
-          <h2 className="text-2xl font-bold mb-2 text-foreground text-center">
-            {quizType === 'subject' ? '📚 Practice by Subject' : 
-             quizType === 'timed-practice' ? '⏱️ Timed Practice' :
+          <h2 className="text-xl font-bold mb-1 text-foreground text-center">
+            {isPracticeMode ? '📚 Practice Quiz' : 
              quizType === 'full' ? '📝 Full Quiz (60 Qs)' : '⚡ Mini Quiz (20 Qs)'}
           </h2>
           
-          <p className="text-muted-foreground mb-6 text-center text-sm">
-            {quizType === 'subject' ? 'Select subjects to practice' :
-             quizType === 'timed-practice' ? 'Choose duration and subjects' :
-             'Choose your quiz mode'}
+          <p className="text-muted-foreground mb-4 text-center text-sm">
+            {isPracticeMode ? 'Select subjects, years, and time' : 'Choose your quiz mode'}
           </p>
 
-          {/* Subject selection for practice modes */}
-          {(quizType === 'subject' || quizType === 'timed-practice') && (
-            <div className="mb-6">
-              <label className="text-sm font-medium text-foreground mb-3 block">
-                Select Subjects ({selectedSubjects.length} selected)
+          {/* Subject selection for practice modes - shows user's subjects only */}
+          {isPracticeMode && (
+            <div className="mb-4">
+              <label className="text-sm font-medium text-foreground mb-2 block">
+                Subjects ({selectedSubjects.length} selected)
               </label>
-              <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1">
-                {ALL_SUBJECTS.map(subject => (
+              <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
+                {subjects.map(subject => (
                   <label
                     key={subject}
-                    className={`flex items-center gap-2 p-3 rounded-lg border cursor-pointer transition-all ${
+                    className={`flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer transition-all text-sm ${
                       selectedSubjects.includes(subject)
                         ? 'border-primary bg-primary/10'
                         : 'border-border hover:border-primary/50'
@@ -383,25 +381,70 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
                       checked={selectedSubjects.includes(subject)}
                       onCheckedChange={() => toggleSubjectSelection(subject)}
                     />
-                    <span className="text-sm capitalize">{subject.replace('_', ' ')}</span>
+                    <span className="capitalize">{subject.replace('_', ' ')}</span>
                   </label>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Time selection for timed practice */}
-          {quizType === 'timed-practice' && (
-            <div className="mb-6">
-              <label className="text-sm font-medium text-foreground mb-3 block">
-                Practice Duration
+          {/* Year selection for practice modes */}
+          {isPracticeMode && (
+            <div className="mb-4">
+              <label className="text-sm font-medium text-foreground mb-2 block">
+                Year Range (optional)
               </label>
-              <div className="grid grid-cols-3 gap-2">
-                {TIME_OPTIONS.map(option => (
+              <div className="flex gap-2 items-center">
+                <select
+                  value={selectedYears.start || '2000'}
+                  onChange={(e) => setSelectedYears(prev => ({ ...prev, start: e.target.value }))}
+                  className="flex-1 p-2 rounded-lg border border-border bg-background text-sm"
+                >
+                  {YEARS.map(year => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+                <span className="text-muted-foreground">to</span>
+                <select
+                  value={selectedYears.end || '2025'}
+                  onChange={(e) => setSelectedYears(prev => ({ ...prev, end: e.target.value }))}
+                  className="flex-1 p-2 rounded-lg border border-border bg-background text-sm"
+                >
+                  {YEARS.map(year => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+
+          {/* Time selection for practice modes */}
+          {isPracticeMode && (
+            <div className="mb-4">
+              <label className="text-sm font-medium text-foreground mb-2 block">
+                Practice Time
+              </label>
+              <div className="grid grid-cols-4 gap-2">
+                {TIME_OPTIONS.slice(0, 4).map(option => (
                   <button
                     key={option.value}
                     onClick={() => setSelectedDuration(option.value)}
-                    className={`p-3 rounded-lg border-2 text-center font-medium transition-all ${
+                    className={`p-2 rounded-lg border-2 text-center text-sm font-medium transition-all ${
+                      selectedDuration === option.value
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+              <div className="grid grid-cols-3 gap-2 mt-2">
+                {TIME_OPTIONS.slice(4).map(option => (
+                  <button
+                    key={option.value}
+                    onClick={() => setSelectedDuration(option.value)}
+                    className={`p-2 rounded-lg border-2 text-center text-sm font-medium transition-all ${
                       selectedDuration === option.value
                         ? 'border-primary bg-primary/10 text-primary'
                         : 'border-border hover:border-primary/50'
@@ -415,32 +458,32 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
           )}
 
           {/* Quiz mode selection */}
-          <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="grid grid-cols-2 gap-3 mb-3">
             <motion.button
               whileTap={{ scale: 0.98 }}
               onClick={() => startQuiz('practice')}
-              disabled={quizType === 'subject' && selectedSubjects.length === 0}
-              className="p-4 rounded-xl border-2 border-primary bg-primary/10 hover:bg-primary/20 transition-all disabled:opacity-50"
+              disabled={isPracticeMode && selectedSubjects.length === 0}
+              className="p-3 rounded-xl border-2 border-primary bg-primary/10 hover:bg-primary/20 transition-all disabled:opacity-50"
             >
-              <div className="text-2xl mb-2">📖</div>
-              <h4 className="font-bold text-primary">Practice</h4>
-              <p className="text-xs text-muted-foreground mt-1">See answers after each</p>
+              <div className="text-xl mb-1">📖</div>
+              <h4 className="font-bold text-primary text-sm">Practice</h4>
+              <p className="text-xs text-muted-foreground">See answers after each</p>
             </motion.button>
 
             <motion.button
               whileTap={{ scale: 0.98 }}
               onClick={() => startQuiz('exam')}
-              disabled={quizType === 'subject' && selectedSubjects.length === 0}
-              className="p-4 rounded-xl border-2 border-orange-500 bg-orange-500/10 hover:bg-orange-500/20 transition-all disabled:opacity-50"
+              disabled={isPracticeMode && selectedSubjects.length === 0}
+              className="p-3 rounded-xl border-2 border-orange-500 bg-orange-500/10 hover:bg-orange-500/20 transition-all disabled:opacity-50"
             >
-              <div className="text-2xl mb-2">🎓</div>
-              <h4 className="font-bold text-orange-500">Exam</h4>
-              <p className="text-xs text-muted-foreground mt-1">Like real JAMB CBT</p>
+              <div className="text-xl mb-1">🎓</div>
+              <h4 className="font-bold text-orange-500 text-sm">Exam</h4>
+              <p className="text-xs text-muted-foreground">Like real JAMB</p>
             </motion.button>
           </div>
 
-          <Button variant="ghost" className="w-full text-muted-foreground" onClick={onExit}>
-            <ChevronLeft className="w-4 h-4 mr-1" /> Go Back
+          <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={onExit}>
+            <ChevronLeft className="w-4 h-4 mr-1" /> Back
           </Button>
         </motion.div>
       </div>

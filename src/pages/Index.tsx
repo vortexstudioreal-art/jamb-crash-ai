@@ -26,7 +26,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, User, Timer } from 'lucide-react';
+import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, User } from 'lucide-react';
 
 type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'demo' | 'study-plan' | 'study-materials';
 type QuizType = 'full' | 'mini' | 'subject' | 'timed-practice' | 'demo';
@@ -520,46 +520,36 @@ const Index = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="grid grid-cols-2 gap-3 mb-4"
+                className="grid grid-cols-3 gap-3 mb-4"
               >
                 <Button
                   variant="outline"
-                  className="h-auto py-5 flex flex-col gap-1.5 hover:border-primary hover:bg-primary/5"
+                  className="h-auto py-4 flex flex-col gap-1 hover:border-primary hover:bg-primary/5"
                   onClick={() => handleStartQuiz('full')}
                 >
-                  <Play className="w-7 h-7 text-primary" />
+                  <Play className="w-6 h-6 text-primary" />
                   <span className="font-bold text-sm">Full Quiz</span>
-                  <span className="text-xs text-muted-foreground">60 Qs • 70 min</span>
+                  <span className="text-xs text-muted-foreground">60 Qs</span>
                 </Button>
                 
                 <Button
                   variant="outline"
-                  className="h-auto py-5 flex flex-col gap-1.5 hover:border-yellow-500 hover:bg-yellow-500/5"
+                  className="h-auto py-4 flex flex-col gap-1 hover:border-yellow-500 hover:bg-yellow-500/5"
                   onClick={() => handleStartQuiz('mini')}
                 >
-                  <Zap className="w-7 h-7 text-yellow-500" />
+                  <Zap className="w-6 h-6 text-yellow-500" />
                   <span className="font-bold text-sm">Mini Quiz</span>
-                  <span className="text-xs text-muted-foreground">20 Qs • 30 min</span>
+                  <span className="text-xs text-muted-foreground">20 Qs</span>
                 </Button>
                 
                 <Button
                   variant="outline"
-                  className="h-auto py-5 flex flex-col gap-1.5 hover:border-purple-500 hover:bg-purple-500/5"
+                  className="h-auto py-4 flex flex-col gap-1 hover:border-purple-500 hover:bg-purple-500/5"
                   onClick={() => handleStartQuiz('subject')}
                 >
-                  <BookOpen className="w-7 h-7 text-purple-500" />
-                  <span className="font-bold text-sm">Practice by Subject</span>
-                  <span className="text-xs text-muted-foreground">Multi-select • Untimed</span>
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  className="h-auto py-5 flex flex-col gap-1.5 hover:border-orange-500 hover:bg-orange-500/5"
-                  onClick={() => handleStartQuiz('timed-practice')}
-                >
-                  <Timer className="w-7 h-7 text-orange-500" />
-                  <span className="font-bold text-sm">Timed Practice</span>
-                  <span className="text-xs text-muted-foreground">5-60 min sessions</span>
+                  <BookOpen className="w-6 h-6 text-purple-500" />
+                  <span className="font-bold text-sm">Practice</span>
+                  <span className="text-xs text-muted-foreground">Custom</span>
                 </Button>
               </motion.div>
 
@@ -572,22 +562,22 @@ const Index = () => {
               >
                 <Button
                   variant="outline"
-                  className="h-auto py-5 flex flex-col gap-1.5 hover:border-blue-500 hover:bg-blue-500/5"
+                  className="h-auto py-4 flex flex-col gap-1 hover:border-blue-500 hover:bg-blue-500/5"
                   onClick={() => setCurrentStep('upload')}
                 >
-                  <FileText className="w-7 h-7 text-blue-500" />
+                  <FileText className="w-6 h-6 text-blue-500" />
                   <span className="font-bold text-sm">Upload PDF</span>
-                  <span className="text-xs text-muted-foreground">AI extraction ✨</span>
+                  <span className="text-xs text-muted-foreground">AI extraction</span>
                 </Button>
                 
                 <Button
                   variant="outline"
-                  className="h-auto py-5 flex flex-col gap-1.5 hover:border-green-500 hover:bg-green-500/5"
+                  className="h-auto py-4 flex flex-col gap-1 hover:border-green-500 hover:bg-green-500/5"
                   onClick={handleGenerateStudyPlan}
                 >
-                  <Target className="w-7 h-7 text-green-500" />
+                  <Target className="w-6 h-6 text-green-500" />
                   <span className="font-bold text-sm">Study Plan</span>
-                  <span className="text-xs text-muted-foreground">48-72hr timetable</span>
+                  <span className="text-xs text-muted-foreground">Personalized</span>
                 </Button>
               </motion.div>
 

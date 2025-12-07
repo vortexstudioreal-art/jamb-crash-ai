@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MessageCircle, Bell, CheckCircle } from 'lucide-react';
+import { MessageCircle, Bell, CheckCircle, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,12 +9,39 @@ import { toast } from 'sonner';
 
 interface WhatsAppReminderProps {
   userEmail: string;
+  onSetupComplete?: (phoneNumber: string) => void;
 }
 
-export const WhatsAppReminder = ({ userEmail }: WhatsAppReminderProps) => {
+const SETTINGS_STORAGE_KEY = 'jamb_user_settings';
+
+export const WhatsAppReminder = ({ userEmail, onSetupComplete }: WhatsAppReminderProps) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSetup, setIsSetup] = useState(false);
+  const [savedNumber, setSavedNumber] = useState('');
+
+  // Check if already setup
+  useEffect(() => {
+    const checkExisting = async () => {
+      try {
+        const { data } = await supabase
+          .from('whatsapp_reminders')
+          .select('phone_number, is_active')
+          .eq('email', userEmail)
+          .maybeSingle();
+        
+        if (data?.is_active) {
+          setIsSetup(true);
+          setSavedNumber(data.phone_number);
+          setPhoneNumber(data.phone_number.replace('+234', ''));
+        }
+      } catch (err) {
+        console.error('Error checking WhatsApp setup:', err);
+      }
+    };
+    
+    if (userEmail) checkExisting();
+  }, [userEmail]);
 
   const handleSetup = async () => {
     if (!phoneNumber || phoneNumber.length < 10) {
@@ -23,22 +50,59 @@ export const WhatsAppReminder = ({ userEmail }: WhatsAppReminderProps) => {
     }
 
     setIsSubmitting(true);
+    const fullNumber = phoneNumber.startsWith('+') ? phoneNumber : `+234${phoneNumber}`;
+    
     try {
-      const { error } = await supabase
+      // First check if record exists
+      const { data: existing } = await supabase
         .from('whatsapp_reminders')
-        .upsert({
-          email: userEmail,
-          phone_number: phoneNumber.startsWith('+') ? phoneNumber : `+234${phoneNumber}`,
-          is_active: true,
-        }, { onConflict: 'email' });
+        .select('id')
+        .eq('email', userEmail)
+        .maybeSingle();
+
+      let error;
+      if (existing) {
+        // Update existing
+        const result = await supabase
+          .from('whatsapp_reminders')
+          .update({
+            phone_number: fullNumber,
+            is_active: true,
+            updated_at: new Date().toISOString()
+          })
+          .eq('email', userEmail);
+        error = result.error;
+      } else {
+        // Insert new
+        const result = await supabase
+          .from('whatsapp_reminders')
+          .insert({
+            email: userEmail,
+            phone_number: fullNumber,
+            is_active: true,
+          });
+        error = result.error;
+      }
 
       if (error) throw error;
 
+      // Save to localStorage for Settings persistence
+      const settingsKey = `${SETTINGS_STORAGE_KEY}_${userEmail}`;
+      const existingSettings = localStorage.getItem(settingsKey);
+      const settings = existingSettings ? JSON.parse(existingSettings) : {};
+      localStorage.setItem(settingsKey, JSON.stringify({
+        ...settings,
+        whatsappNumber: fullNumber,
+        whatsappEnabled: true
+      }));
+
       setIsSetup(true);
-      toast.success('WhatsApp reminders activated!');
+      setSavedNumber(fullNumber);
+      onSetupComplete?.(fullNumber);
+      toast.success('WhatsApp reminders activated! 🎉');
     } catch (err) {
       console.error('Error setting up WhatsApp:', err);
-      toast.error('Failed to setup reminders');
+      toast.error('Failed to setup reminders. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -65,7 +129,7 @@ export const WhatsAppReminder = ({ userEmail }: WhatsAppReminderProps) => {
         </p>
         <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/30">
           <p className="text-sm text-green-600 font-medium">
-            📱 WhatsApp: +234{phoneNumber}
+            📱 WhatsApp: {savedNumber}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
             First reminder coming tomorrow! 🎯

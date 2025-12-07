@@ -41,8 +41,14 @@ const SUBJECT_TOPICS: Record<string, string[]> = {
   accounting: ['Financial Statements', 'Double Entry', 'Trial Balance', 'Depreciation', 'Partnership', 'Company Accounts'],
   commerce: ['Trade', 'Banking', 'Insurance', 'Transport', 'Business Organizations', 'Marketing'],
   crs: ['Old Testament', 'New Testament', 'Christian Ethics', 'Church History', 'Parables', 'Epistles'],
+  irs: ['Quran Studies', 'Hadith', 'Fiqh', 'Islamic History', 'Tawheed', 'Islamic Ethics', 'Pillars of Islam'],
   agricultural_science: ['Soil Science', 'Crop Production', 'Animal Husbandry', 'Farm Management', 'Pests & Diseases'],
 };
+
+interface QuizPerformance {
+  subject: string;
+  accuracy: number;
+}
 
 export const StudyPlanGenerator = ({
   userEmail,
@@ -51,8 +57,9 @@ export const StudyPlanGenerator = ({
   hoursPerDay = 4,
   weakestSubject,
   examDate,
-  onBack
-}: StudyPlanGeneratorProps) => {
+  onBack,
+  quizPerformance = []
+}: StudyPlanGeneratorProps & { quizPerformance?: QuizPerformance[] }) => {
   const [isGenerating, setIsGenerating] = useState(true);
   const [progress, setProgress] = useState(0);
   const [plan, setPlan] = useState<DayPlan[]>([]);
