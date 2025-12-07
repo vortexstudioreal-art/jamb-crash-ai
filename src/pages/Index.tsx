@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
+import { DashboardHeader } from '@/components/DashboardHeader';
 import { HeroSection } from '@/components/HeroSection';
 import { HowItWorksSection } from '@/components/HowItWorksSection';
 import { PricingSection } from '@/components/PricingSection';
@@ -17,6 +18,7 @@ import { TimedQuiz } from '@/components/TimedQuiz';
 import { QuizResults } from '@/components/QuizResults';
 import { StudyStats } from '@/components/StudyStats';
 import { StudyPlanGenerator } from '@/components/StudyPlanGenerator';
+import { StudyMaterials } from '@/components/StudyMaterials';
 import { Footer } from '@/components/Footer';
 import { BackButton } from '@/components/BackButton';
 import { useAuth } from '@/contexts/AuthContext';
@@ -42,17 +44,21 @@ const plans = {
   premium: { name: 'Premium', price: 30000 },
 };
 
-// Bypass emails for immediate access (fallback check when async state hasn't resolved)
+// Bypass emails for immediate access
 const OWNER_EMAIL = 'saeedabdulbasit933@gmail.com';
 const COLLABORATOR_EMAILS = [
   'loaborejim@gmail.com',
   'favourgoodnews@gmail.com',
   'onuchionwuegbusi@gmail.com',
   'muzzyothman@gmail.com',
-  'muzzyothmam@gmail.com'  // Both spelling variants
+  'muzzyothmam@gmail.com'
 ];
 const BYPASS_EMAILS = [OWNER_EMAIL, ...COLLABORATOR_EMAILS];
 const BYPASS_STORAGE_KEY = 'jamb_bypass_email';
+const DASHBOARD_STATE_KEY = 'jamb_dashboard_state';
+
+// Default subjects when none selected
+const DEFAULT_SUBJECTS = ['english', 'mathematics', 'physics', 'chemistry'];
 
 // Helper to get bypass email from localStorage
 const getBypassEmail = (): string | null => {
@@ -61,6 +67,17 @@ const getBypassEmail = (): string | null => {
     return stored.toLowerCase();
   }
   return null;
+};
+
+// Helper to persist dashboard state
+const saveDashboardState = (step: Step) => {
+  if (['dashboard', 'quiz', 'quiz-results', 'study-plan', 'upload'].includes(step)) {
+    localStorage.setItem(DASHBOARD_STATE_KEY, 'dashboard');
+  }
+};
+
+const getSavedDashboardState = (): boolean => {
+  return localStorage.getItem(DASHBOARD_STATE_KEY) === 'dashboard';
 };
 
 const Index = () => {
@@ -73,6 +90,7 @@ const Index = () => {
   const [quizType, setQuizType] = useState<QuizType>('full');
   const [quizResults, setQuizResults] = useState<any>(null);
   const [highlightStandard, setHighlightStandard] = useState(false);
+  const [weakSubjectFromQuiz, setWeakSubjectFromQuiz] = useState<string | null>(null);
   
   const { user, isLoading, hasAccess, isAdmin, isOwner, userRole, signOut, refreshAccess } = useAuth();
   const navigate = useNavigate();
@@ -95,11 +113,15 @@ const Index = () => {
   // Effective owner check
   const effectiveOwner = isOwner || isBypassOwner;
 
-  // Load user subjects (no auto-redirect - users see landing page first)
+  // ALWAYS have subjects available - use defaults if none selected
+  const effectiveSubjects = userSubjects.length > 0 ? userSubjects : DEFAULT_SUBJECTS;
+
+  // Load user subjects and restore dashboard state
   useEffect(() => {
-    const loadUserSubjects = async () => {
+    const loadUserData = async () => {
       if (!userEmail || isLoading) return;
       
+      // Load subjects
       const { data } = await supabase
         .from('user_subjects')
         .select('subjects')
@@ -109,49 +131,92 @@ const Index = () => {
       if (data?.subjects) {
         setUserSubjects(data.subjects as string[]);
       }
+
+      // Load weak subject from quiz history
+      const { data: quizData } = await supabase
+        .from('quiz_attempts')
+        .select('subjects, correct_answers, total_questions')
+        .eq('email', userEmail)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (quizData && quizData.length > 0) {
+        // Analyze to find weak subject
+        const subjectScores: Record<string, { correct: number; total: number }> = {};
+        quizData.forEach(attempt => {
+          const subjects = attempt.subjects as string[];
+          const scorePerSubject = attempt.correct_answers / subjects.length;
+          const totalPerSubject = attempt.total_questions / subjects.length;
+          subjects.forEach(s => {
+            if (!subjectScores[s]) subjectScores[s] = { correct: 0, total: 0 };
+            subjectScores[s].correct += scorePerSubject;
+            subjectScores[s].total += totalPerSubject;
+          });
+        });
+
+        let worstSubject = '';
+        let worstRate = 1;
+        Object.entries(subjectScores).forEach(([subject, scores]) => {
+          const rate = scores.correct / scores.total;
+          if (rate < worstRate) {
+            worstRate = rate;
+            worstSubject = subject;
+          }
+        });
+        if (worstSubject) setWeakSubjectFromQuiz(worstSubject);
+      }
+
+      // Restore dashboard state if user has access and was on dashboard
+      if (effectiveAccess && getSavedDashboardState()) {
+        setCurrentStep('dashboard');
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }
     };
     
-    loadUserSubjects();
-  }, [userEmail, isLoading]);
+    loadUserData();
+  }, [userEmail, isLoading, effectiveAccess]);
 
-  // BULLETPROOF: Check for step param from payment success redirect or bypass login
-  // BULLETPROOF: Bypass users go STRAIGHT to dashboard - no subject selection needed
+  // Handle URL params and bypass login
   useEffect(() => {
     const step = searchParams.get('step');
     
-    // BYPASS USERS: Skip everything, go straight to dashboard
-    if (step === 'dashboard' && isBypassUser && userEmail) {
+    if (step === 'dashboard' && (isBypassUser || effectiveAccess) && userEmail) {
       setCurrentStep('dashboard');
       setSearchParams({});
+      window.scrollTo({ top: 0, behavior: 'instant' });
       return;
     }
     
-    // Wait for loading to complete for non-bypass users
     if (isLoading) return;
     
     if (step === 'upload' && userEmail) {
-      setCurrentStep('subject-select');
-      setSearchParams({});
-    } else if (step === 'dashboard' && userEmail) {
-      if (effectiveAccess) {
-        if (userSubjects.length > 0) {
-          setCurrentStep('dashboard');
-        } else {
-          setCurrentStep('subject-select');
-        }
-        setSearchParams({});
+      if (userSubjects.length === 0 && !isBypassUser) {
+        setCurrentStep('subject-select');
+      } else {
+        setCurrentStep('upload');
       }
+      setSearchParams({});
+    } else if (step === 'dashboard' && userEmail && effectiveAccess) {
+      setCurrentStep('dashboard');
+      setSearchParams({});
+      window.scrollTo({ top: 0, behavior: 'instant' });
     }
   }, [searchParams, setSearchParams, userEmail, userSubjects.length, isLoading, effectiveAccess, isBypassUser]);
 
+  // Save dashboard state when step changes
+  useEffect(() => {
+    saveDashboardState(currentStep);
+    if (currentStep === 'dashboard') {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [currentStep]);
+
   const handleGetStarted = () => {
-    // Always scroll to pricing and highlight Standard package
-    // This allows owner/collaborator to test the scroll behavior too
     setHighlightStandard(true);
     setTimeout(() => {
       const pricingSection = document.getElementById('pricing');
       if (pricingSection) {
-        const headerOffset = 80; // Account for fixed header
+        const headerOffset = 80;
         const elementPosition = pricingSection.getBoundingClientRect().top;
         const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
         window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
@@ -168,30 +233,28 @@ const Index = () => {
     const planKey = plan as keyof typeof plans;
     setSelectedPlan(planKey);
     
-    // BULLETPROOF: Bypass users skip EVERYTHING - straight to dashboard
     if (isBypassUser) {
       toast.success(isBypassOwner ? 'Owner access granted! 👑' : 'Collaborator access granted! 🛡️');
       setCurrentStep('dashboard');
+      window.scrollTo({ top: 0, behavior: 'instant' });
       return;
     }
     
-    // Already has access - go to dashboard
     if (effectiveAccess) {
       if (userSubjects.length === 0) {
         setCurrentStep('subject-select');
       } else {
         setCurrentStep('dashboard');
+        window.scrollTo({ top: 0, behavior: 'instant' });
       }
       return;
     }
     
-    // Needs to log in first
     if (!user) {
       navigate('/auth', { state: { returnTo: '/', selectedPlan: planKey } });
       return;
     }
     
-    // Open payment modal for unpaid users
     setIsPaymentModalOpen(true);
   };
 
@@ -200,48 +263,52 @@ const Index = () => {
     await refreshAccess();
     toast.success('Payment successful! 🎉 Let\'s pick your subjects!');
     setCurrentStep('subject-select');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   const handleSubjectsSelected = (subjects: string[]) => {
     setUserSubjects(subjects);
-    setCurrentStep('upload');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setCurrentStep('dashboard');
+    window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   const handleUploadComplete = (files: File[]) => {
     toast.success(`${files.length} file(s) ready for AI magic! ✨`);
     setCurrentStep('personalize');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   const handleFormSubmit = (data: unknown) => {
     setPersonalizationData(data as FormData);
     toast.success('Creating your personalized study plan... 🚀');
     setCurrentStep('study-plan');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   const handleGenerateStudyPlan = () => {
     setCurrentStep('study-plan');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   const handleStartQuiz = (type: QuizType) => {
     setQuizType(type);
     setCurrentStep('quiz');
+    window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   const handleQuizComplete = (results: any) => {
     setQuizResults(results);
     setCurrentStep('quiz-results');
+    window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   const handleStartTrial = () => {
     setCurrentStep('demo');
+    window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   const handleUpgradeClick = () => {
+    localStorage.removeItem(DASHBOARD_STATE_KEY);
     setCurrentStep('landing');
     setHighlightStandard(true);
     setTimeout(() => {
@@ -256,8 +323,8 @@ const Index = () => {
   };
 
   const handleSignOut = async () => {
-    // Clear bypass email from localStorage
     localStorage.removeItem(BYPASS_STORAGE_KEY);
+    localStorage.removeItem(DASHBOARD_STATE_KEY);
     await signOut();
     setCurrentStep('landing');
     setUserSubjects([]);
@@ -266,38 +333,57 @@ const Index = () => {
     toast.success('Signed out successfully');
   };
 
-  // Default subjects for bypass users who haven't selected
-  const DEFAULT_SUBJECTS = ['english', 'mathematics', 'physics', 'chemistry'];
-  const effectiveSubjects = userSubjects.length > 0 ? userSubjects : (isBypassUser ? DEFAULT_SUBJECTS : []);
+  const handleBackToDashboard = () => {
+    setCurrentStep('dashboard');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
 
-  // Quiz step - bypass users can use default subjects if none selected
-  if (currentStep === 'quiz' && userEmail && (userSubjects.length > 0 || isBypassUser)) {
+  // Quiz step
+  if (currentStep === 'quiz' && userEmail) {
     return (
-      <>
-        <BackButton onClick={() => setCurrentStep('dashboard')} />
-        <TimedQuiz
+      <div className="min-h-screen bg-background">
+        <DashboardHeader 
           userEmail={userEmail}
-          subjects={effectiveSubjects}
-          quizType={quizType}
-          onComplete={handleQuizComplete}
-          onExit={() => setCurrentStep('dashboard')}
+          isOwner={isBypassOwner}
+          isCollaborator={isBypassCollaborator}
+          userRole={userRole}
+          onSignOut={handleSignOut}
         />
-      </>
+        <div className="pt-16">
+          <BackButton onClick={handleBackToDashboard} />
+          <TimedQuiz
+            userEmail={userEmail}
+            subjects={effectiveSubjects}
+            quizType={quizType}
+            onComplete={handleQuizComplete}
+            onExit={handleBackToDashboard}
+          />
+        </div>
+      </div>
     );
   }
 
   // Quiz results step
   if (currentStep === 'quiz-results' && quizResults) {
     return (
-      <>
-        <BackButton onClick={() => setCurrentStep('dashboard')} />
-        <QuizResults
-          results={quizResults}
-          quizType={quizType}
-          onRetry={() => setCurrentStep('dashboard')}
-          onHome={() => setCurrentStep('dashboard')}
+      <div className="min-h-screen bg-background">
+        <DashboardHeader 
+          userEmail={userEmail || ''}
+          isOwner={isBypassOwner}
+          isCollaborator={isBypassCollaborator}
+          userRole={userRole}
+          onSignOut={handleSignOut}
         />
-      </>
+        <div className="pt-16">
+          <BackButton onClick={handleBackToDashboard} />
+          <QuizResults
+            results={quizResults}
+            quizType={quizType}
+            onRetry={handleBackToDashboard}
+            onHome={handleBackToDashboard}
+          />
+        </div>
+      </div>
     );
   }
 
@@ -314,11 +400,9 @@ const Index = () => {
     );
   }
 
-  // Subject selection step (after payment or for owner)
-  // BYPASS USERS: Force redirect to dashboard - they should NEVER see this screen
+  // Subject selection step
   if (currentStep === 'subject-select' && userEmail) {
     if (isBypassUser) {
-      // Force bypass users to dashboard immediately
       setCurrentStep('dashboard');
       return null;
     }
@@ -334,268 +418,291 @@ const Index = () => {
     );
   }
 
-  // Study Plan Generator step - bypass users can use default subjects
-  if (currentStep === 'study-plan' && userEmail && (userSubjects.length > 0 || isBypassUser)) {
+  // Study Plan Generator step
+  if (currentStep === 'study-plan' && userEmail) {
     return (
-      <>
-        <BackButton onClick={() => setCurrentStep('dashboard')} />
-        <StudyPlanGenerator
+      <div className="min-h-screen bg-background">
+        <DashboardHeader 
           userEmail={userEmail}
-          subjects={effectiveSubjects}
-          targetScore={personalizationData?.targetScore ? parseInt(personalizationData.targetScore) : 300}
-          hoursPerDay={personalizationData?.hoursPerDay ? parseInt(personalizationData.hoursPerDay) : 4}
-          weakestSubject={personalizationData?.weakestSubject}
-          examDate={personalizationData?.examDate}
-          onBack={() => setCurrentStep('dashboard')}
+          isOwner={isBypassOwner}
+          isCollaborator={isBypassCollaborator}
+          userRole={userRole}
+          onSignOut={handleSignOut}
         />
-      </>
+        <div className="pt-16">
+          <BackButton onClick={handleBackToDashboard} />
+          <StudyPlanGenerator
+            userEmail={userEmail}
+            subjects={effectiveSubjects}
+            targetScore={personalizationData?.targetScore ? parseInt(personalizationData.targetScore) : 300}
+            hoursPerDay={personalizationData?.hoursPerDay ? parseInt(personalizationData.hoursPerDay) : 4}
+            weakestSubject={weakSubjectFromQuiz || personalizationData?.weakestSubject}
+            examDate={personalizationData?.examDate}
+            onBack={handleBackToDashboard}
+          />
+        </div>
+      </div>
     );
   }
 
-  // Protected steps require access
-  const isProtectedStep = ['upload', 'personalize', 'processing', 'dashboard', 'quiz', 'quiz-results', 'study-plan'].includes(currentStep);
+  // Upload step
+  if (currentStep === 'upload' && userEmail) {
+    return (
+      <div className="min-h-screen bg-background">
+        <DashboardHeader 
+          userEmail={userEmail}
+          isOwner={isBypassOwner}
+          isCollaborator={isBypassCollaborator}
+          userRole={userRole}
+          onSignOut={handleSignOut}
+        />
+        <div className="pt-16">
+          <BackButton onClick={handleBackToDashboard} />
+          <UploadSection onUploadComplete={handleUploadComplete} />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
-  if (isProtectedStep) {
-    // For bypass users, skip the loading state entirely - they always have access
+  // Personalize step
+  if (currentStep === 'personalize' && userEmail) {
+    return (
+      <div className="min-h-screen bg-background">
+        <DashboardHeader 
+          userEmail={userEmail}
+          isOwner={isBypassOwner}
+          isCollaborator={isBypassCollaborator}
+          userRole={userRole}
+          onSignOut={handleSignOut}
+        />
+        <div className="pt-16">
+          <BackButton onClick={handleBackToDashboard} />
+          <PersonalizationForm onSubmit={handleFormSubmit} />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Dashboard step
+  if (currentStep === 'dashboard' && userEmail) {
     const showLoading = isBypassUser ? false : isLoading;
+    
     return (
       <PaywallGate hasAccess={effectiveAccess} isLoading={showLoading} onUpgrade={handleUpgradeClick}>
         <div className="min-h-screen bg-background">
-          <Header onGetStarted={handleGetStarted} hasAccess={effectiveAccess} />
-          {/* Back Button */}
-          <BackButton onClick={() => setCurrentStep(currentStep === 'dashboard' ? 'landing' : 'dashboard')} />
-          <div className="pt-16">
-            {/* Admin Badge and Sign Out - show for bypass users too */}
-            {(user || isBypassUser) && (
-              <div className="fixed top-20 right-4 z-50 flex items-center gap-2">
-                {(effectiveAdmin || isBypassUser) && (
-                  <AdminBadge 
-                    role={isBypassOwner ? 'owner' : (isBypassCollaborator ? 'collaborator' : userRole)} 
-                    linkToAdmin={isBypassOwner} 
-                  />
-                )}
+          <DashboardHeader 
+            userEmail={userEmail}
+            isOwner={isBypassOwner}
+            isCollaborator={isBypassCollaborator}
+            userRole={userRole}
+            onSignOut={handleSignOut}
+          />
+          <div className="pt-20 pb-8 px-4">
+            <div className="max-w-6xl mx-auto">
+              {/* Welcome Header */}
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center mb-8"
+              >
+                <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
+                  Welcome back, future uni star! 🌟
+                </h1>
+                <p className="text-muted-foreground">
+                  Your personalized JAMB prep dashboard. Let's crush that 300+!
+                </p>
+              </motion.div>
+
+              {/* Quick Actions - The 5 Main Buttons */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6"
+              >
                 <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleSignOut}
-                  className="text-muted-foreground hover:text-foreground"
+                  variant="outline"
+                  className="h-auto py-6 flex flex-col gap-2 hover:border-primary hover:bg-primary/5"
+                  onClick={() => handleStartQuiz('full')}
                 >
-                  <LogOut className="w-4 h-4" />
+                  <Play className="w-8 h-8 text-primary" />
+                  <span className="font-bold">Full Quiz</span>
+                  <span className="text-xs text-muted-foreground">60 questions • 70 min</span>
                 </Button>
-              </div>
-            )}
-            
-            {currentStep === 'upload' && (
-              <UploadSection onUploadComplete={handleUploadComplete} />
-            )}
-            
-            {currentStep === 'personalize' && (
-              <PersonalizationForm onSubmit={handleFormSubmit} />
-            )}
-            
-            {currentStep === 'processing' && (
-              <div className="min-h-[60vh] flex items-center justify-center">
-                <div className="text-center">
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-                    className="w-20 h-20 rounded-full gradient-primary mx-auto mb-6 flex items-center justify-center"
-                  >
-                    <span className="text-3xl">🚀</span>
-                  </motion.div>
-                  <h2 className="text-2xl font-bold text-foreground mb-2">Processing Your Materials</h2>
-                  <p className="text-muted-foreground">Our AI is analyzing your past questions...</p>
-                  <p className="text-sm text-primary mt-2">You're crushing this! 💪</p>
-                </div>
-              </div>
-            )}
+                
+                <Button
+                  variant="outline"
+                  className="h-auto py-6 flex flex-col gap-2 hover:border-yellow-500 hover:bg-yellow-500/5"
+                  onClick={() => handleStartQuiz('mini')}
+                >
+                  <Zap className="w-8 h-8 text-yellow-500" />
+                  <span className="font-bold">Mini Quiz</span>
+                  <span className="text-xs text-muted-foreground">20 questions • 30 min</span>
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  className="h-auto py-6 flex flex-col gap-2 hover:border-blue-500 hover:bg-blue-500/5"
+                  onClick={() => setCurrentStep('upload')}
+                >
+                  <FileText className="w-8 h-8 text-blue-500" />
+                  <span className="font-bold">Upload PDF</span>
+                  <span className="text-xs text-muted-foreground">AI magic ✨</span>
+                </Button>
+              </motion.div>
 
-            {currentStep === 'dashboard' && userEmail && (
-              <div className="py-8 px-4">
-                <div className="max-w-6xl mx-auto">
-                  {/* Header with Settings */}
-                  <motion.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex items-center justify-between mb-8"
-                  >
-                    <div className="text-center flex-1">
-                      <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-                        Welcome back, future uni star! 🌟
-                      </h1>
-                      <p className="text-muted-foreground">
-                        Your personalized JAMB prep dashboard. Let's crush that 300+!
-                      </p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => navigate('/settings')}
-                      className="shrink-0"
-                    >
-                      <User className="w-5 h-5" />
-                    </Button>
-                  </motion.div>
-
-                  {/* Quick Actions */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6"
-                  >
-                    <Button
-                      variant="outline"
-                      className="h-auto py-6 flex flex-col gap-2"
-                      onClick={() => handleStartQuiz('full')}
-                    >
-                      <Play className="w-8 h-8 text-primary" />
-                      <span className="font-bold">Full Quiz</span>
-                      <span className="text-xs text-muted-foreground">60 questions • 70 min</span>
-                    </Button>
-                    
-                    <Button
-                      variant="outline"
-                      className="h-auto py-6 flex flex-col gap-2"
-                      onClick={() => handleStartQuiz('mini')}
-                    >
-                      <Zap className="w-8 h-8 text-yellow-500" />
-                      <span className="font-bold">Mini Quiz</span>
-                      <span className="text-xs text-muted-foreground">20 questions • 30 min</span>
-                    </Button>
-                    
-                    <Button
-                      variant="outline"
-                      className="h-auto py-6 flex flex-col gap-2"
-                      onClick={() => setCurrentStep('upload')}
-                    >
-                      <FileText className="w-8 h-8 text-blue-500" />
-                      <span className="font-bold">Upload PDF</span>
-                      <span className="text-xs text-muted-foreground">AI magic ✨</span>
-                    </Button>
-                  </motion.div>
-
-                  {/* Practice by Subject - Paid Only */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.15 }}
-                    className="mb-6"
-                  >
-                    <Button
-                      variant="outline"
-                      className="w-full h-auto py-6 flex flex-col gap-2 border-2 border-purple-500/50 hover:bg-purple-500/10 bg-gradient-to-r from-purple-500/5 to-primary/5"
-                      onClick={() => handleStartQuiz('subject')}
-                    >
-                      <div className="flex items-center gap-2">
-                        <BookOpen className="w-8 h-8 text-purple-500" />
-                        <span className="text-2xl">📚</span>
-                      </div>
-                      <span className="font-bold text-purple-600 text-lg">Practice by Subject & Year</span>
-                      <span className="text-xs text-muted-foreground">40 questions • Untimed • Instant feedback</span>
-                    </Button>
-                  </motion.div>
-
-                  {/* Generate Plan Button */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="mb-8"
-                  >
-                    <Button
-                      variant="outline"
-                      className="w-full h-auto py-6 flex flex-col gap-2 border-2 border-green-500/50 hover:bg-green-500/10"
-                      onClick={handleGenerateStudyPlan}
-                    >
-                      <Target className="w-8 h-8 text-green-500" />
-                      <span className="font-bold text-green-600">Generate Study Plan</span>
-                      <span className="text-xs text-muted-foreground">48-72hr personalized timetable</span>
-                    </Button>
-                  </motion.div>
-
-                  {/* Subject Tags */}
-                  {effectiveSubjects.length > 0 && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.2 }}
-                      className="flex flex-wrap gap-2 justify-center mb-8"
-                    >
-                      <span className="text-sm text-muted-foreground">Your subjects:</span>
-                      {effectiveSubjects.map(subject => (
-                        <span
-                          key={subject}
-                          className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium capitalize"
-                        >
-                          {subject.replace('_', ' ')}
-                        </span>
-                      ))}
-                    </motion.div>
-                  )}
-
-                  {/* Study Stats */}
-                  <div className="mb-8">
-                    <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-                      <BookOpen className="w-5 h-5 text-primary" />
-                      Your Study Stats 📊
-                    </h2>
-                    <StudyStats userEmail={userEmail} />
+              {/* Practice by Subject */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                className="mb-6"
+              >
+                <Button
+                  variant="outline"
+                  className="w-full h-auto py-6 flex flex-col gap-2 border-2 border-purple-500/50 hover:bg-purple-500/10 bg-gradient-to-r from-purple-500/5 to-primary/5"
+                  onClick={() => handleStartQuiz('subject')}
+                >
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="w-8 h-8 text-purple-500" />
+                    <span className="text-2xl">📚</span>
                   </div>
+                  <span className="font-bold text-purple-600 text-lg">Practice by Subject & Year</span>
+                  <span className="text-xs text-muted-foreground">40 questions • Untimed • Instant feedback</span>
+                </Button>
+              </motion.div>
 
-                  {/* Premium Dashboard Features */}
-                  <PremiumDashboard
-                    userEmail={userEmail}
-                    isAdmin={effectiveAdmin || isBypassUser}
-                    adminRole={isBypassOwner ? 'owner' : (isBypassCollaborator ? 'collaborator' : userRole)}
-                    targetScore={personalizationData?.targetScore ? parseInt(personalizationData.targetScore) : undefined}
-                    weakSubject={personalizationData?.weakestSubject}
-                  />
+              {/* Generate Study Plan */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="mb-8"
+              >
+                <Button
+                  variant="outline"
+                  className="w-full h-auto py-6 flex flex-col gap-2 border-2 border-green-500/50 hover:bg-green-500/10"
+                  onClick={handleGenerateStudyPlan}
+                >
+                  <Target className="w-8 h-8 text-green-500" />
+                  <span className="font-bold text-green-600">Generate Study Plan</span>
+                  <span className="text-xs text-muted-foreground">48-72hr personalized timetable</span>
+                </Button>
+              </motion.div>
 
-                  {/* UTME Countdown */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                    className="mt-8 bg-gradient-to-r from-primary/20 to-green-500/20 rounded-2xl p-6 text-center border border-primary/30"
-                  >
-                    <Calendar className="w-10 h-10 text-primary mx-auto mb-3" />
-                    <h3 className="text-xl font-bold text-foreground mb-1">2026 UTME Countdown</h3>
-                    <p className="text-muted-foreground mb-3">Stay focused, stay winning! 🔥</p>
-                    <div className="text-4xl font-bold text-primary">
-                      {Math.ceil((new Date('2026-04-01').getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-2">until UTME 2026</p>
-                  </motion.div>
+              {/* Subject Tags */}
+              {effectiveSubjects.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.25 }}
+                  className="flex flex-wrap gap-2 justify-center mb-8"
+                >
+                  <span className="text-sm text-muted-foreground">Your subjects:</span>
+                  {effectiveSubjects.map(subject => (
+                    <span
+                      key={subject}
+                      className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium capitalize"
+                    >
+                      {subject.replace('_', ' ')}
+                    </span>
+                  ))}
+                </motion.div>
+              )}
 
-                  {/* Motivational Quote */}
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.5 }}
-                    className="mt-8 text-center"
-                  >
-                    <p className="text-lg text-muted-foreground italic">
-                      "You got this, future uni star! Every question you practice brings you closer to that 300+!" 💪
-                    </p>
-                  </motion.div>
+              {/* Study Materials */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mb-8"
+              >
+                <StudyMaterials subjects={effectiveSubjects} />
+              </motion.div>
+
+              {/* Study Stats */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35 }}
+                className="mb-8"
+              >
+                <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-primary" />
+                  Your Study Stats 📊
+                </h2>
+                <StudyStats userEmail={userEmail} />
+              </motion.div>
+
+              {/* Premium Dashboard Features */}
+              <PremiumDashboard
+                userEmail={userEmail}
+                isAdmin={effectiveAdmin || isBypassUser}
+                adminRole={isBypassOwner ? 'owner' : (isBypassCollaborator ? 'collaborator' : userRole)}
+                targetScore={personalizationData?.targetScore ? parseInt(personalizationData.targetScore) : undefined}
+                weakSubject={weakSubjectFromQuiz || personalizationData?.weakestSubject}
+              />
+
+              {/* UTME Countdown */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="mt-8 bg-gradient-to-r from-primary/20 to-green-500/20 rounded-2xl p-6 text-center border border-primary/30"
+              >
+                <Calendar className="w-10 h-10 text-primary mx-auto mb-3" />
+                <h3 className="text-xl font-bold text-foreground mb-1">2026 UTME Countdown</h3>
+                <p className="text-muted-foreground mb-3">Stay focused, stay winning! 🔥</p>
+                <div className="text-4xl font-bold text-primary">
+                  {Math.ceil((new Date('2026-04-01').getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days
                 </div>
-              </div>
-            )}
+                <p className="text-sm text-muted-foreground mt-2">until UTME 2026</p>
+              </motion.div>
+
+              {/* AI Tips Based on Quiz Performance */}
+              {weakSubjectFromQuiz && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.45 }}
+                  className="mt-8 p-4 rounded-xl bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/30"
+                >
+                  <p className="text-lg text-foreground">
+                    💡 <span className="font-semibold">AI Tip:</span> Based on your quiz history, focus more on{' '}
+                    <span className="font-bold text-primary capitalize">{weakSubjectFromQuiz.replace('_', ' ')}</span>.{' '}
+                    Try 20 extra questions today to boost your score!
+                  </p>
+                </motion.div>
+              )}
+
+              {/* Motivational Quote */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="mt-8 text-center"
+              >
+                <p className="text-lg text-muted-foreground italic">
+                  "You got this, future uni star! Every question you practice brings you closer to that 300+!" 💪
+                </p>
+              </motion.div>
+            </div>
           </div>
-          {currentStep !== 'dashboard' && <Footer />}
         </div>
       </PaywallGate>
     );
   }
 
+  // Landing page
   const handleGoToDashboard = () => {
-    if (userSubjects.length === 0) {
+    if (userSubjects.length === 0 && !isBypassUser) {
       setCurrentStep('subject-select');
     } else {
       setCurrentStep('dashboard');
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   return (
