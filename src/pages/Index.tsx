@@ -24,7 +24,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut } from 'lucide-react';
+import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, User } from 'lucide-react';
 
 type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'demo' | 'study-plan';
 type QuizType = 'full' | 'mini' | 'subject';
@@ -308,8 +308,13 @@ const Index = () => {
   }
 
   // Subject selection step (after payment or for owner)
-  // NOTE: Bypass users should skip this entirely, but if they somehow get here, handle gracefully
+  // BYPASS USERS: Force redirect to dashboard - they should NEVER see this screen
   if (currentStep === 'subject-select' && userEmail) {
+    if (isBypassUser) {
+      // Force bypass users to dashboard immediately
+      setCurrentStep('dashboard');
+      return null;
+    }
     return (
       <>
         <BackButton onClick={() => setCurrentStep('landing')} />
@@ -401,18 +406,28 @@ const Index = () => {
             {currentStep === 'dashboard' && userEmail && (
               <div className="py-8 px-4">
                 <div className="max-w-6xl mx-auto">
-                  {/* Welcome Message */}
+                  {/* Header with Settings */}
                   <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-center mb-8"
+                    className="flex items-center justify-between mb-8"
                   >
-                    <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-                      Welcome back, future uni star! 🌟
-                    </h1>
-                    <p className="text-muted-foreground">
-                      Your personalized JAMB prep dashboard. Let's crush that 300+!
-                    </p>
+                    <div className="text-center flex-1">
+                      <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
+                        Welcome back, future uni star! 🌟
+                      </h1>
+                      <p className="text-muted-foreground">
+                        Your personalized JAMB prep dashboard. Let's crush that 300+!
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => navigate('/settings')}
+                      className="shrink-0"
+                    >
+                      <User className="w-5 h-5" />
+                    </Button>
                   </motion.div>
 
                   {/* Quick Actions */}
