@@ -499,6 +499,8 @@ const Index = () => {
             userRole={userRole}
             onSignOut={handleSignOut}
           />
+          {/* Back button to landing page */}
+          <BackButton onClick={() => setCurrentStep('landing')} />
           <div className="pt-20 pb-8 px-4">
             <div className="max-w-6xl mx-auto">
               {/* Welcome Header */}
