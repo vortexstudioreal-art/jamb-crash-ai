@@ -31,12 +31,10 @@ export const Header = ({ onGetStarted, hasAccess }: HeaderProps) => {
           </a>
         </nav>
 
-        {/* Hide Get Started for paid users */}
-        {!hasAccess && (
-          <Button variant="default" size="sm" onClick={onGetStarted}>
-            Get Started
-          </Button>
-        )}
+        {/* Get Started always visible - scrolls to pricing */}
+        <Button variant="default" size="sm" onClick={onGetStarted}>
+          Get Started
+        </Button>
       </div>
     </motion.header>
   );
