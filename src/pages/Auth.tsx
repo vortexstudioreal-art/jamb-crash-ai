@@ -12,6 +12,8 @@ const emailSchema = z.string().email('Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
 
 const OWNER_EMAIL = 'saeedabdulbasit933@gmail.com';
+const COLLABORATOR_EMAIL = 'muzzyothmam@gmail.com';
+const BYPASS_EMAILS = [OWNER_EMAIL, COLLABORATOR_EMAIL];
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -25,7 +27,10 @@ export default function Auth() {
   const { signIn, signUp, user, isLoading } = useAuth();
   const navigate = useNavigate();
 
-  const isOwnerEmail = email.toLowerCase().trim() === OWNER_EMAIL;
+  const normalizedEmail = email.toLowerCase().trim();
+  const isOwnerEmail = normalizedEmail === OWNER_EMAIL;
+  const isCollaboratorEmail = normalizedEmail === COLLABORATOR_EMAIL;
+  const isBypassEmail = BYPASS_EMAILS.includes(normalizedEmail);
 
   // Redirect if already logged in - use replace to prevent back button returning here
   useEffect(() => {
@@ -43,8 +48,8 @@ export default function Auth() {
       newErrors.email = emailResult.error.errors[0].message;
     }
     
-    // Owner doesn't need password validation
-    if (!isOwnerEmail) {
+    // Bypass emails don't need password validation
+    if (!isBypassEmail) {
       const passwordResult = passwordSchema.safeParse(password);
       if (!passwordResult.success) {
         newErrors.password = passwordResult.error.errors[0].message;
@@ -59,42 +64,44 @@ export default function Auth() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const OWNER_BYPASS_PASSWORD = 'OwnerSecure2024!@#';
+  const BYPASS_PASSWORD = 'BypassSecure2024!@#';
 
-  const handleOwnerLogin = async () => {
+  const handleBypassLogin = async () => {
+    const targetEmail = normalizedEmail;
+    const roleLabel = isOwnerEmail ? 'Owner' : 'Collaborator';
+    const emoji = isOwnerEmail ? '👑' : '🛡️';
+    
     // Step 1: Try to sign in with bypass password
-    const { error: signInError } = await signIn(email.trim(), OWNER_BYPASS_PASSWORD);
+    const { error: signInError } = await signIn(targetEmail, BYPASS_PASSWORD);
     
     if (!signInError) {
-      toast.success('Welcome back, Owner! 👑', { duration: 3000 });
+      toast.success(`Welcome back, ${roleLabel}! ${emoji}`, { duration: 3000 });
       navigate('/', { replace: true });
       return;
     }
     
-    // Step 2: If login fails, try to create the owner account
-    const { error: signUpError } = await signUp(email.trim(), OWNER_BYPASS_PASSWORD, 'Owner');
+    // Step 2: If login fails, try to create the account
+    const { error: signUpError } = await signUp(targetEmail, BYPASS_PASSWORD, roleLabel);
     
     if (!signUpError) {
       // Account created, now sign in
-      const { error: finalSignInError } = await signIn(email.trim(), OWNER_BYPASS_PASSWORD);
+      const { error: finalSignInError } = await signIn(targetEmail, BYPASS_PASSWORD);
       if (!finalSignInError) {
-        toast.success('Owner account activated! Welcome! 👑', { duration: 3000 });
+        toast.success(`${roleLabel} account activated! Welcome! ${emoji}`, { duration: 3000 });
         navigate('/', { replace: true });
         return;
       }
     }
     
-    // Step 3: If signup says already registered, the password might be different - update it
+    // Step 3: If signup says already registered, the password might be different
     if (signUpError?.message?.includes('already registered')) {
-      // Try with different common passwords or just show success anyway
-      // since the owner should have access regardless
-      toast.success('Owner verified! Redirecting... 👑', { duration: 2000 });
-      // Force navigation - the app will recognize owner email
+      // Force navigation - the app will recognize the email
+      toast.success(`${roleLabel} verified! Redirecting... ${emoji}`, { duration: 2000 });
       navigate('/', { replace: true });
       return;
     }
     
-    toast.error('Owner login issue. Please try again.');
+    toast.error(`${roleLabel} login issue. Please try again.`);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -105,9 +112,9 @@ export default function Auth() {
     setIsSubmitting(true);
     
     try {
-      // Special owner handling - instant login
-      if (isOwnerEmail && isLogin) {
-        await handleOwnerLogin();
+      // Special bypass handling - instant login for owner/collaborator
+      if (isBypassEmail && isLogin) {
+        await handleBypassLogin();
         return;
       }
 
@@ -222,12 +229,14 @@ export default function Auth() {
               )}
             </div>
             
-            {/* Hide password field for owner login - show special owner message instead */}
-            {isOwnerEmail && isLogin ? (
-              <div className="bg-gradient-to-r from-yellow-500/10 to-amber-500/10 border border-yellow-500/30 rounded-lg p-4">
-                <div className="flex items-center gap-2 text-yellow-600">
+            {/* Hide password field for bypass emails - show special message instead */}
+            {isBypassEmail && isLogin ? (
+              <div className={`bg-gradient-to-r ${isOwnerEmail ? 'from-yellow-500/10 to-amber-500/10 border-yellow-500/30' : 'from-gray-400/10 to-slate-400/10 border-gray-400/30'} border rounded-lg p-4`}>
+                <div className={`flex items-center gap-2 ${isOwnerEmail ? 'text-yellow-600' : 'text-gray-600'}`}>
                   <Sparkles className="w-5 h-5" />
-                  <span className="font-semibold">👑 Owner Detected!</span>
+                  <span className="font-semibold">
+                    {isOwnerEmail ? '👑 Owner Detected!' : '🛡️ Collaborator Detected!'}
+                  </span>
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
                   Click "Sign In" for instant access - no password needed.
