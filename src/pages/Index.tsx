@@ -115,16 +115,13 @@ const Index = () => {
   }, [userEmail, isLoading]);
 
   // BULLETPROOF: Check for step param from payment success redirect or bypass login
+  // BULLETPROOF: Bypass users go STRAIGHT to dashboard - no subject selection needed
   useEffect(() => {
     const step = searchParams.get('step');
     
-    // For bypass users, don't wait for isLoading - they should navigate immediately
+    // BYPASS USERS: Skip everything, go straight to dashboard
     if (step === 'dashboard' && isBypassUser && userEmail) {
-      if (userSubjects.length > 0) {
-        setCurrentStep('dashboard');
-      } else {
-        setCurrentStep('subject-select');
-      }
+      setCurrentStep('dashboard');
       setSearchParams({});
       return;
     }
@@ -171,14 +168,10 @@ const Index = () => {
     const planKey = plan as keyof typeof plans;
     setSelectedPlan(planKey);
     
-    // BULLETPROOF: Bypass users skip everything
+    // BULLETPROOF: Bypass users skip EVERYTHING - straight to dashboard
     if (isBypassUser) {
       toast.success(isBypassOwner ? 'Owner access granted! 👑' : 'Collaborator access granted! 🛡️');
-      if (userSubjects.length === 0) {
-        setCurrentStep('subject-select');
-      } else {
-        setCurrentStep('dashboard');
-      }
+      setCurrentStep('dashboard');
       return;
     }
     
@@ -315,6 +308,7 @@ const Index = () => {
   }
 
   // Subject selection step (after payment or for owner)
+  // NOTE: Bypass users should skip this entirely, but if they somehow get here, handle gracefully
   if (currentStep === 'subject-select' && userEmail) {
     return (
       <>
@@ -322,6 +316,7 @@ const Index = () => {
         <SubjectSelector
           userEmail={userEmail}
           onComplete={handleSubjectsSelected}
+          isBypassUser={isBypassUser}
         />
       </>
     );

@@ -8,6 +8,7 @@ import { toast } from '@/hooks/use-toast';
 interface SubjectSelectorProps {
   userEmail: string;
   onComplete: (subjects: string[]) => void;
+  isBypassUser?: boolean; // Bypass users skip database operations
 }
 
 const SUBJECTS = [
@@ -27,7 +28,7 @@ const SUBJECTS = [
   { id: 'agricultural_science', name: 'Agric Science', icon: Wheat },
 ];
 
-export const SubjectSelector = ({ userEmail, onComplete }: SubjectSelectorProps) => {
+export const SubjectSelector = ({ userEmail, onComplete, isBypassUser = false }: SubjectSelectorProps) => {
   const [selected, setSelected] = useState<string[]>(['english']);
   const [saving, setSaving] = useState(false);
 
@@ -61,6 +62,18 @@ export const SubjectSelector = ({ userEmail, onComplete }: SubjectSelectorProps)
     }
 
     setSaving(true);
+    
+    // BYPASS USERS: Skip database save, just proceed
+    if (isBypassUser) {
+      toast({
+        title: "Awesome choice! 🎉",
+        description: "Your subjects are saved. Let's crush JAMB together!"
+      });
+      onComplete(selected);
+      setSaving(false);
+      return;
+    }
+    
     try {
       const { error } = await supabase
         .from('user_subjects')
