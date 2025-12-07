@@ -48,23 +48,27 @@ const MOTIVATIONAL_MESSAGES = [
   "Stay focused, stay winning! 🔥",
 ];
 
-// Soft ambient sounds - study-friendly background music
+// Original ambient sounds - soft background for studying
 const AMBIENT_SOUNDS = {
+  rain: {
+    url: "https://cdn.pixabay.com/audio/2022/05/13/audio_257112311e.mp3",
+    label: "🌧️ Soft Rain"
+  },
+  library: {
+    url: "https://cdn.pixabay.com/audio/2022/03/10/audio_4dedf5bf94.mp3",
+    label: "📚 Library"
+  },
   lofi: {
     url: "https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3",
-    label: "Lo-Fi Beats"
+    label: "🎵 Lo-Fi"
+  },
+  nature: {
+    url: "https://cdn.pixabay.com/audio/2021/08/04/audio_27f54de4e9.mp3",
+    label: "🌿 Nature"
   },
   piano: {
     url: "https://cdn.pixabay.com/audio/2022/02/07/audio_b9bd4170e4.mp3",
-    label: "Soft Piano"
-  },
-  ambient: {
-    url: "https://cdn.pixabay.com/audio/2022/08/02/audio_54ca0ffa52.mp3",
-    label: "Calm Ambient"
-  },
-  focus: {
-    url: "https://cdn.pixabay.com/audio/2022/10/25/audio_946bc6eb3c.mp3",
-    label: "Focus Mode"
+    label: "🎹 Piano"
   }
 };
 
@@ -546,16 +550,49 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
             </div>
           )}
           
-          {/* Controls */}
+          {/* Sound Controls with selector */}
           <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleSound}
-              className={`h-8 w-8 p-0 ${isSoundPlaying ? 'text-primary' : 'text-muted-foreground'}`}
-            >
-              {isSoundPlaying ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-            </Button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`h-8 px-2 ${isSoundPlaying ? 'text-primary' : 'text-muted-foreground'}`}
+                >
+                  {isSoundPlaying ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+                  <span className="text-xs ml-1 hidden sm:inline">{AMBIENT_SOUNDS[currentSound].label}</span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-48 p-2" align="end">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground mb-2">🎵 Background Sound</p>
+                  {(Object.keys(AMBIENT_SOUNDS) as AmbientSound[]).map((sound) => (
+                    <button
+                      key={sound}
+                      onClick={() => {
+                        changeSound(sound);
+                        if (!isSoundPlaying) toggleSound();
+                      }}
+                      className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
+                        currentSound === sound
+                          ? 'bg-primary/10 text-primary font-medium'
+                          : 'hover:bg-muted'
+                      }`}
+                    >
+                      {AMBIENT_SOUNDS[sound].label}
+                    </button>
+                  ))}
+                  <div className="border-t border-border mt-2 pt-2">
+                    <button
+                      onClick={toggleSound}
+                      className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-muted"
+                    >
+                      {isSoundPlaying ? '🔇 Turn Off' : '🔊 Turn On'}
+                    </button>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
             <Button
               variant="ghost"
               size="sm"
