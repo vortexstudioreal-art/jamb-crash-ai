@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { User, Mail, Crown, Shield, Calendar, Package, ArrowLeft, LogOut, Edit2, Check, X, HelpCircle, FileText, MessageCircle } from 'lucide-react';
+import { User, Mail, Crown, Shield, Calendar, Package, ArrowLeft, LogOut, Edit2, Check, X, HelpCircle, FileText, MessageCircle, Moon, Sun, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -22,6 +23,8 @@ const COLLABORATOR_EMAILS = [
 ];
 const BYPASS_EMAILS = [OWNER_EMAIL, ...COLLABORATOR_EMAILS];
 const BYPASS_STORAGE_KEY = 'jamb_bypass_email';
+const THEME_STORAGE_KEY = 'jamb_theme';
+const SETTINGS_STORAGE_KEY = 'jamb_user_settings';
 
 const getBypassEmail = (): string | null => {
   const stored = localStorage.getItem(BYPASS_STORAGE_KEY);
@@ -29,6 +32,24 @@ const getBypassEmail = (): string | null => {
     return stored.toLowerCase();
   }
   return null;
+};
+
+interface UserSettings {
+  fullName: string;
+  whatsappNumber: string;
+  whatsappEnabled: boolean;
+}
+
+const loadSettings = (email: string): UserSettings => {
+  const stored = localStorage.getItem(`${SETTINGS_STORAGE_KEY}_${email}`);
+  if (stored) {
+    return JSON.parse(stored);
+  }
+  return { fullName: '', whatsappNumber: '', whatsappEnabled: false };
+};
+
+const saveSettings = (email: string, settings: UserSettings) => {
+  localStorage.setItem(`${SETTINGS_STORAGE_KEY}_${email}`, JSON.stringify(settings));
 };
 
 export default function Settings() {
@@ -39,6 +60,9 @@ export default function Settings() {
   const [userSubjects, setUserSubjects] = useState<string[]>([]);
   const [paymentInfo, setPaymentInfo] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [whatsappNumber, setWhatsappNumber] = useState('');
+  const [whatsappEnabled, setWhatsappEnabled] = useState(false);
 
   const bypassEmail = getBypassEmail();
   const userEmail = user?.email?.toLowerCase() || bypassEmail || '';
@@ -50,6 +74,28 @@ export default function Settings() {
   const effectiveAdmin = isAdmin || isBypassUser;
   const effectiveAccess = hasAccess || isBypassUser;
 
+  // Load theme from localStorage
+  useEffect(() => {
+    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+    if (savedTheme === 'dark') {
+      setIsDarkMode(true);
+      document.documentElement.classList.add('dark');
+    }
+  }, []);
+
+  // Toggle dark mode
+  const toggleDarkMode = () => {
+    const newMode = !isDarkMode;
+    setIsDarkMode(newMode);
+    if (newMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem(THEME_STORAGE_KEY, 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem(THEME_STORAGE_KEY, 'light');
+    }
+  };
+
   useEffect(() => {
     const loadUserData = async () => {
       if (!userEmail) {
@@ -57,15 +103,21 @@ export default function Settings() {
         return;
       }
 
+      // Load settings from localStorage first
+      const savedSettings = loadSettings(userEmail);
+      setFullName(savedSettings.fullName);
+      setWhatsappNumber(savedSettings.whatsappNumber);
+      setWhatsappEnabled(savedSettings.whatsappEnabled);
+
       try {
-        // Load profile
+        // Load profile from Supabase (as backup)
         const { data: profile } = await supabase
           .from('profiles')
           .select('full_name')
           .eq('email', userEmail)
           .maybeSingle();
 
-        if (profile?.full_name) {
+        if (profile?.full_name && !savedSettings.fullName) {
           setFullName(profile.full_name);
         }
 
@@ -78,6 +130,18 @@ export default function Settings() {
 
         if (subjects?.subjects) {
           setUserSubjects(subjects.subjects as string[]);
+        }
+
+        // Load WhatsApp reminder settings
+        const { data: reminder } = await supabase
+          .from('whatsapp_reminders')
+          .select('phone_number, is_active')
+          .eq('email', userEmail)
+          .maybeSingle();
+
+        if (reminder) {
+          setWhatsappNumber(reminder.phone_number);
+          setWhatsappEnabled(reminder.is_active ?? false);
         }
 
         // Load payment info (skip for bypass users)
@@ -111,10 +175,14 @@ export default function Settings() {
       return;
     }
 
+    // Save to localStorage for persistence
+    const currentSettings = loadSettings(userEmail);
+    saveSettings(userEmail, { ...currentSettings, fullName: fullName.trim() });
+
     // Bypass users: just update local state
     if (isBypassUser) {
       setIsEditingName(false);
-      toast.success('Name updated! ✨');
+      toast.success('Name saved! ✨');
       return;
     }
 
@@ -126,10 +194,11 @@ export default function Settings() {
 
       if (error) throw error;
       setIsEditingName(false);
-      toast.success('Name updated! ✨');
+      toast.success('Name saved! ✨');
     } catch (error) {
       console.error('Error updating name:', error);
-      toast.error('Failed to update name');
+      setIsEditingName(false);
+      toast.success('Name saved locally! ✨');
     }
   };
 
@@ -138,6 +207,11 @@ export default function Settings() {
     await signOut();
     navigate('/');
     toast.success('Signed out successfully');
+  };
+
+  const handleBack = () => {
+    // Navigate directly to dashboard without going through landing
+    navigate('/?step=dashboard');
   };
 
   const getRoleBadge = () => {
@@ -207,7 +281,7 @@ export default function Settings() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate('/')}
+            onClick={handleBack}
             className="shrink-0"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -277,11 +351,76 @@ export default function Settings() {
           </Card>
         </motion.div>
 
+        {/* Appearance Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+        >
+          <Card className="mb-6">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2">
+                {isDarkMode ? <Moon className="w-5 h-5 text-primary" /> : <Sun className="w-5 h-5 text-primary" />}
+                Appearance
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-foreground">Dark Mode</p>
+                  <p className="text-sm text-muted-foreground">Switch between light and dark themes</p>
+                </div>
+                <Switch checked={isDarkMode} onCheckedChange={toggleDarkMode} />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* WhatsApp Reminders Card */}
+        {(whatsappNumber || whatsappEnabled) && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <Card className="mb-6">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2">
+                  <Phone className="w-5 h-5 text-primary" />
+                  WhatsApp Reminders
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-foreground">Daily Reminders</p>
+                    <p className="text-sm text-muted-foreground">
+                      {whatsappEnabled ? 'Enabled' : 'Disabled'}
+                    </p>
+                  </div>
+                  <Badge variant={whatsappEnabled ? 'default' : 'secondary'}>
+                    {whatsappEnabled ? 'Active' : 'Inactive'}
+                  </Badge>
+                </div>
+                {whatsappNumber && (
+                  <>
+                    <Separator />
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-muted-foreground">Phone Number</label>
+                      <p className="text-foreground">{whatsappNumber}</p>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
         {/* Plan Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.25 }}
         >
           <Card className="mb-6">
             <CardHeader className="pb-4">
@@ -349,7 +488,7 @@ export default function Settings() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.35 }}
         >
           <Card className="mb-6">
             <CardHeader className="pb-4">
@@ -399,7 +538,7 @@ export default function Settings() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
+          transition={{ delay: 0.4 }}
         >
           <Button
             variant="outline"
