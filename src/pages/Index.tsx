@@ -42,6 +42,16 @@ const plans = {
   premium: { name: 'Premium', price: 30000 },
 };
 
+// Bypass emails for immediate access (fallback check when async state hasn't resolved)
+const OWNER_EMAIL = 'saeedabdulbasit933@gmail.com';
+const COLLABORATOR_EMAILS = [
+  'loaborejim@gmail.com',
+  'favourgoodnews@gmail.com',
+  'onuchionwuegbusi@gmail.com',
+  'muzzyothman@gmail.com'
+];
+const BYPASS_EMAILS = [OWNER_EMAIL, ...COLLABORATOR_EMAILS];
+
 const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [currentStep, setCurrentStep] = useState<Step>('landing');
@@ -85,19 +95,28 @@ const Index = () => {
   // Check for step param from payment success redirect or bypass login
   useEffect(() => {
     const step = searchParams.get('step');
+    // Wait for loading to complete before making navigation decisions
+    if (isLoading) return;
+    
     if (step === 'upload' && userEmail) {
       setCurrentStep('subject-select');
       setSearchParams({});
     } else if (step === 'dashboard' && userEmail) {
       // Bypass users (owner/collaborator) go straight to dashboard
-      if (userSubjects.length > 0) {
-        setCurrentStep('dashboard');
-      } else {
-        setCurrentStep('subject-select');
+      // Use immediate email check to avoid race condition
+      const currentEmail = userEmail?.toLowerCase() || '';
+      const isBypassUser = BYPASS_EMAILS.includes(currentEmail);
+      
+      if (isBypassUser || isOwner || isAdmin || hasAccess) {
+        if (userSubjects.length > 0) {
+          setCurrentStep('dashboard');
+        } else {
+          setCurrentStep('subject-select');
+        }
+        setSearchParams({});
       }
-      setSearchParams({});
     }
-  }, [searchParams, setSearchParams, userEmail, userSubjects.length]);
+  }, [searchParams, setSearchParams, userEmail, userSubjects.length, isLoading, isOwner, isAdmin, hasAccess]);
 
   const handleGetStarted = () => {
     // Always scroll to pricing and highlight Standard package
@@ -123,9 +142,14 @@ const Index = () => {
     const planKey = plan as keyof typeof plans;
     setSelectedPlan(planKey);
     
+    // Immediate email-based bypass check (handles race condition when isOwner/isAdmin hasn't resolved yet)
+    const currentEmail = userEmail?.toLowerCase() || '';
+    const isEmailOwner = currentEmail === OWNER_EMAIL;
+    const isEmailCollaborator = COLLABORATOR_EMAILS.includes(currentEmail);
+    
     // Owner/admin bypasses payment completely - instant access
-    if (isOwner || isAdmin) {
-      toast.success(isOwner ? 'Owner access granted! 👑' : 'Admin access granted! 🛡️');
+    if (isOwner || isAdmin || isEmailOwner || isEmailCollaborator) {
+      toast.success(isOwner || isEmailOwner ? 'Owner access granted! 👑' : 'Admin access granted! 🛡️');
       if (userSubjects.length === 0) {
         setCurrentStep('subject-select');
       } else {
