@@ -56,12 +56,7 @@ const Index = () => {
   const { user, isLoading, hasAccess, isAdmin, isOwner, userRole, signOut, refreshAccess } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect unauthenticated users to login first
-  useEffect(() => {
-    if (!isLoading && !user) {
-      navigate('/auth', { replace: true });
-    }
-  }, [user, isLoading, navigate]);
+  // No automatic redirect - landing page is visible to everyone
 
   const userEmail = user?.email || null;
 
@@ -97,31 +92,18 @@ const Index = () => {
   }, [searchParams, setSearchParams, userEmail]);
 
   const handleGetStarted = () => {
-    if (user) {
-      // Already logged in
-      if (effectiveAccess) {
-        // Paid user or owner - go to dashboard
-        if (userSubjects.length === 0) {
-          setCurrentStep('subject-select');
-        } else {
-          setCurrentStep('dashboard');
-        }
-      } else {
-        // Unpaid user - scroll to TOP of pricing section and highlight Standard
-        setHighlightStandard(true);
-        setTimeout(() => {
-          const pricingSection = document.getElementById('pricing');
-          if (pricingSection) {
-            const headerOffset = 80; // Account for fixed header
-            const elementPosition = pricingSection.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-            window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-          }
-        }, 100);
+    // Always scroll to pricing and highlight Standard package
+    // This allows owner/collaborator to test the scroll behavior too
+    setHighlightStandard(true);
+    setTimeout(() => {
+      const pricingSection = document.getElementById('pricing');
+      if (pricingSection) {
+        const headerOffset = 80; // Account for fixed header
+        const elementPosition = pricingSection.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+        window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
       }
-    } else {
-      navigate('/auth');
-    }
+    }, 100);
   };
 
   const handleSeeHowItWorks = () => {
@@ -133,9 +115,9 @@ const Index = () => {
     const planKey = plan as keyof typeof plans;
     setSelectedPlan(planKey);
     
-    // Owner bypasses payment completely - instant access
-    if (isOwner) {
-      toast.success('Owner access granted! 👑');
+    // Owner/admin bypasses payment completely - instant access
+    if (isOwner || isAdmin) {
+      toast.success(isOwner ? 'Owner access granted! 👑' : 'Admin access granted! 🛡️');
       if (userSubjects.length === 0) {
         setCurrentStep('subject-select');
       } else {
@@ -144,11 +126,24 @@ const Index = () => {
       return;
     }
     
-    if (user) {
-      setIsPaymentModalOpen(true);
-    } else {
-      navigate('/auth');
+    // Already has access - go to dashboard
+    if (hasAccess) {
+      if (userSubjects.length === 0) {
+        setCurrentStep('subject-select');
+      } else {
+        setCurrentStep('dashboard');
+      }
+      return;
     }
+    
+    // Needs to log in first
+    if (!user) {
+      navigate('/auth', { state: { returnTo: '/', selectedPlan: planKey } });
+      return;
+    }
+    
+    // Open payment modal for unpaid users
+    setIsPaymentModalOpen(true);
   };
 
   const handlePaymentSuccess = async (reference: string, email: string) => {
@@ -512,14 +507,34 @@ const Index = () => {
     );
   }
 
+  const handleGoToDashboard = () => {
+    if (userSubjects.length === 0) {
+      setCurrentStep('subject-select');
+    } else {
+      setCurrentStep('dashboard');
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header onGetStarted={handleGetStarted} hasAccess={effectiveAccess} />
       <div className="pt-16">
-        {/* Admin Badge and Sign Out for logged in users */}
+        {/* Admin Badge, Dashboard Button, and Sign Out for logged in users */}
         {user && (
           <div className="fixed top-20 right-4 z-50 flex items-center gap-2">
             {isAdmin && <AdminBadge role={userRole} linkToAdmin />}
+            {effectiveAccess && (
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleGoToDashboard}
+                className="gradient-primary text-primary-foreground"
+              >
+                <BookOpen className="w-4 h-4 mr-1" />
+                Dashboard
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="sm"
