@@ -51,13 +51,26 @@ export const WhatsAppReminder = ({ userEmail }: WhatsAppReminderProps) => {
         animate={{ opacity: 1, scale: 1 }}
         className="card-elevated p-6 text-center"
       >
-        <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-4">
+        <motion.div 
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", delay: 0.2 }}
+          className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-4"
+        >
           <CheckCircle className="w-8 h-8 text-green-500" />
-        </div>
-        <h3 className="text-lg font-semibold text-foreground mb-2">Reminders Active!</h3>
-        <p className="text-muted-foreground text-sm">
+        </motion.div>
+        <h3 className="text-lg font-semibold text-foreground mb-2">✅ Reminders Active!</h3>
+        <p className="text-muted-foreground text-sm mb-3">
           You'll receive your timetable + 3 practice questions every morning at 6 AM
         </p>
+        <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/30">
+          <p className="text-sm text-green-600 font-medium">
+            📱 WhatsApp: +234{phoneNumber}
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            First reminder coming tomorrow! 🎯
+          </p>
+        </div>
       </motion.div>
     );
   }
