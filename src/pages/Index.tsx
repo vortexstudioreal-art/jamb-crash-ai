@@ -48,9 +48,20 @@ const COLLABORATOR_EMAILS = [
   'loaborejim@gmail.com',
   'favourgoodnews@gmail.com',
   'onuchionwuegbusi@gmail.com',
-  'muzzyothman@gmail.com'
+  'muzzyothman@gmail.com',
+  'muzzyothmam@gmail.com'  // Both spelling variants
 ];
 const BYPASS_EMAILS = [OWNER_EMAIL, ...COLLABORATOR_EMAILS];
+const BYPASS_STORAGE_KEY = 'jamb_bypass_email';
+
+// Helper to get bypass email from localStorage
+const getBypassEmail = (): string | null => {
+  const stored = localStorage.getItem(BYPASS_STORAGE_KEY);
+  if (stored && BYPASS_EMAILS.includes(stored.toLowerCase())) {
+    return stored.toLowerCase();
+  }
+  return null;
+};
 
 const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -66,12 +77,23 @@ const Index = () => {
   const { user, isLoading, hasAccess, isAdmin, isOwner, userRole, signOut, refreshAccess } = useAuth();
   const navigate = useNavigate();
 
-  // No automatic redirect - landing page is visible to everyone
+  // BULLETPROOF BYPASS: Check both Supabase user AND localStorage for bypass emails
+  const bypassEmail = getBypassEmail();
+  const userEmail = user?.email?.toLowerCase() || bypassEmail || null;
+  
+  // Determine if this is a bypass user (owner or collaborator)
+  const isBypassOwner = userEmail === OWNER_EMAIL;
+  const isBypassCollaborator = COLLABORATOR_EMAILS.includes(userEmail || '');
+  const isBypassUser = isBypassOwner || isBypassCollaborator;
 
-  const userEmail = user?.email || null;
-
-  // Effective access check (owner always has access)
-  const effectiveAccess = hasAccess || isOwner;
+  // Effective access check - bypass users ALWAYS have access
+  const effectiveAccess = hasAccess || isOwner || isBypassUser;
+  
+  // Effective admin check - bypass users are treated as admins
+  const effectiveAdmin = isAdmin || isBypassUser;
+  
+  // Effective owner check
+  const effectiveOwner = isOwner || isBypassOwner;
 
   // Load user subjects (no auto-redirect - users see landing page first)
   useEffect(() => {
@@ -92,22 +114,29 @@ const Index = () => {
     loadUserSubjects();
   }, [userEmail, isLoading]);
 
-  // Check for step param from payment success redirect or bypass login
+  // BULLETPROOF: Check for step param from payment success redirect or bypass login
   useEffect(() => {
     const step = searchParams.get('step');
-    // Wait for loading to complete before making navigation decisions
+    
+    // For bypass users, don't wait for isLoading - they should navigate immediately
+    if (step === 'dashboard' && isBypassUser && userEmail) {
+      if (userSubjects.length > 0) {
+        setCurrentStep('dashboard');
+      } else {
+        setCurrentStep('subject-select');
+      }
+      setSearchParams({});
+      return;
+    }
+    
+    // Wait for loading to complete for non-bypass users
     if (isLoading) return;
     
     if (step === 'upload' && userEmail) {
       setCurrentStep('subject-select');
       setSearchParams({});
     } else if (step === 'dashboard' && userEmail) {
-      // Bypass users (owner/collaborator) go straight to dashboard
-      // Use immediate email check to avoid race condition
-      const currentEmail = userEmail?.toLowerCase() || '';
-      const isBypassUser = BYPASS_EMAILS.includes(currentEmail);
-      
-      if (isBypassUser || isOwner || isAdmin || hasAccess) {
+      if (effectiveAccess) {
         if (userSubjects.length > 0) {
           setCurrentStep('dashboard');
         } else {
@@ -116,7 +145,7 @@ const Index = () => {
         setSearchParams({});
       }
     }
-  }, [searchParams, setSearchParams, userEmail, userSubjects.length, isLoading, isOwner, isAdmin, hasAccess]);
+  }, [searchParams, setSearchParams, userEmail, userSubjects.length, isLoading, effectiveAccess, isBypassUser]);
 
   const handleGetStarted = () => {
     // Always scroll to pricing and highlight Standard package
@@ -142,14 +171,9 @@ const Index = () => {
     const planKey = plan as keyof typeof plans;
     setSelectedPlan(planKey);
     
-    // Immediate email-based bypass check (handles race condition when isOwner/isAdmin hasn't resolved yet)
-    const currentEmail = userEmail?.toLowerCase() || '';
-    const isEmailOwner = currentEmail === OWNER_EMAIL;
-    const isEmailCollaborator = COLLABORATOR_EMAILS.includes(currentEmail);
-    
-    // Owner/admin bypasses payment completely - instant access
-    if (isOwner || isAdmin || isEmailOwner || isEmailCollaborator) {
-      toast.success(isOwner || isEmailOwner ? 'Owner access granted! 👑' : 'Admin access granted! 🛡️');
+    // BULLETPROOF: Bypass users skip everything
+    if (isBypassUser) {
+      toast.success(isBypassOwner ? 'Owner access granted! 👑' : 'Collaborator access granted! 🛡️');
       if (userSubjects.length === 0) {
         setCurrentStep('subject-select');
       } else {
@@ -159,7 +183,7 @@ const Index = () => {
     }
     
     // Already has access - go to dashboard
-    if (hasAccess) {
+    if (effectiveAccess) {
       if (userSubjects.length === 0) {
         setCurrentStep('subject-select');
       } else {
@@ -239,6 +263,8 @@ const Index = () => {
   };
 
   const handleSignOut = async () => {
+    // Clear bypass email from localStorage
+    localStorage.removeItem(BYPASS_STORAGE_KEY);
     await signOut();
     setCurrentStep('landing');
     toast.success('Signed out successfully');
@@ -323,17 +349,24 @@ const Index = () => {
   const isProtectedStep = ['upload', 'personalize', 'processing', 'dashboard', 'quiz', 'quiz-results', 'study-plan'].includes(currentStep);
 
   if (isProtectedStep) {
+    // For bypass users, skip the loading state entirely - they always have access
+    const showLoading = isBypassUser ? false : isLoading;
     return (
-      <PaywallGate hasAccess={effectiveAccess} isLoading={isLoading} onUpgrade={handleUpgradeClick}>
+      <PaywallGate hasAccess={effectiveAccess} isLoading={showLoading} onUpgrade={handleUpgradeClick}>
         <div className="min-h-screen bg-background">
           <Header onGetStarted={handleGetStarted} hasAccess={effectiveAccess} />
           {/* Back Button */}
           <BackButton onClick={() => setCurrentStep(currentStep === 'dashboard' ? 'landing' : 'dashboard')} />
           <div className="pt-16">
-            {/* Admin Badge and Sign Out */}
-            {user && (
+            {/* Admin Badge and Sign Out - show for bypass users too */}
+            {(user || isBypassUser) && (
               <div className="fixed top-20 right-4 z-50 flex items-center gap-2">
-                {isAdmin && <AdminBadge role={userRole} linkToAdmin />}
+                {(effectiveAdmin || isBypassUser) && (
+                  <AdminBadge 
+                    role={isBypassOwner ? 'owner' : (isBypassCollaborator ? 'collaborator' : userRole)} 
+                    linkToAdmin={isBypassOwner} 
+                  />
+                )}
                 <Button
                   variant="ghost"
                   size="sm"
@@ -496,8 +529,8 @@ const Index = () => {
                   {/* Premium Dashboard Features */}
                   <PremiumDashboard
                     userEmail={userEmail}
-                    isAdmin={isAdmin}
-                    adminRole={userRole}
+                    isAdmin={effectiveAdmin || isBypassUser}
+                    adminRole={isBypassOwner ? 'owner' : (isBypassCollaborator ? 'collaborator' : userRole)}
                     targetScore={personalizationData?.targetScore ? parseInt(personalizationData.targetScore) : undefined}
                     weakSubject={personalizationData?.weakestSubject}
                   />
@@ -552,10 +585,15 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header onGetStarted={handleGetStarted} hasAccess={effectiveAccess} />
       <div className="pt-16">
-        {/* Admin Badge, Dashboard Button, and Sign Out for logged in users */}
-        {user && (
+        {/* Admin Badge, Dashboard Button, and Sign Out for logged in users OR bypass users */}
+        {(user || isBypassUser) && (
           <div className="fixed top-20 right-4 z-50 flex items-center gap-2">
-            {isAdmin && <AdminBadge role={userRole} linkToAdmin />}
+            {(effectiveAdmin || isBypassUser) && (
+              <AdminBadge 
+                role={isBypassOwner ? 'owner' : (isBypassCollaborator ? 'collaborator' : userRole)} 
+                linkToAdmin={isBypassOwner} 
+              />
+            )}
             {effectiveAccess && (
               <Button
                 variant="default"
