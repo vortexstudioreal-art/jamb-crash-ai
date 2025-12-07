@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { User, Mail, Crown, Shield, Calendar, Package, ArrowLeft, LogOut, Edit2, Check, X, HelpCircle, FileText, MessageCircle, Moon, Sun, Phone } from 'lucide-react';
+import { User, Mail, Crown, Shield, Calendar, Package, ArrowLeft, LogOut, Edit2, Check, X, HelpCircle, FileText, MessageCircle, Moon, Sun, Phone, Bell, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +11,6 @@ import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { AdminBadge } from '@/components/AdminBadge';
 
 const OWNER_EMAIL = 'saeedabdulbasit933@gmail.com';
 const COLLABORATOR_EMAILS = [
@@ -38,6 +37,8 @@ interface UserSettings {
   fullName: string;
   whatsappNumber: string;
   whatsappEnabled: boolean;
+  notificationsEnabled: boolean;
+  emailNotifications: boolean;
 }
 
 const loadSettings = (email: string): UserSettings => {
@@ -45,7 +46,7 @@ const loadSettings = (email: string): UserSettings => {
   if (stored) {
     return JSON.parse(stored);
   }
-  return { fullName: '', whatsappNumber: '', whatsappEnabled: false };
+  return { fullName: '', whatsappNumber: '', whatsappEnabled: false, notificationsEnabled: true, emailNotifications: true };
 };
 
 const saveSettings = (email: string, settings: UserSettings) => {
@@ -63,6 +64,8 @@ export default function Settings() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const [whatsappEnabled, setWhatsappEnabled] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [emailNotifications, setEmailNotifications] = useState(true);
 
   const bypassEmail = getBypassEmail();
   const userEmail = user?.email?.toLowerCase() || bypassEmail || '';
@@ -108,6 +111,8 @@ export default function Settings() {
       setFullName(savedSettings.fullName);
       setWhatsappNumber(savedSettings.whatsappNumber);
       setWhatsappEnabled(savedSettings.whatsappEnabled);
+      setNotificationsEnabled(savedSettings.notificationsEnabled ?? true);
+      setEmailNotifications(savedSettings.emailNotifications ?? true);
 
       try {
         // Load profile from Supabase (as backup)
@@ -202,6 +207,42 @@ export default function Settings() {
     }
   };
 
+  const handleWhatsAppToggle = async (enabled: boolean) => {
+    setWhatsappEnabled(enabled);
+    const currentSettings = loadSettings(userEmail);
+    saveSettings(userEmail, { ...currentSettings, whatsappEnabled: enabled });
+
+    if (userEmail) {
+      try {
+        await supabase
+          .from('whatsapp_reminders')
+          .upsert({
+            email: userEmail,
+            phone_number: whatsappNumber || '',
+            is_active: enabled
+          }, { onConflict: 'email' });
+        
+        toast.success(enabled ? 'WhatsApp reminders enabled!' : 'WhatsApp reminders disabled');
+      } catch (error) {
+        console.error('Error updating WhatsApp settings:', error);
+      }
+    }
+  };
+
+  const handleNotificationsToggle = (enabled: boolean) => {
+    setNotificationsEnabled(enabled);
+    const currentSettings = loadSettings(userEmail);
+    saveSettings(userEmail, { ...currentSettings, notificationsEnabled: enabled });
+    toast.success(enabled ? 'Notifications enabled' : 'Notifications disabled');
+  };
+
+  const handleEmailNotificationsToggle = (enabled: boolean) => {
+    setEmailNotifications(enabled);
+    const currentSettings = loadSettings(userEmail);
+    saveSettings(userEmail, { ...currentSettings, emailNotifications: enabled });
+    toast.success(enabled ? 'Email notifications enabled' : 'Email notifications disabled');
+  };
+
   const handleSignOut = async () => {
     localStorage.removeItem(BYPASS_STORAGE_KEY);
     await signOut();
@@ -210,29 +251,52 @@ export default function Settings() {
   };
 
   const handleBack = () => {
-    // Navigate directly to dashboard without going through landing
     navigate('/?step=dashboard');
   };
 
   const getRoleBadge = () => {
     if (effectiveOwner) {
-      return <AdminBadge role="owner" />;
+      return (
+        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold shadow-lg bg-gradient-to-r from-yellow-400 to-amber-500 text-black">
+          <Crown className="w-3.5 h-3.5" />
+          Owner
+        </span>
+      );
     }
     if (isBypassCollaborator) {
-      return <AdminBadge role="collaborator" />;
+      return (
+        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold shadow-lg bg-gradient-to-r from-gray-300 to-slate-400 text-gray-800">
+          <Users className="w-3.5 h-3.5" />
+          Collaborator
+        </span>
+      );
     }
     if (effectiveAdmin) {
-      return <AdminBadge role="admin" />;
+      return (
+        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold shadow-lg bg-gradient-to-r from-blue-400 to-indigo-500 text-white">
+          <Shield className="w-3.5 h-3.5" />
+          Admin
+        </span>
+      );
     }
     return null;
   };
 
   const getAccessStatus = () => {
-    if (isBypassUser) {
+    if (effectiveOwner) {
       return {
+        planName: 'Owner',
         status: 'Permanent Access',
         color: 'bg-gradient-to-r from-yellow-400 to-amber-500',
         textColor: 'text-black'
+      };
+    }
+    if (isBypassCollaborator) {
+      return {
+        planName: 'Collaborator',
+        status: 'Permanent Access',
+        color: 'bg-gradient-to-r from-gray-300 to-slate-400',
+        textColor: 'text-gray-800'
       };
     }
     if (effectiveAccess && paymentInfo?.access_expires_at) {
@@ -240,6 +304,7 @@ export default function Settings() {
       const now = new Date();
       const daysLeft = Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
       return {
+        planName: paymentInfo.package || 'Premium',
         status: `${daysLeft} days remaining`,
         color: daysLeft > 7 ? 'bg-primary' : 'bg-orange-500',
         textColor: 'text-primary-foreground'
@@ -247,12 +312,14 @@ export default function Settings() {
     }
     if (effectiveAccess) {
       return {
+        planName: paymentInfo?.package || 'Active',
         status: 'Active',
         color: 'bg-primary',
         textColor: 'text-primary-foreground'
       };
     }
     return {
+      planName: 'Free',
       status: 'No Active Plan',
       color: 'bg-muted',
       textColor: 'text-muted-foreground'
@@ -272,7 +339,7 @@ export default function Settings() {
   return (
     <div className="min-h-screen bg-background py-8 px-4">
       <div className="max-w-2xl mx-auto">
-        {/* Header */}
+        {/* Header with green back button */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -280,13 +347,14 @@ export default function Settings() {
         >
           <Button
             variant="ghost"
-            size="icon"
+            size="sm"
             onClick={handleBack}
-            className="shrink-0"
+            className="shrink-0 text-primary hover:text-primary/80 hover:bg-primary/10 font-medium"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4 mr-1" />
+            Back
           </Button>
-          <div>
+          <div className="flex-1">
             <h1 className="text-2xl font-bold text-foreground">Settings</h1>
             <p className="text-muted-foreground text-sm">Manage your account and preferences</p>
           </div>
@@ -351,76 +419,11 @@ export default function Settings() {
           </Card>
         </motion.div>
 
-        {/* Appearance Card */}
+        {/* Your Plan Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-        >
-          <Card className="mb-6">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2">
-                {isDarkMode ? <Moon className="w-5 h-5 text-primary" /> : <Sun className="w-5 h-5 text-primary" />}
-                Appearance
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-foreground">Dark Mode</p>
-                  <p className="text-sm text-muted-foreground">Switch between light and dark themes</p>
-                </div>
-                <Switch checked={isDarkMode} onCheckedChange={toggleDarkMode} />
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* WhatsApp Reminders Card */}
-        {(whatsappNumber || whatsappEnabled) && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <Card className="mb-6">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2">
-                  <Phone className="w-5 h-5 text-primary" />
-                  WhatsApp Reminders
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-foreground">Daily Reminders</p>
-                    <p className="text-sm text-muted-foreground">
-                      {whatsappEnabled ? 'Enabled' : 'Disabled'}
-                    </p>
-                  </div>
-                  <Badge variant={whatsappEnabled ? 'default' : 'secondary'}>
-                    {whatsappEnabled ? 'Active' : 'Inactive'}
-                  </Badge>
-                </div>
-                {whatsappNumber && (
-                  <>
-                    <Separator />
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-muted-foreground">Phone Number</label>
-                      <p className="text-foreground">{whatsappNumber}</p>
-                    </div>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-
-        {/* Plan Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25 }}
         >
           <Card className="mb-6">
             <CardHeader className="pb-4">
@@ -432,8 +435,8 @@ export default function Settings() {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-semibold text-foreground">
-                    {isBypassUser ? (effectiveOwner ? 'Owner' : 'Collaborator') : (paymentInfo?.package || 'Free')}
+                  <p className="font-semibold text-foreground text-lg">
+                    {accessStatus.planName}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     {isBypassUser ? 'Full access to all features' : (paymentInfo ? `Purchased on ${new Date(paymentInfo.created_at).toLocaleDateString()}` : 'Upgrade to unlock all features')}
@@ -457,12 +460,104 @@ export default function Settings() {
           </Card>
         </motion.div>
 
+        {/* Appearance Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <Card className="mb-6">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2">
+                {isDarkMode ? <Moon className="w-5 h-5 text-primary" /> : <Sun className="w-5 h-5 text-primary" />}
+                Appearance
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-foreground">Dark Mode</p>
+                  <p className="text-sm text-muted-foreground">Switch between light and dark themes</p>
+                </div>
+                <Switch checked={isDarkMode} onCheckedChange={toggleDarkMode} />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* WhatsApp Reminders Card - Always visible */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+        >
+          <Card className="mb-6">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2">
+                <Phone className="w-5 h-5 text-primary" />
+                WhatsApp Reminders
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-foreground">Daily Study Reminders</p>
+                  <p className="text-sm text-muted-foreground">Receive study tips via WhatsApp</p>
+                </div>
+                <Switch checked={whatsappEnabled} onCheckedChange={handleWhatsAppToggle} />
+              </div>
+              {whatsappNumber && (
+                <>
+                  <Separator />
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">Phone Number</label>
+                    <p className="text-foreground">{whatsappNumber}</p>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Notifications Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <Card className="mb-6">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2">
+                <Bell className="w-5 h-5 text-primary" />
+                Notifications
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-foreground">Push Notifications</p>
+                  <p className="text-sm text-muted-foreground">Get reminders and updates</p>
+                </div>
+                <Switch checked={notificationsEnabled} onCheckedChange={handleNotificationsToggle} />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-foreground">Email Notifications</p>
+                  <p className="text-sm text-muted-foreground">Receive study plan updates via email</p>
+                </div>
+                <Switch checked={emailNotifications} onCheckedChange={handleEmailNotificationsToggle} />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
         {/* Subjects Card */}
         {userSubjects.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: 0.35 }}
           >
             <Card className="mb-6">
               <CardHeader className="pb-4">
@@ -488,7 +583,7 @@ export default function Settings() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35 }}
+          transition={{ delay: 0.4 }}
         >
           <Card className="mb-6">
             <CardHeader className="pb-4">
@@ -538,7 +633,7 @@ export default function Settings() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.45 }}
         >
           <Button
             variant="outline"
