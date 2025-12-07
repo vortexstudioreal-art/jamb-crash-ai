@@ -26,10 +26,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, User } from 'lucide-react';
+import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, User, Timer } from 'lucide-react';
 
-type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'demo' | 'study-plan';
-type QuizType = 'full' | 'mini' | 'subject';
+type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'demo' | 'study-plan' | 'study-materials';
+type QuizType = 'full' | 'mini' | 'subject' | 'timed-practice' | 'demo';
 
 interface FormData {
   targetScore: string;
@@ -515,80 +515,79 @@ const Index = () => {
                 </p>
               </motion.div>
 
-              {/* Quick Actions - The 5 Main Buttons */}
+              {/* Quick Actions - Clean Grid */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6"
+                className="grid grid-cols-2 gap-3 mb-4"
               >
                 <Button
                   variant="outline"
-                  className="h-auto py-6 flex flex-col gap-2 hover:border-primary hover:bg-primary/5"
+                  className="h-auto py-5 flex flex-col gap-1.5 hover:border-primary hover:bg-primary/5"
                   onClick={() => handleStartQuiz('full')}
                 >
-                  <Play className="w-8 h-8 text-primary" />
-                  <span className="font-bold">Full Quiz</span>
-                  <span className="text-xs text-muted-foreground">60 questions • 70 min</span>
+                  <Play className="w-7 h-7 text-primary" />
+                  <span className="font-bold text-sm">Full Quiz</span>
+                  <span className="text-xs text-muted-foreground">60 Qs • 70 min</span>
                 </Button>
                 
                 <Button
                   variant="outline"
-                  className="h-auto py-6 flex flex-col gap-2 hover:border-yellow-500 hover:bg-yellow-500/5"
+                  className="h-auto py-5 flex flex-col gap-1.5 hover:border-yellow-500 hover:bg-yellow-500/5"
                   onClick={() => handleStartQuiz('mini')}
                 >
-                  <Zap className="w-8 h-8 text-yellow-500" />
-                  <span className="font-bold">Mini Quiz</span>
-                  <span className="text-xs text-muted-foreground">20 questions • 30 min</span>
+                  <Zap className="w-7 h-7 text-yellow-500" />
+                  <span className="font-bold text-sm">Mini Quiz</span>
+                  <span className="text-xs text-muted-foreground">20 Qs • 30 min</span>
                 </Button>
                 
                 <Button
                   variant="outline"
-                  className="h-auto py-6 flex flex-col gap-2 hover:border-blue-500 hover:bg-blue-500/5"
-                  onClick={() => setCurrentStep('upload')}
+                  className="h-auto py-5 flex flex-col gap-1.5 hover:border-purple-500 hover:bg-purple-500/5"
+                  onClick={() => handleStartQuiz('subject')}
                 >
-                  <FileText className="w-8 h-8 text-blue-500" />
-                  <span className="font-bold">Upload PDF</span>
-                  <span className="text-xs text-muted-foreground">AI magic ✨</span>
+                  <BookOpen className="w-7 h-7 text-purple-500" />
+                  <span className="font-bold text-sm">Practice by Subject</span>
+                  <span className="text-xs text-muted-foreground">Multi-select • Untimed</span>
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  className="h-auto py-5 flex flex-col gap-1.5 hover:border-orange-500 hover:bg-orange-500/5"
+                  onClick={() => handleStartQuiz('timed-practice')}
+                >
+                  <Timer className="w-7 h-7 text-orange-500" />
+                  <span className="font-bold text-sm">Timed Practice</span>
+                  <span className="text-xs text-muted-foreground">5-60 min sessions</span>
                 </Button>
               </motion.div>
 
-              {/* Practice by Subject */}
+              {/* Secondary Actions Row */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 }}
-                className="mb-6"
+                className="grid grid-cols-2 gap-3 mb-6"
               >
                 <Button
                   variant="outline"
-                  className="w-full h-auto py-6 flex flex-col gap-2 border-2 border-purple-500/50 hover:bg-purple-500/10 bg-gradient-to-r from-purple-500/5 to-primary/5"
-                  onClick={() => handleStartQuiz('subject')}
+                  className="h-auto py-5 flex flex-col gap-1.5 hover:border-blue-500 hover:bg-blue-500/5"
+                  onClick={() => setCurrentStep('upload')}
                 >
-                  <div className="flex items-center gap-2">
-                    <BookOpen className="w-8 h-8 text-purple-500" />
-                    <span className="text-2xl">📚</span>
-                  </div>
-                  <span className="font-bold text-purple-600 text-lg">Practice by Subject & Year</span>
-                  <span className="text-xs text-muted-foreground">40 questions • Untimed • Instant feedback</span>
+                  <FileText className="w-7 h-7 text-blue-500" />
+                  <span className="font-bold text-sm">Upload PDF</span>
+                  <span className="text-xs text-muted-foreground">AI extraction ✨</span>
                 </Button>
-              </motion.div>
-
-              {/* Generate Study Plan */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="mb-8"
-              >
+                
                 <Button
                   variant="outline"
-                  className="w-full h-auto py-6 flex flex-col gap-2 border-2 border-green-500/50 hover:bg-green-500/10"
+                  className="h-auto py-5 flex flex-col gap-1.5 hover:border-green-500 hover:bg-green-500/5"
                   onClick={handleGenerateStudyPlan}
                 >
-                  <Target className="w-8 h-8 text-green-500" />
-                  <span className="font-bold text-green-600">Generate Study Plan</span>
-                  <span className="text-xs text-muted-foreground">48-72hr personalized timetable</span>
+                  <Target className="w-7 h-7 text-green-500" />
+                  <span className="font-bold text-sm">Study Plan</span>
+                  <span className="text-xs text-muted-foreground">48-72hr timetable</span>
                 </Button>
               </motion.div>
 
