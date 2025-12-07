@@ -266,14 +266,18 @@ const Index = () => {
     toast.success('Signed out successfully');
   };
 
-  // Quiz step
-  if (currentStep === 'quiz' && userEmail && userSubjects.length > 0) {
+  // Default subjects for bypass users who haven't selected
+  const DEFAULT_SUBJECTS = ['english', 'mathematics', 'physics', 'chemistry'];
+  const effectiveSubjects = userSubjects.length > 0 ? userSubjects : (isBypassUser ? DEFAULT_SUBJECTS : []);
+
+  // Quiz step - bypass users can use default subjects if none selected
+  if (currentStep === 'quiz' && userEmail && (userSubjects.length > 0 || isBypassUser)) {
     return (
       <>
         <BackButton onClick={() => setCurrentStep('dashboard')} />
         <TimedQuiz
           userEmail={userEmail}
-          subjects={userSubjects}
+          subjects={effectiveSubjects}
           quizType={quizType}
           onComplete={handleQuizComplete}
           onExit={() => setCurrentStep('dashboard')}
@@ -330,14 +334,14 @@ const Index = () => {
     );
   }
 
-  // Study Plan Generator step
-  if (currentStep === 'study-plan' && userEmail && userSubjects.length > 0) {
+  // Study Plan Generator step - bypass users can use default subjects
+  if (currentStep === 'study-plan' && userEmail && (userSubjects.length > 0 || isBypassUser)) {
     return (
       <>
         <BackButton onClick={() => setCurrentStep('dashboard')} />
         <StudyPlanGenerator
           userEmail={userEmail}
-          subjects={userSubjects}
+          subjects={effectiveSubjects}
           targetScore={personalizationData?.targetScore ? parseInt(personalizationData.targetScore) : 300}
           hoursPerDay={personalizationData?.hoursPerDay ? parseInt(personalizationData.hoursPerDay) : 4}
           weakestSubject={personalizationData?.weakestSubject}
@@ -511,7 +515,7 @@ const Index = () => {
                   </motion.div>
 
                   {/* Subject Tags */}
-                  {userSubjects.length > 0 && (
+                  {effectiveSubjects.length > 0 && (
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -519,7 +523,7 @@ const Index = () => {
                       className="flex flex-wrap gap-2 justify-center mb-8"
                     >
                       <span className="text-sm text-muted-foreground">Your subjects:</span>
-                      {userSubjects.map(subject => (
+                      {effectiveSubjects.map(subject => (
                         <span
                           key={subject}
                           className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium capitalize"
