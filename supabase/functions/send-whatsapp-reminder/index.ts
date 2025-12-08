@@ -10,10 +10,16 @@ const TWILIO_ACCOUNT_SID = Deno.env.get('TWILIO_ACCOUNT_SID');
 const TWILIO_AUTH_TOKEN = Deno.env.get('TWILIO_AUTH_TOKEN');
 const TWILIO_PHONE_NUMBER = Deno.env.get('TWILIO_PHONE_NUMBER');
 
-// Twilio sandbox join code - users need to text this to join
+// Twilio sandbox details
+const SANDBOX_NUMBER = '+14155238886';
 const SANDBOX_JOIN_MESSAGE = "join sound-sound";
 
-async function sendWhatsAppMessage(to: string, message: string): Promise<{ success: boolean; error?: string }> {
+// App link
+const APP_LINK = 'https://otpczgpmpnabbvzthvjv.lovableproject.com';
+
+async function sendWhatsAppMessage(to: string, message: string): Promise<{ success: boolean; error?: string; messageId?: string }> {
+  console.log(`Attempting to send WhatsApp to: ${to}`);
+  
   const url = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
   
   const formData = new URLSearchParams();
@@ -32,39 +38,74 @@ async function sendWhatsAppMessage(to: string, message: string): Promise<{ succe
     });
 
     const result = await response.json();
-    console.log('Twilio response:', JSON.stringify(result));
+    console.log('Twilio API response:', JSON.stringify(result));
     
     if (!response.ok) {
-      // Check if it's a sandbox error
+      // Sandbox-specific error handling
       if (result.code === 63007 || result.message?.includes('sandbox')) {
         return { 
           success: false, 
-          error: `Sandbox not joined. User must text "${SANDBOX_JOIN_MESSAGE}" to +14155238886 on WhatsApp first.` 
+          error: `Sandbox session expired. Send "${SANDBOX_JOIN_MESSAGE}" to ${SANDBOX_NUMBER} on WhatsApp to rejoin.` 
         };
       }
-      return { success: false, error: result.message || 'Failed to send message' };
+      if (result.code === 21211) {
+        return { success: false, error: 'Invalid phone number format. Use international format (+234...)' };
+      }
+      return { success: false, error: result.message || `Twilio error: ${result.code}` };
     }
     
-    return { success: true };
+    console.log(`Message sent successfully! SID: ${result.sid}`);
+    return { success: true, messageId: result.sid };
   } catch (err) {
-    console.error('Fetch error:', err);
+    console.error('Network error sending WhatsApp:', err);
     return { success: false, error: err instanceof Error ? err.message : 'Network error' };
   }
 }
 
+// Generate daily motivational messages
+function getDailyGreeting(): string {
+  const hour = new Date().getUTCHours() + 1; // Nigerian time (WAT = UTC+1)
+  
+  if (hour >= 5 && hour < 12) {
+    const mornings = [
+      'Good morning, champion! 🌅',
+      'Rise and shine! ☀️',
+      'Wake up, future doctor/engineer! 🌞',
+      'Morning superstar! 🌟',
+    ];
+    return mornings[Math.floor(Math.random() * mornings.length)];
+  } else if (hour >= 12 && hour < 17) {
+    const afternoons = [
+      'Good afternoon! 🌤️',
+      'Afternoon boost! 💪',
+      'Keep pushing! 🔥',
+    ];
+    return afternoons[Math.floor(Math.random() * afternoons.length)];
+  } else {
+    const evenings = [
+      'Good evening! 🌙',
+      'Evening study time! 📚',
+      'Night owl mode! 🦉',
+    ];
+    return evenings[Math.floor(Math.random() * evenings.length)];
+  }
+}
+
 serve(async (req) => {
-  // Handle CORS preflight requests
+  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { phone_number, email, test_mode } = await req.json();
+    const { phone_number, email, test_mode, send_daily_reminders } = await req.json();
 
-    console.log(`WhatsApp request - phone: ${phone_number}, email: ${email}, test_mode: ${test_mode}`);
+    console.log(`WhatsApp request - phone: ${phone_number}, email: ${email}, test: ${test_mode}, daily: ${send_daily_reminders}`);
 
-    // Validate Twilio credentials
-    if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_PHONE_NUMBER) {
+    // Check Twilio configuration
+    const configured = !!(TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN && TWILIO_PHONE_NUMBER);
+    
+    if (!configured) {
       console.error('Missing Twilio credentials');
       return new Response(
         JSON.stringify({ 
@@ -80,94 +121,162 @@ serve(async (req) => {
       );
     }
 
-    // If test mode, just verify credentials work
+    // Test mode - just check configuration
     if (test_mode) {
-      console.log('Test mode - checking Twilio configuration');
+      console.log('Test mode - returning configuration status');
       return new Response(
         JSON.stringify({ 
           success: true, 
           configured: true,
-          message: 'Twilio is configured correctly',
-          sandbox_info: `To receive messages, text "${SANDBOX_JOIN_MESSAGE}" to +14155238886 on WhatsApp`
+          message: 'WhatsApp is connected & working ✅',
+          sandbox_info: {
+            number: SANDBOX_NUMBER,
+            join_message: SANDBOX_JOIN_MESSAGE,
+            instructions: `Text "${SANDBOX_JOIN_MESSAGE}" to ${SANDBOX_NUMBER} on WhatsApp to activate`
+          }
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Get user's study data from Supabase
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    // Fetch user's subjects and progress
-    const { data: userSubjects } = await supabase
-      .from('user_subjects')
-      .select('subjects')
-      .eq('email', email)
-      .single();
-
-    const { data: progress } = await supabase
-      .from('user_progress')
-      .select('*')
-      .eq('email', email)
-      .single();
-
-    // Fetch 3 random questions from their subjects
-    let questionsMessage = '';
-    if (userSubjects?.subjects && userSubjects.subjects.length > 0) {
-      const randomSubject = userSubjects.subjects[Math.floor(Math.random() * userSubjects.subjects.length)];
+    // Send daily reminders to all active users (called by cron)
+    if (send_daily_reminders) {
+      console.log('Sending daily reminders to all active users...');
       
-      const { data: questions } = await supabase
-        .from('jamb_questions')
-        .select('question, option_a, option_b, option_c, option_d, correct_answer')
-        .eq('subject', randomSubject)
-        .limit(3);
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+      const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+      const supabase = createClient(supabaseUrl, supabaseKey);
 
-      if (questions && questions.length > 0) {
-        questionsMessage = '\n\n📚 *Quick Practice Questions:*\n';
-        questions.forEach((q, i) => {
-          questionsMessage += `\n${i + 1}. ${q.question}\nA) ${q.option_a}\nB) ${q.option_b}\nC) ${q.option_c}\nD) ${q.option_d}\n`;
-        });
+      // Get all active WhatsApp reminders
+      const { data: reminders, error: remindersError } = await supabase
+        .from('whatsapp_reminders')
+        .select('*')
+        .eq('is_active', true);
+
+      if (remindersError) {
+        console.error('Error fetching reminders:', remindersError);
+        return new Response(
+          JSON.stringify({ error: 'Failed to fetch reminders' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      console.log(`Found ${reminders?.length || 0} active reminders`);
+
+      const results: { sent: number; failed: number; errors: string[] } = { sent: 0, failed: 0, errors: [] };
+
+      for (const reminder of reminders || []) {
+        const greeting = getDailyGreeting();
+        const message = `${greeting}
+
+🎯 *JAMB 48-Hour Crash*
+
+Ready for today's 20 JAMB questions? 📚
+
+💪 Every question gets you closer to 300+!
+
+📱 Open app → ${APP_LINK}
+
+Keep crushing it! 🔥`;
+
+        const result = await sendWhatsAppMessage(reminder.phone_number, message);
+        
+        if (result.success) {
+          results.sent++;
+        } else {
+          results.failed++;
+          results.errors.push(`${reminder.phone_number}: ${result.error}`);
+        }
+        
+        // Small delay between messages to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
+      console.log(`Daily reminders complete: ${results.sent} sent, ${results.failed} failed`);
+      
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: `Sent ${results.sent} reminders, ${results.failed} failed`,
+          details: results
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Single message send (test or manual)
+    if (!phone_number) {
+      return new Response(
+        JSON.stringify({ error: 'Phone number required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Format phone number
+    let formattedPhone = phone_number.replace(/\s+/g, '');
+    if (!formattedPhone.startsWith('+')) {
+      formattedPhone = '+' + formattedPhone;
+    }
+
+    // Get user data if email provided
+    let studyStats = '';
+    if (email) {
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+      const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+      const supabase = createClient(supabaseUrl, supabaseKey);
+
+      const { data: progress } = await supabase
+        .from('user_progress')
+        .select('*')
+        .eq('email', email)
+        .maybeSingle();
+
+      if (progress) {
+        studyStats = `
+📊 Your Progress:
+• Questions: ${progress.questions_completed || 0}
+• Study Days: ${progress.study_days_completed || 0}
+${progress.predicted_score_min ? `• Predicted: ${progress.predicted_score_min}-${progress.predicted_score_max}` : ''}`;
       }
     }
 
-    // Build the reminder message
-    const greetings = ['Good morning! 🌅', 'Rise and shine! ☀️', 'Hello champion! 🏆'];
-    const greeting = greetings[Math.floor(Math.random() * greetings.length)];
-    
-    const studyDays = progress?.study_days_completed || 0;
-    const questionsCompleted = progress?.questions_completed || 0;
-    
+    const greeting = getDailyGreeting();
     const message = `${greeting}
 
-🎯 *JAMB 48-Hour Crash - Daily Reminder*
+🎯 *JAMB 48-Hour Crash - Study Reminder*
+${studyStats}
 
-📊 Your Progress:
-• Study Days: ${studyDays} days
-• Questions Completed: ${questionsCompleted}
-${progress?.predicted_score_min ? `• Predicted Score: ${progress.predicted_score_min}-${progress.predicted_score_max}` : ''}
+Ready for today's 20 JAMB questions? 📚
 
-💪 Keep pushing! Every question brings you closer to that 300+ score!
-${questionsMessage}
+💪 Every question gets you closer to 300+!
 
-📱 Open the app to continue your study session!`;
+📱 Open app → ${APP_LINK}
 
-    // Send the WhatsApp message
-    const result = await sendWhatsAppMessage(phone_number, message);
+Keep crushing it! 🔥`;
+
+    const result = await sendWhatsAppMessage(formattedPhone, message);
 
     if (result.success) {
-      console.log(`WhatsApp reminder sent to ${phone_number}`);
+      console.log(`WhatsApp sent to ${formattedPhone}`);
       return new Response(
-        JSON.stringify({ success: true, message: 'Reminder sent successfully' }),
+        JSON.stringify({ 
+          success: true, 
+          message: 'Reminder sent successfully! ✅',
+          messageId: result.messageId
+        }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     } else {
-      console.error(`Failed to send WhatsApp: ${result.error}`);
+      console.error(`Failed to send: ${result.error}`);
       return new Response(
         JSON.stringify({ 
           success: false, 
           error: result.error,
-          sandbox_info: `Make sure to text "${SANDBOX_JOIN_MESSAGE}" to +14155238886 on WhatsApp first!`
+          sandbox_info: {
+            number: SANDBOX_NUMBER,
+            join_message: SANDBOX_JOIN_MESSAGE,
+            instructions: `If sandbox expired, text "${SANDBOX_JOIN_MESSAGE}" to ${SANDBOX_NUMBER} on WhatsApp`
+          }
         }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -175,7 +284,7 @@ ${questionsMessage}
 
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Error sending WhatsApp reminder:', error);
+    console.error('WhatsApp function error:', error);
     return new Response(
       JSON.stringify({ error: errorMessage }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
