@@ -19,14 +19,16 @@ export const PricingCard = ({ name, price, features, popular, onSelect, delay = 
       viewport={{ once: true }}
       transition={{ delay, duration: 0.5 }}
       className={`relative card-elevated p-6 md:p-8 flex flex-col ${
-        popular ? 'border-2 border-primary shadow-glow' : ''
+        popular 
+          ? 'border-2 border-primary shadow-[0_0_30px_rgba(34,197,94,0.3)] scale-105 z-10' 
+          : ''
       }`}
     >
       {popular && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-          <span className="inline-flex items-center gap-1 px-4 py-1 rounded-full text-sm font-semibold bg-primary text-primary-foreground">
-            <Star className="w-4 h-4" />
-            Most Popular
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold bg-gradient-to-r from-primary to-green-400 text-primary-foreground shadow-lg">
+            <Star className="w-4 h-4 fill-current" />
+            Most Popular 🔥
           </span>
         </div>
       )}
