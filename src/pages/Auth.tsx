@@ -95,14 +95,48 @@ export default function Auth() {
 
     setIsSubmitting(true);
     try {
+      // First, check if we have a valid session from the recovery token
+      const { data: sessionData } = await supabase.auth.getSession();
+      
+      if (!sessionData.session) {
+        // Try to exchange the recovery token from the URL hash
+        const hash = window.location.hash;
+        if (hash && hash.includes('access_token')) {
+          const params = new URLSearchParams(hash.substring(1));
+          const accessToken = params.get('access_token');
+          const refreshToken = params.get('refresh_token');
+          
+          if (accessToken && refreshToken) {
+            const { error: sessionError } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken
+            });
+            
+            if (sessionError) {
+              toast.error('Session expired. Please request a new password reset link.');
+              setView('forgot-password');
+              setIsSubmitting(false);
+              return;
+            }
+          }
+        }
+      }
+      
       const { error } = await supabase.auth.updateUser({ password });
       
       if (error) {
-        toast.error(error.message);
+        if (error.message.includes('session')) {
+          toast.error('Session expired. Please request a new password reset link.');
+          setView('forgot-password');
+        } else {
+          toast.error(error.message);
+        }
       } else {
         toast.success('Password updated successfully! You can now sign in.');
         // Clear the hash from URL
         window.history.replaceState(null, '', window.location.pathname);
+        // Sign out to clear the recovery session
+        await supabase.auth.signOut();
         setView('login');
         setPassword('');
         setConfirmPassword('');

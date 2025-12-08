@@ -39,7 +39,7 @@ export const ProtectedRoute = ({
   }
 
   // Requires admin access (verified server-side)
-  if (requireAdmin && !isAdmin) {
+  if (requireAdmin && !isAdmin && !isOwner) {
     return <Navigate to="/" replace />;
   }
 
