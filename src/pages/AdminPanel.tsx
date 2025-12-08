@@ -10,11 +10,10 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AdminBadge } from '@/components/AdminBadge';
-import { useAccessControl } from '@/hooks/useAccessControl';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { AppHealthCheck } from '@/components/AppHealthCheck';
-
 interface Payment {
   id: string;
   email: string;
@@ -52,7 +51,9 @@ const OWNER_EMAIL = 'saeedabdulbasit933@gmail.com';
 
 const AdminPanel = () => {
   const navigate = useNavigate();
-  const { hasAccess, isAdmin, adminRole, isLoading, userEmail } = useAccessControl();
+  const { user, isLoading, isAdmin, isOwner: authIsOwner, userRole, hasAccess } = useAuth();
+  const userEmail = user?.email || null;
+  const adminRole = userRole;
   const [payments, setPayments] = useState<Payment[]>([]);
   const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [features, setFeatures] = useState<FeatureStatus[]>([]);
@@ -66,7 +67,7 @@ const AdminPanel = () => {
   const [emailConfigured, setEmailConfigured] = useState<boolean | null>(null);
   const [whatsappConfigured, setWhatsappConfigured] = useState<boolean | null>(null);
 
-  const isOwner = userEmail?.toLowerCase() === OWNER_EMAIL.toLowerCase() || adminRole === 'owner';
+  const isOwner = authIsOwner || userEmail?.toLowerCase() === OWNER_EMAIL.toLowerCase();
   const canEdit = isOwner; // Only owner can edit settings
 
   useEffect(() => {
