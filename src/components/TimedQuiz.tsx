@@ -48,27 +48,27 @@ const MOTIVATIONAL_MESSAGES = [
   "Stay focused, stay winning! 🔥",
 ];
 
-// Ambient sounds - using reliable free audio sources
+// Ambient sounds - soothing natural sounds with accurate labels
 const AMBIENT_SOUNDS = {
   rain: {
-    url: "https://assets.mixkit.co/active_storage/sfx/212/212-preview.mp3",
-    label: "🌧️ Soft Rain"
+    url: "https://cdn.freesound.org/previews/531/531947_5674468-lq.mp3",
+    label: "🌧️ Gentle Rain"
   },
-  nature: {
-    url: "https://assets.mixkit.co/active_storage/sfx/2491/2491-preview.mp3",
-    label: "🌿 Forest Birds"
+  birds: {
+    url: "https://cdn.freesound.org/previews/531/531953_5674468-lq.mp3",
+    label: "🐦 Morning Birds"
   },
   ocean: {
-    url: "https://assets.mixkit.co/active_storage/sfx/2194/2194-preview.mp3",
+    url: "https://cdn.freesound.org/previews/527/527602_2645044-lq.mp3",
     label: "🌊 Ocean Waves"
   },
-  wind: {
-    url: "https://assets.mixkit.co/active_storage/sfx/2502/2502-preview.mp3",
-    label: "💨 Gentle Wind"
+  forest: {
+    url: "https://cdn.freesound.org/previews/462/462087_9159316-lq.mp3",
+    label: "🌲 Peaceful Forest"
   },
-  stream: {
-    url: "https://assets.mixkit.co/active_storage/sfx/2507/2507-preview.mp3",
-    label: "💧 Stream"
+  fire: {
+    url: "https://cdn.freesound.org/previews/499/499018_10758857-lq.mp3",
+    label: "🔥 Crackling Fire"
   }
 };
 
