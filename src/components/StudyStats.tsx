@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, Target, Clock, Calendar, Flame, BookOpen, AlertCircle } from 'lucide-react';
+import { TrendingUp, Target, Clock, Flame, BookOpen, AlertCircle, Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
 interface StudyStatsProps {
   userEmail: string;
+  refreshTrigger?: number; // Optional trigger to force refresh
 }
 
 interface QuizAttempt {
@@ -18,31 +19,66 @@ interface QuizAttempt {
   created_at: string;
 }
 
-export const StudyStats = ({ userEmail }: StudyStatsProps) => {
+export const StudyStats = ({ userEmail, refreshTrigger }: StudyStatsProps) => {
   const [quizzes, setQuizzes] = useState<QuizAttempt[]>([]);
   const [loading, setLoading] = useState(true);
+  const [tipIndex, setTipIndex] = useState(0);
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('quiz_attempts')
-          .select('*')
-          .eq('email', userEmail)
-          .order('created_at', { ascending: false })
-          .limit(30);
+  const fetchStats = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('quiz_attempts')
+        .select('*')
+        .eq('email', userEmail)
+        .order('created_at', { ascending: false })
+        .limit(30);
 
-        if (error) throw error;
-        setQuizzes(data || []);
-      } catch (error) {
-        console.error('Error fetching stats:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStats();
+      if (error) throw error;
+      setQuizzes(data || []);
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    } finally {
+      setLoading(false);
+    }
   }, [userEmail]);
+
+  // Initial fetch and real-time subscription
+  useEffect(() => {
+    fetchStats();
+
+    // Subscribe to real-time updates for quiz_attempts
+    const channel = supabase
+      .channel('quiz-stats-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'quiz_attempts',
+          filter: `email=eq.${userEmail}`
+        },
+        (payload) => {
+          console.log('New quiz detected, updating stats:', payload);
+          // Add the new quiz to the beginning of the list
+          setQuizzes(prev => [payload.new as QuizAttempt, ...prev.slice(0, 29)]);
+        }
+      )
+      .subscribe();
+
+    // Set random tip index on mount
+    setTipIndex(Math.floor(Math.random() * 5));
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userEmail, fetchStats]);
+
+  // Refetch when refreshTrigger changes
+  useEffect(() => {
+    if (refreshTrigger && refreshTrigger > 0) {
+      fetchStats();
+    }
+  }, [refreshTrigger, fetchStats]);
 
   if (loading) {
     return (
@@ -84,24 +120,28 @@ export const StudyStats = ({ userEmail }: StudyStatsProps) => {
 
   const streak = calculateStreak();
 
-  // Subject performance
-  const subjectPerformance: Record<string, { correct: number; total: number }> = {};
+  // Subject performance with detailed tracking
+  const subjectPerformance: Record<string, { correct: number; total: number; attempts: number }> = {};
   quizzes.forEach(quiz => {
     quiz.subjects.forEach(subject => {
       if (!subjectPerformance[subject]) {
-        subjectPerformance[subject] = { correct: 0, total: 0 };
+        subjectPerformance[subject] = { correct: 0, total: 0, attempts: 0 };
       }
       // Approximate per-subject stats
       const perSubject = quiz.total_questions / quiz.subjects.length;
       subjectPerformance[subject].total += perSubject;
       subjectPerformance[subject].correct += (quiz.correct_answers / quiz.total_questions) * perSubject;
+      subjectPerformance[subject].attempts++;
     });
   });
 
   const subjectData = Object.entries(subjectPerformance)
     .map(([name, data]) => ({
       name: name.charAt(0).toUpperCase() + name.slice(1),
-      score: Math.round((data.correct / data.total) * 100) || 0
+      score: Math.round((data.correct / data.total) * 100) || 0,
+      correct: Math.round(data.correct),
+      total: Math.round(data.total),
+      attempts: data.attempts
     }))
     .sort((a, b) => a.score - b.score);
 
@@ -114,21 +154,76 @@ export const StudyStats = ({ userEmail }: StudyStatsProps) => {
       score: Math.round((q.correct_answers / q.total_questions) * 100)
     }));
 
-  // Find weakest subject
+  // Find weakest and strongest subjects
   const weakestSubject = subjectData[0];
+  const strongestSubject = subjectData[subjectData.length - 1];
+  const lastQuiz = quizzes[0];
 
-  // AI Insight
+  // Calculate predicted JAMB score
+  const predictedJAMB = Math.round((avgScore / 100) * 400);
+
+  // Generate personalized AI insight
   const getAIInsight = () => {
     if (totalQuizzes === 0) {
-      return "Start your first quiz to get personalized insights! 📚";
+      const startTips = [
+        "Ready to crush JAMB? Start your first quiz now and watch your scores climb! 🚀",
+        "Your JAMB journey starts here! Take a quiz to get personalized study tips 📚",
+        "Champions start somewhere — take your first quiz today! 💪",
+        "No stats yet? Complete a quiz and I'll show you exactly where to focus! 🎯",
+        "Let's begin! Your first quiz will unlock powerful insights for your prep 🔓"
+      ];
+      return startTips[tipIndex % startTips.length];
     }
+
+    // If there's a recent quiz (last 24 hours), give specific feedback
+    if (lastQuiz) {
+      const lastQuizScore = Math.round((lastQuiz.correct_answers / lastQuiz.total_questions) * 100);
+      const hoursAgo = (Date.now() - new Date(lastQuiz.created_at).getTime()) / (1000 * 60 * 60);
+      
+      if (hoursAgo < 1) {
+        if (lastQuizScore >= 80) {
+          return `Amazing! You just scored ${lastQuizScore}%! You're on track for ${predictedJAMB}+ 🔥`;
+        } else if (lastQuizScore >= 60) {
+          return `Good effort! ${lastQuizScore}% is solid. ${weakestSubject ? `Focus on ${weakestSubject.name} next!` : 'Keep practicing!'} 💪`;
+        } else {
+          return `${lastQuizScore}% — don't worry! ${weakestSubject ? `Practice more ${weakestSubject.name} to improve fast!` : 'Every quiz makes you stronger!'} 📈`;
+        }
+      }
+    }
+
+    // Weak subject specific tips
     if (weakestSubject && weakestSubject.score < 50) {
-      return `You need more practice in ${weakestSubject.name} — try 20 questions today! 💪`;
+      const weakTips = [
+        `You got ${weakestSubject.correct}/${weakestSubject.total} in ${weakestSubject.name} — practice 20 questions today to hit 280+! 🔥`,
+        `${weakestSubject.name} needs attention (${weakestSubject.score}%) — one focused session could add 30+ marks! 📊`,
+        `Your ${weakestSubject.name} score is ${weakestSubject.score}%. Master it and watch your JAMB score jump! 🎯`,
+        `Focus area: ${weakestSubject.name} at ${weakestSubject.score}%. Daily practice here = faster improvement! 💡`,
+        `${weakestSubject.name} is pulling you back. Let's turn your weakness into a strength! 💪`
+      ];
+      return weakTips[tipIndex % weakTips.length];
     }
+
+    // Good performance tips
     if (avgScore >= 70) {
-      return "You're doing great! Keep up the momentum for that 300+! 🔥";
+      const strongTips = [
+        `You're killing it! ${avgScore}% average = predicted ${predictedJAMB} JAMB score! 🔥`,
+        `${strongestSubject?.name} is your superpower at ${strongestSubject?.score}%! Keep the momentum! 🚀`,
+        `Consistent ${avgScore}%! You're on track for 300+. Don't slow down now! 💪`,
+        `${streak} day streak + ${avgScore}% average = JAMB success incoming! 🎯`,
+        `Amazing progress! Your ${totalQuizzes} quizzes are paying off. Keep it up! ⭐`
+      ];
+      return strongTips[tipIndex % strongTips.length];
     }
-    return "Consistent practice is key. Aim for at least one quiz daily! 🎯";
+
+    // General improvement tips
+    const generalTips = [
+      `${totalQuizzes} quizzes done! Aim for 1 more today to boost your ${avgScore}% average 📈`,
+      `Current: ${avgScore}%. Target: 70%+. You're ${70 - avgScore}% away — you've got this! 💪`,
+      `Daily practice = steady gains. Your ${streak || 0} day streak is building success! 🔥`,
+      `${totalTimeMinutes} mins studied! Consistent effort wins the JAMB race 🏆`,
+      `Keep going! Every quiz gets you closer to that 300+ score! 🎯`
+    ];
+    return generalTips[tipIndex % generalTips.length];
   };
 
   return (
@@ -139,41 +234,72 @@ export const StudyStats = ({ userEmail }: StudyStatsProps) => {
     >
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-card rounded-xl p-4 border border-border">
+        <motion.div 
+          className="bg-card rounded-xl p-4 border border-border"
+          whileHover={{ scale: 1.02 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
           <Target className="w-6 h-6 text-primary mb-2" />
           <p className="text-2xl font-bold text-foreground">{avgScore}%</p>
           <p className="text-sm text-muted-foreground">Avg Score</p>
-        </div>
+        </motion.div>
         
-        <div className="bg-card rounded-xl p-4 border border-border">
+        <motion.div 
+          className="bg-card rounded-xl p-4 border border-border"
+          whileHover={{ scale: 1.02 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
           <BookOpen className="w-6 h-6 text-blue-500 mb-2" />
           <p className="text-2xl font-bold text-foreground">{totalQuizzes}</p>
           <p className="text-sm text-muted-foreground">Quizzes Done</p>
-        </div>
+        </motion.div>
         
-        <div className="bg-card rounded-xl p-4 border border-border">
+        <motion.div 
+          className="bg-card rounded-xl p-4 border border-border"
+          whileHover={{ scale: 1.02 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
           <Clock className="w-6 h-6 text-green-500 mb-2" />
           <p className="text-2xl font-bold text-foreground">{totalTimeMinutes}m</p>
           <p className="text-sm text-muted-foreground">Study Time</p>
-        </div>
+        </motion.div>
         
-        <div className="bg-card rounded-xl p-4 border border-border">
+        <motion.div 
+          className="bg-card rounded-xl p-4 border border-border"
+          whileHover={{ scale: 1.02 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
           <Flame className={`w-6 h-6 mb-2 ${streak > 0 ? 'text-orange-500' : 'text-muted-foreground'}`} />
           <p className="text-2xl font-bold text-foreground">{streak}</p>
           <p className="text-sm text-muted-foreground">Day Streak 🔥</p>
-        </div>
+        </motion.div>
       </div>
 
-      {/* AI Insight */}
-      <div className="bg-primary/10 rounded-xl p-4 border border-primary/30">
-        <div className="flex items-start gap-3">
-          <span className="text-2xl">🤖</span>
-          <div>
-            <p className="font-medium text-foreground">AI Study Tip</p>
-            <p className="text-sm text-muted-foreground">{getAIInsight()}</p>
+      {/* AI Insight - Enhanced */}
+      <motion.div 
+        className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-xl p-5 border border-primary/30"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.2 }}
+      >
+        <div className="flex items-start gap-4">
+          <div className="bg-primary/20 rounded-full p-2">
+            <Sparkles className="w-6 h-6 text-primary" />
+          </div>
+          <div className="flex-1">
+            <p className="font-semibold text-foreground flex items-center gap-2">
+              AI Study Tip 
+              <span className="text-xs bg-primary/20 px-2 py-0.5 rounded-full text-primary">Personalized</span>
+            </p>
+            <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{getAIInsight()}</p>
+            {predictedJAMB > 0 && totalQuizzes > 0 && (
+              <p className="text-xs text-primary mt-2 font-medium">
+                📊 Predicted JAMB Score: {predictedJAMB}/400
+              </p>
+            )}
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Charts */}
       {totalQuizzes > 0 && (
@@ -189,13 +315,20 @@ export const StudyStats = ({ userEmail }: StudyStatsProps) => {
                 <LineChart data={dailyData}>
                   <XAxis dataKey="date" stroke="#888" fontSize={12} />
                   <YAxis stroke="#888" fontSize={12} domain={[0, 100]} />
-                  <Tooltip />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))', 
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px'
+                    }}
+                  />
                   <Line 
                     type="monotone" 
                     dataKey="score" 
                     stroke="hsl(var(--primary))" 
-                    strokeWidth={2}
-                    dot={{ fill: 'hsl(var(--primary))' }}
+                    strokeWidth={3}
+                    dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2 }}
+                    activeDot={{ r: 6, fill: 'hsl(var(--primary))' }}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -213,7 +346,14 @@ export const StudyStats = ({ userEmail }: StudyStatsProps) => {
                 <BarChart data={subjectData} layout="vertical">
                   <XAxis type="number" domain={[0, 100]} stroke="#888" fontSize={12} />
                   <YAxis type="category" dataKey="name" stroke="#888" fontSize={10} width={80} />
-                  <Tooltip />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))', 
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px'
+                    }}
+                    formatter={(value) => [`${value}%`, 'Score']}
+                  />
                   <Bar 
                     dataKey="score" 
                     fill="hsl(var(--primary))"
@@ -227,19 +367,24 @@ export const StudyStats = ({ userEmail }: StudyStatsProps) => {
       )}
 
       {/* Weak Areas Alert */}
-      {weakestSubject && weakestSubject.score < 50 && (
-        <div className="bg-orange-500/10 rounded-xl p-4 border border-orange-500/30">
+      {weakestSubject && weakestSubject.score < 50 && totalQuizzes > 0 && (
+        <motion.div 
+          className="bg-orange-500/10 rounded-xl p-4 border border-orange-500/30"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.3 }}
+        >
           <div className="flex items-start gap-3">
             <AlertCircle className="w-6 h-6 text-orange-500 flex-shrink-0" />
             <div>
               <p className="font-medium text-foreground">Weak Area Detected! 📊</p>
               <p className="text-sm text-muted-foreground">
-                Your {weakestSubject.name} score is {weakestSubject.score}%. 
+                Your {weakestSubject.name} score is {weakestSubject.score}% ({weakestSubject.correct}/{weakestSubject.total} correct). 
                 Focus more practice here to boost your overall JAMB score!
               </p>
             </div>
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* No Data State */}
