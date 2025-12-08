@@ -14,11 +14,13 @@ export function PasswordRecoveryHandler({ children }: PasswordRecoveryHandlerPro
   useEffect(() => {
     // Check for recovery token in URL hash (could land on any page)
     const hash = window.location.hash;
+    const searchParams = new URLSearchParams(window.location.search);
+    const hasRecoveryParam = searchParams.get('recovery') === 'true';
     
     if (hash && hash.includes('access_token') && hash.includes('type=recovery')) {
-      // Redirect to auth page with the hash preserved
+      // Redirect to auth page with recovery param
       if (location.pathname !== '/auth') {
-        navigate('/auth' + hash, { replace: true });
+        navigate('/auth?recovery=true' + hash, { replace: true });
         return;
       }
     }
