@@ -17,6 +17,63 @@ const SANDBOX_JOIN_MESSAGE = "join sound-sound";
 // App link
 const APP_LINK = 'https://otpczgpmpnabbvzthvjv.lovableproject.com';
 
+// Rate limiting: track requests per phone number (in-memory, resets on function restart)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_MAX = 5; // Max 5 messages per hour per phone
+const RATE_LIMIT_WINDOW = 60 * 60 * 1000; // 1 hour in milliseconds
+
+function isRateLimited(phone: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(phone);
+  
+  if (!entry || now > entry.resetTime) {
+    rateLimitMap.set(phone, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return false;
+  }
+  
+  if (entry.count >= RATE_LIMIT_MAX) {
+    return true;
+  }
+  
+  entry.count++;
+  return false;
+}
+
+// Validate phone number format (international format, 10-15 digits)
+function validatePhoneNumber(phone: string): { valid: boolean; formatted: string; error?: string } {
+  // Remove all whitespace and non-digit characters except +
+  let cleaned = phone.replace(/[^\d+]/g, '');
+  
+  // Ensure it starts with +
+  if (!cleaned.startsWith('+')) {
+    cleaned = '+' + cleaned;
+  }
+  
+  // Remove the + for digit validation
+  const digitsOnly = cleaned.substring(1);
+  
+  // Check if it's all digits
+  if (!/^\d+$/.test(digitsOnly)) {
+    return { valid: false, formatted: '', error: 'Phone number must contain only digits' };
+  }
+  
+  // Check length (international numbers are typically 10-15 digits after country code)
+  if (digitsOnly.length < 10 || digitsOnly.length > 15) {
+    return { valid: false, formatted: '', error: 'Phone number must be 10-15 digits. Use international format (+234...)' };
+  }
+  
+  // Validate common country codes (basic check)
+  const validCountryCodes = ['1', '234', '233', '254', '27', '44', '49', '33', '39', '81', '86', '91', '61', '55'];
+  const hasValidCountryCode = validCountryCodes.some(code => digitsOnly.startsWith(code));
+  
+  if (!hasValidCountryCode) {
+    // Still allow it but log a warning
+    console.log(`Warning: Unusual country code for phone: ${cleaned}`);
+  }
+  
+  return { valid: true, formatted: cleaned };
+}
+
 async function sendWhatsAppMessage(to: string, message: string): Promise<{ success: boolean; error?: string; messageId?: string }> {
   console.log(`Attempting to send WhatsApp to: ${to}`);
   
@@ -166,6 +223,14 @@ serve(async (req) => {
       const results: { sent: number; failed: number; errors: string[] } = { sent: 0, failed: 0, errors: [] };
 
       for (const reminder of reminders || []) {
+        // Validate phone before sending
+        const validation = validatePhoneNumber(reminder.phone_number);
+        if (!validation.valid) {
+          results.failed++;
+          results.errors.push(`${reminder.phone_number}: ${validation.error}`);
+          continue;
+        }
+
         const greeting = getDailyGreeting();
         const message = `${greeting}
 
@@ -179,7 +244,7 @@ Ready for today's 20 JAMB questions? 📚
 
 Keep crushing it! 🔥`;
 
-        const result = await sendWhatsAppMessage(reminder.phone_number, message);
+        const result = await sendWhatsAppMessage(validation.formatted, message);
         
         if (result.success) {
           results.sent++;
@@ -212,10 +277,27 @@ Keep crushing it! 🔥`;
       );
     }
 
-    // Format phone number
-    let formattedPhone = phone_number.replace(/\s+/g, '');
-    if (!formattedPhone.startsWith('+')) {
-      formattedPhone = '+' + formattedPhone;
+    // Validate phone number
+    const validation = validatePhoneNumber(phone_number);
+    if (!validation.valid) {
+      return new Response(
+        JSON.stringify({ error: validation.error }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const formattedPhone = validation.formatted;
+
+    // Check rate limiting
+    if (isRateLimited(formattedPhone)) {
+      console.log(`Rate limited: ${formattedPhone}`);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Too many messages sent to this number. Please wait an hour before trying again.',
+          rate_limited: true
+        }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     // Get user data if email provided
