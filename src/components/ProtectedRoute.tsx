@@ -28,23 +28,19 @@ export const ProtectedRoute = ({
     );
   }
 
-  // Owner bypasses all checks (verified server-side via user_roles table)
-  if (isOwner) {
-    return <>{children}</>;
-  }
-
-  // Not logged in - redirect to auth
+  // Not logged in - redirect to auth (NO BYPASSES - everyone must authenticate)
   if (!user) {
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
-  // Requires admin access (verified server-side)
+  // Requires admin access (server-side verified via user_roles table)
   if (requireAdmin && !isAdmin && !isOwner) {
     return <Navigate to="/" replace />;
   }
 
-  // Requires paid access (verified server-side)
-  if (requireAccess && !hasAccess) {
+  // Requires paid access (server-side verified via check_user_access RPC)
+  // Owner and admin get access without payment
+  if (requireAccess && !hasAccess && !isOwner && !isAdmin) {
     return <Navigate to="/" state={{ showPaywall: true }} replace />;
   }
 

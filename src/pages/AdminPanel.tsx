@@ -621,20 +621,20 @@ const AdminPanel = () => {
             )}
 
             <div className="grid lg:grid-cols-2 gap-6">
-              {/* Admin Management */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
-                <Card className="bg-card border-border">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Crown className="w-5 h-5 text-amber-500" />
-                      Team Members
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {canEdit ? (
+              {/* Admin Management - OWNER ONLY */}
+              {isOwner ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <Card className="bg-card border-border">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Crown className="w-5 h-5 text-amber-500" />
+                        Team Members
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
                       <div className="flex gap-2">
                         <Input
                           placeholder="collaborator@email.com"
@@ -646,44 +646,62 @@ const AdminPanel = () => {
                           <Plus className="w-4 h-4" />
                         </Button>
                       </div>
-                    ) : (
-                      <div className="p-3 rounded-lg bg-muted/50 text-center">
-                        <p className="text-sm text-muted-foreground">Only owner can add collaborators</p>
-                      </div>
-                    )}
-                    <div className="space-y-2 max-h-64 overflow-y-auto">
-                      {admins.map((admin) => (
-                        <div
-                          key={admin.id}
-                          className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
-                        >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <Mail className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                            <span className="text-sm truncate">{admin.email}</span>
-                            <span className={`text-xs px-2 py-0.5 rounded-full ${
-                              admin.role === 'owner' 
-                                ? 'bg-amber-500/20 text-amber-600' 
-                                : 'bg-blue-500/20 text-blue-600'
-                            }`}>
-                              {admin.role}
-                            </span>
+                      <div className="space-y-2 max-h-64 overflow-y-auto">
+                        {admins.map((admin) => (
+                          <div
+                            key={admin.id}
+                            className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <Mail className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                              <span className="text-sm truncate">{admin.email}</span>
+                              <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                admin.role === 'owner' 
+                                  ? 'bg-amber-500/20 text-amber-600' 
+                                  : 'bg-blue-500/20 text-blue-600'
+                              }`}>
+                                {admin.role}
+                              </span>
+                            </div>
+                            {admin.email !== userEmail && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-destructive hover:text-destructive"
+                                onClick={() => removeAdmin(admin.id, admin.email)}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            )}
                           </div>
-                          {canEdit && admin.email !== userEmail && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-destructive hover:text-destructive"
-                              onClick={() => removeAdmin(admin.id, admin.email)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <Card className="bg-card border-border">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Users className="w-5 h-5 text-primary" />
+                        Your Access
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="p-4 rounded-lg bg-muted/50 text-center space-y-2">
+                        <AdminBadge role={adminRole} />
+                        <p className="text-sm text-muted-foreground mt-2">
+                          You have collaborator access. Admin list is only visible to the owner.
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
 
               {/* WhatsApp Status & Quick Actions */}
               <motion.div
