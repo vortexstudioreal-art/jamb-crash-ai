@@ -1,18 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-// Bypass emails for immediate access
-const OWNER_EMAIL = 'saeedabdulbasit933@gmail.com';
-const COLLABORATOR_EMAILS = [
-  'loaborejim@gmail.com',
-  'favourgoodnews@gmail.com',
-  'onuchionwuegbusi@gmail.com',
-  'muzzyothman@gmail.com',
-  'muzzyothmam@gmail.com'
-];
-const BYPASS_EMAILS = [OWNER_EMAIL, ...COLLABORATOR_EMAILS];
-const BYPASS_STORAGE_KEY = 'jamb_bypass_email';
-
 interface AccessStatus {
   hasAccess: boolean;
   isAdmin: boolean;
@@ -25,40 +13,15 @@ interface AccessStatus {
 
 const STORAGE_KEY = 'jamb_user_email';
 
-// Helper to get bypass email from localStorage
-const getBypassEmail = (): string | null => {
-  const stored = localStorage.getItem(BYPASS_STORAGE_KEY);
-  if (stored && BYPASS_EMAILS.includes(stored.toLowerCase())) {
-    return stored.toLowerCase();
-  }
-  return null;
-};
-
 export const useAccessControl = () => {
-  const [accessStatus, setAccessStatus] = useState<AccessStatus>(() => {
-    // Check for bypass user immediately
-    const bypassEmail = getBypassEmail();
-    if (bypassEmail) {
-      const isOwner = bypassEmail === OWNER_EMAIL;
-      return {
-        hasAccess: true,
-        isAdmin: true,
-        adminRole: isOwner ? 'owner' : 'collaborator',
-        package: 'permanent',
-        expiresAt: null,
-        isLoading: false,
-        userEmail: bypassEmail,
-      };
-    }
-    return {
-      hasAccess: false,
-      isAdmin: false,
-      adminRole: null,
-      package: null,
-      expiresAt: null,
-      isLoading: true,
-      userEmail: null,
-    };
+  const [accessStatus, setAccessStatus] = useState<AccessStatus>({
+    hasAccess: false,
+    isAdmin: false,
+    adminRole: null,
+    package: null,
+    expiresAt: null,
+    isLoading: true,
+    userEmail: null,
   });
 
   const checkAccess = useCallback(async (email: string) => {
@@ -75,25 +38,10 @@ export const useAccessControl = () => {
       return;
     }
 
-    // Check if bypass user FIRST - instant access
-    const normalizedEmail = email.toLowerCase();
-    if (BYPASS_EMAILS.includes(normalizedEmail)) {
-      const isOwner = normalizedEmail === OWNER_EMAIL;
-      setAccessStatus({
-        hasAccess: true,
-        isAdmin: true,
-        adminRole: isOwner ? 'owner' : 'collaborator',
-        package: 'permanent',
-        expiresAt: null,
-        isLoading: false,
-        userEmail: normalizedEmail,
-      });
-      return;
-    }
-
     try {
+      // All access checks are done server-side via RPC
       const { data, error } = await supabase.rpc('check_user_access', {
-        user_email: normalizedEmail,
+        user_email: email.toLowerCase(),
       });
 
       if (error) {
@@ -153,7 +101,6 @@ export const useAccessControl = () => {
 
   const clearUserEmail = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(BYPASS_STORAGE_KEY);
     setAccessStatus({
       hasAccess: false,
       isAdmin: false,
@@ -166,13 +113,6 @@ export const useAccessControl = () => {
   }, []);
 
   useEffect(() => {
-    // Check bypass email FIRST
-    const bypassEmail = getBypassEmail();
-    if (bypassEmail) {
-      checkAccess(bypassEmail);
-      return;
-    }
-    
     const storedEmail = localStorage.getItem(STORAGE_KEY);
     if (storedEmail) {
       checkAccess(storedEmail);
@@ -186,11 +126,6 @@ export const useAccessControl = () => {
     setUserEmail,
     clearUserEmail,
     refreshAccess: () => {
-      const bypassEmail = getBypassEmail();
-      if (bypassEmail) {
-        checkAccess(bypassEmail);
-        return;
-      }
       const email = localStorage.getItem(STORAGE_KEY);
       if (email) checkAccess(email);
     },

@@ -44,30 +44,10 @@ const plans = {
   premium: { name: 'Premium', price: 30000 },
 };
 
-// Bypass emails for immediate access
-const OWNER_EMAIL = 'saeedabdulbasit933@gmail.com';
-const COLLABORATOR_EMAILS = [
-  'loaborejim@gmail.com',
-  'favourgoodnews@gmail.com',
-  'onuchionwuegbusi@gmail.com',
-  'muzzyothman@gmail.com',
-  'muzzyothmam@gmail.com'
-];
-const BYPASS_EMAILS = [OWNER_EMAIL, ...COLLABORATOR_EMAILS];
-const BYPASS_STORAGE_KEY = 'jamb_bypass_email';
 const DASHBOARD_STATE_KEY = 'jamb_dashboard_state';
 
 // Default subjects when none selected
 const DEFAULT_SUBJECTS = ['english', 'mathematics', 'physics', 'chemistry'];
-
-// Helper to get bypass email from localStorage
-const getBypassEmail = (): string | null => {
-  const stored = localStorage.getItem(BYPASS_STORAGE_KEY);
-  if (stored && BYPASS_EMAILS.includes(stored.toLowerCase())) {
-    return stored.toLowerCase();
-  }
-  return null;
-};
 
 // Helper to persist dashboard state
 const saveDashboardState = (step: Step) => {
@@ -95,23 +75,13 @@ const Index = () => {
   const { user, isLoading, hasAccess, isAdmin, isOwner, userRole, signOut, refreshAccess } = useAuth();
   const navigate = useNavigate();
 
-  // BULLETPROOF BYPASS: Check both Supabase user AND localStorage for bypass emails
-  const bypassEmail = getBypassEmail();
-  const userEmail = user?.email?.toLowerCase() || bypassEmail || null;
-  
-  // Determine if this is a bypass user (owner or collaborator)
-  const isBypassOwner = userEmail === OWNER_EMAIL;
-  const isBypassCollaborator = COLLABORATOR_EMAILS.includes(userEmail || '');
-  const isBypassUser = isBypassOwner || isBypassCollaborator;
+  // User email from authenticated session only
+  const userEmail = user?.email?.toLowerCase() || null;
 
-  // Effective access check - bypass users ALWAYS have access
-  const effectiveAccess = hasAccess || isOwner || isBypassUser;
-  
-  // Effective admin check - bypass users are treated as admins
-  const effectiveAdmin = isAdmin || isBypassUser;
-  
-  // Effective owner check
-  const effectiveOwner = isOwner || isBypassOwner;
+  // Access is determined server-side via check_user_access RPC
+  const effectiveAccess = hasAccess || isOwner || isAdmin;
+  const effectiveAdmin = isAdmin || isOwner;
+  const effectiveOwner = isOwner;
 
   // ALWAYS have subjects available - use defaults if none selected
   const effectiveSubjects = userSubjects.length > 0 ? userSubjects : DEFAULT_SUBJECTS;
@@ -176,11 +146,11 @@ const Index = () => {
     loadUserData();
   }, [userEmail, isLoading, effectiveAccess]);
 
-  // Handle URL params and bypass login
+  // Handle URL params
   useEffect(() => {
     const step = searchParams.get('step');
     
-    if (step === 'dashboard' && (isBypassUser || effectiveAccess) && userEmail) {
+    if (step === 'dashboard' && effectiveAccess && userEmail) {
       setCurrentStep('dashboard');
       setSearchParams({});
       window.scrollTo({ top: 0, behavior: 'instant' });
@@ -190,7 +160,7 @@ const Index = () => {
     if (isLoading) return;
     
     if (step === 'upload' && userEmail) {
-      if (userSubjects.length === 0 && !isBypassUser) {
+      if (userSubjects.length === 0 && !effectiveAdmin) {
         setCurrentStep('subject-select');
       } else {
         setCurrentStep('upload');
@@ -201,7 +171,7 @@ const Index = () => {
       setSearchParams({});
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
-  }, [searchParams, setSearchParams, userEmail, userSubjects.length, isLoading, effectiveAccess, isBypassUser]);
+  }, [searchParams, setSearchParams, userEmail, userSubjects.length, isLoading, effectiveAccess, effectiveAdmin]);
 
   // Save dashboard state when step changes
   useEffect(() => {
@@ -233,8 +203,9 @@ const Index = () => {
     const planKey = plan as keyof typeof plans;
     setSelectedPlan(planKey);
     
-    if (isBypassUser) {
-      toast.success(isBypassOwner ? 'Owner access granted! 👑' : 'Collaborator access granted! 🛡️');
+    // Admins/owners skip payment (verified server-side)
+    if (effectiveAdmin) {
+      toast.success(effectiveOwner ? 'Owner access granted! 👑' : 'Admin access granted! 🛡️');
       setCurrentStep('dashboard');
       window.scrollTo({ top: 0, behavior: 'instant' });
       return;
@@ -323,7 +294,6 @@ const Index = () => {
   };
 
   const handleSignOut = async () => {
-    localStorage.removeItem(BYPASS_STORAGE_KEY);
     localStorage.removeItem(DASHBOARD_STATE_KEY);
     await signOut();
     setCurrentStep('landing');
@@ -344,8 +314,8 @@ const Index = () => {
       <div className="min-h-screen bg-background">
         <DashboardHeader 
           userEmail={userEmail}
-          isOwner={isBypassOwner}
-          isCollaborator={isBypassCollaborator}
+          isOwner={effectiveOwner}
+          isCollaborator={isAdmin && !isOwner}
           userRole={userRole}
           onSignOut={handleSignOut}
         />
@@ -369,8 +339,8 @@ const Index = () => {
       <div className="min-h-screen bg-background">
         <DashboardHeader 
           userEmail={userEmail || ''}
-          isOwner={isBypassOwner}
-          isCollaborator={isBypassCollaborator}
+          isOwner={effectiveOwner}
+          isCollaborator={isAdmin && !isOwner}
           userRole={userRole}
           onSignOut={handleSignOut}
         />
@@ -402,7 +372,7 @@ const Index = () => {
 
   // Subject selection step
   if (currentStep === 'subject-select' && userEmail) {
-    if (isBypassUser) {
+    if (effectiveAdmin) {
       setCurrentStep('dashboard');
       return null;
     }
@@ -412,7 +382,7 @@ const Index = () => {
         <SubjectSelector
           userEmail={userEmail}
           onComplete={handleSubjectsSelected}
-          isBypassUser={isBypassUser}
+          isBypassUser={effectiveAdmin}
         />
       </>
     );
@@ -424,8 +394,8 @@ const Index = () => {
       <div className="min-h-screen bg-background">
         <DashboardHeader 
           userEmail={userEmail}
-          isOwner={isBypassOwner}
-          isCollaborator={isBypassCollaborator}
+          isOwner={effectiveOwner}
+          isCollaborator={isAdmin && !isOwner}
           userRole={userRole}
           onSignOut={handleSignOut}
         />
@@ -451,8 +421,8 @@ const Index = () => {
       <div className="min-h-screen bg-background">
         <DashboardHeader 
           userEmail={userEmail}
-          isOwner={isBypassOwner}
-          isCollaborator={isBypassCollaborator}
+          isOwner={effectiveOwner}
+          isCollaborator={isAdmin && !isOwner}
           userRole={userRole}
           onSignOut={handleSignOut}
         />
@@ -471,8 +441,8 @@ const Index = () => {
       <div className="min-h-screen bg-background">
         <DashboardHeader 
           userEmail={userEmail}
-          isOwner={isBypassOwner}
-          isCollaborator={isBypassCollaborator}
+          isOwner={effectiveOwner}
+          isCollaborator={isAdmin && !isOwner}
           userRole={userRole}
           onSignOut={handleSignOut}
         />
@@ -487,15 +457,13 @@ const Index = () => {
 
   // Dashboard step
   if (currentStep === 'dashboard' && userEmail) {
-    const showLoading = isBypassUser ? false : isLoading;
-    
     return (
-      <PaywallGate hasAccess={effectiveAccess} isLoading={showLoading} onUpgrade={handleUpgradeClick}>
+      <PaywallGate hasAccess={effectiveAccess} isLoading={isLoading} onUpgrade={handleUpgradeClick}>
         <div className="min-h-screen bg-background">
           <DashboardHeader 
             userEmail={userEmail}
-            isOwner={isBypassOwner}
-            isCollaborator={isBypassCollaborator}
+            isOwner={effectiveOwner}
+            isCollaborator={isAdmin && !isOwner}
             userRole={userRole}
             onSignOut={handleSignOut}
           />
@@ -630,8 +598,8 @@ const Index = () => {
               {/* Premium Dashboard Features */}
               <PremiumDashboard
                 userEmail={userEmail}
-                isAdmin={effectiveAdmin || isBypassUser}
-                adminRole={isBypassOwner ? 'owner' : (isBypassCollaborator ? 'collaborator' : userRole)}
+                isAdmin={effectiveAdmin}
+                adminRole={userRole}
                 targetScore={personalizationData?.targetScore ? parseInt(personalizationData.targetScore) : undefined}
                 weakSubject={weakSubjectFromQuiz || personalizationData?.weakestSubject}
               />
@@ -688,7 +656,7 @@ const Index = () => {
 
   // Landing page
   const handleGoToDashboard = () => {
-    if (userSubjects.length === 0 && !isBypassUser) {
+    if (userSubjects.length === 0 && !effectiveAdmin) {
       setCurrentStep('subject-select');
     } else {
       setCurrentStep('dashboard');
@@ -700,13 +668,13 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header onGetStarted={handleGetStarted} hasAccess={effectiveAccess} />
       <div className="pt-16">
-        {/* Admin Badge, Dashboard Button, and Sign Out for logged in users OR bypass users */}
-        {(user || isBypassUser) && (
+        {/* Admin Badge, Dashboard Button, and Sign Out for logged in users */}
+        {user && (
           <div className="fixed top-20 right-4 z-50 flex items-center gap-2">
-            {(effectiveAdmin || isBypassUser) && (
+            {effectiveAdmin && (
               <AdminBadge 
-                role={isBypassOwner ? 'owner' : (isBypassCollaborator ? 'collaborator' : userRole)} 
-                linkToAdmin={isBypassOwner} 
+                role={userRole} 
+                linkToAdmin={effectiveOwner} 
               />
             )}
             {effectiveAccess && (
