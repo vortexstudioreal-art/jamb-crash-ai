@@ -1,18 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, User, Eye, EyeOff, Sparkles, ArrowRight, Loader2 } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, Sparkles, ArrowRight, Loader2, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { supabase } from '@/integrations/supabase/client';
 
 const emailSchema = z.string().email('Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
 
+type AuthView = 'login' | 'signup' | 'forgot-password';
+
 export default function Auth() {
-  const [isLogin, setIsLogin] = useState(true);
+  const [view, setView] = useState<AuthView>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -43,12 +46,14 @@ export default function Auth() {
       newErrors.email = emailResult.error.errors[0].message;
     }
     
-    const passwordResult = passwordSchema.safeParse(password);
-    if (!passwordResult.success) {
-      newErrors.password = passwordResult.error.errors[0].message;
+    if (view !== 'forgot-password') {
+      const passwordResult = passwordSchema.safeParse(password);
+      if (!passwordResult.success) {
+        newErrors.password = passwordResult.error.errors[0].message;
+      }
     }
     
-    if (!isLogin && !fullName.trim()) {
+    if (view === 'signup' && !fullName.trim()) {
       newErrors.fullName = 'Please enter your name';
     }
     
@@ -56,15 +61,46 @@ export default function Auth() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleForgotPassword = async () => {
+    const emailResult = emailSchema.safeParse(email);
+    if (!emailResult.success) {
+      setErrors({ email: emailResult.error.errors[0].message });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth?reset=true`,
+      });
+      
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success('Password reset link sent! Check your email inbox.');
+        setView('login');
+      }
+    } catch (err) {
+      toast.error('Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (view === 'forgot-password') {
+      await handleForgotPassword();
+      return;
+    }
     
     if (!validateForm()) return;
     
     setIsSubmitting(true);
     
     try {
-      if (isLogin) {
+      if (view === 'login') {
         const { error } = await signIn(email, password);
         if (error) {
           if (error.message.includes('Invalid login credentials')) {
@@ -74,26 +110,46 @@ export default function Auth() {
           }
         } else {
           toast.success('Welcome back! 🎉');
-          // Navigation will happen via useEffect when user state updates
         }
       } else {
         const { error } = await signUp(email, password, fullName);
         if (error) {
           if (error.message.includes('already registered')) {
             toast.error('This email is already registered. Please sign in instead.');
-            setIsLogin(true);
+            setView('login');
           } else {
             toast.error(error.message);
           }
         } else {
           toast.success('Account created! Welcome to JAMB Crash! 🎉');
-          // Navigation will happen via useEffect when user state updates
         }
       }
     } catch (err) {
       toast.error('Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const getTitle = () => {
+    switch (view) {
+      case 'forgot-password':
+        return 'Reset Password';
+      case 'signup':
+        return 'Create Account';
+      default:
+        return 'Welcome Back!';
+    }
+  };
+
+  const getSubtitle = () => {
+    switch (view) {
+      case 'forgot-password':
+        return "Enter your email and we'll send you a reset link";
+      case 'signup':
+        return 'Join thousands of students crushing their JAMB goals';
+      default:
+        return 'Sign in to continue your JAMB preparation';
     }
   };
 
@@ -123,19 +179,17 @@ export default function Auth() {
             <span className="text-sm font-semibold text-primary">JAMB 48-Hour Crash</span>
           </motion.div>
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            {isLogin ? 'Welcome Back!' : 'Create Account'}
+            {getTitle()}
           </h1>
           <p className="text-muted-foreground">
-            {isLogin 
-              ? 'Sign in to continue your JAMB preparation' 
-              : 'Join thousands of students crushing their JAMB goals'}
+            {getSubtitle()}
           </p>
         </div>
 
         {/* Form Card */}
         <div className="card-elevated p-6 rounded-2xl">
           <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
+            {view === 'signup' && (
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1.5">
                   Full Name
@@ -175,31 +229,48 @@ export default function Auth() {
               )}
             </div>
             
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 pr-10"
-                />
+            {view !== 'forgot-password' && (
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">
+                  Password
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10 pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+                {errors.password && (
+                  <p className="text-sm text-destructive mt-1">{errors.password}</p>
+                )}
+              </div>
+            )}
+
+            {view === 'login' && (
+              <div className="text-right">
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  onClick={() => {
+                    setView('forgot-password');
+                    setErrors({});
+                  }}
+                  className="text-sm text-primary hover:underline"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  Forgot password?
                 </button>
               </div>
-              {errors.password && (
-                <p className="text-sm text-destructive mt-1">{errors.password}</p>
-              )}
-            </div>
+            )}
 
             <Button
               type="submit"
@@ -210,26 +281,40 @@ export default function Auth() {
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
                 <>
-                  {isLogin ? 'Sign In' : 'Create Account'}
+                  {view === 'forgot-password' ? 'Send Reset Link' : view === 'login' ? 'Sign In' : 'Create Account'}
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </>
               )}
             </Button>
           </form>
 
-          <p className="text-center text-sm text-muted-foreground mt-6">
-            {isLogin ? "Don't have an account? " : 'Already have an account? '}
+          {view === 'forgot-password' ? (
             <button
               type="button"
               onClick={() => {
-                setIsLogin(!isLogin);
+                setView('login');
                 setErrors({});
               }}
-              className="text-primary font-semibold hover:underline"
+              className="flex items-center justify-center gap-2 w-full text-sm text-muted-foreground mt-6 hover:text-foreground"
             >
-              {isLogin ? 'Sign up' : 'Sign in'}
+              <ArrowLeft className="w-4 h-4" />
+              Back to sign in
             </button>
-          </p>
+          ) : (
+            <p className="text-center text-sm text-muted-foreground mt-6">
+              {view === 'login' ? "Don't have an account? " : 'Already have an account? '}
+              <button
+                type="button"
+                onClick={() => {
+                  setView(view === 'login' ? 'signup' : 'login');
+                  setErrors({});
+                }}
+                className="text-primary font-semibold hover:underline"
+              >
+                {view === 'login' ? 'Sign up' : 'Sign in'}
+              </button>
+            </p>
+          )}
         </div>
 
         {/* Footer */}
