@@ -176,9 +176,6 @@ const Index = () => {
   // Save dashboard state when step changes
   useEffect(() => {
     saveDashboardState(currentStep);
-    if (currentStep === 'dashboard') {
-      window.scrollTo({ top: 0, behavior: 'instant' });
-    }
   }, [currentStep]);
 
   const handleGetStarted = () => {

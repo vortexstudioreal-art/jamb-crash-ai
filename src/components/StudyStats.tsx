@@ -17,6 +17,7 @@ interface QuizAttempt {
   correct_answers: number;
   time_taken_seconds: number;
   created_at: string;
+  questions_data: unknown;
 }
 
 export const StudyStats = ({ userEmail, refreshTrigger }: StudyStatsProps) => {
@@ -120,19 +121,46 @@ export const StudyStats = ({ userEmail, refreshTrigger }: StudyStatsProps) => {
 
   const streak = calculateStreak();
 
-  // Subject performance with detailed tracking
+  // Subject performance with detailed tracking from questions_data
   const subjectPerformance: Record<string, { correct: number; total: number; attempts: number }> = {};
   quizzes.forEach(quiz => {
-    quiz.subjects.forEach(subject => {
-      if (!subjectPerformance[subject]) {
-        subjectPerformance[subject] = { correct: 0, total: 0, attempts: 0 };
-      }
-      // Approximate per-subject stats
-      const perSubject = quiz.total_questions / quiz.subjects.length;
-      subjectPerformance[subject].total += perSubject;
-      subjectPerformance[subject].correct += (quiz.correct_answers / quiz.total_questions) * perSubject;
-      subjectPerformance[subject].attempts++;
-    });
+    // Try to get per-question data for accurate subject tracking
+    const questionsData = quiz.questions_data as any[] | null;
+    
+    if (questionsData && Array.isArray(questionsData)) {
+      // Count per-subject from actual question data
+      questionsData.forEach(q => {
+        const subject = q.subject as string;
+        if (!subject) return;
+        
+        if (!subjectPerformance[subject]) {
+          subjectPerformance[subject] = { correct: 0, total: 0, attempts: 0 };
+        }
+        subjectPerformance[subject].total += 1;
+        // Check if user answered correctly
+        if (q.userAnswer && q.userAnswer === q.correct_answer) {
+          subjectPerformance[subject].correct += 1;
+        }
+      });
+      
+      // Track attempt count
+      quiz.subjects.forEach(subject => {
+        if (subjectPerformance[subject]) {
+          subjectPerformance[subject].attempts += 1;
+        }
+      });
+    } else {
+      // Fallback: distribute evenly if no questions_data
+      quiz.subjects.forEach(subject => {
+        if (!subjectPerformance[subject]) {
+          subjectPerformance[subject] = { correct: 0, total: 0, attempts: 0 };
+        }
+        const perSubject = quiz.total_questions / quiz.subjects.length;
+        subjectPerformance[subject].total += perSubject;
+        subjectPerformance[subject].correct += (quiz.correct_answers / quiz.total_questions) * perSubject;
+        subjectPerformance[subject].attempts++;
+      });
+    }
   });
 
   const subjectData = Object.entries(subjectPerformance)
