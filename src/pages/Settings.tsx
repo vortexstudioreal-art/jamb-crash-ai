@@ -12,26 +12,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-const OWNER_EMAIL = 'saeedabdulbasit933@gmail.com';
-const COLLABORATOR_EMAILS = [
-  'loaborejim@gmail.com',
-  'favourgoodnews@gmail.com',
-  'onuchionwuegbusi@gmail.com',
-  'muzzyothman@gmail.com',
-  'muzzyothmam@gmail.com'
-];
-const BYPASS_EMAILS = [OWNER_EMAIL, ...COLLABORATOR_EMAILS];
-const BYPASS_STORAGE_KEY = 'jamb_bypass_email';
 const THEME_STORAGE_KEY = 'jamb_theme';
 const SETTINGS_STORAGE_KEY = 'jamb_user_settings';
-
-const getBypassEmail = (): string | null => {
-  const stored = localStorage.getItem(BYPASS_STORAGE_KEY);
-  if (stored && BYPASS_EMAILS.includes(stored.toLowerCase())) {
-    return stored.toLowerCase();
-  }
-  return null;
-};
 
 interface UserSettings {
   fullName: string;
@@ -67,15 +49,11 @@ export default function Settings() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
 
-  const bypassEmail = getBypassEmail();
-  const userEmail = user?.email?.toLowerCase() || bypassEmail || '';
-  const isBypassOwner = userEmail === OWNER_EMAIL;
-  const isBypassCollaborator = COLLABORATOR_EMAILS.includes(userEmail);
-  const isBypassUser = isBypassOwner || isBypassCollaborator;
-
-  const effectiveOwner = isOwner || isBypassOwner;
-  const effectiveAdmin = isAdmin || isBypassUser;
-  const effectiveAccess = hasAccess || isBypassUser;
+  // All access checks come from server-side via AuthContext
+  const userEmail = user?.email?.toLowerCase() || '';
+  const effectiveOwner = isOwner;
+  const effectiveAdmin = isAdmin || isOwner;
+  const effectiveAccess = hasAccess || isOwner || isAdmin;
 
   // Load theme from localStorage
   useEffect(() => {
@@ -149,8 +127,8 @@ export default function Settings() {
           setWhatsappEnabled(reminder.is_active ?? false);
         }
 
-        // Load payment info (skip for bypass users)
-        if (!isBypassUser) {
+        // Load payment info
+        if (!effectiveAdmin) {
           const { data: payment } = await supabase
             .from('payments')
             .select('*')
@@ -172,7 +150,7 @@ export default function Settings() {
     };
 
     loadUserData();
-  }, [userEmail, isBypassUser]);
+  }, [userEmail, effectiveAdmin]);
 
   const handleSaveName = async () => {
     if (!fullName.trim()) {
@@ -184,8 +162,8 @@ export default function Settings() {
     const currentSettings = loadSettings(userEmail);
     saveSettings(userEmail, { ...currentSettings, fullName: fullName.trim() });
 
-    // Bypass users: just update local state
-    if (isBypassUser) {
+    // Admin users: just update local state
+    if (effectiveAdmin) {
       setIsEditingName(false);
       toast.success('Name saved! ✨');
       return;
@@ -244,7 +222,6 @@ export default function Settings() {
   };
 
   const handleSignOut = async () => {
-    localStorage.removeItem(BYPASS_STORAGE_KEY);
     await signOut();
     navigate('/');
     toast.success('Signed out successfully');
@@ -263,7 +240,7 @@ export default function Settings() {
         </span>
       );
     }
-    if (isBypassCollaborator) {
+    if (userRole === 'collaborator') {
       return (
         <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold shadow-lg bg-gradient-to-r from-gray-300 to-slate-400 text-gray-800">
           <Users className="w-3.5 h-3.5" />
@@ -291,7 +268,7 @@ export default function Settings() {
         textColor: 'text-black'
       };
     }
-    if (isBypassCollaborator) {
+    if (userRole === 'collaborator') {
       return {
         planName: 'Collaborator',
         status: 'Permanent Access',
@@ -439,7 +416,7 @@ export default function Settings() {
                     {accessStatus.planName}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {isBypassUser ? 'Full access to all features' : (paymentInfo ? `Purchased on ${new Date(paymentInfo.created_at).toLocaleDateString()}` : 'Upgrade to unlock all features')}
+                    {effectiveAdmin ? 'Full access to all features' : (paymentInfo ? `Purchased on ${new Date(paymentInfo.created_at).toLocaleDateString()}` : 'Upgrade to unlock all features')}
                   </p>
                 </div>
                 <Badge className={`${accessStatus.color} ${accessStatus.textColor}`}>
@@ -447,7 +424,7 @@ export default function Settings() {
                 </Badge>
               </div>
 
-              {!isBypassUser && !effectiveAccess && (
+              {!effectiveAdmin && !effectiveAccess && (
                 <Button 
                   onClick={() => navigate('/')} 
                   className="w-full"

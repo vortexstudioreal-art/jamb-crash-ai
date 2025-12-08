@@ -11,16 +11,6 @@ import { z } from 'zod';
 const emailSchema = z.string().email('Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
 
-const OWNER_EMAIL = 'saeedabdulbasit933@gmail.com';
-const COLLABORATOR_EMAILS = [
-  'loaborejim@gmail.com',
-  'favourgoodnews@gmail.com',
-  'onuchionwuegbusi@gmail.com',
-  'muzzyothman@gmail.com',
-  'muzzyothmam@gmail.com'  // Both spelling variants
-];
-const BYPASS_EMAILS = [OWNER_EMAIL, ...COLLABORATOR_EMAILS];
-
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -30,26 +20,20 @@ export default function Auth() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; fullName?: string }>({});
   
-  const { signIn, signUp, user, isLoading } = useAuth();
+  const { signIn, signUp, user, isLoading, isOwner, isAdmin } = useAuth();
   const navigate = useNavigate();
 
-  const normalizedEmail = email.toLowerCase().trim();
-  const isOwnerEmail = normalizedEmail === OWNER_EMAIL;
-  const isCollaboratorEmail = COLLABORATOR_EMAILS.includes(normalizedEmail);
-  const isBypassEmail = BYPASS_EMAILS.includes(normalizedEmail);
-
-  // Redirect if already logged in - bypass users go straight to dashboard
+  // Redirect if already logged in
   useEffect(() => {
     if (user && !isLoading) {
-      const userEmail = user.email?.toLowerCase() || '';
-      // Owner and collaborator go straight to dashboard
-      if (BYPASS_EMAILS.includes(userEmail)) {
+      // Admins and owners go straight to dashboard
+      if (isOwner || isAdmin) {
         navigate('/?step=dashboard', { replace: true });
       } else {
         navigate('/', { replace: true });
       }
     }
-  }, [user, isLoading, navigate]);
+  }, [user, isLoading, navigate, isOwner, isAdmin]);
 
   const validateForm = () => {
     const newErrors: typeof errors = {};
@@ -59,12 +43,9 @@ export default function Auth() {
       newErrors.email = emailResult.error.errors[0].message;
     }
     
-    // Bypass emails don't need password validation
-    if (!isBypassEmail) {
-      const passwordResult = passwordSchema.safeParse(password);
-      if (!passwordResult.success) {
-        newErrors.password = passwordResult.error.errors[0].message;
-      }
+    const passwordResult = passwordSchema.safeParse(password);
+    if (!passwordResult.success) {
+      newErrors.password = passwordResult.error.errors[0].message;
     }
     
     if (!isLogin && !fullName.trim()) {
@@ -75,44 +56,6 @@ export default function Auth() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const BYPASS_PASSWORD = 'BypassSecure2024!@#';
-  const BYPASS_STORAGE_KEY = 'jamb_bypass_email';
-
-  const handleBypassLogin = async () => {
-    const targetEmail = normalizedEmail;
-    const roleLabel = isOwnerEmail ? 'Owner' : 'Collaborator';
-    const emoji = isOwnerEmail ? '👑' : '🛡️';
-    
-    // BULLETPROOF: Store bypass email in localStorage FIRST - this grants access even if auth fails
-    localStorage.setItem(BYPASS_STORAGE_KEY, targetEmail);
-    
-    // Step 1: Try to sign in with bypass password
-    const { error: signInError } = await signIn(targetEmail, BYPASS_PASSWORD);
-    
-    if (!signInError) {
-      toast.success(`Welcome back, ${roleLabel}! ${emoji}`, { duration: 3000 });
-      navigate('/?step=dashboard', { replace: true });
-      return;
-    }
-    
-    // Step 2: If login fails, try to create the account
-    const { error: signUpError } = await signUp(targetEmail, BYPASS_PASSWORD, roleLabel);
-    
-    if (!signUpError) {
-      const { error: finalSignInError } = await signIn(targetEmail, BYPASS_PASSWORD);
-      if (!finalSignInError) {
-        toast.success(`${roleLabel} account activated! Welcome! ${emoji}`, { duration: 3000 });
-        navigate('/?step=dashboard', { replace: true });
-        return;
-      }
-    }
-    
-    // Step 3: FORCE SUCCESS - bypass email is already in localStorage, just navigate
-    // The app will recognize the bypass email from localStorage
-    toast.success(`${roleLabel} verified! Redirecting... ${emoji}`, { duration: 2000 });
-    navigate('/?step=dashboard', { replace: true });
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -121,12 +64,6 @@ export default function Auth() {
     setIsSubmitting(true);
     
     try {
-      // Special bypass handling - instant login for owner/collaborator
-      if (isBypassEmail && isLogin) {
-        await handleBypassLogin();
-        return;
-      }
-
       if (isLogin) {
         const { error } = await signIn(email, password);
         if (error) {
@@ -137,7 +74,7 @@ export default function Auth() {
           }
         } else {
           toast.success('Welcome back! 🎉');
-          navigate('/', { replace: true });
+          // Navigation will happen via useEffect when user state updates
         }
       } else {
         const { error } = await signUp(email, password, fullName);
@@ -150,7 +87,7 @@ export default function Auth() {
           }
         } else {
           toast.success('Account created! Welcome to JAMB Crash! 🎉');
-          navigate('/', { replace: true });
+          // Navigation will happen via useEffect when user state updates
         }
       }
     } catch (err) {
@@ -238,46 +175,31 @@ export default function Auth() {
               )}
             </div>
             
-            {/* Hide password field for bypass emails - show special message instead */}
-            {isBypassEmail && isLogin ? (
-              <div className={`bg-gradient-to-r ${isOwnerEmail ? 'from-yellow-500/10 to-amber-500/10 border-yellow-500/30' : 'from-gray-400/10 to-slate-400/10 border-gray-400/30'} border rounded-lg p-4`}>
-                <div className={`flex items-center gap-2 ${isOwnerEmail ? 'text-yellow-600' : 'text-gray-600'}`}>
-                  <Sparkles className="w-5 h-5" />
-                  <span className="font-semibold">
-                    {isOwnerEmail ? '👑 Owner Detected!' : '🛡️ Collaborator Detected!'}
-                  </span>
-                </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Click "Sign In" for instant access - no password needed.
-                </p>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-10 pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
               </div>
-            ) : (
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1.5">
-                  Password
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 pr-10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                  </button>
-                </div>
-                {errors.password && (
-                  <p className="text-sm text-destructive mt-1">{errors.password}</p>
-                )}
-              </div>
-            )}
+              {errors.password && (
+                <p className="text-sm text-destructive mt-1">{errors.password}</p>
+              )}
+            </div>
 
             <Button
               type="submit"
@@ -294,7 +216,6 @@ export default function Auth() {
               )}
             </Button>
           </form>
-
 
           <p className="text-center text-sm text-muted-foreground mt-6">
             {isLogin ? "Don't have an account? " : 'Already have an account? '}

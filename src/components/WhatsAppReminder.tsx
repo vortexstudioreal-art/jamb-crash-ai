@@ -9,26 +9,17 @@ import { toast } from 'sonner';
 
 interface WhatsAppReminderProps {
   userEmail: string;
+  isAdmin?: boolean;
   onSetupComplete?: (phoneNumber: string) => void;
 }
 
 const SETTINGS_STORAGE_KEY = 'jamb_user_settings';
-const BYPASS_EMAILS = [
-  'saeedabdulbasit933@gmail.com',
-  'loaborejim@gmail.com',
-  'favourgoodnews@gmail.com',
-  'onuchionwuegbusi@gmail.com',
-  'muzzyothman@gmail.com',
-  'muzzyothmam@gmail.com'
-];
 
-export const WhatsAppReminder = ({ userEmail, onSetupComplete }: WhatsAppReminderProps) => {
+export const WhatsAppReminder = ({ userEmail, isAdmin = false, onSetupComplete }: WhatsAppReminderProps) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSetup, setIsSetup] = useState(false);
   const [savedNumber, setSavedNumber] = useState('');
-
-  const isBypassUser = BYPASS_EMAILS.includes(userEmail.toLowerCase());
 
   // Check if already setup
   useEffect(() => {
@@ -45,28 +36,26 @@ export const WhatsAppReminder = ({ userEmail, onSetupComplete }: WhatsAppReminde
         }
       }
 
-      // For non-bypass users, also check database
-      if (!isBypassUser) {
-        try {
-          const { data } = await supabase
-            .from('whatsapp_reminders')
-            .select('phone_number, is_active')
-            .eq('email', userEmail)
-            .maybeSingle();
-          
-          if (data?.is_active) {
-            setIsSetup(true);
-            setSavedNumber(data.phone_number);
-            setPhoneNumber(data.phone_number.replace('+234', ''));
-          }
-        } catch (err) {
-          console.error('Error checking WhatsApp setup:', err);
+      // Check database
+      try {
+        const { data } = await supabase
+          .from('whatsapp_reminders')
+          .select('phone_number, is_active')
+          .eq('email', userEmail)
+          .maybeSingle();
+        
+        if (data?.is_active) {
+          setIsSetup(true);
+          setSavedNumber(data.phone_number);
+          setPhoneNumber(data.phone_number.replace('+234', ''));
         }
+      } catch (err) {
+        console.error('Error checking WhatsApp setup:', err);
       }
     };
     
     if (userEmail) checkExisting();
-  }, [userEmail, isBypassUser]);
+  }, [userEmail]);
 
   const handleSetup = async () => {
     if (!phoneNumber || phoneNumber.length < 10) {
@@ -88,17 +77,7 @@ export const WhatsAppReminder = ({ userEmail, onSetupComplete }: WhatsAppReminde
         whatsappEnabled: true
       }));
 
-      // For bypass users, skip database and just save locally
-      if (isBypassUser) {
-        setIsSetup(true);
-        setSavedNumber(fullNumber);
-        onSetupComplete?.(fullNumber);
-        toast.success('WhatsApp reminders activated! 🎉');
-        setIsSubmitting(false);
-        return;
-      }
-
-      // For regular users, also save to database
+      // Save to database
       const { data: existing } = await supabase
         .from('whatsapp_reminders')
         .select('id')
