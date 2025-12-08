@@ -133,46 +133,61 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
   const [currentSound, setCurrentSound] = useState<AmbientSound>('rain');
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Initialize and manage audio - auto-play when quiz starts
+  // Initialize and manage audio
   useEffect(() => {
-    // Only start audio after setup is complete (quiz has started)
+    // Only set up audio after quiz starts
     if (showSetup) return;
     
     const sound = AMBIENT_SOUNDS[currentSound];
     
     // Create new audio element
-    const audio = new Audio(sound.url);
+    const audio = new Audio();
+    audio.src = sound.url;
     audio.loop = true;
-    audio.volume = 0.2;
+    audio.volume = 0.3;
+    audio.preload = 'auto';
     audioRef.current = audio;
     
-    // Auto-play if sound is enabled
+    // Handle audio loading and playing
+    const handleCanPlay = () => {
+      if (isSoundPlaying && audioRef.current) {
+        audioRef.current.play().catch((err) => {
+          console.log('Audio play failed:', err.message);
+        });
+      }
+    };
+    
+    audio.addEventListener('canplaythrough', handleCanPlay);
+    
+    // If already sound should be playing, try to play
     if (isSoundPlaying) {
       audio.play().catch((err) => {
-        console.log('Audio autoplay blocked, user interaction needed:', err);
-        // Still set up the audio, user can click to play
+        console.log('Initial audio play failed (waiting for user interaction):', err.message);
       });
     }
     
     return () => {
+      audio.removeEventListener('canplaythrough', handleCanPlay);
       audio.pause();
       audio.src = '';
       audioRef.current = null;
     };
   }, [currentSound, showSetup]);
 
-  // Handle play/pause state changes
+  // Handle play/pause state changes separately
   useEffect(() => {
     if (!audioRef.current || showSetup) return;
     
     if (isSoundPlaying) {
-      audioRef.current.play().catch(console.error);
+      audioRef.current.play().catch((err) => {
+        console.log('Audio play on toggle failed:', err.message);
+      });
     } else {
       audioRef.current.pause();
     }
   }, [isSoundPlaying, showSetup]);
 
-  // Cleanup audio on component unmount or exit
+  // Cleanup audio on component unmount
   useEffect(() => {
     return () => {
       if (audioRef.current) {
@@ -184,10 +199,14 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
   }, []);
 
   const toggleSound = () => {
-    setIsSoundPlaying(!isSoundPlaying);
+    setIsSoundPlaying(prev => !prev);
   };
 
   const changeSound = (sound: AmbientSound) => {
+    // Stop current audio before changing
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
     setCurrentSound(sound);
   };
 
