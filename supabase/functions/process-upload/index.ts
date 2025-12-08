@@ -6,6 +6,38 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Rate limiting: track requests per user (in-memory, resets on function restart)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_MAX = 10; // Max 10 uploads per hour per user
+const RATE_LIMIT_WINDOW = 60 * 60 * 1000; // 1 hour in milliseconds
+
+function isRateLimited(identifier: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(identifier);
+  
+  if (!entry || now > entry.resetTime) {
+    rateLimitMap.set(identifier, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return false;
+  }
+  
+  if (entry.count >= RATE_LIMIT_MAX) {
+    return true;
+  }
+  
+  entry.count++;
+  return false;
+}
+
+// Get user identifier from request (email or IP)
+function getUserIdentifier(req: Request, email?: string): string {
+  if (email) return email;
+  
+  // Fallback to IP-based identification
+  const forwarded = req.headers.get('x-forwarded-for');
+  const ip = forwarded ? forwarded.split(',')[0].trim() : 'unknown';
+  return `ip:${ip}`;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -24,14 +56,28 @@ serve(async (req) => {
       });
     }
     
-    const { imageBase64, fileType, subject } = body;
+    const { imageBase64, fileType, subject, email } = body;
+    
+    // Rate limiting check
+    const userIdentifier = getUserIdentifier(req, email);
+    if (isRateLimited(userIdentifier)) {
+      console.log(`Rate limited: ${userIdentifier}`);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Too many uploads! You can upload up to 10 files per hour. Please wait and try again later. 😊',
+          rate_limited: true
+        }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    console.log('Processing upload for subject:', subject, 'file type:', fileType);
+    console.log('Processing upload for subject:', subject, 'file type:', fileType, 'user:', userIdentifier);
 
     const systemPrompt = `You are an expert JAMB exam question extractor. Your job is to extract ALL questions from JAMB past question papers.
 

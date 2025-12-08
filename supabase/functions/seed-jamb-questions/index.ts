@@ -318,6 +318,75 @@ Deno.serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Check for admin authorization via secret header
+    const authHeader = req.headers.get('x-admin-secret');
+    const expectedSecret = Deno.env.get('SEED_ADMIN_SECRET');
+    
+    // If SEED_ADMIN_SECRET is set, require it for access
+    // Otherwise, check if user is owner/admin via Authorization header
+    if (expectedSecret) {
+      if (authHeader !== expectedSecret) {
+        console.log('Unauthorized seed attempt - invalid admin secret');
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized - invalid admin credentials' }),
+          { 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 401 
+          }
+        );
+      }
+    } else {
+      // Fallback: Check JWT authorization for owner/admin role
+      const jwtHeader = req.headers.get('authorization');
+      if (!jwtHeader) {
+        console.log('Unauthorized seed attempt - no authorization header');
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized - authentication required' }),
+          { 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 401 
+          }
+        );
+      }
+
+      // Create user-context supabase client to verify role
+      const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+      const userSupabase = createClient(supabaseUrl, supabaseAnonKey, {
+        global: { headers: { Authorization: jwtHeader } }
+      });
+
+      const { data: { user }, error: userError } = await userSupabase.auth.getUser();
+      if (userError || !user) {
+        console.log('Unauthorized seed attempt - invalid JWT');
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized - invalid session' }),
+          { 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 401 
+          }
+        );
+      }
+
+      // Check if user is owner or admin using the database function
+      const { data: accessData } = await supabase.rpc('check_user_access', { 
+        user_email: user.email 
+      });
+
+      const isAuthorized = accessData?.[0]?.is_admin === true;
+      if (!isAuthorized) {
+        console.log(`Unauthorized seed attempt by: ${user.email}`);
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized - admin access required' }),
+          { 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 403 
+          }
+        );
+      }
+
+      console.log(`Authorized seed by admin: ${user.email}`);
+    }
+
     console.log('Starting to seed JAMB questions...');
     
     let totalInserted = 0;
