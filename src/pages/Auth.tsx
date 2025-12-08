@@ -12,23 +12,32 @@ import { supabase } from '@/integrations/supabase/client';
 const emailSchema = z.string().email('Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
 
-type AuthView = 'login' | 'signup' | 'forgot-password';
+type AuthView = 'login' | 'signup' | 'forgot-password' | 'reset-password';
 
 export default function Auth() {
   const [view, setView] = useState<AuthView>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string; fullName?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string; fullName?: string; confirmPassword?: string }>({});
   
   const { signIn, signUp, user, isLoading, isOwner, isAdmin } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect if already logged in
+  // Check for password reset token in URL hash
   useEffect(() => {
-    if (user && !isLoading) {
+    const hash = window.location.hash;
+    if (hash && hash.includes('access_token') && hash.includes('type=recovery')) {
+      setView('reset-password');
+    }
+  }, []);
+
+  // Redirect if already logged in (but not during password reset)
+  useEffect(() => {
+    if (user && !isLoading && view !== 'reset-password') {
       // Admins and owners go straight to dashboard
       if (isOwner || isAdmin) {
         navigate('/?step=dashboard', { replace: true });
@@ -36,7 +45,7 @@ export default function Auth() {
         navigate('/', { replace: true });
       }
     }
-  }, [user, isLoading, navigate, isOwner, isAdmin]);
+  }, [user, isLoading, navigate, isOwner, isAdmin, view]);
 
   const validateForm = () => {
     const newErrors: typeof errors = {};
@@ -56,9 +65,39 @@ export default function Auth() {
     if (view === 'signup' && !fullName.trim()) {
       newErrors.fullName = 'Please enter your name';
     }
+
+    if (view === 'reset-password') {
+      if (password !== confirmPassword) {
+        newErrors.confirmPassword = 'Passwords do not match';
+      }
+    }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleResetPassword = async () => {
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+      
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success('Password updated successfully! You can now sign in.');
+        // Clear the hash from URL
+        window.history.replaceState(null, '', window.location.pathname);
+        setView('login');
+        setPassword('');
+        setConfirmPassword('');
+      }
+    } catch (err) {
+      toast.error('Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleForgotPassword = async () => {
@@ -92,6 +131,11 @@ export default function Auth() {
     
     if (view === 'forgot-password') {
       await handleForgotPassword();
+      return;
+    }
+
+    if (view === 'reset-password') {
+      await handleResetPassword();
       return;
     }
     
@@ -135,6 +179,8 @@ export default function Auth() {
     switch (view) {
       case 'forgot-password':
         return 'Reset Password';
+      case 'reset-password':
+        return 'Set New Password';
       case 'signup':
         return 'Create Account';
       default:
@@ -146,6 +192,8 @@ export default function Auth() {
     switch (view) {
       case 'forgot-password':
         return "Enter your email and we'll send you a reset link";
+      case 'reset-password':
+        return 'Enter your new password below';
       case 'signup':
         return 'Join thousands of students crushing their JAMB goals';
       default:
@@ -210,35 +258,37 @@ export default function Auth() {
               </div>
             )}
             
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              {errors.email && (
-                <p className="text-sm text-destructive mt-1">{errors.email}</p>
-              )}
-            </div>
-            
-            {view !== 'forgot-password' && (
+            {view !== 'reset-password' && (
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1.5">
-                  Password
+                  Email Address
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Input
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                {errors.email && (
+                  <p className="text-sm text-destructive mt-1">{errors.email}</p>
+                )}
+              </div>
+            )}
+            
+            {(view !== 'forgot-password') && (
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">
+                  {view === 'reset-password' ? 'New Password' : 'Password'}
                 </label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <Input
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Enter your password"
+                    placeholder={view === 'reset-password' ? 'Enter new password' : 'Enter your password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10 pr-10"
@@ -253,6 +303,27 @@ export default function Auth() {
                 </div>
                 {errors.password && (
                   <p className="text-sm text-destructive mt-1">{errors.password}</p>
+                )}
+              </div>
+            )}
+
+            {view === 'reset-password' && (
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">
+                  Confirm Password
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Confirm new password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="pl-10 pr-10"
+                  />
+                </div>
+                {errors.confirmPassword && (
+                  <p className="text-sm text-destructive mt-1">{errors.confirmPassword}</p>
                 )}
               </div>
             )}
@@ -281,19 +352,27 @@ export default function Auth() {
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
                 <>
-                  {view === 'forgot-password' ? 'Send Reset Link' : view === 'login' ? 'Sign In' : 'Create Account'}
+                  {view === 'forgot-password' ? 'Send Reset Link' : 
+                   view === 'reset-password' ? 'Update Password' :
+                   view === 'login' ? 'Sign In' : 'Create Account'}
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </>
               )}
             </Button>
           </form>
 
-          {view === 'forgot-password' ? (
+          {(view === 'forgot-password' || view === 'reset-password') ? (
             <button
               type="button"
               onClick={() => {
                 setView('login');
                 setErrors({});
+                setPassword('');
+                setConfirmPassword('');
+                // Clear the hash from URL if present
+                if (window.location.hash) {
+                  window.history.replaceState(null, '', window.location.pathname);
+                }
               }}
               className="flex items-center justify-center gap-2 w-full text-sm text-muted-foreground mt-6 hover:text-foreground"
             >
