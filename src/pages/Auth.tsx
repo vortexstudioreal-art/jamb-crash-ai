@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, User, Eye, EyeOff, Sparkles, ArrowRight, Loader2, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -23,15 +23,19 @@ export default function Auth() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; fullName?: string; confirmPassword?: string }>({});
+  const [searchParams] = useSearchParams();
   
   const { signIn, signUp, user, isLoading, isOwner, isAdmin } = useAuth();
   const navigate = useNavigate();
 
-  // Check for password reset token in URL hash or auth event
+  // Check for password reset token in URL hash, query params, or auth event
   useEffect(() => {
     // Check URL hash for recovery token
     const hash = window.location.hash;
-    if (hash && hash.includes('access_token') && hash.includes('type=recovery')) {
+    const isRecoveryFromHash = hash && hash.includes('access_token') && hash.includes('type=recovery');
+    const isRecoveryFromQuery = searchParams.get('recovery') === 'true';
+    
+    if (isRecoveryFromHash || isRecoveryFromQuery) {
       setView('reset-password');
     }
 
@@ -43,7 +47,7 @@ export default function Auth() {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [searchParams]);
 
   // Redirect if already logged in (but not during password reset)
   useEffect(() => {
