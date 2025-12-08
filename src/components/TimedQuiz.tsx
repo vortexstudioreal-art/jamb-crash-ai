@@ -48,47 +48,27 @@ const MOTIVATIONAL_MESSAGES = [
   "Stay focused, stay winning! 🔥",
 ];
 
-// Ambient sounds - variety of study-friendly background sounds (verified working URLs)
+// Ambient sounds - using reliable free audio sources
 const AMBIENT_SOUNDS = {
   rain: {
-    url: "https://www.soundjay.com/nature/sounds/rain-01.mp3",
+    url: "https://assets.mixkit.co/active_storage/sfx/212/212-preview.mp3",
     label: "🌧️ Soft Rain"
   },
-  thunder: {
-    url: "https://www.soundjay.com/nature/sounds/thunder-01.mp3",
-    label: "⛈️ Thunderstorm"
-  },
   nature: {
-    url: "https://www.soundjay.com/nature/sounds/birds-1.mp3",
+    url: "https://assets.mixkit.co/active_storage/sfx/2491/2491-preview.mp3",
     label: "🌿 Forest Birds"
   },
   ocean: {
-    url: "https://www.soundjay.com/nature/sounds/ocean-wave-1.mp3",
+    url: "https://assets.mixkit.co/active_storage/sfx/2194/2194-preview.mp3",
     label: "🌊 Ocean Waves"
   },
-  fire: {
-    url: "https://www.soundjay.com/nature/sounds/fire-1.mp3",
-    label: "🔥 Fireplace"
+  wind: {
+    url: "https://assets.mixkit.co/active_storage/sfx/2502/2502-preview.mp3",
+    label: "💨 Gentle Wind"
   },
-  cafe: {
-    url: "https://cdn.pixabay.com/audio/2022/03/10/audio_4dedf5bf94.mp3",
-    label: "☕ Coffee Shop"
-  },
-  lofi: {
-    url: "https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3",
-    label: "🎵 Lo-Fi Beats"
-  },
-  piano: {
-    url: "https://cdn.pixabay.com/audio/2022/01/18/audio_d0c6ff1bab.mp3",
-    label: "🎹 Soft Piano"
-  },
-  whitenoise: {
-    url: "https://www.soundjay.com/nature/sounds/water-stream-1.mp3",
-    label: "📻 White Noise"
-  },
-  night: {
-    url: "https://www.soundjay.com/nature/sounds/crickets-1.mp3",
-    label: "🌙 Night Crickets"
+  stream: {
+    url: "https://assets.mixkit.co/active_storage/sfx/2507/2507-preview.mp3",
+    label: "💧 Stream"
   }
 };
 
