@@ -11,38 +11,40 @@ interface PricingSectionProps {
 const plans = [
   {
     name: 'Basic',
-    price: 7500,
+    price: 5000,
     features: [
-      '48-hour crash study plan',
+      '30-question quiz mode',
       '3 PDF uploads max',
-      'Basic 40-question quiz',
+      'Basic study plan',
       '30-day access',
       'Email delivery',
     ],
   },
   {
-    name: 'Standard',
-    price: 12000,
+    name: 'Pro',
+    price: 10000,
     popular: true,
     features: [
-      '72-hour intensive plan',
-      'Unlimited PDF uploads',
       'Full 60-question timed quiz',
-      'Daily WhatsApp reminders',
+      'Unlimited PDF uploads',
+      '72-hour intensive plan',
+      'Subject & year practice mode',
+      'Study materials access',
+      'WhatsApp reminders',
       'Predicted score analysis',
       '90-day access',
     ],
   },
   {
     name: 'Premium',
-    price: 30000,
+    price: 15000,
     features: [
-      'Everything in Standard',
+      'Everything in Pro',
       'Lifetime access forever',
+      'Advanced score prediction',
+      '₦1,000 referral bonus',
       'Priority support 24/7',
-      '₦2,000 referral bonus',
-      'Group study access',
-      'Personal study advisor',
+      'Exclusive study resources',
     ],
   },
 ];
@@ -81,7 +83,7 @@ export const PricingSection = ({ onSelectPlan, highlightStandard }: PricingSecti
             <div
               key={plan.name}
               className={`transition-all duration-500 ${
-                plan.name === 'Standard' && isHighlighted
+                plan.name === 'Pro' && isHighlighted
                   ? 'ring-4 ring-primary ring-offset-4 ring-offset-background animate-pulse rounded-2xl scale-105'
                   : ''
               }`}
