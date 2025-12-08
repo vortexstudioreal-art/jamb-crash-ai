@@ -4,7 +4,7 @@ project_id = "otpczgpmpnabbvzthvjv"
 verify_jwt = false
 
 [functions.paystack-initialize]
-verify_jwt = false
+verify_jwt = true
 
 [functions.paystack-webhook]
 verify_jwt = false
