@@ -113,8 +113,10 @@ const AdminPanel = () => {
       const { data, error } = await supabase.functions.invoke('send-whatsapp-reminder', {
         body: { test_mode: true }
       });
+      console.log('WhatsApp config check:', data);
       setWhatsappConfigured(data?.configured || false);
-    } catch {
+    } catch (err) {
+      console.error('WhatsApp config check failed:', err);
       setWhatsappConfigured(false);
     }
   };
@@ -214,34 +216,37 @@ const AdminPanel = () => {
       return;
     }
     setTestingWhatsApp(true);
+    toast.loading('Sending WhatsApp to +2347073996465...', { id: 'whatsapp-test' });
+    
     try {
-      // Call the actual edge function to send WhatsApp to test number
       const { data, error } = await supabase.functions.invoke('send-whatsapp-reminder', {
         body: {
           phone_number: '+2347073996465',
-          email: userEmail || 'admin@test.com',
+          email: userEmail || OWNER_EMAIL,
           test_mode: false
         }
       });
       
+      console.log('WhatsApp test response:', data, error);
+      
       if (error) {
         console.error('WhatsApp test error:', error);
-        toast.error('Failed to send WhatsApp: ' + error.message);
+        toast.error('Failed to send: ' + error.message, { id: 'whatsapp-test' });
         return;
       }
       
       if (data?.success) {
-        toast.success('WhatsApp sent! Check +2347073996465 📱');
+        toast.success('WhatsApp sent! Check +2347073996465 📱', { id: 'whatsapp-test' });
         setWhatsappConfigured(true);
       } else {
-        toast.error(data?.error || 'Failed to send WhatsApp');
+        toast.error(data?.error || 'Failed to send WhatsApp', { id: 'whatsapp-test' });
         if (data?.sandbox_info) {
-          toast.info(data.sandbox_info, { duration: 8000 });
+          toast.info(`Sandbox tip: Text "${data.sandbox_info.join_message}" to ${data.sandbox_info.number}`, { duration: 10000 });
         }
       }
     } catch (error) {
       console.error('WhatsApp test error:', error);
-      toast.error('Failed to send test reminder');
+      toast.error('Network error - check console', { id: 'whatsapp-test' });
     } finally {
       setTestingWhatsApp(false);
     }
