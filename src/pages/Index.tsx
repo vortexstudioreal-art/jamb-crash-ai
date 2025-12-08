@@ -12,6 +12,7 @@ import { PaywallGate } from '@/components/PaywallGate';
 import { AdminBadge } from '@/components/AdminBadge';
 import { PremiumDashboard } from '@/components/PremiumDashboard';
 import { SubjectSelector } from '@/components/SubjectSelector';
+import { SubjectChanger } from '@/components/SubjectChanger';
 import { FreeTrialBanner } from '@/components/FreeTrialBanner';
 import { DemoQuizFlow } from '@/components/DemoQuizFlow';
 import { TimedQuiz } from '@/components/TimedQuiz';
@@ -19,15 +20,18 @@ import { QuizResults } from '@/components/QuizResults';
 import { StudyStats } from '@/components/StudyStats';
 import { StudyPlanGenerator } from '@/components/StudyPlanGenerator';
 import { StudyMaterials } from '@/components/StudyMaterials';
+import { TrialExpiredScreen } from '@/components/TrialExpiredScreen';
+import { TrialTimerBadge } from '@/components/TrialTimerBadge';
 import { Footer } from '@/components/Footer';
 import { BackButton } from '@/components/BackButton';
 import { FeatureGate, useFeatureAccess } from '@/components/FeatureGate';
 import { useAuth } from '@/contexts/AuthContext';
+import { useFreeTrialTimer } from '@/hooks/useFreeTrialTimer';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, User, Lock, Crown } from 'lucide-react';
+import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, User, Lock, Crown, RefreshCw } from 'lucide-react';
 
 type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'demo' | 'study-plan' | 'study-materials';
 type QuizType = 'full' | 'mini' | 'subject' | 'timed-practice' | 'demo';
@@ -72,10 +76,18 @@ const Index = () => {
   const [quizResults, setQuizResults] = useState<any>(null);
   const [highlightStandard, setHighlightStandard] = useState(false);
   const [weakSubjectFromQuiz, setWeakSubjectFromQuiz] = useState<string | null>(null);
+  const [showSubjectChanger, setShowSubjectChanger] = useState(false);
   
   const { user, isLoading, hasAccess, isAdmin, isOwner, userRole, userPackage, packageFeatures, signOut, refreshAccess } = useAuth();
   const navigate = useNavigate();
   const { hasFeature, getMaxQuizQuestions, getMaxPdfUploads } = useFeatureAccess();
+  
+  // Free trial timer - 30 minutes from first login
+  const { formattedTime, isTrialExpired, isInTrial } = useFreeTrialTimer({
+    userEmail: user?.email || null,
+    isAdmin: isAdmin || isOwner,
+    hasAccess,
+  });
 
   // User email from authenticated session only
   const userEmail = user?.email?.toLowerCase() || null;
@@ -307,10 +319,23 @@ const Index = () => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
+  const handleSubjectsChanged = (subjects: string[]) => {
+    setUserSubjects(subjects);
+    setShowSubjectChanger(false);
+  };
+
+  // Trial expired - show upgrade screen
+  if (isTrialExpired && !effectiveAccess && !effectiveAdmin) {
+    return <TrialExpiredScreen onUpgrade={handleUpgradeClick} />;
+  }
+
   // Quiz step
   if (currentStep === 'quiz' && userEmail) {
     return (
       <div className="min-h-screen bg-background">
+        {isInTrial && formattedTime && (
+          <TrialTimerBadge formattedTime={formattedTime} isLow={parseInt(formattedTime.split(':')[0]) < 5} />
+        )}
         <DashboardHeader 
           userEmail={userEmail}
           isOwner={effectiveOwner}
@@ -457,8 +482,24 @@ const Index = () => {
   // Dashboard step
   if (currentStep === 'dashboard' && userEmail) {
     return (
-      <PaywallGate hasAccess={effectiveAccess} isLoading={isLoading} onUpgrade={handleUpgradeClick}>
+      <PaywallGate hasAccess={effectiveAccess || isInTrial} isLoading={isLoading} onUpgrade={handleUpgradeClick}>
         <div className="min-h-screen bg-background">
+          {/* Trial Timer Badge */}
+          {isInTrial && formattedTime && (
+            <TrialTimerBadge formattedTime={formattedTime} isLow={parseInt(formattedTime.split(':')[0]) < 5} />
+          )}
+          
+          {/* Subject Changer Modal */}
+          {showSubjectChanger && (
+            <SubjectChanger
+              userEmail={userEmail}
+              currentSubjects={effectiveSubjects}
+              onComplete={handleSubjectsChanged}
+              onClose={() => setShowSubjectChanger(false)}
+              isBypassUser={effectiveAdmin}
+            />
+          )}
+          
           <DashboardHeader 
             userEmail={userEmail}
             isOwner={effectiveOwner}
@@ -517,15 +558,15 @@ const Index = () => {
                   </Button>
                 )}
                 
-                {/* Mini Quiz - Available to all */}
+                {/* Mini Quiz - Available to trial users (20 Qs) */}
                 <Button
                   variant="outline"
                   className="h-auto py-4 flex flex-col gap-1 hover:border-yellow-500 hover:bg-yellow-500/5"
                   onClick={() => handleStartQuiz('mini')}
                 >
                   <Zap className="w-6 h-6 text-yellow-500" />
-                  <span className="font-bold text-sm">Mini Quiz</span>
-                  <span className="text-xs text-muted-foreground">{userPackage === 'basic' ? '30' : '20'} Qs</span>
+                  <span className="font-bold text-sm">{isInTrial ? 'Trial Quiz' : 'Mini Quiz'}</span>
+                  <span className="text-xs text-muted-foreground">{isInTrial ? '20 Qs' : userPackage === 'basic' ? '30' : '20'} Qs</span>
                 </Button>
                 
                 {/* Practice Mode - Pro+ only */}
@@ -583,25 +624,32 @@ const Index = () => {
                 </Button>
               </motion.div>
 
-              {/* Subject Tags */}
-              {effectiveSubjects.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.25 }}
-                  className="flex flex-wrap gap-2 justify-center mb-8"
+              {/* Subject Tags with Change Button */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.25 }}
+                className="flex flex-wrap items-center gap-2 justify-center mb-8"
+              >
+                <span className="text-sm text-muted-foreground">Your subjects:</span>
+                {effectiveSubjects.map(subject => (
+                  <span
+                    key={subject}
+                    className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium capitalize"
+                  >
+                    {subject.replace('_', ' ')}
+                  </span>
+                ))}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowSubjectChanger(true)}
+                  className="text-muted-foreground hover:text-primary ml-2"
                 >
-                  <span className="text-sm text-muted-foreground">Your subjects:</span>
-                  {effectiveSubjects.map(subject => (
-                    <span
-                      key={subject}
-                      className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium capitalize"
-                    >
-                      {subject.replace('_', ' ')}
-                    </span>
-                  ))}
-                </motion.div>
-              )}
+                  <RefreshCw className="w-4 h-4 mr-1" />
+                  Change
+                </Button>
+              </motion.div>
 
               {/* Study Materials - Pro+ only */}
               <motion.div
@@ -701,7 +749,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header onGetStarted={handleGetStarted} hasAccess={effectiveAccess} />
+      {/* Trial Timer Badge on landing page */}
+      {isInTrial && formattedTime && (
+        <TrialTimerBadge formattedTime={formattedTime} isLow={parseInt(formattedTime.split(':')[0]) < 5} />
+      )}
+      
+      <Header onGetStarted={handleGetStarted} hasAccess={effectiveAccess || isInTrial} />
       <div className="pt-16">
         {/* Admin Badge, Dashboard Button, and Sign Out for logged in users */}
         {user && (
@@ -712,7 +765,7 @@ const Index = () => {
                 linkToAdmin={effectiveOwner} 
               />
             )}
-            {effectiveAccess && (
+            {(effectiveAccess || isInTrial) && (
               <Button
                 variant="default"
                 size="sm"
@@ -720,7 +773,7 @@ const Index = () => {
                 className="gradient-primary text-primary-foreground"
               >
                 <BookOpen className="w-4 h-4 mr-1" />
-                Dashboard
+                {isInTrial ? 'Try Dashboard' : 'Dashboard'}
               </Button>
             )}
             <Button
