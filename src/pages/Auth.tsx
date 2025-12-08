@@ -27,12 +27,22 @@ export default function Auth() {
   const { signIn, signUp, user, isLoading, isOwner, isAdmin } = useAuth();
   const navigate = useNavigate();
 
-  // Check for password reset token in URL hash
+  // Check for password reset token in URL hash or auth event
   useEffect(() => {
+    // Check URL hash for recovery token
     const hash = window.location.hash;
     if (hash && hash.includes('access_token') && hash.includes('type=recovery')) {
       setView('reset-password');
     }
+
+    // Also listen for PASSWORD_RECOVERY auth event
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setView('reset-password');
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   // Redirect if already logged in (but not during password reset)
