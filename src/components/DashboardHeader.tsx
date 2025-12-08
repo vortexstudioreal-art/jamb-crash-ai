@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, User, LogOut, Crown, Shield, Settings } from 'lucide-react';
+import { BookOpen, LogOut, Settings, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AdminBadge } from './AdminBadge';
 
@@ -20,6 +20,10 @@ export const DashboardHeader = ({
   onSignOut 
 }: DashboardHeaderProps) => {
   const navigate = useNavigate();
+  
+  // Determine the effective role for badge display
+  const effectiveRole = isOwner ? 'owner' : (isCollaborator ? 'collaborator' : userRole);
+  const showAdminButton = isOwner || isCollaborator;
 
   return (
     <motion.header
@@ -39,13 +43,25 @@ export const DashboardHeader = ({
         {/* Center - Role Badge */}
         <div className="hidden md:flex items-center gap-2">
           <AdminBadge 
-            role={isOwner ? 'owner' : (isCollaborator ? 'collaborator' : userRole)} 
-            linkToAdmin={isOwner} 
+            role={effectiveRole} 
+            linkToAdmin={false} 
           />
         </div>
 
         {/* Right - Actions */}
         <div className="flex items-center gap-2">
+          {/* Admin Panel Button - Only for owner/collaborator */}
+          {showAdminButton && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/admin')}
+              className="text-primary hover:text-primary hover:bg-primary/10"
+              title="Admin Panel"
+            >
+              <Shield className="w-5 h-5" />
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="icon"

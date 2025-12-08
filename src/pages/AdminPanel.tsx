@@ -49,10 +49,28 @@ interface Stats {
 }
 
 const OWNER_EMAIL = 'saeedabdulbasit933@gmail.com';
+const COLLABORATOR_EMAILS = [
+  'loaborejim@gmail.com',
+  'favourgoodnews@gmail.com',
+  'onuchionwuegbusi@gmail.com',
+  'muzzyothman@gmail.com',
+  'muzzyothmam@gmail.com'
+];
+const BYPASS_EMAILS = [OWNER_EMAIL, ...COLLABORATOR_EMAILS];
+const BYPASS_STORAGE_KEY = 'jamb_bypass_email';
+
+// Helper to get bypass email from localStorage
+const getBypassEmail = (): string | null => {
+  const stored = localStorage.getItem(BYPASS_STORAGE_KEY);
+  if (stored && BYPASS_EMAILS.includes(stored.toLowerCase())) {
+    return stored.toLowerCase();
+  }
+  return null;
+};
 
 const AdminPanel = () => {
   const navigate = useNavigate();
-  const { hasAccess, isAdmin, adminRole, isLoading, userEmail } = useAccessControl();
+  const { hasAccess, isAdmin, adminRole, isLoading, userEmail: hookUserEmail } = useAccessControl();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [features, setFeatures] = useState<FeatureStatus[]>([]);
@@ -66,10 +84,26 @@ const AdminPanel = () => {
   const [emailConfigured, setEmailConfigured] = useState<boolean | null>(null);
   const [whatsappConfigured, setWhatsappConfigured] = useState<boolean | null>(null);
 
-  const isOwner = userEmail?.toLowerCase() === OWNER_EMAIL.toLowerCase();
+  // Check for bypass user from localStorage
+  const bypassEmail = getBypassEmail();
+  const userEmail = hookUserEmail || bypassEmail;
+  const isBypassOwner = bypassEmail === OWNER_EMAIL || userEmail?.toLowerCase() === OWNER_EMAIL;
+  const isBypassCollaborator = COLLABORATOR_EMAILS.includes(bypassEmail || '') || COLLABORATOR_EMAILS.includes(userEmail?.toLowerCase() || '');
+  const isBypassUser = isBypassOwner || isBypassCollaborator;
+
+  const isOwner = isBypassOwner || userEmail?.toLowerCase() === OWNER_EMAIL.toLowerCase();
   const canEdit = isOwner; // Only owner can edit settings
+  
+  // Effective admin check - bypass users are treated as admins
+  const effectiveAdmin = isAdmin || isBypassUser;
 
   useEffect(() => {
+    // Bypass users always have access
+    if (isBypassUser) {
+      fetchData();
+      return;
+    }
+    
     if (!isLoading && (!isAdmin || !hasAccess)) {
       navigate('/');
       return;
@@ -77,7 +111,7 @@ const AdminPanel = () => {
     if (isAdmin) {
       fetchData();
     }
-  }, [isAdmin, isLoading, hasAccess, navigate]);
+  }, [isAdmin, isLoading, hasAccess, navigate, isBypassUser]);
 
   const fetchData = async () => {
     setLoadingData(true);
