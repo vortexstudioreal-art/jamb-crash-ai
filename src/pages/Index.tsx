@@ -21,12 +21,13 @@ import { StudyPlanGenerator } from '@/components/StudyPlanGenerator';
 import { StudyMaterials } from '@/components/StudyMaterials';
 import { Footer } from '@/components/Footer';
 import { BackButton } from '@/components/BackButton';
+import { FeatureGate, useFeatureAccess } from '@/components/FeatureGate';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, User } from 'lucide-react';
+import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, User, Lock, Crown } from 'lucide-react';
 
 type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'demo' | 'study-plan' | 'study-materials';
 type QuizType = 'full' | 'mini' | 'subject' | 'timed-practice' | 'demo';
@@ -72,8 +73,9 @@ const Index = () => {
   const [highlightStandard, setHighlightStandard] = useState(false);
   const [weakSubjectFromQuiz, setWeakSubjectFromQuiz] = useState<string | null>(null);
   
-  const { user, isLoading, hasAccess, isAdmin, isOwner, userRole, signOut, refreshAccess } = useAuth();
+  const { user, isLoading, hasAccess, isAdmin, isOwner, userRole, userPackage, packageFeatures, signOut, refreshAccess } = useAuth();
   const navigate = useNavigate();
+  const { hasFeature, getMaxQuizQuestions, getMaxPdfUploads } = useFeatureAccess();
 
   // User email from authenticated session only
   const userEmail = user?.email?.toLowerCase() || null;
@@ -482,23 +484,40 @@ const Index = () => {
                 </p>
               </motion.div>
 
-              {/* Quick Actions - Clean Grid */}
+              {/* Quick Actions - Clean Grid with Package Restrictions */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
                 className="grid grid-cols-3 gap-3 mb-4"
               >
-                <Button
-                  variant="outline"
-                  className="h-auto py-4 flex flex-col gap-1 hover:border-primary hover:bg-primary/5"
-                  onClick={() => handleStartQuiz('full')}
-                >
-                  <Play className="w-6 h-6 text-primary" />
-                  <span className="font-bold text-sm">Full Quiz</span>
-                  <span className="text-xs text-muted-foreground">60 Qs</span>
-                </Button>
+                {/* Full Quiz - Pro+ only */}
+                {hasFeature('fullQuiz') ? (
+                  <Button
+                    variant="outline"
+                    className="h-auto py-4 flex flex-col gap-1 hover:border-primary hover:bg-primary/5"
+                    onClick={() => handleStartQuiz('full')}
+                  >
+                    <Play className="w-6 h-6 text-primary" />
+                    <span className="font-bold text-sm">Full Quiz</span>
+                    <span className="text-xs text-muted-foreground">60 Qs</span>
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    className="h-auto py-4 flex flex-col gap-1 opacity-60 relative"
+                    onClick={handleUpgradeClick}
+                  >
+                    <div className="absolute top-1 right-1">
+                      <Lock className="w-3 h-3 text-muted-foreground" />
+                    </div>
+                    <Play className="w-6 h-6 text-muted-foreground" />
+                    <span className="font-bold text-sm">Full Quiz</span>
+                    <span className="text-xs text-primary">Pro+</span>
+                  </Button>
+                )}
                 
+                {/* Mini Quiz - Available to all */}
                 <Button
                   variant="outline"
                   className="h-auto py-4 flex flex-col gap-1 hover:border-yellow-500 hover:bg-yellow-500/5"
@@ -506,18 +525,34 @@ const Index = () => {
                 >
                   <Zap className="w-6 h-6 text-yellow-500" />
                   <span className="font-bold text-sm">Mini Quiz</span>
-                  <span className="text-xs text-muted-foreground">20 Qs</span>
+                  <span className="text-xs text-muted-foreground">{userPackage === 'basic' ? '30' : '20'} Qs</span>
                 </Button>
                 
-                <Button
-                  variant="outline"
-                  className="h-auto py-4 flex flex-col gap-1 hover:border-purple-500 hover:bg-purple-500/5"
-                  onClick={() => handleStartQuiz('subject')}
-                >
-                  <BookOpen className="w-6 h-6 text-purple-500" />
-                  <span className="font-bold text-sm">Practice</span>
-                  <span className="text-xs text-muted-foreground">Custom</span>
-                </Button>
+                {/* Practice Mode - Pro+ only */}
+                {hasFeature('subjectPractice') ? (
+                  <Button
+                    variant="outline"
+                    className="h-auto py-4 flex flex-col gap-1 hover:border-purple-500 hover:bg-purple-500/5"
+                    onClick={() => handleStartQuiz('subject')}
+                  >
+                    <BookOpen className="w-6 h-6 text-purple-500" />
+                    <span className="font-bold text-sm">Practice</span>
+                    <span className="text-xs text-muted-foreground">Custom</span>
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    className="h-auto py-4 flex flex-col gap-1 opacity-60 relative"
+                    onClick={handleUpgradeClick}
+                  >
+                    <div className="absolute top-1 right-1">
+                      <Lock className="w-3 h-3 text-muted-foreground" />
+                    </div>
+                    <BookOpen className="w-6 h-6 text-muted-foreground" />
+                    <span className="font-bold text-sm">Practice</span>
+                    <span className="text-xs text-primary">Pro+</span>
+                  </Button>
+                )}
               </motion.div>
 
               {/* Secondary Actions Row */}
@@ -568,14 +603,16 @@ const Index = () => {
                 </motion.div>
               )}
 
-              {/* Study Materials */}
+              {/* Study Materials - Pro+ only */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
                 className="mb-8"
               >
-                <StudyMaterials subjects={effectiveSubjects} />
+                <FeatureGate feature="studyMaterials" onUpgrade={handleUpgradeClick}>
+                  <StudyMaterials subjects={effectiveSubjects} />
+                </FeatureGate>
               </motion.div>
 
               {/* Study Stats */}
@@ -599,6 +636,7 @@ const Index = () => {
                 adminRole={userRole}
                 targetScore={personalizationData?.targetScore ? parseInt(personalizationData.targetScore) : undefined}
                 weakSubject={weakSubjectFromQuiz || personalizationData?.weakestSubject}
+                onUpgrade={handleUpgradeClick}
               />
 
               {/* UTME Countdown */}

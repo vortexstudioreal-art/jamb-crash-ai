@@ -2,6 +2,73 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
+// Package feature limits
+export type UserPackage = 'basic' | 'pro' | 'premium' | 'admin' | null;
+
+export interface PackageFeatures {
+  maxQuizQuestions: number;
+  maxPdfUploads: number;
+  hasStudyMaterials: boolean;
+  hasWhatsAppReminders: boolean;
+  hasPredictedScore: boolean;
+  hasSubjectPractice: boolean;
+  hasAdvancedPrediction: boolean;
+  hasReferralBonus: boolean;
+  studyPlanType: 'basic' | '72-hour' | 'advanced';
+  accessDays: number | 'lifetime';
+}
+
+export const PACKAGE_FEATURES: Record<NonNullable<UserPackage>, PackageFeatures> = {
+  basic: {
+    maxQuizQuestions: 30,
+    maxPdfUploads: 3,
+    hasStudyMaterials: false,
+    hasWhatsAppReminders: false,
+    hasPredictedScore: false,
+    hasSubjectPractice: false,
+    hasAdvancedPrediction: false,
+    hasReferralBonus: false,
+    studyPlanType: 'basic',
+    accessDays: 30,
+  },
+  pro: {
+    maxQuizQuestions: 60,
+    maxPdfUploads: Infinity,
+    hasStudyMaterials: true,
+    hasWhatsAppReminders: true,
+    hasPredictedScore: true,
+    hasSubjectPractice: true,
+    hasAdvancedPrediction: false,
+    hasReferralBonus: false,
+    studyPlanType: '72-hour',
+    accessDays: 90,
+  },
+  premium: {
+    maxQuizQuestions: 60,
+    maxPdfUploads: Infinity,
+    hasStudyMaterials: true,
+    hasWhatsAppReminders: true,
+    hasPredictedScore: true,
+    hasSubjectPractice: true,
+    hasAdvancedPrediction: true,
+    hasReferralBonus: true,
+    studyPlanType: 'advanced',
+    accessDays: 'lifetime',
+  },
+  admin: {
+    maxQuizQuestions: 60,
+    maxPdfUploads: Infinity,
+    hasStudyMaterials: true,
+    hasWhatsAppReminders: true,
+    hasPredictedScore: true,
+    hasSubjectPractice: true,
+    hasAdvancedPrediction: true,
+    hasReferralBonus: true,
+    studyPlanType: 'advanced',
+    accessDays: 'lifetime',
+  },
+};
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -10,12 +77,27 @@ interface AuthContextType {
   isAdmin: boolean;
   userRole: 'owner' | 'admin' | 'collaborator' | null;
   hasAccess: boolean;
+  userPackage: UserPackage;
+  packageFeatures: PackageFeatures;
   signUp: (email: string, password: string, fullName?: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signInWithGoogle: () => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshAccess: () => Promise<void>;
 }
+
+const defaultFeatures: PackageFeatures = {
+  maxQuizQuestions: 20,
+  maxPdfUploads: 0,
+  hasStudyMaterials: false,
+  hasWhatsAppReminders: false,
+  hasPredictedScore: false,
+  hasSubjectPractice: false,
+  hasAdvancedPrediction: false,
+  hasReferralBonus: false,
+  studyPlanType: 'basic',
+  accessDays: 0,
+};
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -39,6 +121,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [userRole, setUserRole] = useState<'owner' | 'admin' | 'collaborator' | null>(null);
   const [hasAccess, setHasAccess] = useState(false);
+  const [userPackage, setUserPackage] = useState<UserPackage>(null);
+
+  // Derive package features from userPackage
+  const packageFeatures: PackageFeatures = userPackage 
+    ? PACKAGE_FEATURES[userPackage] 
+    : defaultFeatures;
 
   const checkUserAccess = async (email: string) => {
     try {
@@ -59,11 +147,26 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const role = result.admin_role as 'owner' | 'admin' | 'collaborator' | null;
         setUserRole(role);
         setIsOwner(role === 'owner');
+
+        // Determine package - admins/owners get premium
+        if (role === 'owner' || role === 'admin' || role === 'collaborator') {
+          setUserPackage('admin');
+        } else if (result.package) {
+          // Map database package names to our package types
+          const pkgName = result.package.toLowerCase();
+          if (pkgName === 'basic') setUserPackage('basic');
+          else if (pkgName === 'pro' || pkgName === 'standard') setUserPackage('pro');
+          else if (pkgName === 'premium') setUserPackage('premium');
+          else setUserPackage(null);
+        } else {
+          setUserPackage(null);
+        }
       } else {
         setHasAccess(false);
         setIsAdmin(false);
         setUserRole(null);
         setIsOwner(false);
+        setUserPackage(null);
       }
     } catch (err) {
       console.error('Access check failed:', err);
@@ -93,6 +196,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           setIsAdmin(false);
           setUserRole(null);
           setIsOwner(false);
+          setUserPackage(null);
         }
         
         setIsLoading(false);
@@ -159,6 +263,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsAdmin(false);
     setUserRole(null);
     setIsOwner(false);
+    setUserPackage(null);
   };
 
   return (
@@ -171,6 +276,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         isAdmin,
         userRole,
         hasAccess,
+        userPackage,
+        packageFeatures,
         signUp,
         signIn,
         signInWithGoogle,
