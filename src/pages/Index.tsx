@@ -100,7 +100,19 @@ const Index = () => {
   // ALWAYS have subjects available - use defaults if none selected
   const effectiveSubjects = userSubjects.length > 0 ? userSubjects : DEFAULT_SUBJECTS;
 
-  // Load user subjects and restore dashboard state
+  // Auto-redirect signed-in users with access to dashboard
+  useEffect(() => {
+    if (isLoading) return;
+    
+    // If user is signed in and has access (paid, admin, or owner), go to dashboard
+    if (userEmail && effectiveAccess && currentStep === 'landing') {
+      setCurrentStep('dashboard');
+      saveDashboardState('dashboard');
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [userEmail, effectiveAccess, isLoading, currentStep]);
+
+  // Load user subjects and quiz data
   useEffect(() => {
     const loadUserData = async () => {
       if (!userEmail || isLoading) return;
@@ -149,16 +161,10 @@ const Index = () => {
         });
         if (worstSubject) setWeakSubjectFromQuiz(worstSubject);
       }
-
-      // Restore dashboard state if user has access and was on dashboard
-      if (effectiveAccess && getSavedDashboardState()) {
-        setCurrentStep('dashboard');
-        window.scrollTo({ top: 0, behavior: 'instant' });
-      }
     };
     
     loadUserData();
-  }, [userEmail, isLoading, effectiveAccess]);
+  }, [userEmail, isLoading]);
 
   // Handle URL params
   useEffect(() => {
