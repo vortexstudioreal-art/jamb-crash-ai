@@ -44,12 +44,14 @@ export const Flashcards = ({ userEmail, subjects, onBack }: FlashcardsProps) => 
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
+  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'study' | 'browse'>('browse');
   const [sessionStats, setSessionStats] = useState({ correct: 0, incorrect: 0 });
 
   // Load flashcards
   useEffect(() => {
     loadFlashcards();
-  }, [userEmail, subjects, selectedSubject]);
+  }, [userEmail, subjects, selectedSubject, selectedTopic]);
 
   const loadFlashcards = async () => {
     setLoading(true);
@@ -66,6 +68,10 @@ export const Flashcards = ({ userEmail, subjects, onBack }: FlashcardsProps) => 
       query = query.in('subject', subjects.map(s => s.toLowerCase()));
     }
 
+    if (selectedTopic) {
+      query = query.eq('topic', selectedTopic);
+    }
+
     const { data } = await query;
     
     if (data) {
@@ -75,6 +81,31 @@ export const Flashcards = ({ userEmail, subjects, onBack }: FlashcardsProps) => 
     }
     
     setLoading(false);
+  };
+
+  // Group flashcards by topic for browse mode
+  const flashcardsByTopic = flashcards.reduce((acc, card) => {
+    const topicKey = card.topic || 'General';
+    if (!acc[topicKey]) acc[topicKey] = [];
+    acc[topicKey].push(card);
+    return acc;
+  }, {} as Record<string, Flashcard[]>);
+
+  const topicList = Object.keys(flashcardsByTopic).sort();
+
+  const startTopicStudy = (topic: string) => {
+    setSelectedTopic(topic);
+    setViewMode('study');
+    setCurrentIndex(0);
+    setIsFlipped(false);
+    setSessionStats({ correct: 0, incorrect: 0 });
+  };
+
+  const exitStudyMode = () => {
+    setViewMode('browse');
+    setSelectedTopic(null);
+    setCurrentIndex(0);
+    setIsFlipped(false);
   };
 
   const generateFlashcards = async () => {
@@ -223,23 +254,20 @@ export const Flashcards = ({ userEmail, subjects, onBack }: FlashcardsProps) => 
   const currentCard = flashcards[currentIndex];
   const progress = flashcards.length > 0 ? ((currentIndex + 1) / flashcards.length) * 100 : 0;
 
-  return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <button
-            onClick={onBack}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back
-          </button>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={shuffleCards}>
-              <Shuffle className="w-4 h-4 mr-1" />
-              Shuffle
-            </Button>
+  // Browse mode - show topics with flashcard counts
+  if (viewMode === 'browse' && !selectedTopic) {
+    return (
+      <div className="min-h-screen bg-background p-4 md:p-8">
+        <div className="max-w-2xl mx-auto">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6">
+            <button
+              onClick={onBack}
+              className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back
+            </button>
             <Button 
               variant="outline" 
               size="sm" 
@@ -247,31 +275,121 @@ export const Flashcards = ({ userEmail, subjects, onBack }: FlashcardsProps) => 
               disabled={generating}
             >
               <Sparkles className="w-4 h-4 mr-1" />
-              {generating ? 'Generating...' : 'Generate'}
+              {generating ? 'Generating...' : 'Generate from Mistakes'}
+            </Button>
+          </div>
+
+          <h1 className="text-2xl font-bold text-foreground mb-2">📚 My Flashcards</h1>
+          <p className="text-muted-foreground mb-6">
+            {flashcards.length} cards across {topicList.length} topics
+          </p>
+
+          {/* Subject filter */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            <Badge 
+              variant={selectedSubject === null ? 'default' : 'outline'}
+              className="cursor-pointer"
+              onClick={() => setSelectedSubject(null)}
+            >
+              All Subjects
+            </Badge>
+            {subjects.map(subject => (
+              <Badge 
+                key={subject}
+                variant={selectedSubject === subject.toLowerCase() ? 'default' : 'outline'}
+                className="cursor-pointer capitalize"
+                onClick={() => setSelectedSubject(subject.toLowerCase())}
+              >
+                {subject}
+              </Badge>
+            ))}
+          </div>
+
+          {/* Topics list */}
+          {topicList.length > 0 ? (
+            <div className="space-y-3">
+              {topicList.map(topic => {
+                const cards = flashcardsByTopic[topic];
+                const masteredCount = cards.filter(c => c.mastery_level === 'mastered').length;
+                const progressPercent = cards.length > 0 ? Math.round((masteredCount / cards.length) * 100) : 0;
+                
+                return (
+                  <motion.div
+                    key={topic}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-card rounded-xl border border-border p-4 hover:border-primary/50 transition-colors cursor-pointer"
+                    onClick={() => startTopicStudy(topic)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-foreground">{topic}</h3>
+                        <div className="flex items-center gap-3 mt-1">
+                          <span className="text-sm text-muted-foreground">
+                            {cards.length} card{cards.length !== 1 ? 's' : ''}
+                          </span>
+                          <span className="text-sm text-green-500">
+                            {masteredCount} mastered
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-16">
+                          <Progress value={progressPercent} className="h-2" />
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-16">
+              <Brain className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-foreground mb-2">No Flashcards Yet</h3>
+              <p className="text-muted-foreground mb-6">
+                Generate flashcards from the Syllabus Reader or from your quiz mistakes!
+              </p>
+              <Button onClick={generateFlashcards} disabled={generating}>
+                <Sparkles className="w-4 h-4 mr-2" />
+                {generating ? 'Generating...' : 'Generate from Mistakes'}
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Study mode
+  return (
+    <div className="min-h-screen bg-background p-4 md:p-8">
+      <div className="max-w-2xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <button
+            onClick={exitStudyMode}
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Topics
+          </button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={shuffleCards}>
+              <Shuffle className="w-4 h-4 mr-1" />
+              Shuffle
             </Button>
           </div>
         </div>
 
-        {/* Subject filter */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          <Badge 
-            variant={selectedSubject === null ? 'default' : 'outline'}
-            className="cursor-pointer"
-            onClick={() => setSelectedSubject(null)}
-          >
-            All
-          </Badge>
-          {subjects.map(subject => (
-            <Badge 
-              key={subject}
-              variant={selectedSubject === subject.toLowerCase() ? 'default' : 'outline'}
-              className="cursor-pointer capitalize"
-              onClick={() => setSelectedSubject(subject.toLowerCase())}
-            >
-              {subject}
-            </Badge>
-          ))}
-        </div>
+        {/* Topic title */}
+        {selectedTopic && (
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-foreground">{selectedTopic}</h2>
+            <p className="text-muted-foreground text-sm">{flashcards.length} flashcards</p>
+          </div>
+        )}
 
         {/* Stats */}
         <div className="flex items-center justify-between mb-4">
