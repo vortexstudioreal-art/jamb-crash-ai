@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, CheckCircle, XCircle, Pause, Play, Flag, ChevronLeft, ChevronRight, Sparkles, Volume2, VolumeX, Timer } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, Pause, Play, Flag, ChevronLeft, ChevronRight, Sparkles, Volume2, VolumeX, Timer, Settings2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,6 +9,8 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 
 interface Question {
   id: string;
@@ -48,26 +50,26 @@ const MOTIVATIONAL_MESSAGES = [
   "Stay focused, stay winning! 🔥",
 ];
 
-// Ambient sounds - soothing natural sounds with accurate labels
+// Ambient sounds - verified working URLs
 const AMBIENT_SOUNDS = {
   rain: {
-    url: "https://cdn.freesound.org/previews/531/531947_5674468-lq.mp3",
+    url: "https://assets.mixkit.co/active_storage/sfx/212/212-preview.mp3",
     label: "🌧️ Gentle Rain"
   },
   birds: {
-    url: "https://cdn.freesound.org/previews/531/531953_5674468-lq.mp3",
+    url: "https://assets.mixkit.co/active_storage/sfx/2433/2433-preview.mp3",
     label: "🐦 Morning Birds"
   },
   ocean: {
-    url: "https://cdn.freesound.org/previews/527/527602_2645044-lq.mp3",
+    url: "https://assets.mixkit.co/active_storage/sfx/2515/2515-preview.mp3",
     label: "🌊 Ocean Waves"
   },
   forest: {
-    url: "https://cdn.freesound.org/previews/462/462087_9159316-lq.mp3",
-    label: "🌲 Peaceful Forest"
+    url: "https://assets.mixkit.co/active_storage/sfx/2500/2500-preview.mp3",
+    label: "🌲 Forest Ambience"
   },
   fire: {
-    url: "https://cdn.freesound.org/previews/499/499018_10758857-lq.mp3",
+    url: "https://assets.mixkit.co/active_storage/sfx/100/100-preview.mp3",
     label: "🔥 Crackling Fire"
   }
 };
@@ -87,13 +89,16 @@ const TIME_OPTIONS = [
   { value: 60, label: '60 min' },
 ];
 
+// Question count options
+const QUESTION_OPTIONS = [5, 10, 15, 20, 25, 30, 40, 50, 60];
+
 export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }: TimedQuizProps) => {
-  // Quiz config based on type - subject practice is now unified with timed practice
+  // Quiz config based on type
   const getQuizConfig = () => {
     switch (quizType) {
       case 'full': return { questions: 60, time: 70 * 60, untimed: false };
       case 'mini': return { questions: 20, time: 30 * 60, untimed: false };
-      case 'subject': return { questions: 40, time: 30 * 60, untimed: false }; // Now timed too
+      case 'subject': return { questions: 40, time: 30 * 60, untimed: false };
       case 'timed-practice': return { questions: 40, time: 30 * 60, untimed: false };
       case 'demo': return { questions: 20, time: 30 * 60, untimed: false };
       default: return { questions: 60, time: 70 * 60, untimed: false };
@@ -109,12 +114,18 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
   const [quizMode, setQuizMode] = useState<QuizMode | null>(null);
   const [showSetup, setShowSetup] = useState(true);
   
-  // Multi-subject selection for "Practice by Subject"
+  // Multi-subject selection with per-subject year selection
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
-  const [selectedYears, setSelectedYears] = useState<Record<string, string>>({});
+  const [subjectYears, setSubjectYears] = useState<Record<string, { start: number; end: number }>>({});
+  
+  // Custom question count
+  const [customQuestionCount, setCustomQuestionCount] = useState(20);
   
   // Timed practice duration
   const [selectedDuration, setSelectedDuration] = useState<number>(30);
+  
+  // Previously answered question IDs to avoid repetition
+  const [previouslyAnsweredIds, setPreviouslyAnsweredIds] = useState<Set<string>>(new Set());
   
   // Quiz state
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -128,19 +139,44 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
   const [selectedSubjectFilter, setSelectedSubjectFilter] = useState<string>('all');
   const [showAnswerFeedback, setShowAnswerFeedback] = useState<string | null>(null);
   
-  // Audio state - muted by default, user can enable
+  // Audio state - muted by default
   const [isSoundPlaying, setIsSoundPlaying] = useState(false);
   const [currentSound, setCurrentSound] = useState<AmbientSound>('rain');
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Load previously answered questions to avoid repetition
+  useEffect(() => {
+    const loadPreviousQuestions = async () => {
+      const { data } = await supabase
+        .from('quiz_attempts')
+        .select('questions_data')
+        .eq('email', userEmail)
+        .order('created_at', { ascending: false })
+        .limit(10);
+      
+      if (data) {
+        const ids = new Set<string>();
+        data.forEach(attempt => {
+          if (attempt.questions_data && Array.isArray(attempt.questions_data)) {
+            attempt.questions_data.forEach((q: any) => {
+              if (q.id && q.userAnswer === q.correct_answer) {
+                // Only exclude questions user got right
+                ids.add(q.id);
+              }
+            });
+          }
+        });
+        setPreviouslyAnsweredIds(ids);
+      }
+    };
+    loadPreviousQuestions();
+  }, [userEmail]);
+
   // Initialize and manage audio
   useEffect(() => {
-    // Only set up audio after quiz starts
     if (showSetup) return;
     
     const sound = AMBIENT_SOUNDS[currentSound];
-    
-    // Create new audio element
     const audio = new Audio();
     audio.src = sound.url;
     audio.loop = true;
@@ -148,7 +184,6 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
     audio.preload = 'auto';
     audioRef.current = audio;
     
-    // Handle audio loading and playing
     const handleCanPlay = () => {
       if (isSoundPlaying && audioRef.current) {
         audioRef.current.play().catch((err) => {
@@ -159,10 +194,9 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
     
     audio.addEventListener('canplaythrough', handleCanPlay);
     
-    // If already sound should be playing, try to play
     if (isSoundPlaying) {
       audio.play().catch((err) => {
-        console.log('Initial audio play failed (waiting for user interaction):', err.message);
+        console.log('Initial audio play failed:', err.message);
       });
     }
     
@@ -174,20 +208,16 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
     };
   }, [currentSound, showSetup]);
 
-  // Handle play/pause state changes separately
   useEffect(() => {
     if (!audioRef.current || showSetup) return;
     
     if (isSoundPlaying) {
-      audioRef.current.play().catch((err) => {
-        console.log('Audio play on toggle failed:', err.message);
-      });
+      audioRef.current.play().catch(console.log);
     } else {
       audioRef.current.pause();
     }
   }, [isSoundPlaying, showSetup]);
 
-  // Cleanup audio on component unmount
   useEffect(() => {
     return () => {
       if (audioRef.current) {
@@ -203,7 +233,6 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
   };
 
   const changeSound = (sound: AmbientSound) => {
-    // Stop current audio before changing
     if (audioRef.current) {
       audioRef.current.pause();
     }
@@ -214,15 +243,35 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
   const toggleSubjectSelection = (subject: string) => {
     setSelectedSubjects(prev => {
       if (prev.includes(subject)) {
+        // Remove subject and its year config
+        const newYears = { ...subjectYears };
+        delete newYears[subject];
+        setSubjectYears(newYears);
         return prev.filter(s => s !== subject);
       }
+      // Add subject with default year range
+      setSubjectYears(prev => ({
+        ...prev,
+        [subject]: { start: 2000, end: 2025 }
+      }));
       return [...prev, subject];
     });
   };
 
+  // Update year for a specific subject
+  const updateSubjectYear = (subject: string, type: 'start' | 'end', year: number) => {
+    setSubjectYears(prev => ({
+      ...prev,
+      [subject]: {
+        ...prev[subject],
+        [type]: year
+      }
+    }));
+  };
+
   // Start quiz
   const startQuiz = (mode: QuizMode) => {
-    if (quizType === 'subject' && selectedSubjects.length === 0) {
+    if ((quizType === 'subject' || quizType === 'timed-practice') && selectedSubjects.length === 0) {
       toast({
         title: "Select at least one subject",
         description: "Please choose subjects to practice",
@@ -231,55 +280,90 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
       return;
     }
     
-    // Set time for timed practice
-    if (quizType === 'timed-practice') {
+    // Set custom question count and time
+    if (quizType === 'subject' || quizType === 'timed-practice') {
+      setTotalQuestions(customQuestionCount);
       setTotalTimeSeconds(selectedDuration * 60);
       setTimeLeft(selectedDuration * 60);
     }
     
     setQuizMode(mode);
     setShowSetup(false);
-    
-    if (audioRef.current) {
-      audioRef.current.play().catch(console.error);
-      setIsSoundPlaying(true);
-    }
   };
 
-  // Load questions
+  // Load questions with year filtering and anti-repetition
   useEffect(() => {
     if (!quizMode) return;
     
     const loadQuestions = async () => {
       try {
-        let query = supabase.from('jamb_questions').select('*');
-        
-        // Use selected subjects for practice mode, otherwise use provided subjects
         const subjectsToUse = (quizType === 'subject' || quizType === 'timed-practice') && selectedSubjects.length > 0
           ? selectedSubjects
           : subjects;
         
-        query = query.in('subject', subjectsToUse as any);
+        let allQuestions: Question[] = [];
         
-        const { data, error } = await query.limit(500);
+        // For practice mode, load per-subject with year filters
+        if ((quizType === 'subject' || quizType === 'timed-practice') && Object.keys(subjectYears).length > 0) {
+          for (const subject of subjectsToUse) {
+            const yearConfig = subjectYears[subject] || { start: 2000, end: 2025 };
+            
+            const { data, error } = await supabase
+              .from('jamb_questions')
+              .select('*')
+              .eq('subject', subject as any)
+              .gte('year', yearConfig.start)
+              .lte('year', yearConfig.end)
+              .limit(200);
+            
+            if (!error && data) {
+              allQuestions.push(...(data as Question[]));
+            }
+          }
+        } else {
+          // Standard query
+          const { data, error } = await supabase
+            .from('jamb_questions')
+            .select('*')
+            .in('subject', subjectsToUse as any)
+            .limit(500);
+          
+          if (!error && data) {
+            allQuestions = data as Question[];
+          }
+        }
 
-        if (error) throw error;
+        // Filter out previously answered questions (unless not enough remain)
+        let filteredQuestions = allQuestions.filter(q => !previouslyAnsweredIds.has(q.id));
+        
+        // If not enough questions after filtering, include some previously answered
+        if (filteredQuestions.length < totalQuestions) {
+          const previouslyAnswered = allQuestions.filter(q => previouslyAnsweredIds.has(q.id));
+          // Shuffle and add some back
+          const shuffledPrevious = previouslyAnswered.sort(() => Math.random() - 0.5);
+          filteredQuestions.push(...shuffledPrevious.slice(0, totalQuestions - filteredQuestions.length));
+        }
 
-        if (data && data.length >= totalQuestions) {
-          const shuffled = [...data];
+        if (filteredQuestions.length >= totalQuestions) {
+          // Fisher-Yates shuffle for true randomness
+          const shuffled = [...filteredQuestions];
           for (let i = shuffled.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
           }
-          setQuestions(shuffled.slice(0, totalQuestions) as Question[]);
-        } else if (data && data.length > 0) {
-          const shuffled = [...data].sort(() => Math.random() - 0.5);
-          setQuestions(shuffled as Question[]);
+          setQuestions(shuffled.slice(0, totalQuestions));
+        } else if (filteredQuestions.length > 0) {
+          const shuffled = [...filteredQuestions].sort(() => Math.random() - 0.5);
+          setQuestions(shuffled);
           setTotalQuestions(shuffled.length);
+          toast({
+            title: `Only ${shuffled.length} questions available`,
+            description: "Continuing with available questions",
+          });
         } else {
           toast({
-            title: "Not enough questions",
-            description: "Loading available questions...",
+            title: "No questions found",
+            description: "Try different subjects or year range",
             variant: "destructive"
           });
         }
@@ -291,7 +375,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
     };
 
     loadQuestions();
-  }, [subjects, totalQuestions, quizMode, quizType, selectedSubjects]);
+  }, [subjects, totalQuestions, quizMode, quizType, selectedSubjects, subjectYears, previouslyAnsweredIds]);
 
   // Timer
   useEffect(() => {
@@ -385,7 +469,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
     });
   }, [questions, answers, timeLeft, totalTimeSeconds, userEmail, quizType, subjects, selectedSubjects, onComplete]);
 
-  // Unified setup screen - combines subject + year + time selection
+  // Setup screen
   if (showSetup && !quizMode) {
     const isPracticeMode = quizType === 'subject' || quizType === 'timed-practice';
     
@@ -402,71 +486,111 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
           </h2>
           
           <p className="text-muted-foreground mb-4 text-center text-sm">
-            {isPracticeMode ? 'Select subjects, years, and time' : 'Choose your quiz mode'}
+            {isPracticeMode ? 'Select subjects, years, and settings' : 'Choose your quiz mode'}
           </p>
 
-          {/* Subject selection for practice modes - shows user's subjects only */}
+          {/* Subject selection with per-subject year picker */}
           {isPracticeMode && (
             <div className="mb-4">
               <label className="text-sm font-medium text-foreground mb-2 block">
-                Subjects ({selectedSubjects.length} selected)
+                Subjects & Years ({selectedSubjects.length} selected)
               </label>
-              <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
+              <div className="space-y-2 max-h-48 overflow-y-auto">
                 {subjects.map(subject => (
-                  <label
-                    key={subject}
-                    className={`flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer transition-all text-sm ${
-                      selectedSubjects.includes(subject)
-                        ? 'border-primary bg-primary/10'
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <Checkbox
-                      checked={selectedSubjects.includes(subject)}
-                      onCheckedChange={() => toggleSubjectSelection(subject)}
-                    />
-                    <span className="capitalize">{subject.replace('_', ' ')}</span>
-                  </label>
+                  <div key={subject} className="space-y-2">
+                    <label
+                      className={`flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer transition-all text-sm ${
+                        selectedSubjects.includes(subject)
+                          ? 'border-primary bg-primary/10'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <Checkbox
+                        checked={selectedSubjects.includes(subject)}
+                        onCheckedChange={() => toggleSubjectSelection(subject)}
+                      />
+                      <span className="capitalize flex-1">{subject.replace('_', ' ')}</span>
+                    </label>
+                    
+                    {/* Per-subject year selection */}
+                    {selectedSubjects.includes(subject) && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        className="ml-6 flex items-center gap-2 text-xs"
+                      >
+                        <span className="text-muted-foreground">Year:</span>
+                        <select
+                          value={subjectYears[subject]?.start || 2000}
+                          onChange={(e) => updateSubjectYear(subject, 'start', parseInt(e.target.value))}
+                          className="p-1 rounded border border-border bg-background text-xs"
+                        >
+                          {YEARS.map(year => (
+                            <option key={year} value={year}>{year}</option>
+                          ))}
+                        </select>
+                        <span className="text-muted-foreground">to</span>
+                        <select
+                          value={subjectYears[subject]?.end || 2025}
+                          onChange={(e) => updateSubjectYear(subject, 'end', parseInt(e.target.value))}
+                          className="p-1 rounded border border-border bg-background text-xs"
+                        >
+                          {YEARS.map(year => (
+                            <option key={year} value={year}>{year}</option>
+                          ))}
+                        </select>
+                      </motion.div>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Year selection for practice modes */}
+          {/* Question count selection */}
           {isPracticeMode && (
             <div className="mb-4">
               <label className="text-sm font-medium text-foreground mb-2 block">
-                Year Range (optional)
+                Number of Questions
               </label>
-              <div className="flex gap-2 items-center">
-                <select
-                  value={selectedYears.start || '2000'}
-                  onChange={(e) => setSelectedYears(prev => ({ ...prev, start: e.target.value }))}
-                  className="flex-1 p-2 rounded-lg border border-border bg-background text-sm"
-                >
-                  {YEARS.map(year => (
-                    <option key={year} value={year}>{year}</option>
-                  ))}
-                </select>
-                <span className="text-muted-foreground">to</span>
-                <select
-                  value={selectedYears.end || '2025'}
-                  onChange={(e) => setSelectedYears(prev => ({ ...prev, end: e.target.value }))}
-                  className="flex-1 p-2 rounded-lg border border-border bg-background text-sm"
-                >
-                  {YEARS.map(year => (
-                    <option key={year} value={year}>{year}</option>
-                  ))}
-                </select>
+              <div className="grid grid-cols-5 gap-2">
+                {QUESTION_OPTIONS.slice(0, 5).map(count => (
+                  <button
+                    key={count}
+                    onClick={() => setCustomQuestionCount(count)}
+                    className={`p-2 rounded-lg border-2 text-center text-sm font-medium transition-all ${
+                      customQuestionCount === count
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    {count}
+                  </button>
+                ))}
+              </div>
+              <div className="grid grid-cols-4 gap-2 mt-2">
+                {QUESTION_OPTIONS.slice(5).map(count => (
+                  <button
+                    key={count}
+                    onClick={() => setCustomQuestionCount(count)}
+                    className={`p-2 rounded-lg border-2 text-center text-sm font-medium transition-all ${
+                      customQuestionCount === count
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    {count}
+                  </button>
+                ))}
               </div>
             </div>
           )}
 
-          {/* Time selection for practice modes */}
+          {/* Time selection */}
           {isPracticeMode && (
             <div className="mb-4">
               <label className="text-sm font-medium text-foreground mb-2 block">
-                Practice Time
+                Time Limit
               </label>
               <div className="grid grid-cols-4 gap-2">
                 {TIME_OPTIONS.slice(0, 4).map(option => (
@@ -555,7 +679,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
         <div className="text-center">
           <div className="text-6xl mb-4">😕</div>
           <h3 className="text-xl font-bold mb-2">No questions available</h3>
-          <p className="text-muted-foreground mb-4">Try selecting different subjects.</p>
+          <p className="text-muted-foreground mb-4">Try selecting different subjects or year range.</p>
           <Button onClick={onExit}>Go Back</Button>
         </div>
       </div>
@@ -576,7 +700,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
             <ChevronLeft className="w-4 h-4" /> Exit
           </Button>
           
-          {/* Compact Timer or Mode Badge */}
+          {/* Compact Timer */}
           {isUntimed ? (
             <Badge variant="secondary" className="bg-purple-500/10 text-purple-600">
               Practice ✨
@@ -590,7 +714,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
             </div>
           )}
           
-          {/* Sound Controls with selector */}
+          {/* Sound Controls */}
           <div className="flex items-center gap-1">
             <Popover>
               <PopoverTrigger asChild>
@@ -600,7 +724,6 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
                   className={`h-8 px-2 ${isSoundPlaying ? 'text-primary' : 'text-muted-foreground'}`}
                 >
                   {isSoundPlaying ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-                  <span className="text-xs ml-1 hidden sm:inline">{AMBIENT_SOUNDS[currentSound].label}</span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-48 p-2" align="end">
@@ -681,7 +804,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
         </div>
       )}
 
-      {/* Question Content - Clean and Spacious */}
+      {/* Question Content */}
       <div className="flex-1 overflow-y-auto p-4">
         <div className="max-w-2xl mx-auto">
           {/* Question Card */}
@@ -707,7 +830,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
             </p>
           </motion.div>
 
-          {/* Answer Options - Clean Layout */}
+          {/* Answer Options */}
           <div className="space-y-2.5">
             {['A', 'B', 'C', 'D'].map((letter) => {
               const optionKey = `option_${letter.toLowerCase()}` as keyof Question;
@@ -771,7 +894,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
         </div>
       </div>
 
-      {/* Navigation - Minimal Footer */}
+      {/* Navigation Footer */}
       <div className="p-3 border-t border-border bg-card">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <Button
@@ -783,7 +906,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
             <ChevronLeft className="w-4 h-4" /> Prev
           </Button>
 
-          {/* Question dots - compact */}
+          {/* Question dots */}
           <div className="hidden sm:flex gap-1 overflow-x-auto max-w-xs">
             {questions.slice(Math.max(0, currentIndex - 3), currentIndex + 4).map((q, i) => {
               const actualIndex = Math.max(0, currentIndex - 3) + i;

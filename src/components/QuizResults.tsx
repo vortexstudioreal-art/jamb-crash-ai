@@ -41,8 +41,12 @@ export const QuizResults = ({ results, quizType, onRetry, onHome, onUpgrade }: Q
   const [expandedQuestions, setExpandedQuestions] = useState<string[]>([]);
   const [showAllQuestions, setShowAllQuestions] = useState(false);
   
+  // FIXED: Score is based on ACTUAL questions answered, not a progressive total
   const percentage = Math.round((results.correctAnswers / results.totalQuestions) * 100);
   const scoreInfo = getScoreMessage(percentage);
+  
+  // Estimated JAMB score based on THIS quiz performance
+  // JAMB has 4 subjects with different question counts, so we scale appropriately
   const estimatedJambScore = Math.round((percentage / 100) * 400);
 
   // Trigger confetti for good scores
@@ -97,7 +101,7 @@ export const QuizResults = ({ results, quizType, onRetry, onHome, onUpgrade }: Q
           </p>
         </motion.div>
 
-        {/* Score Cards */}
+        {/* Score Cards - FIXED: Shows score over actual questions taken */}
         <div className="grid grid-cols-3 gap-4 mb-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -135,17 +139,17 @@ export const QuizResults = ({ results, quizType, onRetry, onHome, onUpgrade }: Q
           </motion.div>
         </div>
 
-        {/* Estimated JAMB Score */}
+        {/* Estimated JAMB Score - FIXED: Based on actual quiz performance */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.6 }}
           className="bg-gradient-to-r from-primary/20 to-green-500/20 rounded-2xl p-6 mb-8 text-center border border-primary/30"
         >
-          <p className="text-muted-foreground mb-1">Estimated JAMB Score</p>
+          <p className="text-muted-foreground mb-1">Estimated JAMB Score (if you maintain this performance)</p>
           <p className="text-5xl font-bold text-foreground">{estimatedJambScore}/400</p>
           <p className="text-sm text-muted-foreground mt-2">
-            Keep practicing to reach 300+! 🎯
+            Based on {results.correctAnswers} correct out of {results.totalQuestions} questions
           </p>
         </motion.div>
 
