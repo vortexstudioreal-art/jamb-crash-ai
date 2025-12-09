@@ -20,6 +20,8 @@ import { QuizResults } from '@/components/QuizResults';
 import { StudyStats } from '@/components/StudyStats';
 import { StudyPlanGenerator } from '@/components/StudyPlanGenerator';
 import { StudyMaterials } from '@/components/StudyMaterials';
+import { SyllabusReader } from '@/components/SyllabusReader';
+import { Flashcards } from '@/components/Flashcards';
 import { TrialExpiredScreen } from '@/components/TrialExpiredScreen';
 import { TrialTimerBadge } from '@/components/TrialTimerBadge';
 import { Footer } from '@/components/Footer';
@@ -31,9 +33,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, User, Lock, Crown, RefreshCw } from 'lucide-react';
+import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, User, Lock, Crown, RefreshCw, Brain, Layers } from 'lucide-react';
 
-type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'demo' | 'study-plan' | 'study-materials';
+type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'demo' | 'study-plan' | 'study-materials' | 'syllabus' | 'flashcards';
 type QuizType = 'full' | 'mini' | 'subject' | 'timed-practice' | 'demo';
 
 interface FormData {
@@ -325,9 +327,51 @@ const Index = () => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
-  const handleSubjectsChanged = (subjects: string[]) => {
+  const handleSubjectsChanged = async (subjects: string[]) => {
     setUserSubjects(subjects);
     setShowSubjectChanger(false);
+    
+    // Force refresh all data based on new subjects
+    if (userEmail) {
+      // Clear cached quiz data
+      setWeakSubjectFromQuiz(null);
+      setQuizResults(null);
+      
+      // Reload quiz history for new weak subject analysis
+      const { data: quizData } = await supabase
+        .from('quiz_attempts')
+        .select('subjects, correct_answers, total_questions')
+        .eq('email', userEmail)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (quizData && quizData.length > 0) {
+        const subjectScores: Record<string, { correct: number; total: number }> = {};
+        quizData.forEach(attempt => {
+          const attemptSubjects = attempt.subjects as string[];
+          const scorePerSubject = attempt.correct_answers / attemptSubjects.length;
+          const totalPerSubject = attempt.total_questions / attemptSubjects.length;
+          attemptSubjects.forEach(s => {
+            if (!subjectScores[s]) subjectScores[s] = { correct: 0, total: 0 };
+            subjectScores[s].correct += scorePerSubject;
+            subjectScores[s].total += totalPerSubject;
+          });
+        });
+
+        let worstSubject = '';
+        let worstRate = 1;
+        Object.entries(subjectScores).forEach(([subject, scores]) => {
+          const rate = scores.correct / scores.total;
+          if (rate < worstRate && subjects.map(s => s.toLowerCase()).includes(subject.toLowerCase())) {
+            worstRate = rate;
+            worstSubject = subject;
+          }
+        });
+        if (worstSubject) setWeakSubjectFromQuiz(worstSubject);
+      }
+    }
+    
+    toast.success('Subjects updated! App data refreshed. 🎉');
   };
 
   // Trial expired - show upgrade screen
@@ -438,6 +482,50 @@ const Index = () => {
             hoursPerDay={personalizationData?.hoursPerDay ? parseInt(personalizationData.hoursPerDay) : 4}
             weakestSubject={weakSubjectFromQuiz || personalizationData?.weakestSubject}
             examDate={personalizationData?.examDate}
+            onBack={handleBackToDashboard}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Syllabus Reader step
+  if (currentStep === 'syllabus' && userEmail) {
+    return (
+      <div className="min-h-screen bg-background">
+        <DashboardHeader 
+          userEmail={userEmail}
+          isOwner={effectiveOwner}
+          isCollaborator={isAdmin && !isOwner}
+          userRole={userRole}
+          onSignOut={handleSignOut}
+        />
+        <div className="pt-16">
+          <SyllabusReader
+            userEmail={userEmail}
+            subjects={effectiveSubjects}
+            onBack={handleBackToDashboard}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Flashcards step
+  if (currentStep === 'flashcards' && userEmail) {
+    return (
+      <div className="min-h-screen bg-background">
+        <DashboardHeader 
+          userEmail={userEmail}
+          isOwner={effectiveOwner}
+          isCollaborator={isAdmin && !isOwner}
+          userRole={userRole}
+          onSignOut={handleSignOut}
+        />
+        <div className="pt-16">
+          <Flashcards
+            userEmail={userEmail}
+            subjects={effectiveSubjects}
             onBack={handleBackToDashboard}
           />
         </div>
@@ -606,7 +694,7 @@ const Index = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 }}
-                className="grid grid-cols-2 gap-3 mb-6"
+                className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6"
               >
                 <Button
                   variant="outline"
@@ -615,7 +703,6 @@ const Index = () => {
                 >
                   <FileText className="w-6 h-6 text-blue-500" />
                   <span className="font-bold text-sm">Upload PDF</span>
-                  <span className="text-xs text-muted-foreground">AI extraction</span>
                 </Button>
                 
                 <Button
@@ -625,7 +712,24 @@ const Index = () => {
                 >
                   <Target className="w-6 h-6 text-green-500" />
                   <span className="font-bold text-sm">Study Plan</span>
-                  <span className="text-xs text-muted-foreground">Personalized</span>
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="h-auto py-4 flex flex-col gap-1 hover:border-purple-500 hover:bg-purple-500/5"
+                  onClick={() => setCurrentStep('syllabus')}
+                >
+                  <BookOpen className="w-6 h-6 text-purple-500" />
+                  <span className="font-bold text-sm">Syllabus</span>
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="h-auto py-4 flex flex-col gap-1 hover:border-orange-500 hover:bg-orange-500/5"
+                  onClick={() => setCurrentStep('flashcards')}
+                >
+                  <Layers className="w-6 h-6 text-orange-500" />
+                  <span className="font-bold text-sm">Flashcards</span>
                 </Button>
               </motion.div>
 
