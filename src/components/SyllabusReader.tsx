@@ -30,11 +30,19 @@ interface ReadingProgress {
   last_read_at: string | null;
 }
 
+interface TopicQuizQuestion {
+  question: string;
+  options: string[];
+  correct: string;
+  explanation: string;
+}
+
 interface SyllabusReaderProps {
   userEmail: string;
   subjects: string[];
   onBack: () => void;
   onGenerateFlashcards?: (topic: string, subject: string) => void;
+  onStartTopicQuiz?: (questions: TopicQuizQuestion[], topic: string, subject: string) => void;
 }
 
 const MASTERY_COLORS: Record<string, string> = {
@@ -51,7 +59,7 @@ const MASTERY_LABELS: Record<string, string> = {
   mastered: 'Mastered',
 };
 
-export const SyllabusReader = ({ userEmail, subjects, onBack, onGenerateFlashcards }: SyllabusReaderProps) => {
+export const SyllabusReader = ({ userEmail, subjects, onBack, onGenerateFlashcards, onStartTopicQuiz }: SyllabusReaderProps) => {
   const [syllabus, setSyllabus] = useState<SyllabusItem[]>([]);
   const [progress, setProgress] = useState<Record<string, ReadingProgress>>({});
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
@@ -61,6 +69,10 @@ export const SyllabusReader = ({ userEmail, subjects, onBack, onGenerateFlashcar
   const [loading, setLoading] = useState(true);
   const [aiExplanation, setAiExplanation] = useState<string | null>(null);
   const [generatingContent, setGeneratingContent] = useState<string | null>(null);
+  const [topicQuizQuestions, setTopicQuizQuestions] = useState<TopicQuizQuestion[] | null>(null);
+  const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
+  const [quizAnswers, setQuizAnswers] = useState<Record<number, string>>({});
+  const [showQuizFeedback, setShowQuizFeedback] = useState<number | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const sessionIdRef = useRef<string | null>(null);
 
@@ -246,19 +258,34 @@ export const SyllabusReader = ({ userEmail, subjects, onBack, onGenerateFlashcar
                 email: userEmail,
                 subject: selectedTopic.subject,
                 topic: selectedTopic.topic,
-                front: card.front,
+                front: `[${selectedTopic.topic}] ${card.front}`,
                 back: card.back,
                 source_type: 'ai',
                 source_id: selectedTopic.id
               });
             }
-            toast.success(`Generated ${flashcards.length} flashcards for ${selectedTopic.topic}!`);
+            toast.success(`Generated ${flashcards.length} flashcards for "${selectedTopic.topic}"!`);
+            if (onGenerateFlashcards) {
+              onGenerateFlashcards(selectedTopic.topic, selectedTopic.subject);
+            }
           }
         } catch (e) {
           toast.error('Failed to parse flashcards');
         }
       } else if (type === 'quiz') {
-        toast.success('Quiz questions generated!');
+        try {
+          const jsonMatch = data.content.match(/\[[\s\S]*\]/);
+          if (jsonMatch) {
+            const questions: TopicQuizQuestion[] = JSON.parse(jsonMatch[0]);
+            setTopicQuizQuestions(questions);
+            setCurrentQuizIndex(0);
+            setQuizAnswers({});
+            setShowQuizFeedback(null);
+            toast.success(`Starting quiz on "${selectedTopic.topic}"!`);
+          }
+        } catch (e) {
+          toast.error('Failed to parse quiz questions');
+        }
       }
     } catch (error: unknown) {
       console.error('Error generating content:', error);
@@ -267,6 +294,39 @@ export const SyllabusReader = ({ userEmail, subjects, onBack, onGenerateFlashcar
     } finally {
       setGeneratingContent(null);
     }
+  };
+
+  const handleQuizAnswer = (answer: string) => {
+    if (!topicQuizQuestions || showQuizFeedback !== null) return;
+    
+    const currentQ = topicQuizQuestions[currentQuizIndex];
+    setQuizAnswers(prev => ({ ...prev, [currentQuizIndex]: answer }));
+    setShowQuizFeedback(currentQuizIndex);
+  };
+
+  const nextQuizQuestion = () => {
+    if (!topicQuizQuestions) return;
+    
+    if (currentQuizIndex < topicQuizQuestions.length - 1) {
+      setCurrentQuizIndex(prev => prev + 1);
+      setShowQuizFeedback(null);
+    } else {
+      // Quiz complete
+      const correct = Object.entries(quizAnswers).filter(([idx, ans]) => {
+        return topicQuizQuestions[parseInt(idx)]?.correct === ans;
+      }).length;
+      toast.success(`Quiz complete! You got ${correct}/${topicQuizQuestions.length} correct!`);
+      setTopicQuizQuestions(null);
+      setQuizAnswers({});
+      setShowQuizFeedback(null);
+    }
+  };
+
+  const closeTopicQuiz = () => {
+    setTopicQuizQuestions(null);
+    setQuizAnswers({});
+    setShowQuizFeedback(null);
+    setCurrentQuizIndex(0);
   };
 
   const formatTime = (seconds: number) => {
@@ -478,6 +538,92 @@ export const SyllabusReader = ({ userEmail, subjects, onBack, onGenerateFlashcar
                   <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap text-muted-foreground">
                     {aiExplanation}
                   </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Topic Quiz Display */}
+            <AnimatePresence>
+              {topicQuizQuestions && topicQuizQuestions.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="mb-6 bg-gradient-to-br from-blue-500/5 to-blue-500/10 rounded-xl p-5 border border-blue-500/20"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-foreground flex items-center gap-2">
+                      <HelpCircle className="w-4 h-4 text-blue-500" />
+                      Quick Quiz: {selectedTopic.topic}
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline">
+                        {currentQuizIndex + 1}/{topicQuizQuestions.length}
+                      </Badge>
+                      <Button variant="ghost" size="sm" onClick={closeTopicQuiz}>
+                        ✕
+                      </Button>
+                    </div>
+                  </div>
+
+                  <p className="text-foreground font-medium mb-4">
+                    {topicQuizQuestions[currentQuizIndex].question}
+                  </p>
+
+                  <div className="space-y-2">
+                    {topicQuizQuestions[currentQuizIndex].options.map((option, idx) => {
+                      const optionLetter = String.fromCharCode(65 + idx);
+                      const isSelected = quizAnswers[currentQuizIndex] === optionLetter;
+                      const isCorrect = topicQuizQuestions[currentQuizIndex].correct === optionLetter;
+                      const showFeedback = showQuizFeedback === currentQuizIndex;
+
+                      return (
+                        <button
+                          key={idx}
+                          onClick={() => handleQuizAnswer(optionLetter)}
+                          disabled={showFeedback}
+                          className={`w-full text-left p-3 rounded-lg border transition-all ${
+                            showFeedback && isCorrect
+                              ? 'bg-green-500/20 border-green-500 text-green-700 dark:text-green-400'
+                              : showFeedback && isSelected && !isCorrect
+                              ? 'bg-red-500/20 border-red-500 text-red-700 dark:text-red-400'
+                              : isSelected
+                              ? 'bg-primary/20 border-primary'
+                              : 'bg-muted/50 border-border hover:border-primary/50'
+                          }`}
+                        >
+                          <span className="font-bold mr-2">{optionLetter}.</span>
+                          {option}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {showQuizFeedback !== null && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-4"
+                    >
+                      <div className={`p-3 rounded-lg ${
+                        quizAnswers[currentQuizIndex] === topicQuizQuestions[currentQuizIndex].correct
+                          ? 'bg-green-500/10 border border-green-500/30'
+                          : 'bg-red-500/10 border border-red-500/30'
+                      }`}>
+                        <p className="text-sm font-medium mb-1">
+                          {quizAnswers[currentQuizIndex] === topicQuizQuestions[currentQuizIndex].correct
+                            ? '✅ Correct!'
+                            : `❌ Wrong! The answer is ${topicQuizQuestions[currentQuizIndex].correct}`}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {topicQuizQuestions[currentQuizIndex].explanation}
+                        </p>
+                      </div>
+                      <Button onClick={nextQuizQuestion} className="mt-3 w-full">
+                        {currentQuizIndex < topicQuizQuestions.length - 1 ? 'Next Question' : 'Finish Quiz'}
+                      </Button>
+                    </motion.div>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
