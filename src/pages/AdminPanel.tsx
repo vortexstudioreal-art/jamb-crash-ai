@@ -57,6 +57,7 @@ const AdminPanel = () => {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [features, setFeatures] = useState<FeatureStatus[]>([]);
+  const [questionStats, setQuestionStats] = useState<{ subject: string; count: number; minYear: number; maxYear: number }[]>([]);
   const [stats, setStats] = useState<Stats>({ 
     totalPayments: 0, totalRevenue: 0, activeUsers: 0, totalAdmins: 0, totalQuizzes: 0, totalQuestions: 0 
   });
@@ -92,6 +93,7 @@ const AdminPanel = () => {
       fetchFeatures(), 
       fetchQuizStats(), 
       fetchQuestionCount(),
+      fetchQuestionStats(),
       checkEmailConfig(),
       checkWhatsAppConfig()
     ]);
@@ -193,6 +195,35 @@ const AdminPanel = () => {
     
     if (!error) {
       setStats(prev => ({ ...prev, totalQuestions: count || 0 }));
+    }
+  };
+
+  const fetchQuestionStats = async () => {
+    // Fetch subject breakdown with years
+    const { data, error } = await supabase
+      .from('jamb_questions')
+      .select('subject, year');
+    
+    if (!error && data) {
+      // Group by subject and calculate stats
+      const subjectMap: Record<string, { count: number; years: Set<number> }> = {};
+      
+      data.forEach((q: any) => {
+        if (!subjectMap[q.subject]) {
+          subjectMap[q.subject] = { count: 0, years: new Set() };
+        }
+        subjectMap[q.subject].count++;
+        if (q.year) subjectMap[q.subject].years.add(q.year);
+      });
+      
+      const stats = Object.entries(subjectMap).map(([subject, data]) => ({
+        subject,
+        count: data.count,
+        minYear: data.years.size > 0 ? Math.min(...data.years) : 0,
+        maxYear: data.years.size > 0 ? Math.max(...data.years) : 0
+      })).sort((a, b) => b.count - a.count);
+      
+      setQuestionStats(stats);
     }
   };
 
@@ -420,10 +451,14 @@ const AdminPanel = () => {
 
         {/* Tabs for different sections */}
         <Tabs defaultValue="health" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
             <TabsTrigger value="health" className="gap-2">
               <Zap className="w-4 h-4" />
-              APP HEALTH CHECK
+              Health
+            </TabsTrigger>
+            <TabsTrigger value="questions" className="gap-2">
+              <Database className="w-4 h-4" />
+              Questions
             </TabsTrigger>
             <TabsTrigger value="overview" className="gap-2">
               <Activity className="w-4 h-4" />
@@ -442,6 +477,116 @@ const AdminPanel = () => {
               animate={{ opacity: 1, y: 0 }}
             >
               <AppHealthCheck />
+            </motion.div>
+          </TabsContent>
+
+          {/* Questions Database Tab */}
+          <TabsContent value="questions">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-6"
+            >
+              <Card className="bg-card border-border">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Database className="w-5 h-5 text-primary" />
+                    Question Database Overview
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="mb-4 p-4 bg-gradient-to-r from-primary/10 to-green-500/10 rounded-xl border border-primary/20">
+                    <div className="text-center">
+                      <p className="text-4xl font-bold text-primary">{stats.totalQuestions}</p>
+                      <p className="text-muted-foreground">Total Questions in Database</p>
+                    </div>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-border">
+                          <th className="text-left py-3 px-2 text-muted-foreground font-medium">Subject</th>
+                          <th className="text-center py-3 px-2 text-muted-foreground font-medium">Questions</th>
+                          <th className="text-center py-3 px-2 text-muted-foreground font-medium">Year Range</th>
+                          <th className="text-center py-3 px-2 text-muted-foreground font-medium">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {questionStats.map((stat) => (
+                          <tr key={stat.subject} className="border-b border-border/50 hover:bg-muted/50">
+                            <td className="py-3 px-2">
+                              <span className="capitalize font-medium text-foreground">
+                                {stat.subject.replace('_', ' ')}
+                              </span>
+                            </td>
+                            <td className="py-3 px-2 text-center">
+                              <span className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold">
+                                {stat.count}
+                              </span>
+                            </td>
+                            <td className="py-3 px-2 text-center text-muted-foreground">
+                              {stat.minYear && stat.maxYear ? (
+                                <span>{stat.minYear} - {stat.maxYear}</span>
+                              ) : (
+                                <span className="text-yellow-500">No years</span>
+                              )}
+                            </td>
+                            <td className="py-3 px-2 text-center">
+                              {stat.count >= 50 ? (
+                                <span className="px-2 py-1 bg-green-500/20 text-green-600 rounded-full text-xs">
+                                  ✓ Good
+                                </span>
+                              ) : stat.count >= 20 ? (
+                                <span className="px-2 py-1 bg-yellow-500/20 text-yellow-600 rounded-full text-xs">
+                                  ⚠ Low
+                                </span>
+                              ) : (
+                                <span className="px-2 py-1 bg-red-500/20 text-red-600 rounded-full text-xs">
+                                  ✗ Needs More
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                        {questionStats.length === 0 && (
+                          <tr>
+                            <td colSpan={4} className="py-8 text-center text-muted-foreground">
+                              No questions in database yet
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="mt-6 p-4 bg-muted/50 rounded-lg">
+                    <h4 className="font-semibold text-foreground mb-2">📊 Database Summary</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">Subjects</p>
+                        <p className="font-bold text-foreground">{questionStats.length}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Total Questions</p>
+                        <p className="font-bold text-foreground">{stats.totalQuestions}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Avg per Subject</p>
+                        <p className="font-bold text-foreground">
+                          {questionStats.length > 0 ? Math.round(stats.totalQuestions / questionStats.length) : 0}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Coverage</p>
+                        <p className="font-bold text-green-600">
+                          {questionStats.filter(s => s.count >= 50).length}/{questionStats.length} Complete
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </motion.div>
           </TabsContent>
 
