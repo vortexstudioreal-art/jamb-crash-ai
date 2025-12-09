@@ -19,4 +19,13 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.send-whatsapp-reminder]
+enabled = true
+verify_jwt = false
+
+[functions.seed-syllabus]
+enabled = true
+verify_jwt = false
+
+[functions.generate-topic-content]
+enabled = true
 verify_jwt = false
