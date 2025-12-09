@@ -80,6 +80,63 @@ export type Database = {
         }
         Relationships: []
       }
+      flashcards: {
+        Row: {
+          back: string
+          created_at: string | null
+          difficulty: string | null
+          email: string
+          front: string
+          id: string
+          last_reviewed_at: string | null
+          mastery_level: string | null
+          next_review_at: string | null
+          source_id: string | null
+          source_type: string | null
+          subject: string
+          times_correct: number | null
+          times_reviewed: number | null
+          topic: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          back: string
+          created_at?: string | null
+          difficulty?: string | null
+          email: string
+          front: string
+          id?: string
+          last_reviewed_at?: string | null
+          mastery_level?: string | null
+          next_review_at?: string | null
+          source_id?: string | null
+          source_type?: string | null
+          subject: string
+          times_correct?: number | null
+          times_reviewed?: number | null
+          topic?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          back?: string
+          created_at?: string | null
+          difficulty?: string | null
+          email?: string
+          front?: string
+          id?: string
+          last_reviewed_at?: string | null
+          mastery_level?: string | null
+          next_review_at?: string | null
+          source_id?: string | null
+          source_type?: string | null
+          subject?: string
+          times_correct?: number | null
+          times_reviewed?: number | null
+          topic?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       jamb_questions: {
         Row: {
           correct_answer: string
@@ -119,6 +176,48 @@ export type Database = {
           question?: string
           subject?: Database["public"]["Enums"]["jamb_subject"]
           year?: number | null
+        }
+        Relationships: []
+      }
+      jamb_syllabus: {
+        Row: {
+          created_at: string | null
+          difficulty_level: string | null
+          estimated_reading_time: number | null
+          id: string
+          objectives: string[] | null
+          order_index: number | null
+          recommended_content: string | null
+          subject: string
+          subtopic: string | null
+          topic: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          difficulty_level?: string | null
+          estimated_reading_time?: number | null
+          id?: string
+          objectives?: string[] | null
+          order_index?: number | null
+          recommended_content?: string | null
+          subject: string
+          subtopic?: string | null
+          topic: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          difficulty_level?: string | null
+          estimated_reading_time?: number | null
+          id?: string
+          objectives?: string[] | null
+          order_index?: number | null
+          recommended_content?: string | null
+          subject?: string
+          subtopic?: string | null
+          topic?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -227,6 +326,103 @@ export type Database = {
         }
         Relationships: []
       }
+      reading_progress: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          last_read_at: string | null
+          mastery_level: string | null
+          progress_percent: number | null
+          subject: string
+          syllabus_id: string | null
+          times_reviewed: number | null
+          topic: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          last_read_at?: string | null
+          mastery_level?: string | null
+          progress_percent?: number | null
+          subject: string
+          syllabus_id?: string | null
+          times_reviewed?: number | null
+          topic: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          last_read_at?: string | null
+          mastery_level?: string | null
+          progress_percent?: number | null
+          subject?: string
+          syllabus_id?: string | null
+          times_reviewed?: number | null
+          topic?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_progress_syllabus_id_fkey"
+            columns: ["syllabus_id"]
+            isOneToOne: false
+            referencedRelation: "jamb_syllabus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reading_sessions: {
+        Row: {
+          created_at: string | null
+          email: string
+          ended_at: string | null
+          id: string
+          is_completed: boolean | null
+          started_at: string | null
+          subject: string
+          syllabus_id: string | null
+          time_spent_seconds: number
+          topic: string
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          ended_at?: string | null
+          id?: string
+          is_completed?: boolean | null
+          started_at?: string | null
+          subject: string
+          syllabus_id?: string | null
+          time_spent_seconds?: number
+          topic: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          ended_at?: string | null
+          id?: string
+          is_completed?: boolean | null
+          started_at?: string | null
+          subject?: string
+          syllabus_id?: string | null
+          time_spent_seconds?: number
+          topic?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_sessions_syllabus_id_fkey"
+            columns: ["syllabus_id"]
+            isOneToOne: false
+            referencedRelation: "jamb_syllabus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       referrals: {
         Row: {
           created_at: string | null
@@ -317,6 +513,42 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_study_preferences: {
+        Row: {
+          created_at: string | null
+          email: string
+          exam_date: string | null
+          hours_per_session: number | null
+          id: string
+          preferred_subjects: string[] | null
+          study_days: string[] | null
+          target_score: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          exam_date?: string | null
+          hours_per_session?: number | null
+          id?: string
+          preferred_subjects?: string[] | null
+          study_days?: string[] | null
+          target_score?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          exam_date?: string | null
+          hours_per_session?: number | null
+          id?: string
+          preferred_subjects?: string[] | null
+          study_days?: string[] | null
+          target_score?: number | null
+          updated_at?: string | null
         }
         Relationships: []
       }
