@@ -2,13 +2,24 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, RotateCcw, Check, X, Sparkles, 
-  Brain, Shuffle, ChevronLeft, ChevronRight, Plus 
+  Brain, Shuffle, ChevronLeft, ChevronRight, Plus, Trash2 
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Flashcard {
   id: string;
@@ -110,7 +121,7 @@ export const Flashcards = ({ userEmail, subjects, onBack }: FlashcardsProps) => 
 
   const generateFlashcards = async () => {
     setGenerating(true);
-    toast.info('Generating flashcards from your quiz mistakes and weak topics...');
+    toast.info('Generating flashcards from your quiz mistakes...');
 
     try {
       // Get user's quiz attempts to find mistakes
@@ -127,22 +138,42 @@ export const Flashcards = ({ userEmail, subjects, onBack }: FlashcardsProps) => 
         return;
       }
 
+      // Get existing flashcard fronts to avoid duplicates
+      const { data: existingCards } = await supabase
+        .from('flashcards')
+        .select('front')
+        .eq('email', userEmail);
+      
+      const existingFronts = new Set((existingCards || []).map(c => c.front));
+
       // Extract incorrect answers and create flashcards
       const newFlashcards: Omit<Flashcard, 'id'>[] = [];
       
       quizData.forEach(attempt => {
         const questions = attempt.questions_data as any[];
-        if (!questions) return;
+        if (!questions || !Array.isArray(questions)) return;
 
         questions.forEach(q => {
-          if (q.userAnswer !== q.correctAnswer) {
-            // Create flashcard from mistake
+          // Check for mistakes - handle different data structures
+          const userAnswer = q.userAnswer || q.user_answer || q.selected;
+          const correctAnswer = q.correctAnswer || q.correct_answer || q.correct;
+          const questionText = q.question || q.text || '';
+          const explanation = q.explanation || q.reason || '';
+          const topic = q.topic || 'Quiz Mistakes';
+          const subject = q.subject || (attempt.subjects as string[])?.[0] || 'general';
+
+          if (userAnswer && correctAnswer && userAnswer !== correctAnswer && questionText) {
+            const front = `[${topic}] ${questionText}`;
+            
+            // Skip if already exists
+            if (existingFronts.has(front)) return;
+            
             newFlashcards.push({
               email: userEmail,
-              subject: q.subject || (attempt.subjects as string[])?.[0] || 'general',
-              topic: q.topic || null,
-              front: q.question,
-              back: `Answer: ${q.correctAnswer}\n\n${q.explanation || 'Review this topic in your study materials.'}`,
+              subject: subject.toLowerCase(),
+              topic: topic,
+              front: front,
+              back: `✅ Correct Answer: ${correctAnswer}\n\n${explanation || 'Review this topic in your study materials.'}`,
               source_type: 'mistake',
               difficulty: 'medium',
               times_reviewed: 0,
@@ -154,15 +185,15 @@ export const Flashcards = ({ userEmail, subjects, onBack }: FlashcardsProps) => 
       });
 
       if (newFlashcards.length === 0) {
-        toast.info('No mistakes found - you\'re doing great! 🎉');
+        toast.info('No new mistakes found - you\'re doing great! 🎉');
         setGenerating(false);
         return;
       }
 
-      // Insert flashcards (avoid duplicates)
+      // Insert flashcards
       const { error } = await supabase
         .from('flashcards')
-        .insert(newFlashcards.slice(0, 20) as any); // Limit to 20
+        .insert(newFlashcards.slice(0, 20) as any);
 
       if (error) throw error;
 
@@ -173,6 +204,47 @@ export const Flashcards = ({ userEmail, subjects, onBack }: FlashcardsProps) => 
       toast.error('Failed to generate flashcards');
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const deleteFlashcard = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('flashcards')
+        .delete()
+        .eq('id', id)
+        .eq('email', userEmail);
+
+      if (error) throw error;
+
+      setFlashcards(prev => prev.filter(f => f.id !== id));
+      toast.success('Flashcard deleted!');
+      
+      // Adjust current index if needed
+      if (currentIndex >= flashcards.length - 1 && currentIndex > 0) {
+        setCurrentIndex(prev => prev - 1);
+      }
+    } catch (error) {
+      console.error('Error deleting flashcard:', error);
+      toast.error('Failed to delete flashcard');
+    }
+  };
+
+  const deleteTopicFlashcards = async (topic: string) => {
+    try {
+      const { error } = await supabase
+        .from('flashcards')
+        .delete()
+        .eq('email', userEmail)
+        .eq('topic', topic);
+
+      if (error) throw error;
+
+      setFlashcards(prev => prev.filter(f => f.topic !== topic));
+      toast.success(`Deleted all flashcards for "${topic}"!`);
+    } catch (error) {
+      console.error('Error deleting topic flashcards:', error);
+      toast.error('Failed to delete flashcards');
     }
   };
 
@@ -318,11 +390,13 @@ export const Flashcards = ({ userEmail, subjects, onBack }: FlashcardsProps) => 
                     key={topic}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-card rounded-xl border border-border p-4 hover:border-primary/50 transition-colors cursor-pointer"
-                    onClick={() => startTopicStudy(topic)}
+                    className="bg-card rounded-xl border border-border p-4 hover:border-primary/50 transition-colors"
                   >
                     <div className="flex items-center justify-between">
-                      <div className="flex-1">
+                      <div 
+                        className="flex-1 cursor-pointer"
+                        onClick={() => startTopicStudy(topic)}
+                      >
                         <h3 className="font-semibold text-foreground">{topic}</h3>
                         <div className="flex items-center gap-3 mt-1">
                           <span className="text-sm text-muted-foreground">
@@ -337,7 +411,39 @@ export const Flashcards = ({ userEmail, subjects, onBack }: FlashcardsProps) => 
                         <div className="w-16">
                           <Progress value={progressPercent} className="h-2" />
                         </div>
-                        <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="text-red-500 hover:text-red-600 hover:bg-red-500/10"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Topic Flashcards?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This will delete all {cards.length} flashcards for "{topic}". This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-red-500 hover:bg-red-600"
+                                onClick={() => deleteTopicFlashcards(topic)}
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                        <ChevronRight 
+                          className="w-5 h-5 text-muted-foreground cursor-pointer" 
+                          onClick={() => startTopicStudy(topic)}
+                        />
                       </div>
                     </div>
                   </motion.div>
@@ -473,8 +579,8 @@ export const Flashcards = ({ userEmail, subjects, onBack }: FlashcardsProps) => 
               )}
             </AnimatePresence>
 
-            {/* Navigation */}
-            <div className="flex justify-center gap-4 mt-6">
+            {/* Navigation and Delete */}
+            <div className="flex justify-center items-center gap-4 mt-6">
               <Button
                 variant="ghost"
                 size="icon"
@@ -486,6 +592,36 @@ export const Flashcards = ({ userEmail, subjects, onBack }: FlashcardsProps) => 
               >
                 <ChevronLeft className="w-5 h-5" />
               </Button>
+              
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-red-500 hover:text-red-600 hover:bg-red-500/10"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete this flashcard?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete this flashcard. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-red-500 hover:bg-red-600"
+                      onClick={() => deleteFlashcard(currentCard.id)}
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+              
               <Button
                 variant="ghost"
                 size="icon"
