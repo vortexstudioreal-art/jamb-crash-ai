@@ -71,6 +71,26 @@ const AMBIENT_SOUNDS = {
   fire: {
     url: "https://assets.mixkit.co/active_storage/sfx/100/100-preview.mp3",
     label: "🔥 Crackling Fire"
+  },
+  thinking: {
+    url: "https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3",
+    label: "🧠 Thinking Tones"
+  },
+  piano: {
+    url: "https://assets.mixkit.co/active_storage/sfx/2515/2515-preview.mp3",
+    label: "🎹 Soft Piano"
+  },
+  whitenoise: {
+    url: "https://assets.mixkit.co/active_storage/sfx/2499/2499-preview.mp3",
+    label: "📻 White Noise"
+  },
+  lofi: {
+    url: "https://assets.mixkit.co/active_storage/sfx/2462/2462-preview.mp3",
+    label: "🎧 Lo-Fi Beats"
+  },
+  night: {
+    url: "https://assets.mixkit.co/active_storage/sfx/2432/2432-preview.mp3",
+    label: "🌙 Night Crickets"
   }
 };
 

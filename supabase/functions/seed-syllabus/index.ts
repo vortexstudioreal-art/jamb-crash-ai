@@ -281,6 +281,275 @@ const syllabusData = {
         ]
       }
     }
+  },
+  "government": {
+    "sections": {
+      "Elements of Government": {
+        "topics": [
+          "Meaning and scope of government",
+          "Functions of government",
+          "Power, authority, legitimacy",
+          "Concepts of democracy",
+          "Dictatorship and totalitarianism",
+          "Systems of government (unitary, federal, confederacy)",
+          "Constitution: types and features"
+        ]
+      },
+      "Political Institutions": {
+        "topics": [
+          "Legislature: structure and functions",
+          "Executive: composition, roles",
+          "Judiciary: structure and independence",
+          "Civil service",
+          "Public corporations",
+          "Local government: functions and structure"
+        ]
+      },
+      "Political Processes": {
+        "topics": [
+          "Political parties",
+          "Pressure groups",
+          "Electoral systems",
+          "Elections and electoral commissions",
+          "Public opinion",
+          "Political participation"
+        ]
+      },
+      "Nigerian Government and Politics": {
+        "topics": [
+          "Pre-colonial political systems",
+          "Colonial administration",
+          "Post-independence political development",
+          "Military rule in Nigeria",
+          "Nigerian foreign policy",
+          "Constitutional development"
+        ]
+      },
+      "International Relations": {
+        "topics": [
+          "International organizations",
+          "Foreign policy",
+          "Interdependence of nations",
+          "Diplomacy"
+        ]
+      }
+    }
+  },
+  "economics": {
+    "sections": {
+      "Basic Economic Principles": {
+        "topics": [
+          "Meaning and scope of economics",
+          "Basic economic problems",
+          "Scale of preference",
+          "Opportunity cost",
+          "Economic systems"
+        ]
+      },
+      "Production and Distribution": {
+        "topics": [
+          "Factors of production",
+          "Efficiency and division of labour",
+          "Types of production",
+          "Distribution channels"
+        ]
+      },
+      "Market Structure": {
+        "topics": [
+          "Demand and supply",
+          "Price determination",
+          "Elasticity",
+          "Market equilibrium",
+          "Perfect and imperfect markets"
+        ]
+      },
+      "Money and Banking": {
+        "topics": [
+          "Definition and functions of money",
+          "Banking systems",
+          "Central bank roles",
+          "Commercial banks",
+          "Inflation and deflation"
+        ]
+      },
+      "National Income": {
+        "topics": [
+          "Concepts of national income",
+          "Methods of measuring national income",
+          "Uses and limitations"
+        ]
+      },
+      "Public Finance": {
+        "topics": [
+          "Government revenue",
+          "Government expenditure",
+          "Taxation: types and principles",
+          "Budgeting"
+        ]
+      },
+      "International Trade": {
+        "topics": [
+          "Balance of trade",
+          "Balance of payments",
+          "Foreign exchange",
+          "Protectionism and free trade"
+        ]
+      }
+    }
+  },
+  "crs": {
+    "sections": {
+      "Old Testament": {
+        "topics": [
+          "Creation stories",
+          "Call of Abraham",
+          "Moses and the Exodus",
+          "Israelite monarchy",
+          "Prophets and their messages"
+        ]
+      },
+      "New Testament": {
+        "topics": [
+          "Birth and ministry of Jesus",
+          "Parables of Jesus",
+          "Miracles of Jesus",
+          "The passion and resurrection",
+          "Acts of the Apostles",
+          "Teachings of Paul"
+        ]
+      },
+      "Christian Ethics": {
+        "topics": [
+          "Obedience and faith",
+          "Leadership",
+          "Love and forgiveness",
+          "Righteousness",
+          "Humility"
+        ]
+      }
+    }
+  },
+  "irs": {
+    "sections": {
+      "Qur'an": {
+        "topics": [
+          "Tafsir of selected surahs",
+          "Themes of revelation",
+          "Virtues of the Qur'an",
+          "Qur'anic teachings on conduct"
+        ]
+      },
+      "Hadith": {
+        "topics": [
+          "Classification of hadith",
+          "Selected hadith and meanings",
+          "Importance of Sunnah",
+          "Application of hadith in daily life"
+        ]
+      },
+      "Fiqh (Islamic Law)": {
+        "topics": [
+          "Purification",
+          "Salah (prayer)",
+          "Zakah",
+          "Sawm (fasting)",
+          "Hajj",
+          "Islamic marriage and family"
+        ]
+      },
+      "Tauhid (Islamic Belief)": {
+        "topics": [
+          "Oneness of Allah",
+          "Articles of faith",
+          "Angels, books, prophets",
+          "Akhirah (hereafter)"
+        ]
+      },
+      "Sirah (Life of Prophet Muhammad)": {
+        "topics": [
+          "Early life of the Prophet",
+          "Prophethood and revelation",
+          "Hijrah",
+          "Battles of Islam",
+          "Farewell sermon"
+        ]
+      }
+    }
+  },
+  "literature": {
+    "sections": {
+      "Literary Appreciation": {
+        "topics": [
+          "Figures of speech",
+          "Poetic devices",
+          "Literary terms",
+          "Analyzing themes, style, tone"
+        ]
+      },
+      "Poetry": {
+        "topics": [
+          "Types of poetry",
+          "Analysis of African poems",
+          "Analysis of non-African poems"
+        ]
+      },
+      "Prose": {
+        "topics": [
+          "Elements of prose",
+          "Characterization",
+          "Setting and themes",
+          "African prose texts",
+          "Non-African prose texts"
+        ]
+      },
+      "Drama": {
+        "topics": [
+          "Types of drama",
+          "African plays",
+          "Non-African plays",
+          "Tragic elements",
+          "Comedy and satire"
+        ]
+      }
+    }
+  },
+  "geography": {
+    "sections": {
+      "Physical Geography": {
+        "topics": [
+          "Earth's structure",
+          "Rocks and minerals",
+          "Landforms",
+          "Atmosphere and weather",
+          "Climate regions"
+        ]
+      },
+      "Human Geography": {
+        "topics": [
+          "Population studies",
+          "Rural and urban settlement",
+          "Transportation",
+          "Economic activities"
+        ]
+      },
+      "Regional Geography": {
+        "topics": [
+          "Nigeria: physical and human geography",
+          "West Africa",
+          "Africa",
+          "World regional geography"
+        ]
+      },
+      "Map Reading and Interpretation": {
+        "topics": [
+          "Scale and measurement",
+          "Contour interpretation",
+          "Map symbols",
+          "Compass points",
+          "Field sketching"
+        ]
+      }
+    }
   }
 };
 
