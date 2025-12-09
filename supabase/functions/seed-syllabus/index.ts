@@ -550,6 +550,126 @@ const syllabusData = {
         ]
       }
     }
+  },
+  "commerce": {
+    "sections": {
+      "Introduction to Commerce": {
+        "topics": [
+          "Meaning and scope of commerce",
+          "Trade and aids to trade",
+          "Occupation and division of labour"
+        ]
+      },
+      "Trade": {
+        "topics": [
+          "Home and foreign trade",
+          "Import and export procedures",
+          "Documents used in trade"
+        ]
+      },
+      "Business Units": {
+        "topics": [
+          "Sole proprietorship",
+          "Partnership",
+          "Cooperatives",
+          "Public enterprises",
+          "Limited liability companies"
+        ]
+      },
+      "Business Finance": {
+        "topics": [
+          "Sources of business finance",
+          "Capital market",
+          "Money market",
+          "Insurance and its principles"
+        ]
+      },
+      "Transportation & Communication": {
+        "topics": [
+          "Road, rail, water, air transport",
+          "Modern communication systems"
+        ]
+      },
+      "Warehousing & Marketing": {
+        "topics": [
+          "Types of warehouses",
+          "Functions of warehousing",
+          "Marketing concepts",
+          "Advertising",
+          "Consumer protection"
+        ]
+      }
+    }
+  },
+  "accounting": {
+    "sections": {
+      "Principles of Accounting": {
+        "topics": [
+          "Meaning and purpose of accounting",
+          "Users of accounting information",
+          "Accounting concepts and conventions"
+        ]
+      },
+      "Double Entry System": {
+        "topics": [
+          "Debit and credit rules",
+          "Ledger accounts",
+          "Trial balance"
+        ]
+      },
+      "Final Accounts": {
+        "topics": [
+          "Trading, Profit and Loss account",
+          "Balance sheet",
+          "Adjustments",
+          "Depreciation methods"
+        ]
+      },
+      "Bank Reconciliation": {
+        "topics": [
+          "Cash book",
+          "Bank statement",
+          "Causes of differences",
+          "Reconciliation statements"
+        ]
+      },
+      "Company Accounts": {
+        "topics": [
+          "Share capital",
+          "Profit appropriation account",
+          "Final accounts of companies"
+        ]
+      }
+    }
+  },
+  "history": {
+    "sections": {
+      "Nigerian History": {
+        "topics": [
+          "Early Nigerian societies",
+          "Pre-colonial Nigeria",
+          "Colonial rule",
+          "Nationalism",
+          "Post-independence Nigeria"
+        ]
+      },
+      "African History": {
+        "topics": [
+          "African empires",
+          "Slave trade",
+          "Colonization of Africa",
+          "Road to independence"
+        ]
+      },
+      "World History": {
+        "topics": [
+          "Industrial revolution",
+          "World wars",
+          "United Nations",
+          "Cold War"
+        ]
+      }
+    }
   }
 };
 
