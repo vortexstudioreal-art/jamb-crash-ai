@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   BookOpen, Clock, Check, ChevronRight, ArrowLeft, 
-  Target, Brain, Play, Pause, RotateCcw, Sparkles 
+  Target, Brain, Play, Pause, RotateCcw, Sparkles, HelpCircle, Loader2 
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -59,6 +59,8 @@ export const SyllabusReader = ({ userEmail, subjects, onBack, onGenerateFlashcar
   const [isReading, setIsReading] = useState(false);
   const [readingTime, setReadingTime] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [aiExplanation, setAiExplanation] = useState<string | null>(null);
+  const [generatingContent, setGeneratingContent] = useState<string | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const sessionIdRef = useRef<string | null>(null);
 
@@ -212,6 +214,59 @@ export const SyllabusReader = ({ userEmail, subjects, onBack, onGenerateFlashcar
     setSelectedTopic(null);
     sessionIdRef.current = null;
     setReadingTime(0);
+    setAiExplanation(null);
+  };
+
+  const generateAIContent = async (type: 'explanation' | 'flashcards' | 'quiz') => {
+    if (!selectedTopic) return;
+    
+    setGeneratingContent(type);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-topic-content', {
+        body: {
+          topic: selectedTopic.topic,
+          subject: selectedTopic.subject,
+          type
+        }
+      });
+
+      if (error) throw error;
+
+      if (type === 'explanation') {
+        setAiExplanation(data.content);
+        toast.success('AI explanation generated!');
+      } else if (type === 'flashcards') {
+        try {
+          const jsonMatch = data.content.match(/\[[\s\S]*\]/);
+          if (jsonMatch) {
+            const flashcards = JSON.parse(jsonMatch[0]);
+            for (const card of flashcards) {
+              await supabase.from('flashcards').insert({
+                email: userEmail,
+                subject: selectedTopic.subject,
+                topic: selectedTopic.topic,
+                front: card.front,
+                back: card.back,
+                source_type: 'ai',
+                source_id: selectedTopic.id
+              });
+            }
+            toast.success(`Generated ${flashcards.length} flashcards for ${selectedTopic.topic}!`);
+          }
+        } catch (e) {
+          toast.error('Failed to parse flashcards');
+        }
+      } else if (type === 'quiz') {
+        toast.success('Quiz questions generated!');
+      }
+    } catch (error: unknown) {
+      console.error('Error generating content:', error);
+      const message = error instanceof Error ? error.message : 'Failed to generate content';
+      toast.error(message);
+    } finally {
+      setGeneratingContent(null);
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -352,6 +407,80 @@ export const SyllabusReader = ({ userEmail, subjects, onBack, onGenerateFlashcar
                 </div>
               </div>
             )}
+
+            {/* AI Content Buttons */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+              <Button
+                variant="outline"
+                onClick={() => generateAIContent('explanation')}
+                disabled={generatingContent !== null}
+                className="h-auto py-3"
+              >
+                {generatingContent === 'explanation' ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Sparkles className="w-4 h-4 mr-2 text-yellow-500" />
+                )}
+                <div className="text-left">
+                  <div className="font-medium text-sm">AI Explanation</div>
+                  <div className="text-xs text-muted-foreground">Simple breakdown</div>
+                </div>
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={() => generateAIContent('flashcards')}
+                disabled={generatingContent !== null}
+                className="h-auto py-3"
+              >
+                {generatingContent === 'flashcards' ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Brain className="w-4 h-4 mr-2 text-purple-500" />
+                )}
+                <div className="text-left">
+                  <div className="font-medium text-sm">Generate Flashcards</div>
+                  <div className="text-xs text-muted-foreground">Create study cards</div>
+                </div>
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={() => generateAIContent('quiz')}
+                disabled={generatingContent !== null}
+                className="h-auto py-3"
+              >
+                {generatingContent === 'quiz' ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <HelpCircle className="w-4 h-4 mr-2 text-blue-500" />
+                )}
+                <div className="text-left">
+                  <div className="font-medium text-sm">Quick Quiz</div>
+                  <div className="text-xs text-muted-foreground">Test knowledge</div>
+                </div>
+              </Button>
+            </div>
+
+            {/* AI Explanation Display */}
+            <AnimatePresence>
+              {aiExplanation && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mb-6 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-5 border border-primary/20"
+                >
+                  <h3 className="font-semibold text-foreground flex items-center gap-2 mb-3">
+                    <Sparkles className="w-4 h-4 text-yellow-500" />
+                    AI Explanation
+                  </h3>
+                  <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap text-muted-foreground">
+                    {aiExplanation}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Actions */}
             <div className="flex flex-wrap gap-3 mt-8 pt-6 border-t border-border">
