@@ -4,7 +4,7 @@ import { X, Mail, Loader2, Shield, CreditCard, Ticket, CheckCircle, XCircle } fr
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { usePaystack } from '@/hooks/usePaystack';
+import { usePaystack, type PaystackConfig } from '@/hooks/usePaystack';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { z } from 'zod';
