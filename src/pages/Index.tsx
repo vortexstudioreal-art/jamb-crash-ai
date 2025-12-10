@@ -22,11 +22,12 @@ import { StudyPlanGenerator } from '@/components/StudyPlanGenerator';
 import { StudyMaterials } from '@/components/StudyMaterials';
 import { SyllabusReader } from '@/components/SyllabusReader';
 import { Flashcards } from '@/components/Flashcards';
-import { TrialExpiredScreen } from '@/components/TrialExpiredScreen';
+import { TrialEndedScreen } from '@/components/TrialEndedScreen';
 import { TrialTimerBadge } from '@/components/TrialTimerBadge';
 import { Footer } from '@/components/Footer';
 import { BackButton } from '@/components/BackButton';
 import { FeatureGate, useFeatureAccess } from '@/components/FeatureGate';
+import { FreeTrialFlow } from '@/components/FreeTrialFlow';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFreeTrialTimer } from '@/hooks/useFreeTrialTimer';
 import { supabase } from '@/integrations/supabase/client';
@@ -35,7 +36,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, User, Lock, Crown, RefreshCw, Brain, Layers } from 'lucide-react';
 
-type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'demo' | 'study-plan' | 'study-materials' | 'syllabus' | 'flashcards';
+type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'demo' | 'study-plan' | 'study-materials' | 'syllabus' | 'flashcards' | 'free-trial';
 type QuizType = 'full' | 'mini' | 'subject' | 'timed-practice' | 'demo';
 
 interface FormData {
@@ -84,12 +85,27 @@ const Index = () => {
   const navigate = useNavigate();
   const { hasFeature, getMaxQuizQuestions, getMaxPdfUploads } = useFeatureAccess();
   
-  // Free trial timer - 30 minutes AFTER subject selection
-  const { formattedTime, isTrialExpired, isInTrial, hasTrialStarted, startTrial } = useFreeTrialTimer({
+  // Free trial timer with full state management
+  const trialTimer = useFreeTrialTimer({
     userEmail: user?.email || null,
     isAdmin: isAdmin || isOwner,
     hasAccess,
   });
+  
+  const { 
+    formattedTime, 
+    isTrialExpired, 
+    isInTrial, 
+    hasTrialStarted,
+    hasCompletedQuiz,
+    trialSubjects,
+    trialResults,
+    timeRemaining,
+    startTrial,
+    saveTrialSubjects,
+    saveTrialResults,
+    resetTrial,
+  } = trialTimer;
 
   // User email from authenticated session only
   const userEmail = user?.email?.toLowerCase() || null;
@@ -414,7 +430,7 @@ const Index = () => {
 
   // Trial expired - show upgrade screen
   if (isTrialExpired && !effectiveAccess && !effectiveAdmin) {
-    return <TrialExpiredScreen onUpgrade={handleUpgradeClick} />;
+    return <TrialEndedScreen onUpgrade={handleUpgradeClick} />;
   }
 
   // Quiz step

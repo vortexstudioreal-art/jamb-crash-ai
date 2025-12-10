@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const TRIAL_START_KEY = 'jamb_trial_start';
+const TRIAL_SUBJECTS_KEY = 'jamb_trial_subjects';
+const TRIAL_RESULTS_KEY = 'jamb_trial_results';
 const TRIAL_DURATION_MS = 30 * 60 * 1000; // 30 minutes
 
 interface UseFreeTrialTimerProps {
@@ -9,86 +11,143 @@ interface UseFreeTrialTimerProps {
   hasAccess: boolean;
 }
 
+export interface TrialState {
+  timeRemaining: number | null;
+  formattedTime: string | null;
+  isTrialExpired: boolean;
+  isInTrial: boolean;
+  hasTrialStarted: boolean;
+  hasCompletedQuiz: boolean;
+  trialSubjects: string[] | null;
+  trialResults: any | null;
+}
+
 export const useFreeTrialTimer = ({ userEmail, isAdmin, hasAccess }: UseFreeTrialTimerProps) => {
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [isTrialExpired, setIsTrialExpired] = useState(false);
-  const [isInTrialState, setIsInTrialState] = useState(false);
-  const [trialStartedState, setTrialStartedState] = useState(false);
+  const [isInTrial, setIsInTrial] = useState(false);
+  const [trialSubjects, setTrialSubjects] = useState<string[] | null>(null);
+  const [trialResults, setTrialResults] = useState<any>(null);
+  const [hasCompletedQuiz, setHasCompletedQuiz] = useState(false);
 
-  // Check if user should be in trial mode (logged in but no paid access and not admin)
+  const getStorageKey = useCallback((key: string) => {
+    return userEmail ? `${key}_${userEmail}` : key;
+  }, [userEmail]);
+
+  // Check if user should be in trial mode
   const shouldShowTrial = Boolean(userEmail && !hasAccess && !isAdmin);
 
-  // Check localStorage directly for trial start
+  // Get trial start time from localStorage
   const getTrialStartTime = useCallback((): number | null => {
     if (!userEmail) return null;
-    const key = `${TRIAL_START_KEY}_${userEmail}`;
-    const stored = localStorage.getItem(key);
+    const stored = localStorage.getItem(getStorageKey(TRIAL_START_KEY));
     return stored ? parseInt(stored, 10) : null;
-  }, [userEmail]);
+  }, [userEmail, getStorageKey]);
 
-  // Check if trial has started (reads localStorage directly)
+  // Check if trial has started
   const checkTrialStarted = useCallback((): boolean => {
     if (!userEmail) return false;
-    const key = `${TRIAL_START_KEY}_${userEmail}`;
-    return localStorage.getItem(key) !== null;
-  }, [userEmail]);
+    return localStorage.getItem(getStorageKey(TRIAL_START_KEY)) !== null;
+  }, [userEmail, getStorageKey]);
 
-  // Start the 30-minute trial - called AFTER subject selection
+  // Get saved trial subjects
+  const getSavedSubjects = useCallback((): string[] | null => {
+    if (!userEmail) return null;
+    const stored = localStorage.getItem(getStorageKey(TRIAL_SUBJECTS_KEY));
+    return stored ? JSON.parse(stored) : null;
+  }, [userEmail, getStorageKey]);
+
+  // Get saved trial results
+  const getSavedResults = useCallback((): any => {
+    if (!userEmail) return null;
+    const stored = localStorage.getItem(getStorageKey(TRIAL_RESULTS_KEY));
+    return stored ? JSON.parse(stored) : null;
+  }, [userEmail, getStorageKey]);
+
+  // Save trial subjects (called after subject selection, BEFORE quiz)
+  const saveTrialSubjects = useCallback((subjects: string[]) => {
+    if (!userEmail) return;
+    localStorage.setItem(getStorageKey(TRIAL_SUBJECTS_KEY), JSON.stringify(subjects));
+    setTrialSubjects(subjects);
+  }, [userEmail, getStorageKey]);
+
+  // Start the 30-minute trial (called AFTER quiz completion)
   const startTrial = useCallback(() => {
     if (!userEmail) return;
-    const key = `${TRIAL_START_KEY}_${userEmail}`;
+    const key = getStorageKey(TRIAL_START_KEY);
     if (!localStorage.getItem(key)) {
       const now = Date.now();
       localStorage.setItem(key, now.toString());
-      setTrialStartedState(true);
-      setIsInTrialState(true);
+      setIsInTrial(true);
       setTimeRemaining(TRIAL_DURATION_MS);
-      console.log('[Trial] Started for', userEmail, 'at', new Date(now).toISOString());
+      console.log('[Trial] Dashboard timer started for', userEmail, 'at', new Date(now).toISOString());
     }
-  }, [userEmail]);
+  }, [userEmail, getStorageKey]);
+
+  // Save quiz results
+  const saveTrialResults = useCallback((results: any) => {
+    if (!userEmail) return;
+    localStorage.setItem(getStorageKey(TRIAL_RESULTS_KEY), JSON.stringify(results));
+    setTrialResults(results);
+    setHasCompletedQuiz(true);
+  }, [userEmail, getStorageKey]);
 
   // Reset trial (for testing/admin)
   const resetTrial = useCallback(() => {
     if (!userEmail) return;
-    const key = `${TRIAL_START_KEY}_${userEmail}`;
-    localStorage.removeItem(key);
+    localStorage.removeItem(getStorageKey(TRIAL_START_KEY));
+    localStorage.removeItem(getStorageKey(TRIAL_SUBJECTS_KEY));
+    localStorage.removeItem(getStorageKey(TRIAL_RESULTS_KEY));
     setIsTrialExpired(false);
-    setIsInTrialState(false);
+    setIsInTrial(false);
     setTimeRemaining(null);
-    setTrialStartedState(false);
+    setTrialSubjects(null);
+    setTrialResults(null);
+    setHasCompletedQuiz(false);
     console.log('[Trial] Reset for', userEmail);
-  }, [userEmail]);
+  }, [userEmail, getStorageKey]);
 
-  // Main effect to manage trial state and timer
+  // Load saved state on mount
   useEffect(() => {
-    // Admins and paid users skip trial entirely
+    if (!userEmail) return;
+    
+    const savedSubjects = getSavedSubjects();
+    const savedResults = getSavedResults();
+    
+    if (savedSubjects) {
+      setTrialSubjects(savedSubjects);
+    }
+    if (savedResults) {
+      setTrialResults(savedResults);
+      setHasCompletedQuiz(true);
+    }
+  }, [userEmail, getSavedSubjects, getSavedResults]);
+
+  // Main effect to manage trial timer
+  useEffect(() => {
+    // Admins and paid users skip trial
     if (isAdmin || hasAccess) {
-      setIsInTrialState(false);
+      setIsInTrial(false);
       setIsTrialExpired(false);
       setTimeRemaining(null);
       return;
     }
 
     if (!userEmail) {
-      setIsInTrialState(false);
-      setTrialStartedState(false);
+      setIsInTrial(false);
       return;
     }
 
-    // Check if trial was already started
     const startTime = getTrialStartTime();
     
     if (!startTime) {
-      // Trial not started yet - user needs to select subjects first
-      setIsInTrialState(false);
-      setTrialStartedState(false);
+      // Trial dashboard timer not started yet
+      setIsInTrial(false);
       setTimeRemaining(null);
       return;
     }
 
     // Trial was started - check if still active
-    setTrialStartedState(true);
-    
     const checkTime = () => {
       const elapsed = Date.now() - startTime;
       const remaining = Math.max(0, TRIAL_DURATION_MS - elapsed);
@@ -97,10 +156,10 @@ export const useFreeTrialTimer = ({ userEmail, isAdmin, hasAccess }: UseFreeTria
       
       if (remaining <= 0) {
         setIsTrialExpired(true);
-        setIsInTrialState(false);
+        setIsInTrial(false);
         console.log('[Trial] Expired for', userEmail);
       } else {
-        setIsInTrialState(true);
+        setIsInTrial(true);
         setIsTrialExpired(false);
       }
     };
@@ -112,7 +171,7 @@ export const useFreeTrialTimer = ({ userEmail, isAdmin, hasAccess }: UseFreeTria
     const interval = setInterval(checkTime, 1000);
 
     return () => clearInterval(interval);
-  }, [userEmail, isAdmin, hasAccess, getTrialStartTime, trialStartedState]);
+  }, [userEmail, isAdmin, hasAccess, getTrialStartTime]);
 
   // Format time as MM:SS
   const formatTime = (ms: number): string => {
@@ -122,17 +181,22 @@ export const useFreeTrialTimer = ({ userEmail, isAdmin, hasAccess }: UseFreeTria
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  // Compute final values
   const hasTrialStartedValue = checkTrialStarted();
-  const isInTrialValue = shouldShowTrial && isInTrialState && !isTrialExpired;
 
   return {
     timeRemaining,
     formattedTime: timeRemaining !== null ? formatTime(timeRemaining) : null,
     isTrialExpired: shouldShowTrial && isTrialExpired,
-    isInTrial: isInTrialValue,
+    isInTrial: shouldShowTrial && isInTrial,
     hasTrialStarted: hasTrialStartedValue,
+    hasCompletedQuiz,
+    trialSubjects,
+    trialResults,
     startTrial,
     resetTrial,
+    saveTrialSubjects,
+    saveTrialResults,
+    getSavedSubjects,
+    getSavedResults,
   };
 };
