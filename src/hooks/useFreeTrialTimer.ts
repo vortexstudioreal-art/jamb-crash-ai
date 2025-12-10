@@ -13,23 +13,32 @@ export const useFreeTrialTimer = ({ userEmail, isAdmin, hasAccess }: UseFreeTria
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [isTrialExpired, setIsTrialExpired] = useState(false);
   const [isInTrial, setIsInTrial] = useState(false);
+  const [trialStarted, setTrialStarted] = useState(false);
 
   // Check if user is in trial mode (logged in but no paid access and not admin)
   const shouldShowTrial = userEmail && !hasAccess && !isAdmin;
-
-  const startTrial = useCallback(() => {
-    if (!userEmail) return;
-    const key = `${TRIAL_START_KEY}_${userEmail}`;
-    if (!localStorage.getItem(key)) {
-      localStorage.setItem(key, Date.now().toString());
-    }
-  }, [userEmail]);
 
   const getTrialStartTime = useCallback(() => {
     if (!userEmail) return null;
     const key = `${TRIAL_START_KEY}_${userEmail}`;
     const stored = localStorage.getItem(key);
     return stored ? parseInt(stored, 10) : null;
+  }, [userEmail]);
+
+  const hasTrialStarted = useCallback(() => {
+    if (!userEmail) return false;
+    const key = `${TRIAL_START_KEY}_${userEmail}`;
+    return !!localStorage.getItem(key);
+  }, [userEmail]);
+
+  // Manual start trial function - called AFTER subject selection
+  const startTrial = useCallback(() => {
+    if (!userEmail) return;
+    const key = `${TRIAL_START_KEY}_${userEmail}`;
+    if (!localStorage.getItem(key)) {
+      localStorage.setItem(key, Date.now().toString());
+      setTrialStarted(true);
+    }
   }, [userEmail]);
 
   const resetTrial = useCallback(() => {
@@ -39,10 +48,11 @@ export const useFreeTrialTimer = ({ userEmail, isAdmin, hasAccess }: UseFreeTria
     setIsTrialExpired(false);
     setIsInTrial(false);
     setTimeRemaining(null);
+    setTrialStarted(false);
   }, [userEmail]);
 
   useEffect(() => {
-    // Admins and paid users skip trial
+    // Admins and paid users skip trial entirely
     if (isAdmin || hasAccess || !userEmail) {
       setIsInTrial(false);
       setIsTrialExpired(false);
@@ -50,8 +60,17 @@ export const useFreeTrialTimer = ({ userEmail, isAdmin, hasAccess }: UseFreeTria
       return;
     }
 
-    // Start trial if not started
-    startTrial();
+    // Check if trial was already started
+    const existingStart = getTrialStartTime();
+    if (!existingStart) {
+      // Trial not started yet - user needs to select subjects first
+      setIsInTrial(false);
+      setTrialStarted(false);
+      return;
+    }
+
+    // Trial is active
+    setTrialStarted(true);
     setIsInTrial(true);
 
     const checkTime = () => {
@@ -65,6 +84,7 @@ export const useFreeTrialTimer = ({ userEmail, isAdmin, hasAccess }: UseFreeTria
       
       if (remaining <= 0) {
         setIsTrialExpired(true);
+        setIsInTrial(false);
       }
     };
 
@@ -72,7 +92,7 @@ export const useFreeTrialTimer = ({ userEmail, isAdmin, hasAccess }: UseFreeTria
     const interval = setInterval(checkTime, 1000);
 
     return () => clearInterval(interval);
-  }, [userEmail, isAdmin, hasAccess, startTrial, getTrialStartTime]);
+  }, [userEmail, isAdmin, hasAccess, getTrialStartTime, trialStarted]);
 
   const formatTime = (ms: number) => {
     const totalSeconds = Math.floor(ms / 1000);
@@ -86,6 +106,8 @@ export const useFreeTrialTimer = ({ userEmail, isAdmin, hasAccess }: UseFreeTria
     formattedTime: timeRemaining !== null ? formatTime(timeRemaining) : null,
     isTrialExpired,
     isInTrial: shouldShowTrial && isInTrial,
+    hasTrialStarted: hasTrialStarted(),
+    startTrial,
     resetTrial,
   };
 };

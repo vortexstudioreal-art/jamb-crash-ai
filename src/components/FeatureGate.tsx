@@ -46,7 +46,7 @@ export const FeatureGate = ({ children, feature, fallback, onUpgrade }: FeatureG
   const { userPackage, isAdmin, isOwner, hasAccess, user } = useAuth();
   
   // Check if user is in trial - trial users get FULL Pro access
-  const { isInTrial } = useFreeTrialTimer({
+  const { isInTrial, hasTrialStarted } = useFreeTrialTimer({
     userEmail: user?.email || null,
     isAdmin: isAdmin || isOwner,
     hasAccess,
@@ -57,8 +57,9 @@ export const FeatureGate = ({ children, feature, fallback, onUpgrade }: FeatureG
     return <>{children}</>;
   }
 
-  // Trial users get FULL Pro features (everything except Premium-only)
-  if (isInTrial) {
+  // Trial users (with started trial) get FULL Pro features
+  const activeTrialUser = isInTrial && hasTrialStarted;
+  if (activeTrialUser) {
     const proFeatures: FeatureGateProps['feature'][] = ['studyMaterials', 'whatsAppReminders', 'predictedScore', 'subjectPractice', 'fullQuiz'];
     if (proFeatures.includes(feature)) {
       return <>{children}</>;
@@ -111,17 +112,19 @@ export const useFeatureAccess = () => {
   const { userPackage, packageFeatures, isAdmin, isOwner, hasAccess, user } = useAuth();
   
   // Check if user is in trial
-  const { isInTrial } = useFreeTrialTimer({
+  const { isInTrial, hasTrialStarted } = useFreeTrialTimer({
     userEmail: user?.email || null,
     isAdmin: isAdmin || isOwner,
     hasAccess,
   });
 
+  const activeTrialUser = isInTrial && hasTrialStarted;
+
   const hasFeature = (feature: FeatureGateProps['feature']): boolean => {
     if (isAdmin || isOwner) return true;
     
-    // Trial users get FULL Pro features
-    if (isInTrial) {
+    // Trial users (with started trial) get FULL Pro features
+    if (activeTrialUser) {
       const proFeatures: FeatureGateProps['feature'][] = ['studyMaterials', 'whatsAppReminders', 'predictedScore', 'subjectPractice', 'fullQuiz'];
       return proFeatures.includes(feature);
     }
@@ -134,13 +137,13 @@ export const useFeatureAccess = () => {
 
   const getMaxQuizQuestions = (): number => {
     // Trial users get Pro-level quiz (60 questions)
-    if (isInTrial) return 60;
+    if (activeTrialUser) return 60;
     return packageFeatures.maxQuizQuestions;
   };
 
   const getMaxPdfUploads = (): number => {
     // Trial users get unlimited PDFs during trial
-    if (isInTrial) return 999;
+    if (activeTrialUser) return 999;
     return packageFeatures.maxPdfUploads;
   };
 
@@ -150,6 +153,6 @@ export const useFeatureAccess = () => {
     getMaxPdfUploads,
     packageFeatures,
     userPackage,
-    isInTrial,
+    isInTrial: activeTrialUser,
   };
 };
