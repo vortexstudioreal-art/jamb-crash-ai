@@ -6,6 +6,8 @@ interface PaystackConfig {
   email: string;
   amount: number;
   package: string;
+  couponId?: string | null;
+  discountApplied?: number;
 }
 
 declare global {
@@ -97,6 +99,8 @@ export const usePaystack = () => {
           ref: data.reference,
           metadata: {
             package: config.package,
+            couponId: config.couponId,
+            discountApplied: config.discountApplied,
           },
           onClose: () => {
             setIsLoading(false);

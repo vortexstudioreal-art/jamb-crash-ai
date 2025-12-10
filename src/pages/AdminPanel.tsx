@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Crown, Users, CreditCard, TrendingUp, Plus, Trash2, ArrowLeft, RefreshCw, Mail,
-  CheckCircle, XCircle, AlertCircle, Settings, Send, Key, Activity, Database, Zap
+  CheckCircle, XCircle, AlertCircle, Settings, Send, Key, Activity, Database, Zap, Ticket
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,6 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { AppHealthCheck } from '@/components/AppHealthCheck';
+import { CouponManager } from '@/components/CouponManager';
 interface Payment {
   id: string;
   email: string;
@@ -451,10 +452,14 @@ const AdminPanel = () => {
 
         {/* Tabs for different sections */}
         <Tabs defaultValue="health" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
             <TabsTrigger value="health" className="gap-2">
               <Zap className="w-4 h-4" />
               Health
+            </TabsTrigger>
+            <TabsTrigger value="coupons" className="gap-2">
+              <Ticket className="w-4 h-4" />
+              Coupons
             </TabsTrigger>
             <TabsTrigger value="questions" className="gap-2">
               <Database className="w-4 h-4" />
@@ -477,6 +482,16 @@ const AdminPanel = () => {
               animate={{ opacity: 1, y: 0 }}
             >
               <AppHealthCheck />
+            </motion.div>
+          </TabsContent>
+
+          {/* Coupons Tab */}
+          <TabsContent value="coupons">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <CouponManager />
             </motion.div>
           </TabsContent>
 

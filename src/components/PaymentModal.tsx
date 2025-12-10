@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Mail, Loader2, Shield, CreditCard } from 'lucide-react';
+import { X, Mail, Loader2, Shield, CreditCard, Ticket, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { usePaystack } from '@/hooks/usePaystack';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { z } from 'zod';
 
 interface PaymentModalProps {
@@ -23,7 +25,51 @@ const emailSchema = z.string().email('Please enter a valid email address');
 export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }: PaymentModalProps) => {
   const [email, setEmail] = useState(initialEmail || '');
   const [emailError, setEmailError] = useState('');
+  const [couponCode, setCouponCode] = useState('');
+  const [couponStatus, setCouponStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid'>('idle');
+  const [appliedDiscount, setAppliedDiscount] = useState(0);
+  const [appliedCouponId, setAppliedCouponId] = useState<string | null>(null);
   const { isLoading, initializePayment } = usePaystack();
+
+  const finalPrice = Math.max(0, plan.price - appliedDiscount);
+
+  const validateCoupon = async () => {
+    if (!couponCode.trim()) {
+      toast.error('Please enter a coupon code');
+      return;
+    }
+
+    setCouponStatus('checking');
+    
+    try {
+      const { data, error } = await supabase.rpc('validate_coupon', {
+        coupon_code: couponCode.trim()
+      });
+
+      if (error || !data || data.length === 0 || !data[0].valid) {
+        setCouponStatus('invalid');
+        setAppliedDiscount(0);
+        setAppliedCouponId(null);
+        toast.error('Invalid or expired coupon code');
+        return;
+      }
+
+      setCouponStatus('valid');
+      setAppliedDiscount(data[0].discount);
+      setAppliedCouponId(data[0].coupon_id);
+      toast.success(`Coupon applied! ₦${data[0].discount.toLocaleString()} off 🎉`);
+    } catch (err) {
+      setCouponStatus('invalid');
+      toast.error('Failed to validate coupon');
+    }
+  };
+
+  const removeCoupon = () => {
+    setCouponCode('');
+    setCouponStatus('idle');
+    setAppliedDiscount(0);
+    setAppliedCouponId(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,10 +85,26 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
     await initializePayment(
       {
         email,
-        amount: plan.price,
+        amount: finalPrice,
         package: plan.name.toLowerCase(),
+        couponId: appliedCouponId,
+        discountApplied: appliedDiscount,
       },
-      (reference) => {
+      async (reference) => {
+        // Record coupon usage if applied
+        if (appliedCouponId && appliedDiscount > 0) {
+          try {
+            await supabase.from('coupon_usage').insert({
+              coupon_id: appliedCouponId,
+              used_by_email: email,
+              amount_paid: finalPrice,
+              discount_applied: appliedDiscount,
+              creator_earning: 1000, // Fixed earning per referral
+            });
+          } catch (err) {
+            console.error('Failed to record coupon usage:', err);
+          }
+        }
         onSuccess(reference, email);
       },
       () => {
@@ -85,9 +147,76 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Amount</span>
-                <span className="text-2xl font-bold text-primary">
-                  ₦{plan.price.toLocaleString()}
-                </span>
+                <div className="text-right">
+                  {appliedDiscount > 0 && (
+                    <span className="text-sm text-muted-foreground line-through mr-2">
+                      ₦{plan.price.toLocaleString()}
+                    </span>
+                  )}
+                  <span className="text-2xl font-bold text-primary">
+                    ₦{finalPrice.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+              {appliedDiscount > 0 && (
+                <div className="flex justify-between items-center mt-2 text-green-500">
+                  <span className="text-sm">Discount</span>
+                  <span className="font-semibold">-₦{appliedDiscount.toLocaleString()}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Coupon Code Section */}
+            <div className="mb-4">
+              <Label className="flex items-center gap-2 mb-2">
+                <Ticket className="w-4 h-4 text-primary" />
+                Have a coupon code?
+              </Label>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Input
+                    placeholder="Enter code"
+                    value={couponCode}
+                    onChange={(e) => {
+                      setCouponCode(e.target.value.toUpperCase());
+                      if (couponStatus !== 'idle') {
+                        setCouponStatus('idle');
+                      }
+                    }}
+                    disabled={couponStatus === 'valid'}
+                    className={
+                      couponStatus === 'valid' 
+                        ? 'border-green-500 bg-green-500/10' 
+                        : couponStatus === 'invalid' 
+                          ? 'border-destructive' 
+                          : ''
+                    }
+                  />
+                  {couponStatus === 'valid' && (
+                    <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
+                  )}
+                  {couponStatus === 'invalid' && (
+                    <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-destructive" />
+                  )}
+                </div>
+                {couponStatus === 'valid' ? (
+                  <Button type="button" variant="outline" onClick={removeCoupon}>
+                    Remove
+                  </Button>
+                ) : (
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={validateCoupon}
+                    disabled={couponStatus === 'checking' || !couponCode.trim()}
+                  >
+                    {couponStatus === 'checking' ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      'Apply'
+                    )}
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -132,7 +261,7 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
                 ) : (
                   <>
                     <CreditCard className="w-5 h-5" />
-                    Pay ₦{plan.price.toLocaleString()}
+                    Pay ₦{finalPrice.toLocaleString()}
                   </>
                 )}
               </Button>
