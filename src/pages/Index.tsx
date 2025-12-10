@@ -84,8 +84,8 @@ const Index = () => {
   const navigate = useNavigate();
   const { hasFeature, getMaxQuizQuestions, getMaxPdfUploads } = useFeatureAccess();
   
-  // Free trial timer - 30 minutes from first login
-  const { formattedTime, isTrialExpired, isInTrial } = useFreeTrialTimer({
+  // Free trial timer - 30 minutes AFTER subject selection
+  const { formattedTime, isTrialExpired, isInTrial, hasTrialStarted, startTrial } = useFreeTrialTimer({
     userEmail: user?.email || null,
     isAdmin: isAdmin || isOwner,
     hasAccess,
@@ -102,17 +102,31 @@ const Index = () => {
   // ALWAYS have subjects available - use defaults if none selected
   const effectiveSubjects = userSubjects.length > 0 ? userSubjects : DEFAULT_SUBJECTS;
 
-  // Auto-redirect signed-in users with access to dashboard
+  // Auto-redirect logic for users
   useEffect(() => {
     if (isLoading) return;
     
-    // If user is signed in and has access (paid, admin, or owner), go to dashboard
+    // If user is signed in and has PAID access (paid, admin, or owner), go to dashboard
     if (userEmail && effectiveAccess && currentStep === 'landing') {
       setCurrentStep('dashboard');
       saveDashboardState('dashboard');
       window.scrollTo({ top: 0, behavior: 'instant' });
+      return;
     }
-  }, [userEmail, effectiveAccess, isLoading, currentStep]);
+    
+    // Trial users: if logged in but no access and no subjects yet → go to subject picker
+    if (userEmail && !effectiveAccess && !effectiveAdmin && !hasTrialStarted && currentStep === 'landing') {
+      setCurrentStep('subject-select');
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      return;
+    }
+    
+    // Trial already started and has subjects → go to dashboard
+    if (userEmail && !effectiveAccess && !effectiveAdmin && hasTrialStarted && currentStep === 'landing') {
+      setCurrentStep('dashboard');
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [userEmail, effectiveAccess, isLoading, currentStep, hasTrialStarted, effectiveAdmin]);
 
   // Load user subjects and quiz data
   useEffect(() => {
@@ -258,6 +272,10 @@ const Index = () => {
 
   const handleSubjectsSelected = (subjects: string[]) => {
     setUserSubjects(subjects);
+    // Start the 30-minute trial timer NOW (after subject selection)
+    if (!effectiveAccess && !effectiveAdmin) {
+      startTrial();
+    }
     setCurrentStep('dashboard');
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
@@ -444,21 +462,34 @@ const Index = () => {
     );
   }
 
-  // Subject selection step
+  // Subject selection step - first step for trial users
   if (currentStep === 'subject-select' && userEmail) {
     if (effectiveAdmin) {
       setCurrentStep('dashboard');
       return null;
     }
+    
+    // Don't show back button for trial users (subject selection is their entry point)
+    const isTrialEntry = !effectiveAccess && !hasTrialStarted;
+    
     return (
-      <>
-        <BackButton onClick={() => setCurrentStep('landing')} />
+      <div className="min-h-screen bg-background">
+        {!isTrialEntry && (
+          <BackButton onClick={() => setCurrentStep('landing')} />
+        )}
         <SubjectSelector
           userEmail={userEmail}
           onComplete={handleSubjectsSelected}
           isBypassUser={effectiveAdmin}
         />
-      </>
+        {isTrialEntry && (
+          <div className="fixed bottom-4 left-0 right-0 text-center">
+            <p className="text-sm text-muted-foreground">
+              🎁 Pick your subjects to start your 30-minute Pro trial!
+            </p>
+          </div>
+        )}
+      </div>
     );
   }
 
@@ -909,8 +940,8 @@ const Index = () => {
       </div>
       <Footer />
 
-      {/* Free Trial Banner - only for non-access users */}
-      {!effectiveAccess && !isLoading && (
+      {/* Free Trial Banner - only for non-logged-in users who haven't used demo */}
+      {!user && !effectiveAccess && !isLoading && (
         <FreeTrialBanner onStartTrial={handleStartTrial} userEmail={userEmail || undefined} />
       )}
 
