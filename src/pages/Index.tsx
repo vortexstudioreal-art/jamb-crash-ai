@@ -106,7 +106,17 @@ const Index = () => {
   useEffect(() => {
     if (isLoading) return;
     
-    // If user is signed in and has PAID access (paid, admin, or owner), go to dashboard
+    // Owner and admins go straight to dashboard
+    if (userEmail && effectiveAdmin) {
+      if (currentStep === 'landing') {
+        setCurrentStep('dashboard');
+        saveDashboardState('dashboard');
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }
+      return;
+    }
+    
+    // If user is signed in and has PAID access, go to dashboard
     if (userEmail && effectiveAccess && currentStep === 'landing') {
       setCurrentStep('dashboard');
       saveDashboardState('dashboard');
@@ -114,19 +124,24 @@ const Index = () => {
       return;
     }
     
-    // Trial users: if logged in but no access and no subjects yet → go to subject picker
-    if (userEmail && !effectiveAccess && !effectiveAdmin && !hasTrialStarted && currentStep === 'landing') {
-      setCurrentStep('subject-select');
-      window.scrollTo({ top: 0, behavior: 'instant' });
-      return;
+    // Trial users: if logged in but no access and no trial started yet → go to subject picker FIRST
+    if (userEmail && !effectiveAccess && !effectiveAdmin) {
+      if (!hasTrialStarted && currentStep === 'landing') {
+        console.log('[Trial] New user, redirecting to subject picker');
+        setCurrentStep('subject-select');
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        return;
+      }
+      
+      // Trial already started (has subjects) → go to dashboard
+      if (hasTrialStarted && currentStep === 'landing') {
+        console.log('[Trial] Existing trial user, going to dashboard');
+        setCurrentStep('dashboard');
+        saveDashboardState('dashboard');
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }
     }
-    
-    // Trial already started and has subjects → go to dashboard
-    if (userEmail && !effectiveAccess && !effectiveAdmin && hasTrialStarted && currentStep === 'landing') {
-      setCurrentStep('dashboard');
-      window.scrollTo({ top: 0, behavior: 'instant' });
-    }
-  }, [userEmail, effectiveAccess, isLoading, currentStep, hasTrialStarted, effectiveAdmin]);
+  }, [userEmail, effectiveAccess, effectiveAdmin, isLoading, currentStep, hasTrialStarted]);
 
   // Load user subjects and quiz data
   useEffect(() => {
@@ -272,12 +287,17 @@ const Index = () => {
 
   const handleSubjectsSelected = (subjects: string[]) => {
     setUserSubjects(subjects);
-    // Start the 30-minute trial timer NOW (after subject selection)
+    
+    // Start the 30-minute trial timer NOW (after subject selection) - only for non-paid, non-admin users
     if (!effectiveAccess && !effectiveAdmin) {
+      console.log('[Trial] Starting 30-min Pro trial after subject selection');
       startTrial();
     }
+    
     setCurrentStep('dashboard');
+    saveDashboardState('dashboard');
     window.scrollTo({ top: 0, behavior: 'instant' });
+    toast.success('🎉 30-minute Pro trial started! Enjoy full access!');
   };
 
   const handleUploadComplete = (files: File[]) => {
