@@ -35,6 +35,90 @@ export type Database = {
         }
         Relationships: []
       }
+      coupon_codes: {
+        Row: {
+          code: string
+          created_at: string
+          creator_email: string
+          discount_amount: number
+          id: string
+          is_active: boolean
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          creator_email: string
+          discount_amount?: number
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          creator_email?: string
+          discount_amount?: number
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      coupon_usage: {
+        Row: {
+          amount_paid: number
+          coupon_id: string
+          created_at: string
+          creator_earning: number
+          discount_applied: number
+          id: string
+          is_paid_out: boolean
+          paid_out_at: string | null
+          payment_id: string | null
+          used_by_email: string
+        }
+        Insert: {
+          amount_paid: number
+          coupon_id: string
+          created_at?: string
+          creator_earning?: number
+          discount_applied: number
+          id?: string
+          is_paid_out?: boolean
+          paid_out_at?: string | null
+          payment_id?: string | null
+          used_by_email: string
+        }
+        Update: {
+          amount_paid?: number
+          coupon_id?: string
+          created_at?: string
+          creator_earning?: number
+          discount_applied?: number
+          id?: string
+          is_paid_out?: boolean
+          paid_out_at?: string | null
+          payment_id?: string | null
+          used_by_email?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupon_usage_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupon_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coupon_usage_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       demo_usage: {
         Row: {
           device_fingerprint: string | null
@@ -629,6 +713,15 @@ export type Database = {
       }
       is_admin_or_owner: { Args: { _user_id: string }; Returns: boolean }
       is_owner: { Args: { _user_id: string }; Returns: boolean }
+      validate_coupon: {
+        Args: { coupon_code: string }
+        Returns: {
+          coupon_id: string
+          creator: string
+          discount: number
+          valid: boolean
+        }[]
+      }
     }
     Enums: {
       app_role: "owner" | "admin" | "collaborator"
