@@ -55,10 +55,14 @@ export default function Settings() {
   const effectiveAdmin = isAdmin || isOwner;
   const effectiveAccess = hasAccess || isOwner || isAdmin;
 
-  // Load theme from localStorage
+  // Load theme from localStorage (dark mode is default)
   useEffect(() => {
     const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
-    if (savedTheme === 'dark') {
+    // Default to dark mode
+    if (savedTheme === 'light') {
+      setIsDarkMode(false);
+      document.documentElement.classList.remove('dark');
+    } else {
       setIsDarkMode(true);
       document.documentElement.classList.add('dark');
     }
