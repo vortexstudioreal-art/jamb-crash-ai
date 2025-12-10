@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-interface PaystackConfig {
+export interface PaystackConfig {
   email: string;
   amount: number;
   package: string;
