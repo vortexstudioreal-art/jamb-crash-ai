@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import { useAuth, PACKAGE_FEATURES, UserPackage } from '@/contexts/AuthContext';
+import { useFreeTrialTimer } from '@/hooks/useFreeTrialTimer';
 import { Lock, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
@@ -42,18 +43,33 @@ const requiredPackage: Record<FeatureGateProps['feature'], string> = {
 };
 
 export const FeatureGate = ({ children, feature, fallback, onUpgrade }: FeatureGateProps) => {
-  const { userPackage, isAdmin, isOwner } = useAuth();
+  const { userPackage, isAdmin, isOwner, hasAccess, user } = useAuth();
+  
+  // Check if user is in trial - trial users get FULL Pro access
+  const { isInTrial } = useFreeTrialTimer({
+    userEmail: user?.email || null,
+    isAdmin: isAdmin || isOwner,
+    hasAccess,
+  });
 
   // Admins and owners have access to everything
   if (isAdmin || isOwner) {
     return <>{children}</>;
   }
 
+  // Trial users get FULL Pro features (everything except Premium-only)
+  if (isInTrial) {
+    const proFeatures: FeatureGateProps['feature'][] = ['studyMaterials', 'whatsAppReminders', 'predictedScore', 'subjectPractice', 'fullQuiz'];
+    if (proFeatures.includes(feature)) {
+      return <>{children}</>;
+    }
+  }
+
   // Check if user's package includes this feature
   const allowedPackages = featureToPackage[feature];
-  const hasAccess = userPackage && allowedPackages.includes(userPackage);
+  const hasFeatureAccess = userPackage && allowedPackages.includes(userPackage);
 
-  if (hasAccess) {
+  if (hasFeatureAccess) {
     return <>{children}</>;
   }
 
@@ -92,10 +108,24 @@ export const FeatureGate = ({ children, feature, fallback, onUpgrade }: FeatureG
 
 // Hook to check feature access without rendering
 export const useFeatureAccess = () => {
-  const { userPackage, packageFeatures, isAdmin, isOwner } = useAuth();
+  const { userPackage, packageFeatures, isAdmin, isOwner, hasAccess, user } = useAuth();
+  
+  // Check if user is in trial
+  const { isInTrial } = useFreeTrialTimer({
+    userEmail: user?.email || null,
+    isAdmin: isAdmin || isOwner,
+    hasAccess,
+  });
 
   const hasFeature = (feature: FeatureGateProps['feature']): boolean => {
     if (isAdmin || isOwner) return true;
+    
+    // Trial users get FULL Pro features
+    if (isInTrial) {
+      const proFeatures: FeatureGateProps['feature'][] = ['studyMaterials', 'whatsAppReminders', 'predictedScore', 'subjectPractice', 'fullQuiz'];
+      return proFeatures.includes(feature);
+    }
+    
     if (!userPackage) return false;
     
     const allowedPackages = featureToPackage[feature];
@@ -103,10 +133,14 @@ export const useFeatureAccess = () => {
   };
 
   const getMaxQuizQuestions = (): number => {
+    // Trial users get Pro-level quiz (60 questions)
+    if (isInTrial) return 60;
     return packageFeatures.maxQuizQuestions;
   };
 
   const getMaxPdfUploads = (): number => {
+    // Trial users get unlimited PDFs during trial
+    if (isInTrial) return 999;
     return packageFeatures.maxPdfUploads;
   };
 
@@ -116,5 +150,6 @@ export const useFeatureAccess = () => {
     getMaxPdfUploads,
     packageFeatures,
     userPackage,
+    isInTrial,
   };
 };

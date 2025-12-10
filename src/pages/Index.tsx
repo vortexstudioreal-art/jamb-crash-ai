@@ -618,15 +618,15 @@ const Index = () => {
                 </p>
               </motion.div>
 
-              {/* Quick Actions - Clean Grid with Package Restrictions */}
+              {/* Quick Actions - Trial users get FULL Pro features */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
                 className="grid grid-cols-3 gap-3 mb-4"
               >
-                {/* Full Quiz - Pro+ only */}
-                {hasFeature('fullQuiz') ? (
+                {/* Full Quiz - Pro+ only OR trial users */}
+                {(hasFeature('fullQuiz') || isInTrial) ? (
                   <Button
                     variant="outline"
                     className="h-auto py-4 flex flex-col gap-1 hover:border-primary hover:bg-primary/5"
@@ -651,19 +651,19 @@ const Index = () => {
                   </Button>
                 )}
                 
-                {/* Mini Quiz - Available to trial users (20 Qs) */}
+                {/* Mini Quiz - Available to all (trial gets 20 Qs) */}
                 <Button
                   variant="outline"
                   className="h-auto py-4 flex flex-col gap-1 hover:border-yellow-500 hover:bg-yellow-500/5"
                   onClick={() => handleStartQuiz('mini')}
                 >
                   <Zap className="w-6 h-6 text-yellow-500" />
-                  <span className="font-bold text-sm">{isInTrial ? 'Trial Quiz' : 'Mini Quiz'}</span>
-                  <span className="text-xs text-muted-foreground">{isInTrial ? '20 Qs' : userPackage === 'basic' ? '30' : '20'} Qs</span>
+                  <span className="font-bold text-sm">Mini Quiz</span>
+                  <span className="text-xs text-muted-foreground">20 Qs</span>
                 </Button>
                 
-                {/* Practice Mode - Pro+ only */}
-                {hasFeature('subjectPractice') ? (
+                {/* Practice Mode - Pro+ only OR trial users */}
+                {(hasFeature('subjectPractice') || isInTrial) ? (
                   <Button
                     variant="outline"
                     className="h-auto py-4 flex flex-col gap-1 hover:border-purple-500 hover:bg-purple-500/5"
@@ -671,7 +671,7 @@ const Index = () => {
                   >
                     <BookOpen className="w-6 h-6 text-purple-500" />
                     <span className="font-bold text-sm">Practice</span>
-                    <span className="text-xs text-muted-foreground">Custom</span>
+                    <span className="text-xs text-muted-foreground">By Subject</span>
                   </Button>
                 ) : (
                   <Button
@@ -760,16 +760,20 @@ const Index = () => {
                 </Button>
               </motion.div>
 
-              {/* Study Materials - Pro+ only */}
+              {/* Study Materials - Pro+ only OR trial users */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
                 className="mb-8"
               >
-                <FeatureGate feature="studyMaterials" onUpgrade={handleUpgradeClick}>
+                {(hasFeature('studyMaterials') || isInTrial) ? (
                   <StudyMaterials subjects={effectiveSubjects} />
-                </FeatureGate>
+                ) : (
+                  <FeatureGate feature="studyMaterials" onUpgrade={handleUpgradeClick}>
+                    <StudyMaterials subjects={effectiveSubjects} />
+                  </FeatureGate>
+                )}
               </motion.div>
 
               {/* Study Stats */}
