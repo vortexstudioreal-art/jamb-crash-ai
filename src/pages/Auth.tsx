@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, User, Eye, EyeOff, Sparkles, ArrowRight, Loader2, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, Sparkles, ArrowRight, Loader2, ArrowLeft, Gift } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,9 +13,11 @@ const emailSchema = z.string().email('Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
 
 type AuthView = 'login' | 'signup' | 'forgot-password' | 'reset-password';
+type SignupFlow = 'normal' | 'trial';
 
 export default function Auth() {
   const [view, setView] = useState<AuthView>('login');
+  const [signupFlow, setSignupFlow] = useState<SignupFlow>('normal');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -24,14 +26,23 @@ export default function Auth() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; fullName?: string; confirmPassword?: string }>({});
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   
-  const { signIn, signUp, user, isLoading, isOwner, isAdmin } = useAuth();
+  const { signIn, signUp, user, isLoading, isOwner, isAdmin, hasAccess } = useAuth();
   const navigate = useNavigate();
+
+  // Check for trial signup flow from state
+  useEffect(() => {
+    const state = location.state as { flow?: string; returnTo?: string } | null;
+    if (state?.flow === 'trial') {
+      setView('signup');
+      setSignupFlow('trial');
+    }
+  }, [location.state]);
 
   // Check for password reset token in URL hash, query params, or auth event
   useEffect(() => {
     const initRecoverySession = async () => {
-      // Check URL hash for recovery token
       const hash = window.location.hash;
       const isRecoveryFromHash = hash && hash.includes('access_token') && hash.includes('type=recovery');
       const isRecoveryFromQuery = searchParams.get('recovery') === 'true';
@@ -39,7 +50,6 @@ export default function Auth() {
       if (isRecoveryFromHash) {
         setView('reset-password');
         
-        // Extract and set the session from the hash immediately
         const params = new URLSearchParams(hash.substring(1));
         const accessToken = params.get('access_token');
         const refreshToken = params.get('refresh_token');
@@ -63,7 +73,6 @@ export default function Auth() {
 
     initRecoverySession();
 
-    // Also listen for PASSWORD_RECOVERY auth event
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
         setView('reset-password');
@@ -76,14 +85,23 @@ export default function Auth() {
   // Redirect if already logged in (but not during password reset)
   useEffect(() => {
     if (user && !isLoading && view !== 'reset-password') {
-      // Admins and owners go straight to dashboard
+      // Admins and owners go to admin panel
       if (isOwner || isAdmin) {
-        navigate('/?step=dashboard', { replace: true });
-      } else {
-        navigate('/', { replace: true });
+        navigate('/admin', { replace: true });
+        return;
       }
+      
+      // Paid users go to dashboard
+      if (hasAccess) {
+        navigate('/?step=dashboard', { replace: true });
+        return;
+      }
+      
+      // Regular users - check if this was a trial signup flow
+      // They'll be redirected to subject selection via Index.tsx
+      navigate('/', { replace: true });
     }
-  }, [user, isLoading, navigate, isOwner, isAdmin, view]);
+  }, [user, isLoading, navigate, isOwner, isAdmin, hasAccess, view]);
 
   const validateForm = () => {
     const newErrors: typeof errors = {};
@@ -119,7 +137,6 @@ export default function Auth() {
 
     setIsSubmitting(true);
     try {
-      // Check if we have a valid session
       const { data: sessionData } = await supabase.auth.getSession();
       
       if (!sessionData.session) {
@@ -135,9 +152,7 @@ export default function Auth() {
         toast.error(error.message);
       } else {
         toast.success('Password updated successfully! You can now sign in.');
-        // Clear the hash from URL
         window.history.replaceState(null, '', window.location.pathname);
-        // Sign out to clear the recovery session
         await supabase.auth.signOut();
         setView('login');
         setPassword('');
@@ -215,7 +230,11 @@ export default function Auth() {
             toast.error(error.message);
           }
         } else {
-          toast.success('Account created! Welcome to JAMB Crash! 🎉');
+          if (signupFlow === 'trial') {
+            toast.success('Account created! Starting your free trial... 🎉');
+          } else {
+            toast.success('Account created! Welcome to JAMB Crash! 🎉');
+          }
         }
       }
     } catch (err) {
@@ -226,6 +245,9 @@ export default function Auth() {
   };
 
   const getTitle = () => {
+    if (view === 'signup' && signupFlow === 'trial') {
+      return 'Start Your Free Trial';
+    }
     switch (view) {
       case 'forgot-password':
         return 'Reset Password';
@@ -239,6 +261,9 @@ export default function Auth() {
   };
 
   const getSubtitle = () => {
+    if (view === 'signup' && signupFlow === 'trial') {
+      return 'Create an account to get 30 minutes of Premium access FREE';
+    }
     switch (view) {
       case 'forgot-password':
         return "Enter your email and we'll send you a reset link";
@@ -273,8 +298,17 @@ export default function Auth() {
             animate={{ scale: 1 }}
             className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full mb-4"
           >
-            <Sparkles className="w-5 h-5 text-primary" />
-            <span className="text-sm font-semibold text-primary">JAMB 48-Hour Crash</span>
+            {signupFlow === 'trial' && view === 'signup' ? (
+              <>
+                <Gift className="w-5 h-5 text-primary" />
+                <span className="text-sm font-semibold text-primary">30-Min Free Trial</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-5 h-5 text-primary" />
+                <span className="text-sm font-semibold text-primary">JAMB 48-Hour Crash</span>
+              </>
+            )}
           </motion.div>
           <h1 className="text-3xl font-bold text-foreground mb-2">
             {getTitle()}
@@ -283,6 +317,26 @@ export default function Auth() {
             {getSubtitle()}
           </p>
         </div>
+
+        {/* Trial Benefits Banner */}
+        {view === 'signup' && signupFlow === 'trial' && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="mb-6 p-4 rounded-xl bg-gradient-to-r from-primary/20 to-green-500/20 border border-primary/30"
+          >
+            <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
+              <Gift className="w-5 h-5 text-primary" />
+              What you get FREE:
+            </h3>
+            <ul className="text-sm text-muted-foreground space-y-1">
+              <li>✓ Full Premium access for 30 minutes</li>
+              <li>✓ All quiz modes and study materials</li>
+              <li>✓ AI-powered explanations & flashcards</li>
+              <li>✓ No payment required to start</li>
+            </ul>
+          </motion.div>
+        )}
 
         {/* Form Card */}
         <div className="card-elevated p-6 rounded-2xl">
@@ -404,7 +458,8 @@ export default function Auth() {
                 <>
                   {view === 'forgot-password' ? 'Send Reset Link' : 
                    view === 'reset-password' ? 'Update Password' :
-                   view === 'login' ? 'Sign In' : 'Create Account'}
+                   view === 'login' ? 'Sign In' : 
+                   signupFlow === 'trial' ? 'Start Free Trial' : 'Create Account'}
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </>
               )}
@@ -419,7 +474,6 @@ export default function Auth() {
                 setErrors({});
                 setPassword('');
                 setConfirmPassword('');
-                // Clear the hash from URL if present
                 if (window.location.hash) {
                   window.history.replaceState(null, '', window.location.pathname);
                 }
@@ -436,6 +490,7 @@ export default function Auth() {
                 type="button"
                 onClick={() => {
                   setView(view === 'login' ? 'signup' : 'login');
+                  setSignupFlow('normal');
                   setErrors({});
                 }}
                 className="text-primary font-semibold hover:underline"

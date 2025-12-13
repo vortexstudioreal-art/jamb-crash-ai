@@ -56,11 +56,11 @@ export const useTrialSystem = ({ userEmail, isAdmin, hasAccess }: UseTrialSystem
         setTrialExpiresAt(expiresAt);
         
         const now = new Date();
-        if (expiresAt > now) {
+        if (expiresAt > now && data.trial_used) {
           setIsTrialActive(true);
           setIsTrialExpired(false);
           setTimeRemaining(expiresAt.getTime() - now.getTime());
-        } else {
+        } else if (data.trial_used) {
           setIsTrialActive(false);
           setIsTrialExpired(true);
           setTimeRemaining(0);
@@ -167,11 +167,15 @@ export const useTrialSystem = ({ userEmail, isAdmin, hasAccess }: UseTrialSystem
 
   const canStartTrial = Boolean(userEmail && !hasTrialUsed && !isAdmin && !hasAccess);
 
+  // Effective trial state - admins and paid users bypass trial
+  const effectiveTrialActive = !isAdmin && !hasAccess && isTrialActive;
+  const effectiveTrialExpired = !isAdmin && !hasAccess && isTrialExpired && hasTrialUsed;
+
   return {
     timeRemaining,
     formattedTime: timeRemaining !== null ? formatTime(timeRemaining) : null,
-    isTrialExpired,
-    isTrialActive: !isAdmin && !hasAccess && isTrialActive,
+    isTrialExpired: effectiveTrialExpired,
+    isTrialActive: effectiveTrialActive,
     hasTrialUsed,
     canStartTrial,
     subscriptionPlan,
