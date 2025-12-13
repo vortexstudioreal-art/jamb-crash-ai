@@ -76,15 +76,15 @@ const AdminPanel = () => {
     // Wait for loading to complete
     if (isLoading) return;
     
-    // Admin users (including bypass users detected in useAccessControl) have access
-    if (isAdmin && hasAccess) {
+    // Admin/Owner/Collaborator have access - bypass all other checks
+    if (isAdmin || authIsOwner) {
       fetchData();
       return;
     }
     
     // No access - redirect home
     navigate('/');
-  }, [isAdmin, isLoading, hasAccess, navigate]);
+  }, [isAdmin, authIsOwner, isLoading, navigate]);
 
   const fetchData = async () => {
     setLoadingData(true);
