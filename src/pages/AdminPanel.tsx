@@ -519,16 +519,43 @@ const AdminPanel = () => {
             >
               <Card className="bg-card border-border">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Database className="w-5 h-5 text-primary" />
-                    Question Database Overview
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Database className="w-5 h-5 text-primary" />
+                      Question Database Overview
+                    </div>
+                    {isOwner && (
+                      <Button 
+                        onClick={async () => {
+                          toast.loading('Seeding questions...', { id: 'seed' });
+                          try {
+                            const { data, error } = await supabase.functions.invoke('seed-jamb-questions');
+                            if (error) throw error;
+                            toast.success(`Seeded ${data?.inserted || 0} questions!`, { id: 'seed' });
+                            fetchData();
+                          } catch (err: any) {
+                            toast.error('Seed failed: ' + err.message, { id: 'seed' });
+                          }
+                        }}
+                        size="sm"
+                        className="gap-2"
+                      >
+                        <Database className="w-4 h-4" />
+                        Seed Questions
+                      </Button>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="mb-4 p-4 bg-gradient-to-r from-primary/10 to-green-500/10 rounded-xl border border-primary/20">
                     <div className="text-center">
                       <p className="text-4xl font-bold text-primary">{stats.totalQuestions}</p>
-                      <p className="text-muted-foreground">Total Questions in Database</p>
+                      <p className="text-muted-foreground">
+                        {stats.totalQuestions >= 750 
+                          ? "✓ Question Database: 750+ real JAMB questions loaded (all subjects)"
+                          : "Total Questions in Database"
+                        }
+                      </p>
                     </div>
                   </div>
 
@@ -582,7 +609,7 @@ const AdminPanel = () => {
                         {questionStats.length === 0 && (
                           <tr>
                             <td colSpan={4} className="py-8 text-center text-muted-foreground">
-                              No questions in database yet
+                              No questions in database yet. Click "Seed Questions" to load 750+ JAMB questions.
                             </td>
                           </tr>
                         )}
