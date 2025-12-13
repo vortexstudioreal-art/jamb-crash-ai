@@ -762,14 +762,21 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_coupon_usage: {
+        Args: { p_coupon_id: string }
+        Returns: undefined
+      }
       is_admin_or_owner: { Args: { _user_id: string }; Returns: boolean }
       is_owner: { Args: { _user_id: string }; Returns: boolean }
       validate_coupon: {
         Args: { coupon_code: string }
         Returns: {
+          commission_pct: number
           coupon_id: string
+          coupon_type_val: string
           creator: string
           discount: number
+          discount_pct: number
           valid: boolean
         }[]
       }
