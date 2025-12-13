@@ -711,6 +711,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_trials: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          subscription_plan: string | null
+          trial_expires_at: string
+          trial_started_at: string
+          trial_used: boolean
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          subscription_plan?: string | null
+          trial_expires_at?: string
+          trial_started_at?: string
+          trial_used?: boolean
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          subscription_plan?: string | null
+          trial_expires_at?: string
+          trial_started_at?: string
+          trial_used?: boolean
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       whatsapp_reminders: {
         Row: {
           created_at: string | null
