@@ -101,17 +101,23 @@ const Index = () => {
   // Combined loading state
   const isFullyLoading = isLoading || trialLoading;
 
-  // Auto-redirect logic for authenticated users
+  // Redirect admins/owners/collaborators to admin panel - FIRST PRIORITY
   useEffect(() => {
     if (isFullyLoading) return;
     
-    // Owner and admins go to admin panel, not user dashboard
-    if (userEmail && effectiveAdmin) {
-      if (currentStep === 'landing') {
-        navigate('/admin', { replace: true });
-      }
+    // Admin/Owner/Collaborator bypass ALL user flows - redirect immediately
+    if (userEmail && (isAdmin || isOwner)) {
+      navigate('/admin', { replace: true });
       return;
     }
+  }, [userEmail, isAdmin, isOwner, isFullyLoading, navigate]);
+  
+  // Auto-redirect logic for regular users (after admin check)
+  useEffect(() => {
+    if (isFullyLoading) return;
+    
+    // Skip if admin (handled above)
+    if (isAdmin || isOwner) return;
     
     // If user is signed in and has PAID access, go to dashboard
     if (userEmail && effectiveAccess && currentStep === 'landing') {
@@ -269,29 +275,27 @@ const Index = () => {
     const planKey = plan as keyof typeof plans;
     setSelectedPlan(planKey);
     
-    // Admins/owners skip payment
-    if (effectiveAdmin) {
-      toast.success(effectiveOwner ? 'Owner access granted! 👑' : 'Admin access granted! 🛡️');
+    // Admin/owner/collaborators already have full access
+    if (isAdmin || isOwner) {
+      toast.info('You already have full access!');
       navigate('/admin');
       return;
     }
     
-    if (effectiveAccess) {
-      if (userSubjects.length === 0) {
-        setCurrentStep('subject-select');
-      } else {
-        setCurrentStep('dashboard');
-        window.scrollTo({ top: 0, behavior: 'instant' });
-      }
+    // Users with paid access already
+    if (hasAccess) {
+      toast.info('You already have an active subscription!');
       return;
     }
     
-    if (!user) {
-      navigate('/auth', { state: { returnTo: '/', selectedPlan: planKey } });
+    // For authenticated users without access, show payment modal directly
+    if (user) {
+      setIsPaymentModalOpen(true);
       return;
     }
     
-    setIsPaymentModalOpen(true);
+    // For non-authenticated users, redirect to auth with plan info
+    navigate('/auth', { state: { plan: planKey } });
   };
 
   const handlePaymentSuccess = async (reference: string, email: string) => {
