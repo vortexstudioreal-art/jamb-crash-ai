@@ -32,6 +32,8 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
   const { isLoading, initializePayment } = usePaystack();
 
   const finalPrice = Math.max(0, plan.price - appliedDiscount);
+  const [couponType, setCouponType] = useState<string | null>(null);
+  const [commissionPercentage, setCommissionPercentage] = useState<number>(0);
 
   const validateCoupon = async () => {
     if (!couponCode.trim()) {
@@ -50,14 +52,26 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
         setCouponStatus('invalid');
         setAppliedDiscount(0);
         setAppliedCouponId(null);
+        setCouponType(null);
+        setCommissionPercentage(0);
         toast.error('Invalid or expired coupon code');
         return;
       }
 
+      const couponData = data[0];
+      
+      // Calculate discount - use percentage if available, otherwise fixed amount
+      let discount = couponData.discount;
+      if (couponData.discount_pct && couponData.discount_pct > 0) {
+        discount = Math.floor(plan.price * (couponData.discount_pct / 100));
+      }
+
       setCouponStatus('valid');
-      setAppliedDiscount(data[0].discount);
-      setAppliedCouponId(data[0].coupon_id);
-      toast.success(`Coupon applied! ₦${data[0].discount.toLocaleString()} off 🎉`);
+      setAppliedDiscount(discount);
+      setAppliedCouponId(couponData.coupon_id);
+      setCouponType(couponData.coupon_type_val);
+      setCommissionPercentage(couponData.commission_pct || 0);
+      toast.success(`Coupon applied! ₦${discount.toLocaleString()} off 🎉`);
     } catch (err) {
       setCouponStatus('invalid');
       toast.error('Failed to validate coupon');
@@ -69,6 +83,8 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
     setCouponStatus('idle');
     setAppliedDiscount(0);
     setAppliedCouponId(null);
+    setCouponType(null);
+    setCommissionPercentage(0);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -94,13 +110,24 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
         // Record coupon usage if applied
         if (appliedCouponId && appliedDiscount > 0) {
           try {
+            // Calculate commission - only for admin_referral type
+            const isAdminReferral = couponType === 'admin_referral';
+            const creatorEarning = isAdminReferral 
+              ? Math.floor(finalPrice * (commissionPercentage / 100))
+              : 0;
+
             await supabase.from('coupon_usage').insert({
               coupon_id: appliedCouponId,
               used_by_email: email,
               amount_paid: finalPrice,
               discount_applied: appliedDiscount,
-              creator_earning: 1000, // Fixed earning per referral
+              creator_earning: creatorEarning,
+              commission_percentage: commissionPercentage,
+              commission_payable: isAdminReferral && creatorEarning > 0,
             });
+
+            // Increment coupon usage count
+            await supabase.rpc('increment_coupon_usage', { p_coupon_id: appliedCouponId });
           } catch (err) {
             console.error('Failed to record coupon usage:', err);
           }
