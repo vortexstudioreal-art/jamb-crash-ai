@@ -13,8 +13,6 @@ import { AdminBadge } from '@/components/AdminBadge';
 import { PremiumDashboard } from '@/components/PremiumDashboard';
 import { SubjectSelector } from '@/components/SubjectSelector';
 import { SubjectChanger } from '@/components/SubjectChanger';
-import { FreeTrialBanner } from '@/components/FreeTrialBanner';
-import { DemoQuizFlow } from '@/components/DemoQuizFlow';
 import { TimedQuiz } from '@/components/TimedQuiz';
 import { QuizResults } from '@/components/QuizResults';
 import { StudyStats } from '@/components/StudyStats';
@@ -22,22 +20,21 @@ import { StudyPlanGenerator } from '@/components/StudyPlanGenerator';
 import { StudyMaterials } from '@/components/StudyMaterials';
 import { SyllabusReader } from '@/components/SyllabusReader';
 import { Flashcards } from '@/components/Flashcards';
-import { TrialEndedScreen } from '@/components/TrialEndedScreen';
+import { TrialExpiredScreen } from '@/components/TrialExpiredScreen';
 import { TrialTimerBadge } from '@/components/TrialTimerBadge';
 import { Footer } from '@/components/Footer';
 import { BackButton } from '@/components/BackButton';
 import { FeatureGate, useFeatureAccess } from '@/components/FeatureGate';
-import { FreeTrialFlow } from '@/components/FreeTrialFlow';
 import { useAuth } from '@/contexts/AuthContext';
-import { useFreeTrialTimer } from '@/hooks/useFreeTrialTimer';
+import { useTrialSystem } from '@/hooks/useTrialSystem';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, User, Lock, Crown, RefreshCw, Brain, Layers } from 'lucide-react';
+import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, Lock, RefreshCw, Layers } from 'lucide-react';
 
-type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'demo' | 'study-plan' | 'study-materials' | 'syllabus' | 'flashcards' | 'free-trial';
-type QuizType = 'full' | 'mini' | 'subject' | 'timed-practice' | 'demo';
+type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'study-plan' | 'study-materials' | 'syllabus' | 'flashcards';
+type QuizType = 'full' | 'mini' | 'subject' | 'timed-practice';
 
 interface FormData {
   targetScore: string;
@@ -53,19 +50,12 @@ const plans = {
 };
 
 const DASHBOARD_STATE_KEY = 'jamb_dashboard_state';
-
-// Default subjects when none selected
 const DEFAULT_SUBJECTS = ['english', 'mathematics', 'physics', 'chemistry'];
 
-// Helper to persist dashboard state
 const saveDashboardState = (step: Step) => {
   if (['dashboard', 'quiz', 'quiz-results', 'study-plan', 'upload'].includes(step)) {
     localStorage.setItem(DASHBOARD_STATE_KEY, 'dashboard');
   }
-};
-
-const getSavedDashboardState = (): boolean => {
-  return localStorage.getItem(DASHBOARD_STATE_KEY) === 'dashboard';
 };
 
 const Index = () => {
@@ -81,12 +71,12 @@ const Index = () => {
   const [weakSubjectFromQuiz, setWeakSubjectFromQuiz] = useState<string | null>(null);
   const [showSubjectChanger, setShowSubjectChanger] = useState(false);
   
-  const { user, isLoading, hasAccess, isAdmin, isOwner, userRole, userPackage, packageFeatures, signOut, refreshAccess } = useAuth();
+  const { user, isLoading, hasAccess, isAdmin, isOwner, userRole, signOut, refreshAccess } = useAuth();
   const navigate = useNavigate();
-  const { hasFeature, getMaxQuizQuestions, canUseWithLimit, trackUsage, getUsageInfo } = useFeatureAccess();
+  const { hasFeature } = useFeatureAccess();
   
-  // Free trial timer with full state management
-  const trialTimer = useFreeTrialTimer({
+  // Database-backed trial system
+  const trialSystem = useTrialSystem({
     userEmail: user?.email || null,
     isAdmin: isAdmin || isOwner,
     hasAccess,
@@ -95,39 +85,30 @@ const Index = () => {
   const { 
     formattedTime, 
     isTrialExpired, 
-    isInTrial, 
-    hasTrialStarted,
-    hasCompletedQuiz,
-    trialSubjects,
-    trialResults,
-    timeRemaining,
+    isTrialActive,
+    hasTrialUsed,
+    canStartTrial,
     startTrial,
-    saveTrialSubjects,
-    saveTrialResults,
-    resetTrial,
-  } = trialTimer;
+    loading: trialLoading,
+  } = trialSystem;
 
-  // User email from authenticated session only
   const userEmail = user?.email?.toLowerCase() || null;
-
-  // Access is determined server-side via check_user_access RPC
   const effectiveAccess = hasAccess || isOwner || isAdmin;
   const effectiveAdmin = isAdmin || isOwner;
   const effectiveOwner = isOwner;
-
-  // ALWAYS have subjects available - use defaults if none selected
   const effectiveSubjects = userSubjects.length > 0 ? userSubjects : DEFAULT_SUBJECTS;
 
-  // Auto-redirect logic for users
+  // Combined loading state
+  const isFullyLoading = isLoading || trialLoading;
+
+  // Auto-redirect logic for authenticated users
   useEffect(() => {
-    if (isLoading) return;
+    if (isFullyLoading) return;
     
-    // Owner and admins go straight to dashboard
+    // Owner and admins go to admin panel, not user dashboard
     if (userEmail && effectiveAdmin) {
       if (currentStep === 'landing') {
-        setCurrentStep('dashboard');
-        saveDashboardState('dashboard');
-        window.scrollTo({ top: 0, behavior: 'instant' });
+        navigate('/admin', { replace: true });
       }
       return;
     }
@@ -140,31 +121,30 @@ const Index = () => {
       return;
     }
     
-    // Trial users: if logged in but no access and no trial started yet → go to subject picker FIRST
-    if (userEmail && !effectiveAccess && !effectiveAdmin) {
-      if (!hasTrialStarted && currentStep === 'landing') {
-        console.log('[Trial] New user, redirecting to subject picker');
+    // Trial users: if logged in and has active trial → go to dashboard
+    if (userEmail && !effectiveAccess && isTrialActive && currentStep === 'landing') {
+      if (userSubjects.length === 0) {
         setCurrentStep('subject-select');
-        window.scrollTo({ top: 0, behavior: 'instant' });
-        return;
-      }
-      
-      // Trial already started (has subjects) → go to dashboard
-      if (hasTrialStarted && currentStep === 'landing') {
-        console.log('[Trial] Existing trial user, going to dashboard');
+      } else {
         setCurrentStep('dashboard');
         saveDashboardState('dashboard');
-        window.scrollTo({ top: 0, behavior: 'instant' });
       }
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      return;
     }
-  }, [userEmail, effectiveAccess, effectiveAdmin, isLoading, currentStep, hasTrialStarted]);
+    
+    // New user (no trial used yet) - show subject selection to start trial
+    if (userEmail && !effectiveAccess && !hasTrialUsed && canStartTrial && currentStep === 'landing') {
+      setCurrentStep('subject-select');
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [userEmail, effectiveAccess, effectiveAdmin, isFullyLoading, currentStep, isTrialActive, hasTrialUsed, canStartTrial, userSubjects.length, navigate]);
 
-  // Load user subjects and quiz data
+  // Load user subjects
   useEffect(() => {
     const loadUserData = async () => {
       if (!userEmail || isLoading) return;
       
-      // Load subjects
       const { data } = await supabase
         .from('user_subjects')
         .select('subjects')
@@ -184,7 +164,6 @@ const Index = () => {
         .limit(5);
 
       if (quizData && quizData.length > 0) {
-        // Analyze to find weak subject
         const subjectScores: Record<string, { correct: number; total: number }> = {};
         quizData.forEach(attempt => {
           const subjects = attempt.subjects as string[];
@@ -217,14 +196,14 @@ const Index = () => {
   useEffect(() => {
     const step = searchParams.get('step');
     
-    if (step === 'dashboard' && effectiveAccess && userEmail) {
+    if (step === 'dashboard' && (effectiveAccess || isTrialActive) && userEmail) {
       setCurrentStep('dashboard');
       setSearchParams({});
       window.scrollTo({ top: 0, behavior: 'instant' });
       return;
     }
     
-    if (isLoading) return;
+    if (isFullyLoading) return;
     
     if (step === 'upload' && userEmail) {
       if (userSubjects.length === 0 && !effectiveAdmin) {
@@ -233,12 +212,12 @@ const Index = () => {
         setCurrentStep('upload');
       }
       setSearchParams({});
-    } else if (step === 'dashboard' && userEmail && effectiveAccess) {
+    } else if (step === 'dashboard' && userEmail && (effectiveAccess || isTrialActive)) {
       setCurrentStep('dashboard');
       setSearchParams({});
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
-  }, [searchParams, setSearchParams, userEmail, userSubjects.length, isLoading, effectiveAccess, effectiveAdmin]);
+  }, [searchParams, setSearchParams, userEmail, userSubjects.length, isFullyLoading, effectiveAccess, effectiveAdmin, isTrialActive]);
 
   // Save dashboard state when step changes
   useEffect(() => {
@@ -246,6 +225,12 @@ const Index = () => {
   }, [currentStep]);
 
   const handleGetStarted = () => {
+    // If not logged in, redirect to trial signup
+    if (!user) {
+      navigate('/auth', { state: { flow: 'trial' } });
+      return;
+    }
+    
     setHighlightStandard(true);
     setTimeout(() => {
       const pricingSection = document.getElementById('pricing');
@@ -263,15 +248,31 @@ const Index = () => {
     section?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const handleStartFreeTrial = () => {
+    // Always require authentication first
+    if (!user) {
+      navigate('/auth', { state: { flow: 'trial' } });
+      return;
+    }
+    
+    // If user can start trial, go to subject selection
+    if (canStartTrial) {
+      setCurrentStep('subject-select');
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    } else if (hasTrialUsed) {
+      toast.error('You have already used your free trial. Please upgrade to continue.');
+      handleUpgradeClick();
+    }
+  };
+
   const handleSelectPlan = (plan: string) => {
     const planKey = plan as keyof typeof plans;
     setSelectedPlan(planKey);
     
-    // Admins/owners skip payment (verified server-side)
+    // Admins/owners skip payment
     if (effectiveAdmin) {
       toast.success(effectiveOwner ? 'Owner access granted! 👑' : 'Admin access granted! 🛡️');
-      setCurrentStep('dashboard');
-      window.scrollTo({ top: 0, behavior: 'instant' });
+      navigate('/admin');
       return;
     }
     
@@ -301,19 +302,20 @@ const Index = () => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
-  const handleSubjectsSelected = (subjects: string[]) => {
+  const handleSubjectsSelected = async (subjects: string[]) => {
     setUserSubjects(subjects);
     
-    // Start the 30-minute trial timer NOW (after subject selection) - only for non-paid, non-admin users
-    if (!effectiveAccess && !effectiveAdmin) {
-      console.log('[Trial] Starting 30-min Pro trial after subject selection');
-      startTrial();
+    // Start the 30-minute trial NOW (after subject selection) - only for non-paid, non-admin users
+    if (!effectiveAccess && !effectiveAdmin && canStartTrial) {
+      const success = await startTrial();
+      if (success) {
+        toast.success('🎉 30-minute Premium trial started! Enjoy full access!');
+      }
     }
     
     setCurrentStep('dashboard');
     saveDashboardState('dashboard');
     window.scrollTo({ top: 0, behavior: 'instant' });
-    toast.success('🎉 30-minute Pro trial started! Enjoy full access!');
   };
 
   const handleUploadComplete = (files: File[]) => {
@@ -343,11 +345,6 @@ const Index = () => {
   const handleQuizComplete = (results: any) => {
     setQuizResults(results);
     setCurrentStep('quiz-results');
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  };
-
-  const handleStartTrial = () => {
-    setCurrentStep('demo');
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
@@ -384,60 +381,21 @@ const Index = () => {
   const handleSubjectsChanged = async (subjects: string[]) => {
     setUserSubjects(subjects);
     setShowSubjectChanger(false);
-    
-    // Force refresh all data based on new subjects
-    if (userEmail) {
-      // Clear cached quiz data
-      setWeakSubjectFromQuiz(null);
-      setQuizResults(null);
-      
-      // Reload quiz history for new weak subject analysis
-      const { data: quizData } = await supabase
-        .from('quiz_attempts')
-        .select('subjects, correct_answers, total_questions')
-        .eq('email', userEmail)
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      if (quizData && quizData.length > 0) {
-        const subjectScores: Record<string, { correct: number; total: number }> = {};
-        quizData.forEach(attempt => {
-          const attemptSubjects = attempt.subjects as string[];
-          const scorePerSubject = attempt.correct_answers / attemptSubjects.length;
-          const totalPerSubject = attempt.total_questions / attemptSubjects.length;
-          attemptSubjects.forEach(s => {
-            if (!subjectScores[s]) subjectScores[s] = { correct: 0, total: 0 };
-            subjectScores[s].correct += scorePerSubject;
-            subjectScores[s].total += totalPerSubject;
-          });
-        });
-
-        let worstSubject = '';
-        let worstRate = 1;
-        Object.entries(subjectScores).forEach(([subject, scores]) => {
-          const rate = scores.correct / scores.total;
-          if (rate < worstRate && subjects.map(s => s.toLowerCase()).includes(subject.toLowerCase())) {
-            worstRate = rate;
-            worstSubject = subject;
-          }
-        });
-        if (worstSubject) setWeakSubjectFromQuiz(worstSubject);
-      }
-    }
-    
+    setWeakSubjectFromQuiz(null);
+    setQuizResults(null);
     toast.success('Subjects updated! App data refreshed. 🎉');
   };
 
   // Trial expired - show upgrade screen
   if (isTrialExpired && !effectiveAccess && !effectiveAdmin) {
-    return <TrialEndedScreen onUpgrade={handleUpgradeClick} />;
+    return <TrialExpiredScreen onUpgrade={handleUpgradeClick} />;
   }
 
   // Quiz step
   if (currentStep === 'quiz' && userEmail) {
     return (
       <div className="min-h-screen bg-background">
-        {isInTrial && formattedTime && (
+        {isTrialActive && formattedTime && (
           <TrialTimerBadge formattedTime={formattedTime} isLow={parseInt(formattedTime.split(':')[0]) < 5} />
         )}
         <DashboardHeader 
@@ -485,28 +443,14 @@ const Index = () => {
     );
   }
 
-  // Demo quiz flow
-  if (currentStep === 'demo') {
-    return (
-      <>
-        <BackButton onClick={() => setCurrentStep('landing')} />
-        <DemoQuizFlow
-          onComplete={() => setCurrentStep('landing')}
-          onUpgrade={handleUpgradeClick}
-        />
-      </>
-    );
-  }
-
-  // Subject selection step - first step for trial users
+  // Subject selection step
   if (currentStep === 'subject-select' && userEmail) {
     if (effectiveAdmin) {
-      setCurrentStep('dashboard');
+      navigate('/admin');
       return null;
     }
     
-    // Don't show back button for trial users (subject selection is their entry point)
-    const isTrialEntry = !effectiveAccess && !hasTrialStarted;
+    const isTrialEntry = !effectiveAccess && canStartTrial;
     
     return (
       <div className="min-h-screen bg-background">
@@ -521,7 +465,7 @@ const Index = () => {
         {isTrialEntry && (
           <div className="fixed bottom-4 left-0 right-0 text-center">
             <p className="text-sm text-muted-foreground">
-              🎁 Pick your subjects to start your 30-minute Pro trial!
+              🎁 Pick your subjects to start your 30-minute Premium trial!
             </p>
           </div>
         )}
@@ -643,10 +587,10 @@ const Index = () => {
   // Dashboard step
   if (currentStep === 'dashboard' && userEmail) {
     return (
-      <PaywallGate hasAccess={effectiveAccess || isInTrial} isLoading={isLoading} onUpgrade={handleUpgradeClick}>
+      <PaywallGate hasAccess={effectiveAccess || isTrialActive} isLoading={isFullyLoading} onUpgrade={handleUpgradeClick}>
         <div className="min-h-screen bg-background">
           {/* Trial Timer Badge */}
-          {isInTrial && formattedTime && (
+          {isTrialActive && formattedTime && (
             <TrialTimerBadge formattedTime={formattedTime} isLow={parseInt(formattedTime.split(':')[0]) < 5} />
           )}
           
@@ -668,7 +612,6 @@ const Index = () => {
             userRole={userRole}
             onSignOut={handleSignOut}
           />
-          {/* No back button on dashboard - it's the home page */}
           <div className="pt-20 pb-8 px-4">
             <div className="max-w-6xl mx-auto">
               {/* Welcome Header */}
@@ -683,17 +626,21 @@ const Index = () => {
                 <p className="text-muted-foreground">
                   Your personalized JAMB prep dashboard. Let's crush that 300+!
                 </p>
+                {isTrialActive && (
+                  <p className="text-sm text-primary mt-2 font-medium">
+                    🎁 Free Trial Active - {formattedTime} remaining
+                  </p>
+                )}
               </motion.div>
 
-              {/* Quick Actions - Trial users get FULL Pro features */}
+              {/* Quick Actions */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
                 className="grid grid-cols-3 gap-3 mb-4"
               >
-                {/* Full Quiz - Pro+ only OR trial users */}
-                {(hasFeature('fullQuiz') || isInTrial) ? (
+                {(hasFeature('fullQuiz') || isTrialActive) ? (
                   <Button
                     variant="outline"
                     className="h-auto py-4 flex flex-col gap-1 hover:border-primary hover:bg-primary/5"
@@ -718,7 +665,6 @@ const Index = () => {
                   </Button>
                 )}
                 
-                {/* Mini Quiz - Available to all (trial gets 20 Qs) */}
                 <Button
                   variant="outline"
                   className="h-auto py-4 flex flex-col gap-1 hover:border-yellow-500 hover:bg-yellow-500/5"
@@ -729,8 +675,7 @@ const Index = () => {
                   <span className="text-xs text-muted-foreground">20 Qs</span>
                 </Button>
                 
-                {/* Practice Mode - Pro+ only OR trial users */}
-                {(hasFeature('practiceQuiz') || isInTrial) ? (
+                {(hasFeature('practiceQuiz') || isTrialActive) ? (
                   <Button
                     variant="outline"
                     className="h-auto py-4 flex flex-col gap-1 hover:border-purple-500 hover:bg-purple-500/5"
@@ -827,14 +772,14 @@ const Index = () => {
                 </Button>
               </motion.div>
 
-              {/* Study Materials - Pro+ only OR trial users */}
+              {/* Study Materials */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
                 className="mb-8"
               >
-                {(hasFeature('studyMaterials') || isInTrial) ? (
+                {(hasFeature('studyMaterials') || isTrialActive) ? (
                   <StudyMaterials subjects={effectiveSubjects} />
                 ) : (
                   <FeatureGate feature="studyMaterials" onUpgrade={handleUpgradeClick}>
@@ -883,7 +828,7 @@ const Index = () => {
                 <p className="text-sm text-muted-foreground mt-2">until UTME 2026</p>
               </motion.div>
 
-              {/* AI Tips Based on Quiz Performance */}
+              {/* AI Tips */}
               {weakSubjectFromQuiz && (
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -930,11 +875,11 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Trial Timer Badge on landing page */}
-      {isInTrial && formattedTime && (
+      {isTrialActive && formattedTime && (
         <TrialTimerBadge formattedTime={formattedTime} isLow={parseInt(formattedTime.split(':')[0]) < 5} />
       )}
       
-      <Header onGetStarted={handleGetStarted} hasAccess={effectiveAccess || isInTrial} />
+      <Header onGetStarted={handleGetStarted} hasAccess={effectiveAccess || isTrialActive} />
       <div className="pt-16">
         {/* Admin Badge, Dashboard Button, and Sign Out for logged in users */}
         {user && (
@@ -945,7 +890,7 @@ const Index = () => {
                 linkToAdmin={effectiveOwner} 
               />
             )}
-            {(effectiveAccess || isInTrial) && (
+            {(effectiveAccess || isTrialActive) && (
               <Button
                 variant="default"
                 size="sm"
@@ -953,7 +898,7 @@ const Index = () => {
                 className="gradient-primary text-primary-foreground"
               >
                 <BookOpen className="w-4 h-4 mr-1" />
-                {isInTrial ? 'Try Dashboard' : 'Dashboard'}
+                {isTrialActive && !effectiveAccess ? 'Try Dashboard' : 'Dashboard'}
               </Button>
             )}
             <Button
@@ -971,14 +916,31 @@ const Index = () => {
           hasAccess={effectiveAccess}
           onSeeHowItWorks={handleSeeHowItWorks}
         />
-        <HowItWorksSection onStartTrial={handleStartTrial} />
+        <HowItWorksSection onStartTrial={handleStartFreeTrial} />
         <PricingSection onSelectPlan={handleSelectPlan} highlightStandard={highlightStandard} />
       </div>
       <Footer />
 
-      {/* Free Trial Banner - only for non-logged-in users who haven't used demo */}
-      {!user && !effectiveAccess && !isLoading && (
-        <FreeTrialBanner onStartTrial={handleStartTrial} userEmail={userEmail || undefined} />
+      {/* Free Trial Banner - only for non-logged-in users */}
+      {!user && !effectiveAccess && !isFullyLoading && (
+        <motion.div
+          initial={{ y: 100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-r from-primary/90 to-green-600/90 backdrop-blur-sm z-50"
+        >
+          <div className="max-w-4xl mx-auto flex items-center justify-between gap-4 flex-wrap">
+            <div className="text-primary-foreground">
+              <p className="font-bold">🎁 Free Trial Available!</p>
+              <p className="text-sm opacity-90">Get 30 minutes of Premium access - No payment required</p>
+            </div>
+            <Button
+              onClick={handleStartFreeTrial}
+              className="bg-white text-primary hover:bg-white/90 font-bold"
+            >
+              Start Free Trial
+            </Button>
+          </div>
+        </motion.div>
       )}
 
       {/* Payment Modal */}

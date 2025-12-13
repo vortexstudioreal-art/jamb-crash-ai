@@ -158,7 +158,7 @@ export const HowItWorksSection = ({ onStartTrial }: HowItWorksSectionProps) => {
               Ready to Score 300+?
             </h3>
             <p className="text-muted-foreground max-w-md">
-              Try it free with 20 real JAMB questions. No payment needed!
+              Get 30 minutes of full Premium access. No payment needed!
             </p>
             <Button 
               variant="hero" 
@@ -170,7 +170,7 @@ export const HowItWorksSection = ({ onStartTrial }: HowItWorksSectionProps) => {
               <ArrowRight className="w-5 h-5" />
             </Button>
             <p className="text-xs text-muted-foreground">
-              ✓ 20 real questions ✓ 30 min timer ✓ Instant results
+              ✓ Full Premium access ✓ 30 minutes free ✓ No payment required
             </p>
           </div>
         </motion.div>
