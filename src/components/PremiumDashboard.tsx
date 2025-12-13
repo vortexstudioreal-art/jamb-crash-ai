@@ -64,7 +64,7 @@ export const PremiumDashboard = ({ userEmail, isAdmin, adminRole, targetScore, w
         </FeatureGate>
 
         {/* Score Predictor - Pro+ */}
-        <FeatureGate feature="predictedScore" onUpgrade={onUpgrade}>
+        <FeatureGate feature="aiScorePrediction" onUpgrade={onUpgrade}>
           <ScorePredictor
             userEmail={userEmail}
             targetScore={targetScore}

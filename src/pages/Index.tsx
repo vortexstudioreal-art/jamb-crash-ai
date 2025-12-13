@@ -83,7 +83,7 @@ const Index = () => {
   
   const { user, isLoading, hasAccess, isAdmin, isOwner, userRole, userPackage, packageFeatures, signOut, refreshAccess } = useAuth();
   const navigate = useNavigate();
-  const { hasFeature, getMaxQuizQuestions, getMaxPdfUploads } = useFeatureAccess();
+  const { hasFeature, getMaxQuizQuestions, canUseWithLimit, trackUsage, getUsageInfo } = useFeatureAccess();
   
   // Free trial timer with full state management
   const trialTimer = useFreeTrialTimer({
@@ -730,7 +730,7 @@ const Index = () => {
                 </Button>
                 
                 {/* Practice Mode - Pro+ only OR trial users */}
-                {(hasFeature('subjectPractice') || isInTrial) ? (
+                {(hasFeature('practiceQuiz') || isInTrial) ? (
                   <Button
                     variant="outline"
                     className="h-auto py-4 flex flex-col gap-1 hover:border-purple-500 hover:bg-purple-500/5"

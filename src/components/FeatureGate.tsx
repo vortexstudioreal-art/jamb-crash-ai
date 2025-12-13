@@ -1,60 +1,103 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { useAuth, PACKAGE_FEATURES, UserPackage } from '@/contexts/AuthContext';
 import { useFreeTrialTimer } from '@/hooks/useFreeTrialTimer';
+import { useFeatureUsage, FeatureType, FEATURE_NAMES } from '@/hooks/useFeatureUsage';
 import { Lock, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import { UpgradeModal } from '@/components/UpgradeModal';
+
+// Feature types that map to plan features
+export type PlanFeature = 
+  | 'fullQuiz'
+  | 'miniQuiz'
+  | 'studyMaterials'
+  | 'studyStats'
+  | 'recentProgress'
+  | 'subjectPerformance'
+  | 'practiceQuiz'
+  | 'aiScorePrediction'
+  | 'whatsAppReminders'
+  | 'referralBonus'
+  | 'emailReminder'
+  | 'aiStudyTips'
+  | 'advancedPrediction';
 
 interface FeatureGateProps {
   children: ReactNode;
-  feature: 'studyMaterials' | 'whatsAppReminders' | 'predictedScore' | 'subjectPractice' | 'advancedPrediction' | 'referralBonus' | 'fullQuiz';
+  feature: PlanFeature;
   fallback?: ReactNode;
   onUpgrade?: () => void;
 }
 
-const featureToPackage: Record<FeatureGateProps['feature'], UserPackage[]> = {
-  studyMaterials: ['pro', 'premium', 'admin'],
-  whatsAppReminders: ['pro', 'premium', 'admin'],
-  predictedScore: ['pro', 'premium', 'admin'],
-  subjectPractice: ['pro', 'premium', 'admin'],
-  advancedPrediction: ['premium', 'admin'],
-  referralBonus: ['premium', 'admin'],
-  fullQuiz: ['pro', 'premium', 'admin'],
+// Map feature names to package property keys
+const featureToPackageKey: Record<PlanFeature, keyof typeof PACKAGE_FEATURES.basic> = {
+  fullQuiz: 'hasFullQuiz',
+  miniQuiz: 'hasMiniQuiz',
+  studyMaterials: 'hasStudyMaterials',
+  studyStats: 'hasStudyStats',
+  recentProgress: 'hasRecentProgress',
+  subjectPerformance: 'hasSubjectPerformance',
+  practiceQuiz: 'hasPracticeQuiz',
+  aiScorePrediction: 'hasAiScorePrediction',
+  whatsAppReminders: 'hasWhatsAppReminders',
+  referralBonus: 'hasReferralBonus',
+  emailReminder: 'hasEmailReminder',
+  aiStudyTips: 'hasAiStudyTips',
+  advancedPrediction: 'hasAdvancedPrediction',
 };
 
-const featureNames: Record<FeatureGateProps['feature'], string> = {
+const featureNames: Record<PlanFeature, string> = {
+  fullQuiz: 'Full Quiz',
+  miniQuiz: 'Mini Quiz',
   studyMaterials: 'Study Materials',
+  studyStats: 'Study Stats',
+  recentProgress: 'Recent Progress',
+  subjectPerformance: 'Subject Performance',
+  practiceQuiz: 'Practice Quiz',
+  aiScorePrediction: 'AI Score Prediction',
   whatsAppReminders: 'WhatsApp Reminders',
-  predictedScore: 'Score Prediction',
-  subjectPractice: 'Subject Practice Mode',
+  referralBonus: 'Refer & Earn',
+  emailReminder: 'Email Reminders',
+  aiStudyTips: 'AI Study Tips',
   advancedPrediction: 'Advanced Prediction',
-  referralBonus: 'Referral Bonus',
-  fullQuiz: 'Full 60-Question Quiz',
 };
 
-const requiredPackage: Record<FeatureGateProps['feature'], string> = {
-  studyMaterials: 'Pro',
-  whatsAppReminders: 'Pro',
-  predictedScore: 'Pro',
-  subjectPractice: 'Pro',
-  advancedPrediction: 'Premium',
-  referralBonus: 'Premium',
-  fullQuiz: 'Pro',
+const requiredPackage: Record<PlanFeature, 'basic' | 'pro' | 'premium'> = {
+  fullQuiz: 'basic',
+  miniQuiz: 'basic',
+  studyMaterials: 'basic',
+  studyStats: 'basic',
+  recentProgress: 'basic',
+  subjectPerformance: 'basic',
+  practiceQuiz: 'pro',
+  aiScorePrediction: 'pro',
+  whatsAppReminders: 'premium',
+  referralBonus: 'premium',
+  emailReminder: 'pro',
+  aiStudyTips: 'pro',
+  advancedPrediction: 'premium',
 };
 
 // Pro features available during trial
-const PRO_FEATURES: FeatureGateProps['feature'][] = [
-  'studyMaterials', 
-  'whatsAppReminders', 
-  'predictedScore', 
-  'subjectPractice', 
-  'fullQuiz'
+const TRIAL_FEATURES: PlanFeature[] = [
+  'fullQuiz',
+  'miniQuiz',
+  'studyMaterials',
+  'studyStats',
+  'recentProgress',
+  'subjectPerformance',
+  'practiceQuiz',
+  'aiScorePrediction',
+  'emailReminder',
+  'aiStudyTips',
 ];
 
 export const FeatureGate = ({ children, feature, fallback, onUpgrade }: FeatureGateProps) => {
-  const { userPackage, isAdmin, isOwner, hasAccess, user } = useAuth();
+  const { userPackage, isAdmin, isOwner, hasAccess, user, packageFeatures } = useAuth();
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   
-  // Check if user is in trial - trial users get FULL Pro access
+  // Check if user is in trial - trial users get Pro access
   const { isInTrial } = useFreeTrialTimer({
     userEmail: user?.email || null,
     isAdmin: isAdmin || isOwner,
@@ -66,14 +109,14 @@ export const FeatureGate = ({ children, feature, fallback, onUpgrade }: FeatureG
     return <>{children}</>;
   }
 
-  // Trial users get FULL Pro features (all Pro features unlocked)
-  if (isInTrial && PRO_FEATURES.includes(feature)) {
+  // Trial users get Pro features
+  if (isInTrial && TRIAL_FEATURES.includes(feature)) {
     return <>{children}</>;
   }
 
   // Check if user's package includes this feature
-  const allowedPackages = featureToPackage[feature];
-  const hasFeatureAccess = userPackage && allowedPackages.includes(userPackage);
+  const packageKey = featureToPackageKey[feature];
+  const hasFeatureAccess = packageFeatures[packageKey] === true;
 
   if (hasFeatureAccess) {
     return <>{children}</>;
@@ -84,37 +127,57 @@ export const FeatureGate = ({ children, feature, fallback, onUpgrade }: FeatureG
     return <>{fallback}</>;
   }
 
+  const handleUpgradeClick = () => {
+    if (onUpgrade) {
+      onUpgrade();
+    } else {
+      setShowUpgradeModal(true);
+    }
+  };
+
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="relative p-6 rounded-xl bg-muted/50 border border-border"
-    >
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/80 rounded-xl" />
-      <div className="relative text-center py-8">
-        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-          <Lock className="w-8 h-8 text-primary" />
-        </div>
-        <h3 className="text-lg font-bold text-foreground mb-2">
-          {featureNames[feature]} Locked
-        </h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Upgrade to {requiredPackage[feature]} to unlock this feature
-        </p>
-        {onUpgrade && (
-          <Button onClick={onUpgrade} className="gradient-primary">
+    <>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="relative p-6 rounded-xl bg-muted/50 border border-border"
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/80 rounded-xl" />
+        <div className="relative text-center py-8">
+          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+            <Lock className="w-8 h-8 text-primary" />
+          </div>
+          <h3 className="text-lg font-bold text-foreground mb-2">
+            {featureNames[feature]} Locked
+          </h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Upgrade to {requiredPackage[feature].charAt(0).toUpperCase() + requiredPackage[feature].slice(1)} to unlock this feature
+          </p>
+          <Button onClick={handleUpgradeClick} className="gradient-primary">
             <Crown className="w-4 h-4 mr-2" />
-            Upgrade to {requiredPackage[feature]}
+            Upgrade to {requiredPackage[feature].charAt(0).toUpperCase() + requiredPackage[feature].slice(1)}
           </Button>
-        )}
-      </div>
-    </motion.div>
+        </div>
+      </motion.div>
+      
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        feature={featureNames[feature]}
+        requiredPlan={requiredPackage[feature]}
+        onUpgrade={(plan) => {
+          setShowUpgradeModal(false);
+          if (onUpgrade) onUpgrade();
+        }}
+      />
+    </>
   );
 };
 
 // Hook to check feature access without rendering
 export const useFeatureAccess = () => {
   const { userPackage, packageFeatures, isAdmin, isOwner, hasAccess, user } = useAuth();
+  const featureUsage = useFeatureUsage();
   
   // Check if user is in trial
   const { isInTrial } = useFreeTrialTimer({
@@ -123,20 +186,18 @@ export const useFeatureAccess = () => {
     hasAccess,
   });
 
-  const hasFeature = (feature: FeatureGateProps['feature']): boolean => {
+  const hasFeature = (feature: PlanFeature): boolean => {
     // Admins and owners have all features
     if (isAdmin || isOwner) return true;
     
-    // Trial users get FULL Pro features
-    if (isInTrial && PRO_FEATURES.includes(feature)) {
+    // Trial users get Pro features
+    if (isInTrial && TRIAL_FEATURES.includes(feature)) {
       return true;
     }
     
     // Check package
-    if (!userPackage) return false;
-    
-    const allowedPackages = featureToPackage[feature];
-    return allowedPackages.includes(userPackage);
+    const packageKey = featureToPackageKey[feature];
+    return packageFeatures[packageKey] === true;
   };
 
   const getMaxQuizQuestions = (): number => {
@@ -148,21 +209,42 @@ export const useFeatureAccess = () => {
     return packageFeatures.maxQuizQuestions;
   };
 
-  const getMaxPdfUploads = (): number => {
-    // Admins/owners get unlimited
-    if (isAdmin || isOwner) return 999;
-    // Trial users get unlimited PDFs during trial
-    if (isInTrial) return 999;
-    // Package-based
-    return packageFeatures.maxPdfUploads;
+  // Check daily usage limits
+  const canUseWithLimit = (limitedFeature: FeatureType): boolean => {
+    // Admins/owners have no limits
+    if (isAdmin || isOwner) return true;
+    // Pro/Premium have no limits
+    if (userPackage === 'pro' || userPackage === 'premium') return true;
+    // Trial users get Pro limits (unlimited)
+    if (isInTrial) return true;
+    // Basic users check daily limits
+    return featureUsage.canUseFeature(limitedFeature);
+  };
+
+  const getUsageInfo = (limitedFeature: FeatureType) => {
+    return featureUsage.getUsageSummary(limitedFeature);
+  };
+
+  const trackUsage = async (limitedFeature: FeatureType): Promise<boolean> => {
+    // Admins/owners don't need tracking
+    if (isAdmin || isOwner) return true;
+    // Pro/Premium don't need tracking
+    if (userPackage === 'pro' || userPackage === 'premium') return true;
+    // Trial users don't need tracking
+    if (isInTrial) return true;
+    // Basic users track usage
+    return featureUsage.incrementUsage(limitedFeature);
   };
 
   return {
     hasFeature,
     getMaxQuizQuestions,
-    getMaxPdfUploads,
+    canUseWithLimit,
+    getUsageInfo,
+    trackUsage,
     packageFeatures,
     userPackage,
     isInTrial,
+    refreshUsage: featureUsage.refreshUsage,
   };
 };

@@ -7,63 +7,100 @@ export type UserPackage = 'basic' | 'pro' | 'premium' | 'admin' | null;
 
 export interface PackageFeatures {
   maxQuizQuestions: number;
-  maxPdfUploads: number;
+  // Boolean feature flags
+  hasFullQuiz: boolean;
+  hasMiniQuiz: boolean;
   hasStudyMaterials: boolean;
+  hasStudyStats: boolean;
+  hasRecentProgress: boolean;
+  hasSubjectPerformance: boolean;
+  hasPracticeQuiz: boolean; // Mistake-based practice
+  hasAiScorePrediction: boolean;
   hasWhatsAppReminders: boolean;
-  hasPredictedScore: boolean;
-  hasSubjectPractice: boolean;
-  hasAdvancedPrediction: boolean;
   hasReferralBonus: boolean;
-  studyPlanType: 'basic' | '72-hour' | 'advanced';
+  hasEmailReminder: boolean;
+  hasAiStudyTips: boolean;
+  hasAdvancedPrediction: boolean;
+  // Plan metadata
+  studyPlanType: 'basic' | 'full' | 'advanced';
   accessDays: number | 'lifetime';
 }
 
 export const PACKAGE_FEATURES: Record<NonNullable<UserPackage>, PackageFeatures> = {
   basic: {
-    maxQuizQuestions: 30,
-    maxPdfUploads: 3,
-    hasStudyMaterials: false,
+    maxQuizQuestions: 60,
+    // Basic gets: Full Quiz, Mini Quiz, Study Materials, Study Stats, Recent Progress, Subject Performance
+    hasFullQuiz: true,
+    hasMiniQuiz: true,
+    hasStudyMaterials: true,
+    hasStudyStats: true,
+    hasRecentProgress: true,
+    hasSubjectPerformance: true,
+    // Basic BLOCKED: Practice Quiz, AI Score Prediction, WhatsApp, Refer & Earn
+    hasPracticeQuiz: false,
+    hasAiScorePrediction: false,
     hasWhatsAppReminders: false,
-    hasPredictedScore: false,
-    hasSubjectPractice: false,
-    hasAdvancedPrediction: false,
     hasReferralBonus: false,
+    hasEmailReminder: false,
+    hasAiStudyTips: false,
+    hasAdvancedPrediction: false,
     studyPlanType: 'basic',
     accessDays: 30,
   },
   pro: {
     maxQuizQuestions: 60,
-    maxPdfUploads: Infinity,
+    // Pro gets everything in Basic plus:
+    hasFullQuiz: true,
+    hasMiniQuiz: true,
     hasStudyMaterials: true,
-    hasWhatsAppReminders: true,
-    hasPredictedScore: true,
-    hasSubjectPractice: true,
+    hasStudyStats: true,
+    hasRecentProgress: true,
+    hasSubjectPerformance: true,
+    // Pro UNLOCKED: Practice Quiz, Unlimited PDFs, Full Study Plan, AI explanations, flashcards, Email Reminder, AI Tips
+    hasPracticeQuiz: true,
+    hasAiScorePrediction: true,
+    hasWhatsAppReminders: false, // Still blocked
+    hasReferralBonus: false, // Still blocked
+    hasEmailReminder: true,
+    hasAiStudyTips: true,
     hasAdvancedPrediction: false,
-    hasReferralBonus: false,
-    studyPlanType: '72-hour',
+    studyPlanType: 'full',
     accessDays: 90,
   },
   premium: {
     maxQuizQuestions: 60,
-    maxPdfUploads: Infinity,
+    // Premium gets everything
+    hasFullQuiz: true,
+    hasMiniQuiz: true,
     hasStudyMaterials: true,
+    hasStudyStats: true,
+    hasRecentProgress: true,
+    hasSubjectPerformance: true,
+    hasPracticeQuiz: true,
+    hasAiScorePrediction: true,
     hasWhatsAppReminders: true,
-    hasPredictedScore: true,
-    hasSubjectPractice: true,
-    hasAdvancedPrediction: true,
     hasReferralBonus: true,
+    hasEmailReminder: true,
+    hasAiStudyTips: true,
+    hasAdvancedPrediction: true,
     studyPlanType: 'advanced',
     accessDays: 'lifetime',
   },
   admin: {
     maxQuizQuestions: 60,
-    maxPdfUploads: Infinity,
+    hasFullQuiz: true,
+    hasMiniQuiz: true,
     hasStudyMaterials: true,
+    hasStudyStats: true,
+    hasRecentProgress: true,
+    hasSubjectPerformance: true,
+    hasPracticeQuiz: true,
+    hasAiScorePrediction: true,
     hasWhatsAppReminders: true,
-    hasPredictedScore: true,
-    hasSubjectPractice: true,
-    hasAdvancedPrediction: true,
     hasReferralBonus: true,
+    hasEmailReminder: true,
+    hasAiStudyTips: true,
+    hasAdvancedPrediction: true,
     studyPlanType: 'advanced',
     accessDays: 'lifetime',
   },
@@ -88,13 +125,19 @@ interface AuthContextType {
 
 const defaultFeatures: PackageFeatures = {
   maxQuizQuestions: 20,
-  maxPdfUploads: 0,
+  hasFullQuiz: false,
+  hasMiniQuiz: true,
   hasStudyMaterials: false,
+  hasStudyStats: false,
+  hasRecentProgress: false,
+  hasSubjectPerformance: false,
+  hasPracticeQuiz: false,
+  hasAiScorePrediction: false,
   hasWhatsAppReminders: false,
-  hasPredictedScore: false,
-  hasSubjectPractice: false,
-  hasAdvancedPrediction: false,
   hasReferralBonus: false,
+  hasEmailReminder: false,
+  hasAiStudyTips: false,
+  hasAdvancedPrediction: false,
   studyPlanType: 'basic',
   accessDays: 0,
 };
