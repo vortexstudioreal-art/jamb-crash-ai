@@ -55,19 +55,36 @@ export default function Auth() {
         const refreshToken = params.get('refresh_token');
         
         if (accessToken && refreshToken) {
-          const { error } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken
-          });
-          
-          if (error) {
-            console.error('Failed to set recovery session:', error);
-            toast.error('Reset link expired. Please request a new one.');
+          try {
+            const { error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken
+            });
+            
+            if (error) {
+              console.error('Failed to set recovery session:', error);
+              toast.error('Reset link expired. Please request a new one.');
+              setView('forgot-password');
+            } else {
+              // Clear the hash from URL but stay on reset-password view
+              window.history.replaceState(null, '', window.location.pathname + '?recovery=true');
+            }
+          } catch (err) {
+            console.error('Session setup error:', err);
+            toast.error('Something went wrong. Please try again.');
             setView('forgot-password');
           }
         }
       } else if (isRecoveryFromQuery) {
-        setView('reset-password');
+        // Check if we have a valid session for password reset
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          if (session) {
+            setView('reset-password');
+          } else {
+            setView('forgot-password');
+            toast.error('Session expired. Please request a new password reset.');
+          }
+        });
       }
     };
 
@@ -149,16 +166,25 @@ export default function Auth() {
       const { error } = await supabase.auth.updateUser({ password });
       
       if (error) {
-        toast.error(error.message);
+        if (error.message.includes('same as')) {
+          toast.error('New password must be different from your current password.');
+        } else {
+          toast.error(error.message);
+        }
       } else {
-        toast.success('Password updated successfully! You can now sign in.');
-        window.history.replaceState(null, '', window.location.pathname);
+        toast.success('Password updated successfully! Signing you in...');
+        // Clear URL params
+        window.history.replaceState(null, '', '/auth');
+        // Sign out to clear recovery session, then redirect to login
         await supabase.auth.signOut();
-        setView('login');
         setPassword('');
         setConfirmPassword('');
+        setEmail('');
+        setView('login');
+        toast.success('You can now sign in with your new password!');
       }
     } catch (err) {
+      console.error('Password reset error:', err);
       toast.error('Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);
