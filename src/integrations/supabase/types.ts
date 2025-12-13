@@ -38,36 +38,53 @@ export type Database = {
       coupon_codes: {
         Row: {
           code: string
+          coupon_type: string | null
           created_at: string
           creator_email: string
           discount_amount: number
+          discount_percentage: number | null
+          expiry_date: string | null
           id: string
           is_active: boolean
+          times_used: number | null
           updated_at: string
+          usage_limit: number | null
         }
         Insert: {
           code: string
+          coupon_type?: string | null
           created_at?: string
           creator_email: string
           discount_amount?: number
+          discount_percentage?: number | null
+          expiry_date?: string | null
           id?: string
           is_active?: boolean
+          times_used?: number | null
           updated_at?: string
+          usage_limit?: number | null
         }
         Update: {
           code?: string
+          coupon_type?: string | null
           created_at?: string
           creator_email?: string
           discount_amount?: number
+          discount_percentage?: number | null
+          expiry_date?: string | null
           id?: string
           is_active?: boolean
+          times_used?: number | null
           updated_at?: string
+          usage_limit?: number | null
         }
         Relationships: []
       }
       coupon_usage: {
         Row: {
           amount_paid: number
+          commission_payable: boolean | null
+          commission_percentage: number | null
           coupon_id: string
           created_at: string
           creator_earning: number
@@ -80,6 +97,8 @@ export type Database = {
         }
         Insert: {
           amount_paid: number
+          commission_payable?: boolean | null
+          commission_percentage?: number | null
           coupon_id: string
           created_at?: string
           creator_earning?: number
@@ -92,6 +111,8 @@ export type Database = {
         }
         Update: {
           amount_paid?: number
+          commission_payable?: boolean | null
+          commission_percentage?: number | null
           coupon_id?: string
           created_at?: string
           creator_earning?: number
