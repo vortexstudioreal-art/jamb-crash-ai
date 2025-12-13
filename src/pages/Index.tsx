@@ -101,26 +101,18 @@ const Index = () => {
   // Combined loading state
   const isFullyLoading = isLoading || trialLoading;
 
-  // Redirect admins/owners/collaborators to admin panel - FIRST PRIORITY
-  useEffect(() => {
-    if (isFullyLoading) return;
-    
-    // Admin/Owner/Collaborator bypass ALL user flows - redirect immediately
-    if (userEmail && (isAdmin || isOwner)) {
-      navigate('/admin', { replace: true });
-      return;
-    }
-  }, [userEmail, isAdmin, isOwner, isFullyLoading, navigate]);
+  // Admins/owners can use dashboard normally - no auto-redirect
+  // They access admin panel via the gear (Shield) icon in header
   
-  // Auto-redirect logic for regular users (after admin check)
+  // Auto-redirect logic for all users
   useEffect(() => {
     if (isFullyLoading) return;
     
-    // Skip if admin (handled above)
-    if (isAdmin || isOwner) return;
+    // Admins/owners have full access - treat them like paid users
+    const hasFullAccess = effectiveAccess || isAdmin || isOwner;
     
-    // If user is signed in and has PAID access, go to dashboard
-    if (userEmail && effectiveAccess && currentStep === 'landing') {
+    // If user is signed in and has access (paid OR admin), go to dashboard
+    if (userEmail && hasFullAccess && currentStep === 'landing') {
       setCurrentStep('dashboard');
       saveDashboardState('dashboard');
       window.scrollTo({ top: 0, behavior: 'instant' });
@@ -128,7 +120,7 @@ const Index = () => {
     }
     
     // Trial users: if logged in and has active trial → go to dashboard
-    if (userEmail && !effectiveAccess && isTrialActive && currentStep === 'landing') {
+    if (userEmail && !hasFullAccess && isTrialActive && currentStep === 'landing') {
       if (userSubjects.length === 0) {
         setCurrentStep('subject-select');
       } else {
@@ -140,11 +132,11 @@ const Index = () => {
     }
     
     // New user (no trial used yet) - show subject selection to start trial
-    if (userEmail && !effectiveAccess && !hasTrialUsed && canStartTrial && currentStep === 'landing') {
+    if (userEmail && !hasFullAccess && !hasTrialUsed && canStartTrial && currentStep === 'landing') {
       setCurrentStep('subject-select');
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
-  }, [userEmail, effectiveAccess, effectiveAdmin, isFullyLoading, currentStep, isTrialActive, hasTrialUsed, canStartTrial, userSubjects.length, navigate]);
+  }, [userEmail, effectiveAccess, isAdmin, isOwner, isFullyLoading, currentStep, isTrialActive, hasTrialUsed, canStartTrial, userSubjects.length]);
 
   // Load user subjects
   useEffect(() => {
@@ -278,7 +270,6 @@ const Index = () => {
     // Admin/owner/collaborators already have full access
     if (isAdmin || isOwner) {
       toast.info('You already have full access!');
-      navigate('/admin');
       return;
     }
     
@@ -449,8 +440,9 @@ const Index = () => {
 
   // Subject selection step
   if (currentStep === 'subject-select' && userEmail) {
+    // Admins with no subjects selected - go to dashboard (they have full access)
     if (effectiveAdmin) {
-      navigate('/admin');
+      setCurrentStep('dashboard');
       return null;
     }
     

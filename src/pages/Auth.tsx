@@ -102,14 +102,9 @@ export default function Auth() {
   // Redirect if already logged in (but not during password reset)
   useEffect(() => {
     if (user && !isLoading && view !== 'reset-password') {
-      // Admins and owners go to admin panel
-      if (isOwner || isAdmin) {
-        navigate('/admin', { replace: true });
-        return;
-      }
-      
-      // Paid users go to dashboard
-      if (hasAccess) {
+      // Admins/owners and paid users go to dashboard
+      // They can access admin panel via the gear icon
+      if (isOwner || isAdmin || hasAccess) {
         navigate('/?step=dashboard', { replace: true });
         return;
       }
