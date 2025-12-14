@@ -39,9 +39,16 @@ export const TrialExpiredScreen = ({ onUpgrade }: TrialExpiredScreenProps) => {
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
-    toast.success('Signed out successfully');
+    try {
+      await signOut();
+      // Force a small delay to ensure state clears before navigation
+      setTimeout(() => {
+        navigate('/', { replace: true });
+        toast.success('Signed out successfully');
+      }, 100);
+    } catch (error) {
+      toast.error('Failed to sign out. Please try again.');
+    }
   };
 
   return (

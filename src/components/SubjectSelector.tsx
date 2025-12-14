@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Check, BookOpen, Calculator, Atom, FlaskConical, Leaf, BookText, Building2, TrendingUp, Church, Globe, Receipt, ShoppingCart, Wheat } from 'lucide-react';
+import { Check, BookOpen, Calculator, Atom, FlaskConical, Leaf, BookText, Building2, TrendingUp, Church, Globe, Receipt, ShoppingCart, Wheat, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -109,6 +109,41 @@ export const SubjectSelector = ({ userEmail, onComplete, isBypassUser = false }:
       className="fixed inset-0 bg-background/95 backdrop-blur-sm z-50 flex items-center justify-center p-4"
     >
       <div className="bg-card rounded-3xl p-6 md:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-border shadow-2xl">
+        {/* Progress Indicator */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between max-w-xs mx-auto">
+            {/* Step 1 - Create Account (Completed) */}
+            <div className="flex flex-col items-center">
+              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+                <CheckCircle className="w-5 h-5 text-primary-foreground" />
+              </div>
+              <span className="text-xs mt-1.5 text-primary font-medium">Account</span>
+            </div>
+            
+            {/* Connector (Completed) */}
+            <div className="flex-1 h-0.5 bg-primary mx-2 mb-5" />
+            
+            {/* Step 2 - Select Subjects (Active) */}
+            <div className="flex flex-col items-center">
+              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm">
+                2
+              </div>
+              <span className="text-xs mt-1.5 text-primary font-medium">Select Subjects</span>
+            </div>
+            
+            {/* Connector */}
+            <div className="flex-1 h-0.5 bg-border mx-2 mb-5" />
+            
+            {/* Step 3 - Start Learning */}
+            <div className="flex flex-col items-center">
+              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground font-bold text-sm">
+                3
+              </div>
+              <span className="text-xs mt-1.5 text-muted-foreground">Start Learning</span>
+            </div>
+          </div>
+        </div>
+
         <div className="text-center mb-6">
           <motion.div
             initial={{ scale: 0 }}
