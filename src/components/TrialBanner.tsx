@@ -40,11 +40,7 @@ export const TrialBanner = ({ userEmail, isAdmin, hasAccess, onTrialStart }: Tri
   };
 
   // Don't show banner if loading, dismissed, trial active, or user has access
-  if (loading || dismissed || isTrialActive || hasAccess || isAdmin || hasTrialUsed) {
-    return null;
-  }
-
-  if (!canStartTrial) {
+  if (loading || dismissed || isTrialActive || hasAccess || isAdmin || hasTrialUsed || !canStartTrial) {
     return null;
   }
 
