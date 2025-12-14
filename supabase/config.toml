@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.seed-science-syllabus]
 verify_jwt = false
+
+[functions.seed-art-syllabus]
+verify_jwt = false
