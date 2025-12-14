@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.seed-art-syllabus]
 verify_jwt = false
+
+[functions.seed-commercial-syllabus]
+verify_jwt = false
