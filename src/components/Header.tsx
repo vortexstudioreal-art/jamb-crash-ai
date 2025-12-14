@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
   onGetStarted: () => void;
@@ -8,6 +9,12 @@ interface HeaderProps {
 }
 
 export const Header = ({ onGetStarted, hasAccess }: HeaderProps) => {
+  const navigate = useNavigate();
+
+  const handleLogin = () => {
+    navigate('/auth');
+  };
+
   return (
     <motion.header
       initial={{ opacity: 0, y: -20 }}
@@ -31,10 +38,15 @@ export const Header = ({ onGetStarted, hasAccess }: HeaderProps) => {
           </a>
         </nav>
 
-        {/* Get Started always visible - navigates to plans */}
-        <Button variant="default" size="sm" onClick={onGetStarted}>
-          View Plans
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={handleLogin}>
+            <User className="w-4 h-4 mr-1" />
+            Login
+          </Button>
+          <Button variant="default" size="sm" onClick={onGetStarted}>
+            View Plans
+          </Button>
+        </div>
       </div>
     </motion.header>
   );
