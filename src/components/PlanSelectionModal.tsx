@@ -38,14 +38,14 @@ export const PlanSelectionModal = ({
             onClick={onClose}
           />
 
-          {/* Modal */}
+          {/* Modal Container */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90%] max-w-md lg:max-w-2xl"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
           >
-            <div className="bg-card rounded-2xl border border-border shadow-2xl overflow-hidden">
+            <div className="w-full max-w-md lg:max-w-2xl pointer-events-auto bg-card rounded-2xl border border-border shadow-2xl overflow-hidden">
               {/* Header */}
               <div className="bg-gradient-to-r from-primary to-green-500 p-4 lg:p-6 flex items-center justify-between">
                 <h2 className="text-white font-bold text-lg lg:text-xl">Choose Your Path</h2>
