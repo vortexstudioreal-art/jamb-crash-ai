@@ -49,12 +49,15 @@ export default function Auth() {
   const { signIn, signUp, user, isLoading, isOwner, isAdmin, hasAccess } = useAuth();
   const navigate = useNavigate();
 
-  // Check for trial signup flow from state
+  // Check for trial or payment signup flow from state
   useEffect(() => {
-    const state = location.state as { flow?: string; returnTo?: string } | null;
+    const state = location.state as { flow?: string; plan?: string; returnToPayment?: boolean } | null;
     if (state?.flow === 'trial') {
       setView('signup');
       setSignupFlow('trial');
+    } else if (state?.flow === 'signup' || state?.returnToPayment) {
+      setView('signup');
+      setSignupFlow('normal');
     }
   }, [location.state]);
 
@@ -120,6 +123,14 @@ export default function Auth() {
   // Redirect if already logged in (but not during password reset)
   useEffect(() => {
     if (user && !isLoading && view !== 'reset-password') {
+      const state = location.state as { plan?: string; returnToPayment?: boolean } | null;
+      
+      // If user just signed up and needs to pay, redirect to payment flow
+      if (state?.returnToPayment && state?.plan) {
+        navigate(`/?openPayment=true&plan=${state.plan}`, { replace: true });
+        return;
+      }
+      
       // Admins/owners and paid users go to dashboard
       // They can access admin panel via the gear icon
       if (isOwner || isAdmin || hasAccess) {
@@ -131,7 +142,7 @@ export default function Auth() {
       // They'll be redirected to subject selection via Index.tsx
       navigate('/', { replace: true });
     }
-  }, [user, isLoading, navigate, isOwner, isAdmin, hasAccess, view]);
+  }, [user, isLoading, navigate, isOwner, isAdmin, hasAccess, view, location.state]);
 
   const validateForm = () => {
     const newErrors: typeof errors = {};

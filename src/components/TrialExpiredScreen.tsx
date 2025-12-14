@@ -1,6 +1,9 @@
 import { motion } from 'framer-motion';
-import { Clock, Flame, Star, Zap } from 'lucide-react';
+import { Clock, Flame, Star, Zap, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 interface TrialExpiredScreenProps {
   onUpgrade: () => void;
@@ -32,6 +35,15 @@ const packages = [
 ];
 
 export const TrialExpiredScreen = ({ onUpgrade }: TrialExpiredScreenProps) => {
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+    toast.success('Signed out successfully');
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -121,6 +133,23 @@ export const TrialExpiredScreen = ({ onUpgrade }: TrialExpiredScreenProps) => {
             Thousands of students are already crushing it with JAMB 48-Hour Crash.
             Join them today and secure your 300+ score!
           </p>
+        </motion.div>
+
+        {/* Sign Out Button */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+          className="text-center mt-6"
+        >
+          <Button
+            variant="ghost"
+            onClick={handleSignOut}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Sign Out
+          </Button>
         </motion.div>
       </div>
     </motion.div>
