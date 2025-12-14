@@ -8,6 +8,7 @@ import { PricingSection } from '@/components/PricingSection';
 import { UploadSection } from '@/components/UploadSection';
 import { PersonalizationForm } from '@/components/PersonalizationForm';
 import { PaymentModal } from '@/components/PaymentModal';
+import { PlanSelectionModal } from '@/components/PlanSelectionModal';
 import { PaywallGate } from '@/components/PaywallGate';
 import { AdminBadge } from '@/components/AdminBadge';
 import { PremiumDashboard } from '@/components/PremiumDashboard';
@@ -31,7 +32,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, Lock, RefreshCw, Layers } from 'lucide-react';
+import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, Lock, RefreshCw, Layers, X } from 'lucide-react';
 
 type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'study-plan' | 'study-materials' | 'syllabus' | 'flashcards';
 type QuizType = 'full' | 'mini' | 'subject' | 'timed-practice';
@@ -63,6 +64,7 @@ const Index = () => {
   const [currentStep, setCurrentStep] = useState<Step>('landing');
   const [selectedPlan, setSelectedPlan] = useState<keyof typeof plans | null>(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isPlanSelectionOpen, setIsPlanSelectionOpen] = useState(false);
   const [personalizationData, setPersonalizationData] = useState<FormData | null>(null);
   const [userSubjects, setUserSubjects] = useState<string[]>([]);
   const [quizType, setQuizType] = useState<QuizType>('full');
@@ -70,6 +72,7 @@ const Index = () => {
   const [highlightStandard, setHighlightStandard] = useState(false);
   const [weakSubjectFromQuiz, setWeakSubjectFromQuiz] = useState<string | null>(null);
   const [showSubjectChanger, setShowSubjectChanger] = useState(false);
+  const [showTrialBanner, setShowTrialBanner] = useState(true);
   
   const { user, isLoading, hasAccess, isAdmin, isOwner, userRole, signOut, refreshAccess } = useAuth();
   const navigate = useNavigate();
@@ -279,14 +282,25 @@ const Index = () => {
       return;
     }
     
-    // For authenticated users without access, show payment modal directly
+    // For authenticated users, show plan selection modal (trial vs payment choice)
     if (user) {
-      setIsPaymentModalOpen(true);
+      setIsPlanSelectionOpen(true);
       return;
     }
     
     // For non-authenticated users, redirect to auth with plan info
     navigate('/auth', { state: { plan: planKey } });
+  };
+
+  const handleTrialFromPlanModal = () => {
+    setIsPlanSelectionOpen(false);
+    setCurrentStep('subject-select');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
+  const handlePaymentFromPlanModal = () => {
+    setIsPlanSelectionOpen(false);
+    setIsPaymentModalOpen(true);
   };
 
   const handlePaymentSuccess = async (reference: string, email: string) => {
@@ -314,9 +328,8 @@ const Index = () => {
   };
 
   const handleUploadComplete = (files: File[]) => {
-    toast.success(`${files.length} file(s) ready for AI magic! ✨`);
-    setCurrentStep('personalize');
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    toast.success(`${files.length} file(s) processed! Questions extracted. ✨`);
+    // Stay on the upload page to show results - don't redirect
   };
 
   const handleFormSubmit = (data: unknown) => {
@@ -917,14 +930,21 @@ const Index = () => {
       </div>
       <Footer />
 
-      {/* Free Trial Banner - only for non-logged-in users */}
-      {!user && !effectiveAccess && !isFullyLoading && (
+      {/* Free Trial Banner - only for non-logged-in users, with close button */}
+      {!user && !effectiveAccess && !isFullyLoading && showTrialBanner && (
         <motion.div
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-r from-primary/90 to-green-600/90 backdrop-blur-sm z-50"
         >
-          <div className="max-w-4xl mx-auto flex items-center justify-between gap-4 flex-wrap">
+          <button
+            onClick={() => setShowTrialBanner(false)}
+            className="absolute top-2 right-2 text-white/70 hover:text-white p-1"
+            aria-label="Close banner"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          <div className="max-w-4xl mx-auto flex items-center justify-between gap-4 flex-wrap pr-8">
             <div className="text-primary-foreground">
               <p className="font-bold">🎁 Free Trial Available!</p>
               <p className="text-sm opacity-90">Get 30 minutes of Premium access - No payment required</p>
@@ -937,6 +957,20 @@ const Index = () => {
             </Button>
           </div>
         </motion.div>
+      )}
+
+      {/* Plan Selection Modal - Trial vs Payment choice */}
+      {selectedPlan && user && (
+        <PlanSelectionModal
+          isOpen={isPlanSelectionOpen}
+          onClose={() => setIsPlanSelectionOpen(false)}
+          planName={plans[selectedPlan].name}
+          planPrice={plans[selectedPlan].price}
+          onStartTrial={handleTrialFromPlanModal}
+          onContinuePayment={handlePaymentFromPlanModal}
+          canStartTrial={canStartTrial}
+          hasTrialUsed={hasTrialUsed}
+        />
       )}
 
       {/* Payment Modal */}

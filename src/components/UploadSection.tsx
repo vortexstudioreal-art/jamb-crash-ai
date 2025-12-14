@@ -117,7 +117,10 @@ export const UploadSection = ({ onUploadComplete, userSubjects = [] }: UploadSec
         toast.info('No questions found. Try a clearer image! 📸');
       }
 
-      onUploadComplete(files);
+      // Don't redirect to study plan - just notify completion
+      if (allQuestions.length > 0) {
+        onUploadComplete(files);
+      }
     } catch (err) {
       console.error('Error processing files:', err);
       toast.error('Oops! Something went wrong. Try again! 💪');
