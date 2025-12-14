@@ -226,12 +226,7 @@ const Index = () => {
   }, [currentStep]);
 
   const handleGetStarted = () => {
-    // If not logged in, redirect to trial signup
-    if (!user) {
-      navigate('/auth', { state: { flow: 'trial' } });
-      return;
-    }
-    
+    // Scroll to pricing for everyone
     setHighlightStandard(true);
     setTimeout(() => {
       const pricingSection = document.getElementById('pricing');
@@ -282,24 +277,29 @@ const Index = () => {
       return;
     }
     
-    // For authenticated users, show plan selection modal (trial vs payment choice)
-    if (user) {
-      setIsPlanSelectionOpen(true);
-      return;
-    }
-    
-    // For non-authenticated users, redirect to auth with plan info
-    navigate('/auth', { state: { plan: planKey } });
+    // Show plan selection modal for everyone (authenticated or not)
+    // Modal will handle the trial vs payment decision
+    setIsPlanSelectionOpen(true);
   };
 
   const handleTrialFromPlanModal = () => {
     setIsPlanSelectionOpen(false);
+    // If not logged in, redirect to auth with trial flow
+    if (!user) {
+      navigate('/auth', { state: { flow: 'trial' } });
+      return;
+    }
     setCurrentStep('subject-select');
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   const handlePaymentFromPlanModal = () => {
     setIsPlanSelectionOpen(false);
+    // If not logged in, redirect to auth first with plan info
+    if (!user) {
+      navigate('/auth', { state: { plan: selectedPlan, returnToPayment: true } });
+      return;
+    }
     setIsPaymentModalOpen(true);
   };
 

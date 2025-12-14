@@ -784,7 +784,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
               size="sm"
               onClick={() => setShowCalculator(true)}
               className="h-8 px-2 text-muted-foreground hover:text-primary"
-              title="JAMB Calculator"
+              title="Calculator"
             >
               <Calculator className="w-4 h-4" />
             </Button>
@@ -799,7 +799,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
           </div>
         </div>
         
-        {/* JAMB Calculator */}
+        {/* Calculator */}
         <JambCalculator isOpen={showCalculator} onClose={() => setShowCalculator(false)} />
         
         {/* Progress bar */}

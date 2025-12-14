@@ -9,7 +9,25 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 
-const emailSchema = z.string().email('Please enter a valid email address');
+// Stricter email validation - blocks disposable/fake emails
+const emailSchema = z.string()
+  .email('Please enter a valid email address')
+  .refine((email) => {
+    // Block common disposable email domains
+    const disposableDomains = [
+      'tempmail.com', 'throwaway.com', 'guerrillamail.com', 'mailinator.com',
+      'tempail.com', '10minutemail.com', 'fakeinbox.com', 'trashmail.com',
+      'yopmail.com', 'getnada.com', 'maildrop.cc', 'dispostable.com',
+      'temp-mail.org', 'mohmal.com', 'emailondeck.com', 'sharklasers.com'
+    ];
+    const domain = email.split('@')[1]?.toLowerCase();
+    return !disposableDomains.includes(domain);
+  }, 'Please use a valid email address (disposable emails not allowed)')
+  .refine((email) => {
+    // Must have valid TLD (at least 2 chars)
+    const tld = email.split('.').pop();
+    return tld && tld.length >= 2;
+  }, 'Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
 
 type AuthView = 'login' | 'signup' | 'forgot-password' | 'reset-password';
