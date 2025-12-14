@@ -31,9 +31,9 @@ export const Header = ({ onGetStarted, hasAccess }: HeaderProps) => {
           </a>
         </nav>
 
-        {/* Get Started always visible - scrolls to pricing */}
+        {/* Get Started always visible - navigates to plans */}
         <Button variant="default" size="sm" onClick={onGetStarted}>
-          Get Started
+          View Plans
         </Button>
       </div>
     </motion.header>

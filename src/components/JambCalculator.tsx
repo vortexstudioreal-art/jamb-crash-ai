@@ -247,11 +247,11 @@ export const JambCalculator = ({ isOpen, onClose }: JambCalculatorProps) => {
             className="fixed z-50 w-[280px] md:w-[340px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 md:top-auto md:bottom-24 md:right-8 md:left-auto md:translate-x-0 md:translate-y-0"
           >
             <div className="bg-card border-2 border-border rounded-3xl shadow-2xl overflow-hidden">
-              {/* Header - JAMB Style */}
+              {/* Header */}
               <div className="bg-gradient-to-r from-green-700 to-green-600 px-3 md:px-4 py-2 md:py-3 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-green-400 animate-pulse" />
-                  <span className="text-white font-bold text-xs md:text-sm tracking-wide">JAMB CALCULATOR</span>
+                  <span className="text-white font-bold text-xs md:text-sm tracking-wide">CALCULATOR</span>
                 </div>
                 <button
                   onClick={onClose}
