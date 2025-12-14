@@ -43,12 +43,12 @@ export const PlanSelectionModal = ({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90%] max-w-md"
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90%] max-w-md lg:max-w-2xl"
           >
             <div className="bg-card rounded-2xl border border-border shadow-2xl overflow-hidden">
               {/* Header */}
-              <div className="bg-gradient-to-r from-primary to-green-500 p-4 flex items-center justify-between">
-                <h2 className="text-white font-bold text-lg">Choose Your Path</h2>
+              <div className="bg-gradient-to-r from-primary to-green-500 p-4 lg:p-6 flex items-center justify-between">
+                <h2 className="text-white font-bold text-lg lg:text-xl">Choose Your Path</h2>
                 <button
                   onClick={onClose}
                   className="text-white/80 hover:text-white transition-colors"
@@ -58,80 +58,83 @@ export const PlanSelectionModal = ({
               </div>
 
               {/* Content */}
-              <div className="p-6 space-y-4">
+              <div className="p-6 lg:p-8 space-y-4">
                 <div className="text-center mb-6">
                   <p className="text-muted-foreground">
                     You selected <span className="font-bold text-foreground">{planName}</span> plan
                   </p>
-                  <p className="text-2xl font-bold text-primary mt-1">₦{planPrice.toLocaleString()}</p>
+                  <p className="text-2xl lg:text-3xl font-bold text-primary mt-1">₦{planPrice.toLocaleString()}</p>
                 </div>
 
-                {/* Free Trial Option */}
-                {canStartTrial && !hasTrialUsed && (
+                {/* Options Grid - Side by side on desktop */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {/* Free Trial Option */}
+                  {canStartTrial && !hasTrialUsed && (
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={onStartTrial}
+                      className="w-full p-4 lg:p-6 rounded-xl border-2 border-primary bg-primary/5 hover:bg-primary/10 transition-all text-left h-full"
+                    >
+                      <div className="flex flex-col items-center text-center lg:items-start lg:text-left gap-3">
+                        <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                          <Gift className="w-6 h-6 lg:w-7 lg:h-7 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-bold text-foreground text-lg flex items-center justify-center lg:justify-start gap-2">
+                            Start Free Trial
+                            <span className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
+                              FREE
+                            </span>
+                          </h3>
+                          <p className="text-sm text-muted-foreground mt-2">
+                            Get 30 minutes of full Premium access. No payment required!
+                          </p>
+                          <div className="flex items-center justify-center lg:justify-start gap-1 text-xs text-primary mt-3">
+                            <Clock className="w-3 h-3" />
+                            <span>One-time only • No credit card needed</span>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.button>
+                  )}
+
+                  {hasTrialUsed && (
+                    <div className="p-4 rounded-lg bg-muted flex items-center justify-center">
+                      <p className="text-sm text-muted-foreground">
+                        ⏰ You've already used your free trial
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Payment Option */}
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={onStartTrial}
-                    className="w-full p-4 rounded-xl border-2 border-primary bg-primary/5 hover:bg-primary/10 transition-all text-left"
+                    onClick={onContinuePayment}
+                    className="w-full p-4 lg:p-6 rounded-xl border-2 border-border hover:border-primary/50 bg-card hover:bg-muted/50 transition-all text-left h-full"
                   >
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                        <Gift className="w-5 h-5 text-primary" />
+                    <div className="flex flex-col items-center text-center lg:items-start lg:text-left gap-3">
+                      <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                        <CreditCard className="w-6 h-6 lg:w-7 lg:h-7 text-green-500" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-bold text-foreground flex items-center gap-2">
-                          Start Free Trial
-                          <span className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
-                            FREE
-                          </span>
-                        </h3>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Get 30 minutes of full Premium access. No payment required!
+                        <h3 className="font-bold text-foreground text-lg">Continue to Payment</h3>
+                        <p className="text-sm text-muted-foreground mt-2">
+                          Pay ₦{planPrice.toLocaleString()} and get instant access
                         </p>
-                        <div className="flex items-center gap-1 text-xs text-primary mt-2">
-                          <Clock className="w-3 h-3" />
-                          <span>One-time only • No credit card needed</span>
+                        <div className="flex items-center justify-center lg:justify-start gap-1 text-xs text-green-500 mt-3">
+                          <Zap className="w-3 h-3" />
+                          <span>Secure payment • Instant activation</span>
                         </div>
                       </div>
                     </div>
                   </motion.button>
-                )}
-
-                {hasTrialUsed && (
-                  <div className="p-3 rounded-lg bg-muted text-center">
-                    <p className="text-sm text-muted-foreground">
-                      ⏰ You've already used your free trial
-                    </p>
-                  </div>
-                )}
-
-                {/* Payment Option */}
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={onContinuePayment}
-                  className="w-full p-4 rounded-xl border-2 border-border hover:border-primary/50 bg-card hover:bg-muted/50 transition-all text-left"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
-                      <CreditCard className="w-5 h-5 text-green-500" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-foreground">Continue to Payment</h3>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Pay ₦{planPrice.toLocaleString()} and get instant access
-                      </p>
-                      <div className="flex items-center gap-1 text-xs text-green-500 mt-2">
-                        <Zap className="w-3 h-3" />
-                        <span>Secure payment • Instant activation</span>
-                      </div>
-                    </div>
-                  </div>
-                </motion.button>
+                </div>
               </div>
 
               {/* Footer */}
-              <div className="px-6 pb-6">
+              <div className="px-6 lg:px-8 pb-6 lg:pb-8">
                 <Button variant="ghost" onClick={onClose} className="w-full">
                   Cancel
                 </Button>
