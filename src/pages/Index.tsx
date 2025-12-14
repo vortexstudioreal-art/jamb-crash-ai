@@ -960,7 +960,7 @@ const Index = () => {
       )}
 
       {/* Plan Selection Modal - Trial vs Payment choice */}
-      {selectedPlan && user && (
+      {selectedPlan && (
         <PlanSelectionModal
           isOpen={isPlanSelectionOpen}
           onClose={() => setIsPlanSelectionOpen(false)}
@@ -968,8 +968,8 @@ const Index = () => {
           planPrice={plans[selectedPlan].price}
           onStartTrial={handleTrialFromPlanModal}
           onContinuePayment={handlePaymentFromPlanModal}
-          canStartTrial={canStartTrial}
-          hasTrialUsed={hasTrialUsed}
+          canStartTrial={!user ? true : canStartTrial}
+          hasTrialUsed={!user ? false : hasTrialUsed}
         />
       )}
 
