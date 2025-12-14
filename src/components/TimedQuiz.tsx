@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, CheckCircle, XCircle, Pause, Play, Flag, ChevronLeft, ChevronRight, Sparkles, Volume2, VolumeX, Timer, Settings2 } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, Pause, Play, Flag, ChevronLeft, ChevronRight, Sparkles, Volume2, VolumeX, Timer, Settings2, Calculator } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,6 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { JambCalculator } from '@/components/JambCalculator';
 
 interface Question {
   id: string;
@@ -158,6 +159,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
   const [motivationMsg, setMotivationMsg] = useState('');
   const [selectedSubjectFilter, setSelectedSubjectFilter] = useState<string>('all');
   const [showAnswerFeedback, setShowAnswerFeedback] = useState<string | null>(null);
+  const [showCalculator, setShowCalculator] = useState(false);
   
   // Audio state - muted by default
   const [isSoundPlaying, setIsSoundPlaying] = useState(false);
@@ -776,6 +778,16 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
                 </div>
               </PopoverContent>
             </Popover>
+            {/* Calculator Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowCalculator(true)}
+              className="h-8 px-2 text-muted-foreground hover:text-primary"
+              title="JAMB Calculator"
+            >
+              <Calculator className="w-4 h-4" />
+            </Button>
             <Button
               variant="ghost"
               size="sm"
@@ -786,6 +798,9 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
             </Button>
           </div>
         </div>
+        
+        {/* JAMB Calculator */}
+        <JambCalculator isOpen={showCalculator} onClose={() => setShowCalculator(false)} />
         
         {/* Progress bar */}
         <div className="max-w-4xl mx-auto mt-2">
