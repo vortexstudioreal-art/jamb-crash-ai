@@ -2,3 +2,6 @@ project_id = "jznmcpddqxyuvjjweydw"
 
 [functions.seed-jamb-questions]
 verify_jwt = false
+
+[functions.seed-science-syllabus]
+verify_jwt = false
