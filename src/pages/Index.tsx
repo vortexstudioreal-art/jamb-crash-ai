@@ -196,6 +196,19 @@ const Index = () => {
   // Handle URL params
   useEffect(() => {
     const step = searchParams.get('step');
+    const openPayment = searchParams.get('openPayment');
+    const planParam = searchParams.get('plan');
+    
+    // Handle payment modal opening from auth redirect
+    if (openPayment === 'true' && planParam && user) {
+      const planKey = planParam as keyof typeof plans;
+      if (plans[planKey]) {
+        setSelectedPlan(planKey);
+        setIsPaymentModalOpen(true);
+      }
+      setSearchParams({});
+      return;
+    }
     
     if (step === 'dashboard' && (effectiveAccess || isTrialActive) && userEmail) {
       setCurrentStep('dashboard');
@@ -218,7 +231,7 @@ const Index = () => {
       setSearchParams({});
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
-  }, [searchParams, setSearchParams, userEmail, userSubjects.length, isFullyLoading, effectiveAccess, effectiveAdmin, isTrialActive]);
+  }, [searchParams, setSearchParams, userEmail, userSubjects.length, isFullyLoading, effectiveAccess, effectiveAdmin, isTrialActive, user]);
 
   // Save dashboard state when step changes
   useEffect(() => {
@@ -295,9 +308,9 @@ const Index = () => {
 
   const handlePaymentFromPlanModal = () => {
     setIsPlanSelectionOpen(false);
-    // If not logged in, redirect to auth first with plan info
+    // If not logged in, redirect to signup first with plan info
     if (!user) {
-      navigate('/auth', { state: { plan: selectedPlan, returnToPayment: true } });
+      navigate('/auth', { state: { plan: selectedPlan, returnToPayment: true, flow: 'signup' } });
       return;
     }
     setIsPaymentModalOpen(true);

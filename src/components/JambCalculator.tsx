@@ -237,14 +237,14 @@ export const JambCalculator = ({ isOpen, onClose }: JambCalculatorProps) => {
             onClick={onClose}
           />
 
-          {/* Calculator - Responsive positioning */}
+          {/* Calculator - Centered on all devices */}
           <motion.div
             ref={calculatorRef}
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed z-50 w-[280px] md:w-[340px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 md:top-auto md:bottom-24 md:right-8 md:left-auto md:translate-x-0 md:translate-y-0"
+            className="fixed z-50 w-[90%] max-w-[340px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
           >
             <div className="bg-card border-2 border-border rounded-3xl shadow-2xl overflow-hidden">
               {/* Header */}
