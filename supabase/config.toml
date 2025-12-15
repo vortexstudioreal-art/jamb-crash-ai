@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.generate-topic-content]
 verify_jwt = false
+
+[functions.seed-more-questions]
+verify_jwt = false
