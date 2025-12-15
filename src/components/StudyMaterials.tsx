@@ -1733,7 +1733,19 @@ const ALL_SUBJECTS = [
 ];
 
 export const StudyMaterials = ({ subjects, onBack }: StudyMaterialsProps) => {
-  const [selectedSubject, setSelectedSubject] = useState<string>('english');
+  // Normalize user's subjects to lowercase for matching
+  const normalizedUserSubjects = subjects.map(s => s.toLowerCase().replace('_', ' '));
+  
+  // Filter available subjects to only show user's selected subjects (always include english)
+  const availableSubjects = ALL_SUBJECTS.filter(s => 
+    s === 'english' || normalizedUserSubjects.includes(s) || normalizedUserSubjects.some(us => 
+      us.includes(s) || s.includes(us) || 
+      (s === 'literature' && us.includes('literature')) ||
+      (s === 'agricultural science' && (us.includes('agricultural') || us.includes('agric')))
+    )
+  );
+  
+  const [selectedSubject, setSelectedSubject] = useState<string>(availableSubjects[0] || 'english');
   const [selectedMaterial, setSelectedMaterial] = useState<MaterialContent | null>(null);
 
   const materials = SUBJECT_MATERIALS[selectedSubject] || [];
@@ -1864,7 +1876,7 @@ export const StudyMaterials = ({ subjects, onBack }: StudyMaterialsProps) => {
           {/* Subject Tabs - Scrollable */}
           <ScrollArea className="w-full mb-6">
             <div className="flex gap-2 pb-2">
-              {ALL_SUBJECTS.map(subject => (
+              {availableSubjects.map(subject => (
                 <Button
                   key={subject}
                   variant={selectedSubject === subject ? "default" : "outline"}
