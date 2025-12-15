@@ -21,6 +21,7 @@ import { StudyPlanGenerator } from '@/components/StudyPlanGenerator';
 import { StudyMaterials } from '@/components/StudyMaterials';
 import { SyllabusReader } from '@/components/SyllabusReader';
 import { Flashcards } from '@/components/Flashcards';
+import { CourseRequirements } from '@/components/CourseRequirements';
 import { TrialExpiredScreen } from '@/components/TrialExpiredScreen';
 import { TrialTimerBadge } from '@/components/TrialTimerBadge';
 import { Footer } from '@/components/Footer';
@@ -32,9 +33,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, Lock, RefreshCw, Layers, X } from 'lucide-react';
+import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, Lock, RefreshCw, Layers, X, GraduationCap } from 'lucide-react';
 
-type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'study-plan' | 'study-materials' | 'syllabus' | 'flashcards';
+type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'study-plan' | 'study-materials' | 'syllabus' | 'flashcards' | 'course-requirements';
 type QuizType = 'full' | 'mini' | 'subject' | 'timed-practice';
 
 interface FormData {
@@ -566,6 +567,27 @@ const Index = () => {
     );
   }
 
+  // Course Requirements step
+  if (currentStep === 'course-requirements' && userEmail) {
+    return (
+      <div className="min-h-screen bg-background">
+        <DashboardHeader 
+          userEmail={userEmail}
+          isOwner={effectiveOwner}
+          isCollaborator={isAdmin && !isOwner}
+          userRole={userRole}
+          onSignOut={handleSignOut}
+        />
+        <div className="pt-16">
+          <CourseRequirements
+            userSubjects={effectiveSubjects}
+            onBack={handleBackToDashboard}
+          />
+        </div>
+      </div>
+    );
+  }
+
   // Upload step
   if (currentStep === 'upload' && userEmail) {
     return (
@@ -764,6 +786,26 @@ const Index = () => {
                 >
                   <Layers className="w-6 h-6 text-orange-500" />
                   <span className="font-bold text-sm">Flashcards</span>
+                </Button>
+              </motion.div>
+
+              {/* Course Requirements Button */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="mb-6"
+              >
+                <Button
+                  variant="outline"
+                  className="w-full h-auto py-4 flex items-center justify-center gap-3 border-2 border-dashed border-primary/50 hover:border-primary hover:bg-primary/5 group"
+                  onClick={() => setCurrentStep('course-requirements')}
+                >
+                  <GraduationCap className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
+                  <div className="text-left">
+                    <span className="font-bold text-foreground block">Check Subject Combinations for Your Course</span>
+                    <span className="text-xs text-muted-foreground">Find out which courses match your subjects!</span>
+                  </div>
                 </Button>
               </motion.div>
 

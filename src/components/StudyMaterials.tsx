@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BookOpen, FileText, ArrowLeft, Download, ChevronRight } from 'lucide-react';
+import { BookOpen, FileText, ArrowLeft, Download, ChevronRight, GraduationCap } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { CourseRequirements } from '@/components/CourseRequirements';
 
 interface StudyMaterialsProps {
   subjects: string[];
@@ -1870,84 +1871,103 @@ export const StudyMaterials = ({ subjects, onBack }: StudyMaterialsProps) => {
             <BookOpen className="w-5 h-5 text-primary" />
             Study Materials 📚
           </CardTitle>
-          <p className="text-sm text-muted-foreground">Tap any subject to view materials</p>
+          <p className="text-sm text-muted-foreground">Tap any tab to switch between materials and course requirements</p>
         </CardHeader>
         <CardContent>
-          {/* Subject Tabs - Scrollable */}
-          <div className="w-full mb-6 overflow-x-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
-            <div className="flex gap-2 pb-3 min-w-max pr-4">
-              {availableSubjects.map(subject => (
-                <Button
-                  key={subject}
-                  variant={selectedSubject === subject ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedSubject(subject)}
-                  className="whitespace-nowrap capitalize shrink-0"
-                >
-                  {SUBJECT_DISPLAY_NAMES[subject] || subject.replace('_', ' ')}
-                </Button>
-              ))}
-            </div>
-          </div>
+          <Tabs defaultValue="materials" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="materials" className="flex items-center gap-2">
+                <BookOpen className="w-4 h-4" />
+                Study Materials
+              </TabsTrigger>
+              <TabsTrigger value="requirements" className="flex items-center gap-2">
+                <GraduationCap className="w-4 h-4" />
+                Course Requirements
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Materials List */}
-          <AnimatePresence mode="wait">
-            {materials.length > 0 ? (
-              <motion.div
-                key={selectedSubject}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="space-y-3"
-              >
-                {materials.map((material, idx) => (
-                  <motion.div
-                    key={idx}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.1 }}
-                    onClick={() => handleMaterialClick(material)}
-                    className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-primary/5 hover:border-primary/30 transition-all cursor-pointer group"
-                  >
-                    <div className="flex items-center gap-3">
-                      {material.type === 'pdf' ? (
-                        <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center">
-                          <FileText className="w-5 h-5 text-red-500" />
-                        </div>
-                      ) : (
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <BookOpen className="w-5 h-5 text-primary" />
-                        </div>
-                      )}
-                      <div>
-                        <p className="font-medium text-foreground group-hover:text-primary transition-colors">{material.title}</p>
-                        <p className="text-sm text-muted-foreground">{material.description}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className={material.type === 'pdf' ? 'text-red-500 border-red-500/30' : 'text-primary border-primary/30'}>
-                        {material.type.toUpperCase()}
-                      </Badge>
-                      <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                    </div>
-                  </motion.div>
-                ))}
-              </motion.div>
-            ) : (
-              <div className="text-center py-12 text-muted-foreground">
-                <BookOpen className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                <p className="text-lg font-medium">No materials available yet</p>
-                <p className="text-sm">Materials for this subject coming soon! 📖</p>
+            <TabsContent value="materials">
+              {/* Subject Tabs - Scrollable */}
+              <div className="w-full mb-6 overflow-x-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
+                <div className="flex gap-2 pb-3 min-w-max pr-4">
+                  {availableSubjects.map(subject => (
+                    <Button
+                      key={subject}
+                      variant={selectedSubject === subject ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setSelectedSubject(subject)}
+                      className="whitespace-nowrap capitalize shrink-0"
+                    >
+                      {SUBJECT_DISPLAY_NAMES[subject] || subject.replace('_', ' ')}
+                    </Button>
+                  ))}
+                </div>
               </div>
-            )}
-          </AnimatePresence>
 
-          {/* Coming Soon Banner */}
-          <div className="mt-6 p-4 rounded-lg bg-gradient-to-r from-primary/10 to-green-500/10 border border-primary/20">
-            <p className="text-sm text-center text-muted-foreground">
-              <span className="font-semibold text-primary">More Coming:</span> Video tutorials & past question PDFs! 🚀
-            </p>
-          </div>
+              {/* Materials List */}
+              <AnimatePresence mode="wait">
+                {materials.length > 0 ? (
+                  <motion.div
+                    key={selectedSubject}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="space-y-3"
+                  >
+                    {materials.map((material, idx) => (
+                      <motion.div
+                        key={idx}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.1 }}
+                        onClick={() => handleMaterialClick(material)}
+                        className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-primary/5 hover:border-primary/30 transition-all cursor-pointer group"
+                      >
+                        <div className="flex items-center gap-3">
+                          {material.type === 'pdf' ? (
+                            <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center">
+                              <FileText className="w-5 h-5 text-red-500" />
+                            </div>
+                          ) : (
+                            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                              <BookOpen className="w-5 h-5 text-primary" />
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-medium text-foreground group-hover:text-primary transition-colors">{material.title}</p>
+                            <p className="text-sm text-muted-foreground">{material.description}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className={material.type === 'pdf' ? 'text-red-500 border-red-500/30' : 'text-primary border-primary/30'}>
+                            {material.type.toUpperCase()}
+                          </Badge>
+                          <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </div>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                ) : (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <BookOpen className="w-16 h-16 mx-auto mb-4 opacity-30" />
+                    <p className="text-lg font-medium">No materials available yet</p>
+                    <p className="text-sm">Materials for this subject coming soon! 📖</p>
+                  </div>
+                )}
+              </AnimatePresence>
+
+              {/* Coming Soon Banner */}
+              <div className="mt-6 p-4 rounded-lg bg-gradient-to-r from-primary/10 to-green-500/10 border border-primary/20">
+                <p className="text-sm text-center text-muted-foreground">
+                  <span className="font-semibold text-primary">More Coming:</span> Video tutorials & past question PDFs! 🚀
+                </p>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="requirements">
+              <CourseRequirements userSubjects={subjects} isEmbedded={true} />
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </motion.div>
