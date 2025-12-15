@@ -659,6 +659,7 @@ export type Database = {
           hours_per_session: number | null
           id: string
           preferred_subjects: string[] | null
+          selected_course_id: string | null
           study_days: string[] | null
           target_score: number | null
           updated_at: string | null
@@ -670,6 +671,7 @@ export type Database = {
           hours_per_session?: number | null
           id?: string
           preferred_subjects?: string[] | null
+          selected_course_id?: string | null
           study_days?: string[] | null
           target_score?: number | null
           updated_at?: string | null
@@ -681,6 +683,7 @@ export type Database = {
           hours_per_session?: number | null
           id?: string
           preferred_subjects?: string[] | null
+          selected_course_id?: string | null
           study_days?: string[] | null
           target_score?: number | null
           updated_at?: string | null
