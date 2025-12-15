@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Check, BookOpen, Calculator, Atom, FlaskConical, Leaf, BookText, Building2, TrendingUp, Church, Globe, Receipt, ShoppingCart, Wheat, CheckCircle } from 'lucide-react';
+import { Check, BookOpen, Calculator, Atom, FlaskConical, Leaf, BookText, Building2, TrendingUp, Church, Globe, Receipt, ShoppingCart, Wheat, CheckCircle, GraduationCap, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { getMatchingCourses, getPartiallyMatchingCourses, SUBJECT_DISPLAY_NAMES } from '@/data/jambCourseRequirements';
 
 interface SubjectSelectorProps {
   userEmail: string;
@@ -206,6 +208,11 @@ export const SubjectSelector = ({ userEmail, onComplete, isBypassUser = false }:
           })}
         </div>
 
+        {/* Course Match Preview */}
+        {selected.length === 4 && (
+          <CourseMatchPreview selectedSubjects={selected} />
+        )}
+
         <div className="bg-accent/50 rounded-xl p-4 mb-6">
           <p className="text-sm text-muted-foreground text-center">
             💡 <strong>Pro tip:</strong> Pick subjects that match your course! 
@@ -229,6 +236,78 @@ export const SubjectSelector = ({ userEmail, onComplete, isBypassUser = false }:
             </>
           )}
         </Button>
+      </div>
+    </motion.div>
+  );
+};
+
+// Course Match Preview Component
+const CourseMatchPreview = ({ selectedSubjects }: { selectedSubjects: string[] }) => {
+  const matchingCourses = useMemo(() => getMatchingCourses(selectedSubjects), [selectedSubjects]);
+  const topMatches = matchingCourses.slice(0, 5);
+
+  if (matchingCourses.length === 0) {
+    const partialMatches = getPartiallyMatchingCourses(selectedSubjects).slice(0, 3);
+    
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 mb-6"
+      >
+        <div className="flex items-center gap-2 mb-3">
+          <AlertTriangle className="w-5 h-5 text-yellow-500" />
+          <h3 className="font-semibold text-foreground">Limited Course Matches</h3>
+        </div>
+        <p className="text-sm text-muted-foreground mb-3">
+          Your current combo doesn't fully match many courses. Consider these partial matches:
+        </p>
+        <div className="space-y-2">
+          {partialMatches.map(course => (
+            <div key={course.id} className="flex items-center justify-between text-sm">
+              <span className="text-foreground">{course.course}</span>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="text-yellow-400 border-yellow-500/30 text-xs">
+                  {Math.round(course.matchPercentage)}% match
+                </Badge>
+                <span className="text-xs text-muted-foreground">
+                  Need: {course.missingSubjects.map(s => SUBJECT_DISPLAY_NAMES[s]).join(', ')}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mb-6"
+    >
+      <div className="flex items-center gap-2 mb-3">
+        <GraduationCap className="w-5 h-5 text-green-500" />
+        <h3 className="font-semibold text-foreground">Your Combo Matches!</h3>
+        <Badge className="bg-green-500 text-white text-xs ml-auto">
+          {matchingCourses.length} courses
+        </Badge>
+      </div>
+      <p className="text-sm text-muted-foreground mb-3">
+        You're eligible for these courses with your subject combination:
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {topMatches.map(course => (
+          <Badge key={course.id} variant="secondary" className="text-xs">
+            {course.course}
+          </Badge>
+        ))}
+        {matchingCourses.length > 5 && (
+          <Badge variant="outline" className="text-xs text-primary border-primary/30">
+            +{matchingCourses.length - 5} more
+          </Badge>
+        )}
       </div>
     </motion.div>
   );
