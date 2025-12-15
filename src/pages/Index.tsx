@@ -22,6 +22,7 @@ import { StudyMaterials } from '@/components/StudyMaterials';
 import { SyllabusReader } from '@/components/SyllabusReader';
 import { Flashcards } from '@/components/Flashcards';
 import { CourseRequirements } from '@/components/CourseRequirements';
+import { CourseTipsCard } from '@/components/CourseTipsCard';
 import { TrialExpiredScreen } from '@/components/TrialExpiredScreen';
 import { TrialTimerBadge } from '@/components/TrialTimerBadge';
 import { Footer } from '@/components/Footer';
@@ -794,7 +795,7 @@ const Index = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="mb-6"
+                className="mb-4"
               >
                 <Button
                   variant="outline"
@@ -807,6 +808,16 @@ const Index = () => {
                     <span className="text-xs text-muted-foreground">Find out which courses match your subjects!</span>
                   </div>
                 </Button>
+              </motion.div>
+
+              {/* Course Tips Card */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.22 }}
+                className="mb-6"
+              >
+                <CourseTipsCard userEmail={userEmail} userSubjects={effectiveSubjects} />
               </motion.div>
 
               {/* Subject Tags with Change Button */}
