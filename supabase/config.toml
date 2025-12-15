@@ -12,5 +12,8 @@ verify_jwt = false
 [functions.seed-commercial-syllabus]
 verify_jwt = false
 
+[functions.seed-irs-syllabus]
+verify_jwt = false
+
 [functions.generate-topic-content]
 verify_jwt = false
