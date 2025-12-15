@@ -95,7 +95,7 @@ const PaymentSuccess = () => {
               variant="outline"
               size="lg"
               className="w-full"
-              onClick={() => window.location.href = 'mailto:support@jamb48hr.com'}
+              onClick={() => window.location.href = 'mailto:support@jambcrash.ai'}
             >
               Contact Support
             </Button>

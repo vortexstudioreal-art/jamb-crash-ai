@@ -1,4 +1,4 @@
-import { BookOpen, Mail, Phone } from 'lucide-react';
+import { BookOpen, Mail } from 'lucide-react';
 
 export const Footer = () => {
   return (
@@ -10,7 +10,7 @@ export const Footer = () => {
               <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
                 <BookOpen className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="font-bold text-lg">JAMB 48hr Crash</span>
+              <span className="font-bold text-lg">Jamb Crash AI</span>
             </div>
             <p className="text-sm text-background/70">
               AI-powered JAMB preparation to help you score 300+ in just 48 hours of focused study.
@@ -23,11 +23,7 @@ export const Footer = () => {
               <ul className="space-y-2 text-sm text-background/70">
                 <li className="flex items-center gap-2">
                   <Mail className="w-4 h-4" />
-                  support@jamb48hr.com
-                </li>
-                <li className="flex items-center gap-2">
-                  <Phone className="w-4 h-4" />
-                  +234 800 JAMB 48HR
+                  support@jambcrash.ai
                 </li>
               </ul>
             </div>
@@ -44,7 +40,7 @@ export const Footer = () => {
         </div>
 
         <div className="mt-10 pt-8 border-t border-background/20 text-center text-sm text-background/50">
-          © 2024 JAMB 48hr Crash. All rights reserved.
+          © 2025 Jamb Crash AI. All rights reserved.
         </div>
       </div>
     </footer>

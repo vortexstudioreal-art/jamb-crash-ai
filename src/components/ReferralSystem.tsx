@@ -58,7 +58,7 @@ export const ReferralSystem = ({ userEmail }: ReferralSystemProps) => {
 
   const shareOnWhatsApp = () => {
     const text = encodeURIComponent(
-      `🎯 I'm preparing for JAMB with JAMB 48-Hour Crash!\n\nUse my code "${referralCode}" to get ₦1,000 OFF your purchase! 🚀\n\nGet your personalized study plan now!`
+      `🎯 I'm preparing for JAMB with Jamb Crash AI!\n\nUse my code "${referralCode}" to get ₦1,000 OFF your purchase! 🚀\n\nGet your personalized study plan now!`
     );
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };

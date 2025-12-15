@@ -47,10 +47,10 @@ serve(async (req: Request): Promise<Response> => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "JAMB Crash AI <onboarding@resend.dev>",
-        to: [email],
-        subject: "✅ JAMB Crash AI - Email System Working!",
-        html: `
+      from: "Jamb Crash AI <onboarding@resend.dev>",
+      to: [email],
+      subject: "✅ Jamb Crash AI - Email System Working!",
+      html: `
           <!DOCTYPE html>
           <html>
           <head>
@@ -67,7 +67,7 @@ serve(async (req: Request): Promise<Response> => {
           <body>
             <div class="container">
               <div class="header">
-                <h1>🎉 JAMB 48-Hour Crash</h1>
+                <h1>🎉 Jamb Crash AI</h1>
               </div>
               <div class="content">
                 <p style="text-align: center;">
@@ -75,19 +75,19 @@ serve(async (req: Request): Promise<Response> => {
                 </p>
                 <h2 style="color: #333; text-align: center;">Test Email Successful!</h2>
                 <p style="color: #666; text-align: center;">
-                  This confirms that JAMB Crash AI emails are properly configured and working.
+                  This confirms that Jamb Crash AI emails are properly configured and working.
                 </p>
                 <p style="color: #666; text-align: center;">
                   You'll now receive study plans, reminders, and important updates via email.
                 </p>
                 <div style="text-align: center; margin-top: 30px;">
-                  <a href="https://jambcrash.com" style="background: #16a34a; color: white; padding: 15px 30px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+                  <a href="https://jambcrash.ai" style="background: #16a34a; color: white; padding: 15px 30px; border-radius: 8px; text-decoration: none; font-weight: bold;">
                     Continue Studying 📚
                   </a>
                 </div>
               </div>
               <div class="footer">
-                <p>JAMB 48-Hour Crash - Score 300+ in JAMB</p>
+                <p>Jamb Crash AI - Score 300+ in JAMB</p>
                 <p>© ${new Date().getFullYear()} All rights reserved</p>
               </div>
             </div>

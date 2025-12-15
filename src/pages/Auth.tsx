@@ -356,7 +356,7 @@ export default function Auth() {
             ) : (
               <>
                 <Sparkles className="w-5 h-5 text-primary" />
-                <span className="text-sm font-semibold text-primary">JAMB 48-Hour Crash</span>
+                <span className="text-sm font-semibold text-primary">Jamb Crash AI</span>
               </>
             )}
           </motion.div>

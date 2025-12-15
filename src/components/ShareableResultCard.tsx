@@ -14,7 +14,7 @@ export const ShareableResultCard = ({ predictedMin, predictedMax, onClose }: Sha
   const cardRef = useRef<HTMLDivElement>(null);
 
   const handleShare = async () => {
-    const shareText = `🎯 I just got my JAMB score prediction: ${predictedMin}–${predictedMax}!\n\nPreparing with JAMB 48-Hour Crash 🚀\n\n#JAMB2025 #UTMEPrep #JAMBCrash`;
+    const shareText = `🎯 I just got my JAMB score prediction: ${predictedMin}–${predictedMax}!\n\nPreparing with Jamb Crash AI 🚀\n\n#JAMB2025 #UTMEPrep #JAMBCrash`;
     
     if (navigator.share) {
       try {
@@ -37,7 +37,7 @@ export const ShareableResultCard = ({ predictedMin, predictedMax, onClose }: Sha
   };
 
   const handleWhatsAppShare = () => {
-    const text = encodeURIComponent(`🎯 I just got my JAMB score prediction: ${predictedMin}–${predictedMax}!\n\nPreparing with JAMB 48-Hour Crash 🚀\n\n#JAMB2025 #UTMEPrep`);
+    const text = encodeURIComponent(`🎯 I just got my JAMB score prediction: ${predictedMin}–${predictedMax}!\n\nPreparing with Jamb Crash AI 🚀\n\n#JAMB2025 #UTMEPrep`);
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };
 
@@ -81,7 +81,7 @@ export const ShareableResultCard = ({ predictedMin, predictedMax, onClose }: Sha
             </div>
 
             <p className="text-sm opacity-80 mb-2">Preparing with</p>
-            <p className="text-xl font-bold">JAMB 48-Hour Crash 🚀</p>
+            <p className="text-xl font-bold">Jamb Crash AI 🚀</p>
             
             <div className="mt-4 pt-4 border-t border-white/20">
               <p className="text-xs opacity-70">#JAMB2025 #UTMEPrep</p>
