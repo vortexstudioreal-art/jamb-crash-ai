@@ -1874,8 +1874,8 @@ export const StudyMaterials = ({ subjects, onBack }: StudyMaterialsProps) => {
         </CardHeader>
         <CardContent>
           {/* Subject Tabs - Scrollable */}
-          <ScrollArea className="w-full mb-6">
-            <div className="flex gap-2 pb-2">
+          <div className="w-full mb-6 overflow-x-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
+            <div className="flex gap-2 pb-3 min-w-max pr-4">
               {availableSubjects.map(subject => (
                 <Button
                   key={subject}
@@ -1888,7 +1888,7 @@ export const StudyMaterials = ({ subjects, onBack }: StudyMaterialsProps) => {
                 </Button>
               ))}
             </div>
-          </ScrollArea>
+          </div>
 
           {/* Materials List */}
           <AnimatePresence mode="wait">
