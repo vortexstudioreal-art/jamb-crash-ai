@@ -137,7 +137,7 @@ export const TrialExpiredScreen = ({ onUpgrade }: TrialExpiredScreenProps) => {
             🎓 Don't let your JAMB dreams slip away!
           </p>
           <p className="text-muted-foreground">
-            Thousands of students are already crushing it with JAMB 48-Hour Crash.
+            Thousands of students are already crushing it with Jamb Crash AI.
             Join them today and secure your 300+ score!
           </p>
         </motion.div>

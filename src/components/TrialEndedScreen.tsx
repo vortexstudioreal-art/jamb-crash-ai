@@ -123,7 +123,7 @@ export const TrialEndedScreen = ({ onUpgrade }: TrialEndedScreenProps) => {
           className="text-center"
         >
           <p className="text-muted-foreground">
-            💡 Over 10,000 students have used JAMB 48-Hour Crash to prepare for their exams!
+            💡 Over 10,000 students have used Jamb Crash AI to prepare for their exams!
           </p>
         </motion.div>
       </div>

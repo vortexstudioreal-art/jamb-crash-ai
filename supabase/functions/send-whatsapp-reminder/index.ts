@@ -236,7 +236,7 @@ serve(async (req) => {
         const greeting = getDailyGreeting();
         const message = `${greeting}
 
-🎯 *JAMB 48-Hour Crash*
+🎯 *Jamb Crash AI*
 
 Ready for today's 20 JAMB questions? 📚
 
@@ -327,7 +327,7 @@ ${progress.predicted_score_min ? `• Predicted: ${progress.predicted_score_min}
     const greeting = getDailyGreeting();
     const message = `${greeting}
 
-🎯 *JAMB 48-Hour Crash - Study Reminder*
+🎯 *Jamb Crash AI - Study Reminder*
 ${studyStats}
 
 Ready for today's 20 JAMB questions? 📚

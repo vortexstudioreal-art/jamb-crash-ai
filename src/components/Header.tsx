@@ -26,7 +26,7 @@ export const Header = ({ onGetStarted, hasAccess }: HeaderProps) => {
           <div className="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center">
             <BookOpen className="w-5 h-5 text-primary-foreground" />
           </div>
-          <span className="font-bold text-lg text-foreground">JAMB 48hr</span>
+          <span className="font-bold text-lg text-foreground">Jamb Crash AI</span>
         </div>
 
         <nav className="hidden md:flex items-center gap-8">
