@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BookOpen, FileText, ArrowLeft, X, Download, ChevronRight } from 'lucide-react';
+import { BookOpen, FileText, ArrowLeft, Download, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface StudyMaterialsProps {
   subjects: string[];
@@ -74,72 +75,85 @@ const SUBJECT_MATERIALS: Record<string, MaterialContent[]> = {
 - **A piece of cake** - Very easy
 - **Add fuel to fire** - Make a situation worse
 - **At the drop of a hat** - Immediately, without hesitation
+- **An axe to grind** - A personal reason for doing something
 
 ### B
 - **Bite the bullet** - Face a difficult situation bravely
 - **Break the ice** - Start a conversation
 - **Burn the midnight oil** - Study/work late at night
 - **By hook or by crook** - By any means necessary
+- **Beat around the bush** - Avoid the main topic
 
 ### C
 - **Call it a day** - Stop working
 - **Cost an arm and a leg** - Very expensive
 - **Cry over spilt milk** - Regret something that can't be changed
 - **Cut corners** - Do something cheaply or quickly
+- **Cross that bridge when you come to it** - Deal with problems when they arise
 
 ### D
 - **Dead of night** - Middle of the night
 - **Down to earth** - Practical and realistic
 - **Drop in the bucket** - Very small amount
+- **Don't judge a book by its cover** - Don't judge by appearance
 
 ### E
 - **Easy as pie** - Very simple
 - **Every cloud has a silver lining** - Good comes from bad
+- **Eat humble pie** - Admit you were wrong
 
 ### F
 - **Face the music** - Accept consequences
 - **Fall on deaf ears** - Be ignored
 - **Feather in one's cap** - An achievement
+- **From the horse's mouth** - Directly from the source
 
 ### G
 - **Get cold feet** - Become nervous
 - **Give the green light** - Give permission
 - **Go the extra mile** - Do more than expected
+- **Grease someone's palm** - Bribe someone
 
 ### H
 - **Hit the nail on the head** - Be exactly right
 - **Hold your horses** - Wait, be patient
+- **Hot under the collar** - Angry
 
 ### I-J
 - **In the nick of time** - Just in time
 - **Jump on the bandwagon** - Follow a trend
+- **Jack of all trades** - Someone with many skills
 
 ### K-L
 - **Keep an eye on** - Watch carefully
 - **Let the cat out of the bag** - Reveal a secret
 - **Look before you leap** - Think before acting
+- **Lend an ear** - Listen carefully
 
 ### M-N
 - **Make ends meet** - Manage with limited money
 - **No stone unturned** - Try everything possible
+- **Nip in the bud** - Stop something early
 
 ### O-P
 - **Once in a blue moon** - Very rarely
 - **Pull someone's leg** - Joke with someone
 - **Put all eggs in one basket** - Risk everything
+- **Play devil's advocate** - Argue the opposite side
 
 ### R-S
 - **Rain cats and dogs** - Rain heavily
 - **Spill the beans** - Reveal information
 - **Steal someone's thunder** - Take credit
+- **Strike while the iron is hot** - Act at the right time
 
 ### T-W
 - **The ball is in your court** - It's your decision
 - **Under the weather** - Feeling sick
 - **When pigs fly** - Never
+- **Whole nine yards** - Everything possible
 
-📥 Download full PDF with 500+ idioms`,
-      pdfUrl: 'https://example.com/jamb-idioms.pdf'
+📥 Download full PDF with 500+ idioms`
     },
     { 
       title: 'Oral English Guide', 
@@ -246,6 +260,8 @@ x = (-b ± √(b² - 4ac)) / 2a
 - log(ab) = log a + log b
 - log(a/b) = log a - log b
 - log aⁿ = n log a
+- logₐa = 1
+- logₐ1 = 0
 
 ### GEOMETRY
 
@@ -278,13 +294,12 @@ x = (-b ± √(b² - 4ac)) / 2a
 **AP:** Tₙ = a + (n-1)d, Sₙ = n/2[2a + (n-1)d]
 **GP:** Tₙ = arⁿ⁻¹, Sₙ = a(rⁿ - 1)/(r - 1)
 
-📥 Download complete formula sheet`,
-      pdfUrl: 'https://example.com/jamb-maths-formulas.pdf'
+📥 Download complete formula sheet`
     },
     { 
-      title: 'Past Question Patterns', 
+      title: 'Common Patterns & Tips', 
       type: 'notes', 
-      description: 'Most repeated topics',
+      description: 'Most tested topics & tricks',
       content: `## JAMB Mathematics: Most Tested Topics
 
 ### TOP 10 MOST REPEATED TOPICS
@@ -337,81 +352,29 @@ x = (-b ± √(b² - 4ac)) / 2a
     - AP and GP
     - Sum formulas
 
+### SPEED TRICKS
+
+**Multiply by 11:**
+- 23 × 11 = 2(2+3)3 = 253
+
+**Multiply by 5:**
+- Divide by 2, multiply by 10
+- 48 × 5 = 240
+
+**Numbers ending in 5 squared:**
+- 25² = 2×3 | 25 = 625
+- 35² = 3×4 | 25 = 1225
+
 ### QUICK TIPS:
 ✅ Master indices - it's in EVERY exam
 ✅ Practice Venn diagrams with 3 sets
 ✅ Know your special angles by heart
 ✅ Standard deviation formula is a must`
     },
-    { 
-      title: 'Calculator Tricks', 
-      type: 'notes', 
-      description: 'Speed solving techniques',
-      content: `## Speed Solving Techniques (No Calculator Needed!)
-
-### MULTIPLICATION TRICKS
-
-**Multiply by 11:**
-- 23 × 11 = 2(2+3)3 = 253
-- 45 × 11 = 4(4+5)5 = 495
-
-**Multiply by 5:**
-- Divide by 2, multiply by 10
-- 48 × 5 = 48÷2 × 10 = 240
-
-**Multiply by 25:**
-- Divide by 4, multiply by 100
-- 36 × 25 = 36÷4 × 100 = 900
-
-**Multiply by 9:**
-- Multiply by 10, subtract original
-- 23 × 9 = 230 - 23 = 207
-
-### SQUARING TRICKS
-
-**Numbers ending in 5:**
-- 25² = 2×3 | 25 = 625
-- 35² = 3×4 | 25 = 1225
-- 85² = 8×9 | 25 = 7225
-
-**Numbers near 100:**
-- 97² = 97-3 | 3² = 94 | 09 = 9409
-- 103² = 103+3 | 3² = 106 | 09 = 10609
-
-### PERCENTAGE TRICKS
-
-**Finding X% of Y = Y% of X**
-- 8% of 25 = 25% of 8 = 2
-
-**15% of anything:**
-- Find 10%, add half of it
-- 15% of 80 = 8 + 4 = 12
-
-### FRACTION TRICKS
-
-**Comparing fractions:**
-- Cross multiply: a/b vs c/d
-- Compare a×d with b×c
-
-### DIVISIBILITY RULES
-
-- **By 2:** Last digit even
-- **By 3:** Sum of digits divisible by 3
-- **By 4:** Last 2 digits divisible by 4
-- **By 5:** Ends in 0 or 5
-- **By 6:** Divisible by 2 AND 3
-- **By 9:** Sum of digits divisible by 9
-- **By 11:** Alternating sum = 0 or ±11
-
-### TIME-SAVING IN EXAM:
-⏱️ Use these tricks to solve faster
-⏱️ Estimate before calculating
-⏱️ Eliminate impossible answers first`
-    },
   ],
   physics: [
     { 
-      title: 'Key Formulas Sheet', 
+      title: 'Formula Sheet', 
       type: 'pdf', 
       description: 'All JAMB physics formulas',
       content: `## Complete JAMB Physics Formulas
@@ -456,7 +419,7 @@ x = (-b ± √(b² - 4ac)) / 2a
 
 **Lenses:**
 - 1/f = 1/u + 1/v
-- Magnification: m = v/u = image height/object height
+- Magnification: m = v/u
 
 ### ELECTRICITY
 
@@ -470,17 +433,13 @@ x = (-b ± √(b² - 4ac)) / 2a
 - Series: 1/C = 1/C₁ + 1/C₂
 - Parallel: C = C₁ + C₂
 
-**Electric Field:** E = F/q = V/d
-**Coulomb's Law:** F = kQ₁Q₂/r²
-
-### HEAT & THERMODYNAMICS
+### HEAT
 
 - Q = mcΔθ (specific heat)
 - Q = mL (latent heat)
 - Gas Laws: PV/T = constant
 
-📥 Download complete physics formula sheet`,
-      pdfUrl: 'https://example.com/jamb-physics-formulas.pdf'
+📥 Download complete physics formula sheet`
     },
     { 
       title: 'Diagrams & Derivations', 
@@ -544,80 +503,6 @@ Radio → Microwave → Infrared → Visible → UV → X-ray → Gamma
 - Energy released: E = Δmc²
 - Half-life: N = N₀(½)^(t/T½)`
     },
-    { 
-      title: 'Common Mistakes', 
-      type: 'notes', 
-      description: 'Errors to avoid in JAMB',
-      content: `## Common Physics Mistakes to Avoid
-
-### UNIT ERRORS ⚠️
-
-**Always convert to SI units FIRST:**
-- km → m (×1000)
-- cm → m (÷100)
-- g → kg (÷1000)
-- minutes → seconds (×60)
-- hours → seconds (×3600)
-
-### SIGN ERRORS ⚠️
-
-**Velocity vs Speed:**
-- Velocity can be NEGATIVE (direction matters)
-- Speed is always POSITIVE
-
-**Deceleration:**
-- Use NEGATIVE acceleration
-- If slowing down: a = -value
-
-### FORMULA MIX-UPS ⚠️
-
-**Don't confuse:**
-- KE = ½mv² (not mv²)
-- v² = u² + 2as (not v = u + 2as)
-- Power = Work/Time (not Force/Time)
-
-### GRAPH MISTAKES ⚠️
-
-**Velocity-Time Graphs:**
-- Gradient = acceleration
-- Area under curve = displacement
-
-**Displacement-Time Graphs:**
-- Gradient = velocity
-- NOT acceleration!
-
-### ELECTRICITY ERRORS ⚠️
-
-**Resistors:**
-- SERIES: R increases (add up)
-- PARALLEL: R decreases (1/R formula)
-
-**Capacitors:**
-- SERIES: C decreases (1/C formula)
-- PARALLEL: C increases (add up)
-
-**Opposite rules!**
-
-### LENS/MIRROR ERRORS ⚠️
-
-**Sign Convention:**
-- Real: Positive distance
-- Virtual: Negative distance
-- Concave mirror: Positive focal length
-- Convex mirror: Negative focal length
-
-### WAVE ERRORS ⚠️
-
-**Don't confuse:**
-- Frequency = 1/Period (NOT wavelength)
-- v = fλ (velocity, not frequency)
-
-### TOP TIPS:
-✅ Always write units in calculations
-✅ Draw diagrams for mechanics problems
-✅ Check if answer makes physical sense
-✅ Read question twice - what are they ACTUALLY asking?`
-    },
   ],
   chemistry: [
     { 
@@ -671,13 +556,11 @@ Hydrocarbon + O₂ → CO₂ + H₂O
 
 **Displacement:**
 Zn + CuSO₄ → ZnSO₄ + Cu
-(More reactive metal displaces less reactive)
 
 **Reactivity Series:**
 K > Na > Ca > Mg > Al > Zn > Fe > Pb > H > Cu > Ag > Au
 
-📥 Download complete periodic table with reactions`,
-      pdfUrl: 'https://example.com/jamb-periodic-table.pdf'
+📥 Download complete periodic table with reactions`
     },
     { 
       title: 'Organic Chemistry Summary', 
@@ -720,17 +603,6 @@ K > Na > Ca > Mg > Al > Zn > Fe > Pb > H > Cu > Ag > Au
 | C=O | Ketone | Propanone |
 | -NH₂ | Amine | Ethylamine |
 
-### ISOMERISM
-
-**Structural Isomers:**
-Same molecular formula, different arrangement
-- C₄H₁₀: Butane vs 2-methylpropane
-
-**IUPAC Naming:**
-1. Find longest carbon chain
-2. Number from end nearest substituent
-3. Name substituents with position
-
 ### KEY REACTIONS
 
 **Addition (Alkenes):**
@@ -746,81 +618,1078 @@ CH₃COOH + C₂H₅OH → CH₃COOC₂H₅ + H₂O
 **Polymerization:**
 nCH₂=CH₂ → (-CH₂-CH₂-)ₙ`
     },
+  ],
+  biology: [
     { 
-      title: 'Balancing Equations Guide', 
+      title: 'Cell Structure', 
       type: 'notes', 
-      description: 'Step-by-step balancing',
-      content: `## How to Balance Chemical Equations
+      description: 'Complete cell biology guide',
+      content: `## Cell Structure & Functions
 
-### THE GOLDEN RULE
-Atoms in = Atoms out (Law of Conservation of Mass)
+### CELL ORGANELLES
 
-### STEP-BY-STEP METHOD
+**Nucleus:**
+- Contains DNA (genetic material)
+- Controls cell activities
+- Has nuclear membrane with pores
 
-**Step 1:** Write the unbalanced equation
-**Step 2:** Count atoms on each side
-**Step 3:** Balance one element at a time
-**Step 4:** Start with metals, then non-metals
-**Step 5:** Balance H and O last
-**Step 6:** Check your work!
+**Mitochondria:**
+- Powerhouse of the cell
+- Site of aerobic respiration
+- Produces ATP (energy)
+- Has double membrane
 
-### EXAMPLE 1: Simple Combustion
+**Ribosomes:**
+- Site of protein synthesis
+- Found free or on rough ER
+- Made of RNA and protein
 
-**Unbalanced:** CH₄ + O₂ → CO₂ + H₂O
+**Endoplasmic Reticulum (ER):**
+- Rough ER: Has ribosomes, makes proteins
+- Smooth ER: Makes lipids, detoxifies
 
-**Count atoms:**
-- Left: C=1, H=4, O=2
-- Right: C=1, H=2, O=3
+**Golgi Apparatus:**
+- Packages and modifies proteins
+- Creates vesicles for transport
 
-**Balance H:** CH₄ + O₂ → CO₂ + 2H₂O
-**Balance O:** CH₄ + 2O₂ → CO₂ + 2H₂O ✅
+**Lysosomes:**
+- Contains digestive enzymes
+- Breaks down worn-out organelles
+- "Suicide bags" of the cell
 
-### EXAMPLE 2: Metal + Acid
+**Chloroplast (Plants only):**
+- Site of photosynthesis
+- Contains chlorophyll
+- Has double membrane + thylakoids
 
-**Unbalanced:** Zn + HCl → ZnCl₂ + H₂
+**Vacuole:**
+- Plant cells: Large central vacuole (storage, turgor)
+- Animal cells: Small, temporary vacuoles
 
-**Balance Cl:** Zn + 2HCl → ZnCl₂ + H₂
-**Check H:** 2 on each side ✅
-**Check Zn:** 1 on each side ✅
+**Cell Wall (Plants, Fungi, Bacteria):**
+- Made of cellulose (plants)
+- Provides support and shape
+- Fully permeable
 
-### EXAMPLE 3: Combustion of Alcohol
+### PLANT vs ANIMAL CELLS
 
-**Unbalanced:** C₂H₅OH + O₂ → CO₂ + H₂O
+| Feature | Plant | Animal |
+|---------|-------|--------|
+| Cell wall | Present | Absent |
+| Chloroplast | Present | Absent |
+| Vacuole | Large, central | Small, temporary |
+| Centrioles | Absent | Present |
+| Shape | Fixed, rectangular | Variable |
 
-**Balance C:** C₂H₅OH + O₂ → 2CO₂ + H₂O
-**Balance H:** C₂H₅OH + O₂ → 2CO₂ + 3H₂O
-**Balance O:** C₂H₅OH + 3O₂ → 2CO₂ + 3H₂O ✅
+### CELL DIVISION
 
-### TIPS FOR TRICKY EQUATIONS
+**Mitosis:** 
+- 1 cell → 2 identical cells
+- For growth and repair
+- Stages: PMAT (Prophase, Metaphase, Anaphase, Telophase)
 
-**If stuck with O:**
-- Try multiplying entire equation by 2
-- Then balance O
+**Meiosis:**
+- 1 cell → 4 different cells
+- For gamete (sex cell) production
+- Results in genetic variation`
+    },
+    { 
+      title: 'Ecology Summary', 
+      type: 'pdf', 
+      description: 'Ecosystems & food chains',
+      content: `## Ecology Complete Guide
 
-**Polyatomic ions:**
-- Treat as single unit if unchanged
-- SO₄²⁻, NO₃⁻, CO₃²⁻
+### LEVELS OF ORGANIZATION
 
-**Redox Reactions:**
-- Use oxidation numbers
-- Electrons lost = Electrons gained
+Individual → Population → Community → Ecosystem → Biome → Biosphere
 
-### COMMON MISTAKES ⚠️
+### FOOD CHAINS & WEBS
 
-❌ Changing subscripts (H₂O → H₃O)
-❌ Forgetting to count ALL atoms
-❌ Not rechecking at the end
+**Trophic Levels:**
+1. Producers (autotrophs) - plants, algae
+2. Primary consumers (herbivores)
+3. Secondary consumers (carnivores)
+4. Tertiary consumers (top predators)
+5. Decomposers (bacteria, fungi)
 
-### PRACTICE THESE:
+**Energy Flow:**
+- Only 10% energy transferred per level
+- 90% lost as heat
+- Explains why food chains are short
 
-1. Fe + O₂ → Fe₂O₃
-2. Al + H₂SO₄ → Al₂(SO₄)₃ + H₂
-3. C₃H₈ + O₂ → CO₂ + H₂O
+### NUTRIENT CYCLES
 
-**Answers:**
-1. 4Fe + 3O₂ → 2Fe₂O₃
-2. 2Al + 3H₂SO₄ → Al₂(SO₄)₃ + 3H₂
-3. C₃H₈ + 5O₂ → 3CO₂ + 4H₂O`
+**Carbon Cycle:**
+- Photosynthesis: CO₂ → Glucose
+- Respiration: Glucose → CO₂
+- Combustion: Fossil fuels → CO₂
+- Decomposition: Dead matter → CO₂
+
+**Nitrogen Cycle:**
+- Nitrogen fixation: N₂ → NH₃ (by bacteria)
+- Nitrification: NH₃ → NO₃⁻
+- Denitrification: NO₃⁻ → N₂
+
+**Water Cycle:**
+- Evaporation → Condensation → Precipitation → Collection
+
+### ECOLOGICAL CONCEPTS
+
+**Carrying Capacity:** Maximum population an environment can support
+
+**Biotic Factors:** Living things affecting organisms
+- Predation, competition, parasitism
+
+**Abiotic Factors:** Non-living factors
+- Temperature, water, light, pH
+
+### POPULATION INTERACTIONS
+
+**Symbiosis Types:**
+- Mutualism: Both benefit (+/+)
+- Commensalism: One benefits, other unaffected (+/0)
+- Parasitism: One benefits, other harmed (+/-)
+- Competition: Both harmed (-/-)
+- Predation: One benefits, other dies (+/-)
+
+📥 Download complete ecology PDF`
+    },
+  ],
+  literature: [
+    { 
+      title: 'Literary Devices', 
+      type: 'notes', 
+      description: 'All figures of speech explained',
+      content: `## Literary Devices & Figures of Speech
+
+### SOUND DEVICES
+
+**Alliteration:** Repetition of consonant sounds at the beginning
+- "Peter Piper picked a peck of pickled peppers"
+
+**Assonance:** Repetition of vowel sounds
+- "The rain in Spain stays mainly in the plain"
+
+**Onomatopoeia:** Words that sound like what they mean
+- buzz, hiss, splash, bang, meow
+
+**Rhyme:** Same ending sounds
+- Internal rhyme: within a line
+- End rhyme: at line endings
+
+### COMPARISON DEVICES
+
+**Simile:** Comparison using "like" or "as"
+- "He ran like the wind"
+- "She is as brave as a lion"
+
+**Metaphor:** Direct comparison without like/as
+- "Life is a journey"
+- "The world is a stage"
+
+**Personification:** Giving human qualities to non-human things
+- "The sun smiled down on us"
+- "The wind whispered through the trees"
+
+### CONTRAST & EMPHASIS
+
+**Hyperbole:** Extreme exaggeration
+- "I've told you a million times"
+- "I'm so hungry I could eat a horse"
+
+**Litotes/Understatement:** Saying less than meant
+- "It's not rocket science" (it's easy)
+- "He's not a bad singer" (he's good)
+
+**Irony:**
+- Verbal: Saying opposite of meaning
+- Situational: Opposite of expected happens
+- Dramatic: Audience knows what characters don't
+
+**Paradox:** Contradictory statement that's true
+- "Less is more"
+- "The only constant is change"
+
+**Oxymoron:** Two opposite words together
+- "Living dead," "deafening silence," "bittersweet"
+
+### REPETITION DEVICES
+
+**Anaphora:** Same word(s) at the start of lines
+- "I have a dream... I have a dream..."
+
+**Epistrophe:** Same word(s) at end of lines
+
+**Refrain:** Repeated line or phrase in poem/song
+
+### OTHER DEVICES
+
+**Euphemism:** Mild expression for harsh reality
+- "Passed away" instead of "died"
+
+**Symbolism:** Object represents an idea
+- Dove = peace, Red = danger/love
+
+**Imagery:** Descriptive language appealing to senses
+- Visual, auditory, tactile, gustatory, olfactory`
+    },
+    { 
+      title: 'Drama, Prose & Poetry Tips', 
+      type: 'notes', 
+      description: 'Analysis techniques for all genres',
+      content: `## Literature Analysis Guide
+
+### DRAMA ANALYSIS
+
+**Key Elements:**
+- Plot: Sequence of events
+- Conflict: Central struggle
+- Characters: Protagonist vs Antagonist
+- Theme: Central message
+- Setting: Time and place
+- Dialogue: Character speech
+
+**Types of Drama:**
+- Tragedy: Ends in death/suffering
+- Comedy: Ends happily
+- Tragi-comedy: Mix of both
+- Melodrama: Exaggerated emotions
+
+**Dramatic Techniques:**
+- Soliloquy: Character speaks thoughts alone
+- Monologue: Long speech to others
+- Aside: Brief comment to audience
+- Flashback: Scene from the past
+- Foreshadowing: Hints at future events
+
+### PROSE ANALYSIS
+
+**Types:**
+- Novel: Long fictional narrative
+- Novella: Medium-length fiction
+- Short story: Brief narrative
+- Essay: Non-fiction piece
+
+**Narrative Techniques:**
+- First person: "I" narrator
+- Third person limited: One character's view
+- Third person omniscient: All-knowing narrator
+- Stream of consciousness: Inner thoughts
+
+**Elements to Analyze:**
+- Point of view
+- Characterization (direct vs indirect)
+- Setting and atmosphere
+- Plot structure
+- Themes and motifs
+
+### POETRY ANALYSIS
+
+**Poetic Forms:**
+- Sonnet: 14 lines
+- Ballad: Story poem
+- Ode: Praise poem
+- Elegy: Mourning poem
+- Epic: Long heroic poem
+- Free verse: No fixed pattern
+
+**Poetic Devices:**
+- Meter: Rhythm pattern
+- Stanza: Group of lines
+- Enjambment: Line runs into next
+- Caesura: Pause within line
+
+**How to Analyze Poetry:**
+1. Read multiple times
+2. Identify the speaker
+3. Note the tone and mood
+4. Find literary devices
+5. Interpret the theme
+6. Consider the title
+
+### ANSWERING LITERATURE QUESTIONS
+
+**For context questions:**
+- Quote directly from the text
+- Explain significance
+- Link to theme
+
+**For essay questions:**
+- Introduction with thesis
+- Body paragraphs with evidence
+- Conclusion summarizing main points`
+    },
+  ],
+  government: [
+    { 
+      title: 'Key Concepts & Constitution', 
+      type: 'notes', 
+      description: 'Government fundamentals',
+      content: `## Government Key Concepts
+
+### BASIC CONCEPTS
+
+**State:** A territory with a government, population, sovereignty, and defined borders
+
+**Government:** Body that makes and enforces laws
+- Types: Democracy, Monarchy, Aristocracy, Oligarchy, Autocracy
+
+**Power:** Ability to influence or control others
+- Authority: Legitimate power
+- Sovereignty: Supreme power of a state
+
+**Constitution:** Fundamental laws governing a country
+- Written: In a single document (Nigeria, USA)
+- Unwritten: Based on conventions (UK)
+
+### ARMS OF GOVERNMENT
+
+**Legislature:** Makes laws
+- Bicameral: Two houses (Senate + House of Reps)
+- Unicameral: One house
+
+**Executive:** Implements laws
+- President, Vice President, Ministers
+- Civil servants
+
+**Judiciary:** Interprets laws
+- Supreme Court (highest)
+- Court of Appeal
+- High Courts
+
+**Separation of Powers:** Each arm is independent
+**Checks and Balances:** Each arm limits others
+
+### NIGERIAN CONSTITUTION
+
+**1960 Constitution:** Independence constitution
+**1963 Constitution:** Republican constitution
+**1979 Constitution:** Presidential system
+**1999 Constitution (current):** Fourth Republic
+
+**Key Features:**
+- Federal system
+- Presidential system
+- Fundamental human rights
+- Directive principles
+- Supremacy of constitution
+
+### TYPES OF GOVERNMENT
+
+**Federalism:** Power shared between central and regional governments
+- Nigeria, USA, Canada
+
+**Unitary:** Power concentrated at center
+- UK, France
+
+**Confederalism:** Weak central government
+- Former Confederate States of America
+
+### LOCAL GOVERNMENT
+
+**Functions:**
+- Provision of basic services
+- Revenue collection
+- Community development
+- Health and education at grassroots
+
+**Sources of Revenue:**
+- Federal allocation
+- Local taxes and rates
+- Fees and charges`
+    },
+  ],
+  economics: [
+    { 
+      title: 'Basic Principles & Graphs', 
+      type: 'pdf', 
+      description: 'Economic fundamentals with diagrams',
+      content: `## Economics Principles & Graphs
+
+### BASIC CONCEPTS
+
+**Scarcity:** Limited resources, unlimited wants
+**Opportunity Cost:** What you give up when making a choice
+**Utility:** Satisfaction from consuming goods
+
+**Types of Goods:**
+- Economic goods: Scarce, have price
+- Free goods: Abundant, no price (air, sunlight)
+- Consumer goods: Final use (food, clothes)
+- Capital goods: Used to produce others (machines)
+
+### DEMAND
+
+**Law of Demand:** As price increases, quantity demanded decreases (ceteris paribus)
+
+**Demand Curve:** Slopes downward left to right
+
+**Factors Affecting Demand:**
+- Price of the good
+- Income
+- Tastes and preferences
+- Price of related goods (substitutes/complements)
+- Population
+- Future expectations
+
+### SUPPLY
+
+**Law of Supply:** As price increases, quantity supplied increases
+
+**Supply Curve:** Slopes upward left to right
+
+**Factors Affecting Supply:**
+- Cost of production
+- Technology
+- Government policies
+- Natural factors
+- Number of producers
+
+### MARKET EQUILIBRIUM
+
+Where demand = supply
+- Market clearing price
+- No surplus or shortage
+
+**Price Above Equilibrium:** Surplus (excess supply)
+**Price Below Equilibrium:** Shortage (excess demand)
+
+### ELASTICITY
+
+**Price Elasticity of Demand (PED):**
+PED = % change in Qd / % change in P
+
+- Elastic: PED > 1 (responsive)
+- Inelastic: PED < 1 (unresponsive)
+- Unitary: PED = 1
+
+### MARKET STRUCTURES
+
+**Perfect Competition:**
+- Many buyers and sellers
+- Homogeneous products
+- Free entry and exit
+- Perfect information
+
+**Monopoly:**
+- Single seller
+- No close substitutes
+- Barriers to entry
+
+**Oligopoly:**
+- Few large sellers
+- Interdependent decisions
+
+**Monopolistic Competition:**
+- Many sellers
+- Differentiated products
+
+📥 Download complete economics graphs`
+    },
+  ],
+  commerce: [
+    { 
+      title: 'Trade & Business Units', 
+      type: 'notes', 
+      description: 'Commerce fundamentals',
+      content: `## Commerce Complete Guide
+
+### TRADE
+
+**Definition:** Buying and selling of goods and services
+
+**Types of Trade:**
+
+**Home Trade (Internal):**
+- Wholesale trade: Large quantities, B2B
+- Retail trade: Small quantities, B2C
+
+**Foreign Trade (International):**
+- Import: Buying from other countries
+- Export: Selling to other countries
+- Entrepot: Import for re-export
+
+### AIDS TO TRADE
+
+**Banking:** Provides finance, safe keeping
+**Insurance:** Protects against risks
+**Advertising:** Creates awareness
+**Transportation:** Moves goods
+**Warehousing:** Storage of goods
+**Communication:** Information exchange
+
+### BUSINESS UNITS
+
+**Sole Proprietorship:**
+- Single owner
+- Unlimited liability
+- Easy to start
+- Limited capital
+
+**Partnership:**
+- 2-20 partners
+- Shared responsibility
+- More capital
+- Partnership deed
+
+**Limited Company:**
+- Private Ltd (2-50 shareholders)
+- Public Ltd (7+ shareholders)
+- Limited liability
+- Separate legal entity
+
+**Cooperative Societies:**
+- Owned by members
+- Democratic control
+- One member, one vote
+- Types: Consumer, Producer, Credit
+
+### BUSINESS DOCUMENTS
+
+**Order Documents:**
+- Letter of inquiry
+- Quotation
+- Order
+
+**Delivery Documents:**
+- Delivery note
+- Consignment note
+
+**Payment Documents:**
+- Invoice
+- Credit note
+- Debit note
+- Receipt
+- Statement of account
+
+### CHANNELS OF DISTRIBUTION
+
+Producer → Wholesaler → Retailer → Consumer
+Producer → Retailer → Consumer
+Producer → Consumer (direct)`
+    },
+  ],
+  accounting: [
+    { 
+      title: 'Books of Entry & Final Accounts', 
+      type: 'notes', 
+      description: 'Accounting fundamentals',
+      content: `## Accounting Fundamentals
+
+### DOUBLE ENTRY SYSTEM
+
+**Golden Rule:**
+- Debit the receiver
+- Credit the giver
+
+**Account Types:**
+- Assets: Debit increase, Credit decrease
+- Liabilities: Credit increase, Debit decrease
+- Capital: Credit increase, Debit decrease
+- Expenses: Debit increase
+- Income: Credit increase
+
+### BOOKS OF ORIGINAL ENTRY
+
+**Sales Day Book:** Credit sales
+**Purchases Day Book:** Credit purchases
+**Sales Returns Book:** Goods returned by customers
+**Purchases Returns Book:** Goods returned to suppliers
+**Cash Book:** Cash transactions
+**Journal:** Other transactions
+
+### CASH BOOK
+
+**Types:**
+- Single column: Cash only
+- Two column: Cash and bank
+- Three column: Cash, bank, and discount
+
+**Petty Cash Book:** Small expenses
+- Imprest system: Fixed amount replenished
+
+### TRIAL BALANCE
+
+List of all ledger balances
+- Debits = Credits
+- Detects arithmetic errors
+- Prepared before final accounts
+
+### TRADING ACCOUNT
+
+Sales - Cost of Goods Sold = Gross Profit
+
+**Cost of Goods Sold:**
+Opening Stock + Purchases - Closing Stock
+
+### PROFIT & LOSS ACCOUNT
+
+Gross Profit + Other Income - Expenses = Net Profit
+
+**Expenses include:**
+- Salaries, rent, utilities
+- Depreciation
+- Bad debts
+
+### BALANCE SHEET
+
+**Assets = Liabilities + Capital**
+
+**Fixed Assets:** Long-term (buildings, machinery)
+**Current Assets:** Short-term (cash, debtors, stock)
+**Current Liabilities:** Short-term debts
+**Long-term Liabilities:** Loans, mortgages
+
+### DEPRECIATION
+
+**Methods:**
+- Straight line: (Cost - Salvage) / Years
+- Reducing balance: % of book value yearly
+
+**Purpose:**
+- Shows true asset value
+- Matches cost with revenue`
+    },
+  ],
+  crs: [
+    { 
+      title: 'Key Themes & Teachings', 
+      type: 'notes', 
+      description: 'Christian Religious Studies guide',
+      content: `## Christian Religious Studies Guide
+
+### OLD TESTAMENT THEMES
+
+**Creation:**
+- God created the world in 6 days, rested on 7th
+- Man created in God's image
+- Stewardship of creation
+
+**The Fall:**
+- Adam and Eve's disobedience
+- Introduction of sin and death
+- Promise of redemption (Genesis 3:15)
+
+**Covenant with Abraham:**
+- Land, descendants, blessing
+- Father of faith
+- Sacrifice of Isaac (test of faith)
+
+**The Exodus:**
+- Moses and the burning bush
+- Plagues of Egypt
+- Passover and Red Sea crossing
+- Ten Commandments
+
+**The Monarchy:**
+- Saul: First king, rejected by God
+- David: Man after God's heart
+- Solomon: Wisdom, built the temple
+
+### NEW TESTAMENT THEMES
+
+**Birth of Jesus:**
+- Virgin birth
+- Fulfillment of prophecy
+- Shepherds and wise men
+
+**Ministry of Jesus:**
+- Baptism and temptation
+- Miracles and parables
+- Teaching on love, forgiveness, kingdom
+
+**Death and Resurrection:**
+- Crucifixion for sin
+- Resurrection on third day
+- Great Commission
+
+**Early Church:**
+- Day of Pentecost
+- Spread of Christianity
+- Paul's missionary journeys
+
+### KEY TEACHINGS
+
+**Beatitudes (Matthew 5):**
+- Blessed are the poor in spirit
+- Blessed are those who mourn
+- Blessed are the meek
+- etc.
+
+**Lord's Prayer:**
+- Model for prayer
+- Forgiveness, daily needs, deliverance
+
+**Greatest Commandment:**
+- Love God with all your heart
+- Love your neighbor as yourself
+
+### MORAL LESSONS
+
+- Obedience to God
+- Faith and trust
+- Love and forgiveness
+- Humility and service
+- Justice and righteousness`
+    },
+  ],
+  irs: [
+    { 
+      title: 'Key Themes & Teachings', 
+      type: 'notes', 
+      description: 'Islamic Religious Studies guide',
+      content: `## Islamic Religious Studies Guide
+
+### PILLARS OF ISLAM (Five Pillars)
+
+**1. Shahada (Declaration of Faith):**
+"There is no god but Allah, and Muhammad is His Messenger"
+
+**2. Salat (Prayer):**
+- Five daily prayers
+- Fajr, Dhuhr, Asr, Maghrib, Isha
+- Facing Qibla (Mecca)
+
+**3. Zakat (Charity):**
+- 2.5% of wealth annually
+- Purification of wealth
+- For the poor and needy
+
+**4. Sawm (Fasting):**
+- During Ramadan
+- Dawn to sunset
+- Spiritual discipline
+
+**5. Hajj (Pilgrimage):**
+- Once in lifetime if able
+- To Mecca
+- During Dhul Hijjah
+
+### PILLARS OF IMAN (Faith)
+
+1. Belief in Allah
+2. Belief in Angels
+3. Belief in Books (Quran, Torah, Injil, etc.)
+4. Belief in Prophets
+5. Belief in Day of Judgment
+6. Belief in Divine Decree (Qadr)
+
+### KEY PROPHETS
+
+**Ibrahim (Abraham):** Friend of Allah, builder of Ka'bah
+**Musa (Moses):** Given Torah, parted Red Sea
+**Isa (Jesus):** Born of virgin Mary, performed miracles
+**Muhammad (PBUH):** Final Prophet, given Quran
+
+### THE QURAN
+
+- Final revelation
+- Revealed over 23 years
+- 114 Surahs (chapters)
+- Preserved in original Arabic
+
+### HADITH
+
+- Sayings and actions of Prophet Muhammad
+- Second source of Islamic law
+- Collections: Bukhari, Muslim, etc.
+
+### ISLAMIC HISTORY
+
+**Hijra (622 CE):**
+- Migration from Mecca to Medina
+- Start of Islamic calendar
+
+**Rightly Guided Caliphs:**
+1. Abu Bakr
+2. Umar ibn Khattab
+3. Uthman ibn Affan
+4. Ali ibn Abi Talib
+
+### MORAL TEACHINGS
+
+- Honesty and truthfulness
+- Respect for parents
+- Justice and fairness
+- Kindness to neighbors
+- Modesty and humility
+- Prohibition of interest (riba)`
+    },
+  ],
+  'agricultural science': [
+    { 
+      title: 'Soil & Crop Production', 
+      type: 'notes', 
+      description: 'Agriculture fundamentals',
+      content: `## Agricultural Science Guide
+
+### SOIL SCIENCE
+
+**Soil Formation:**
+- Parent material + Climate + Organisms + Topography + Time
+
+**Soil Components:**
+- Mineral matter (45%)
+- Organic matter (5%)
+- Water (25%)
+- Air (25%)
+
+**Soil Texture:**
+- Sand: Large particles, drains quickly
+- Silt: Medium particles
+- Clay: Small particles, holds water
+- Loam: Best for farming (mix of all)
+
+**Soil pH:**
+- Acidic: Below 7
+- Neutral: 7
+- Alkaline: Above 7
+- Most crops prefer 6-7
+
+### CROP PRODUCTION
+
+**Types of Crops:**
+- Cereals: Maize, rice, wheat, sorghum
+- Legumes: Groundnut, cowpea, soybean
+- Root/Tuber: Cassava, yam, potato
+- Vegetables: Tomato, pepper, okra
+- Tree crops: Cocoa, oil palm, rubber
+
+**Cultural Practices:**
+1. Land clearing
+2. Tillage
+3. Planting
+4. Fertilizer application
+5. Weeding
+6. Pest/disease control
+7. Harvesting
+
+**Crop Rotation:** Growing different crops in succession
+- Benefits: Prevents soil exhaustion, controls pests
+
+**Mixed Cropping:** Growing two or more crops together
+- Benefits: Risk reduction, efficient land use
+
+### PLANT NUTRIENTS
+
+**Macro-nutrients:**
+- Nitrogen (N): Leaf growth
+- Phosphorus (P): Root growth
+- Potassium (K): Flower/fruit
+
+**Micro-nutrients:**
+- Iron, Zinc, Manganese, etc.
+
+**NPK Fertilizers:**
+- 15:15:15 (balanced)
+- 20:10:10 (high nitrogen)
+
+### PEST AND DISEASE CONTROL
+
+**Types of Pests:**
+- Insects (weevils, caterpillars)
+- Rodents (rats, mice)
+- Birds
+- Nematodes
+
+**Control Methods:**
+- Cultural (crop rotation)
+- Biological (natural predators)
+- Chemical (pesticides)
+- Physical (traps, barriers)
+
+### ANIMAL HUSBANDRY
+
+**Livestock:**
+- Cattle: Beef, dairy
+- Poultry: Eggs, meat
+- Pigs: Pork
+- Sheep/Goats: Meat, milk, wool
+
+**Feeding Types:**
+- Concentrates: High energy/protein
+- Roughages: Fibrous feeds (hay, grass)`
+    },
+  ],
+  history: [
+    { 
+      title: 'Nigeria & West Africa Timeline', 
+      type: 'notes', 
+      description: 'Historical events and dates',
+      content: `## Nigerian & West African History
+
+### PRE-COLONIAL ERA
+
+**Early Kingdoms & Empires:**
+
+**Ghana Empire (300-1200 AD):**
+- First major West African empire
+- Controlled gold and salt trade
+- Declined due to Almoravid attacks
+
+**Mali Empire (1235-1600 AD):**
+- Founded by Sundiata Keita
+- Mansa Musa: Famous pilgrimage to Mecca
+- Timbuktu: Center of learning
+
+**Songhai Empire (1464-1591 AD):**
+- Largest West African empire
+- Sunni Ali and Askia Muhammad
+- Fell to Moroccan invasion
+
+**Nigerian Kingdoms:**
+
+**Benin Kingdom:**
+- Advanced bronze casting
+- Trade with Portuguese
+- Oba as divine ruler
+
+**Oyo Empire:**
+- Yoruba kingdom
+- Alaafin and Oyomesi
+- Strong cavalry
+
+**Hausa City-States:**
+- Kano, Katsina, Zaria
+- Trade and crafts
+- Islamic influence
+
+### COLONIAL ERA
+
+**1861:** Lagos annexed by Britain
+**1884-85:** Berlin Conference (Scramble for Africa)
+**1900:** Northern and Southern Protectorates
+**1914:** Amalgamation by Lord Lugard
+
+**Colonial Administration:**
+- Direct rule in South
+- Indirect rule in North
+- Native authority system
+
+### ROAD TO INDEPENDENCE
+
+**1922:** Clifford Constitution (Lagos elections)
+**1946:** Richards Constitution (regional councils)
+**1951:** Macpherson Constitution
+**1954:** Lyttleton Constitution (federal system)
+**1957:** Regional self-government
+**1960:** Independence (October 1)
+**1963:** Republic declared
+
+### POST-INDEPENDENCE
+
+**First Republic (1960-1966):**
+- Tafawa Balewa (PM)
+- Nnamdi Azikiwe (President)
+
+**Military Coups:**
+- 1966: January and July coups
+- Civil War (1967-1970)
+
+**Key Military Leaders:**
+- Ironsi, Gowon, Murtala, Obasanjo, Buhari, Babangida, Abacha
+
+**Second Republic (1979-1983):**
+- Shehu Shagari
+
+**Fourth Republic (1999-present):**
+- Obasanjo, Yar'Adua, Jonathan, Buhari, Tinubu`
+    },
+  ],
+  geography: [
+    { 
+      title: 'Physical & Human Geography', 
+      type: 'notes', 
+      description: 'Geography fundamentals',
+      content: `## Geography Complete Guide
+
+### PHYSICAL GEOGRAPHY
+
+**Landforms:**
+- Mountains: Fold, block, volcanic
+- Plains: Coastal, riverine
+- Plateaus: Highland plains
+- Valleys: River-formed depressions
+
+**Nigerian Landforms:**
+- Niger-Benue Trough
+- Jos Plateau
+- Obudu Plateau
+- Niger Delta
+
+**Climate:**
+- Tropical: Hot and wet
+- Savanna: Wet and dry seasons
+- Sahel: Semi-arid
+
+**Nigerian Climate Zones:**
+- Equatorial (South): Heavy rainfall
+- Tropical (Middle Belt): Distinct seasons
+- Sudan (North): Less rainfall
+- Sahel (Far North): Semi-desert
+
+**Vegetation:**
+- Rainforest: South (high rainfall)
+- Savanna: Middle Belt
+- Sudan Savanna: North
+- Sahel: Far North
+
+### POPULATION
+
+**Factors Affecting Population:**
+- Birth rate and death rate
+- Migration
+- Healthcare
+- Economic factors
+
+**Population Distribution:**
+- Dense: Lagos, Kano
+- Sparse: Sahel, forests
+
+**Urbanization:**
+- Rural-urban migration
+- Urban problems: Housing, traffic, pollution
+
+### SETTLEMENT
+
+**Rural Settlement:**
+- Dispersed: Scattered farms
+- Nucleated: Clustered village
+- Linear: Along roads/rivers
+
+**Urban Settlement:**
+- Cities: Over 20,000 people
+- Functions: Administrative, commercial, industrial
+
+### RESOURCES
+
+**Mineral Resources:**
+- Petroleum: Niger Delta
+- Coal: Enugu
+- Tin: Jos Plateau
+- Iron: Itakpe
+- Limestone: Throughout
+
+**Agricultural Resources:**
+- Cocoa: Southwest
+- Groundnut: North
+- Palm oil: Southeast
+- Rubber: South
+
+### MAP READING
+
+**Scale:** Ratio of map distance to actual distance
+**Contour Lines:** Lines of equal height
+**Symbols:** Represent features
+
+**Bearings:**
+- Compass bearings (N, NE, E, etc.)
+- Three-figure bearings (045°, 180°, etc.)
+
+**Grid References:**
+- Eastings first, then Northings
+- 4-figure: General area
+- 6-figure: Specific location`
     },
   ],
 };
@@ -835,16 +1704,39 @@ const SUBJECT_DISPLAY_NAMES: Record<string, string> = {
   literature: 'Literature',
   government: 'Government',
   economics: 'Economics',
+  commerce: 'Commerce',
+  accounting: 'Accounting',
+  crs: 'CRS',
+  irs: 'IRS',
+  'agricultural science': 'Agric Science',
+  history: 'History',
+  geography: 'Geography',
 };
 
+// All available subjects in order
+const ALL_SUBJECTS = [
+  'english',
+  'mathematics', 
+  'physics',
+  'chemistry',
+  'biology',
+  'literature',
+  'government',
+  'economics',
+  'commerce',
+  'accounting',
+  'crs',
+  'irs',
+  'agricultural science',
+  'history',
+  'geography',
+];
+
 export const StudyMaterials = ({ subjects, onBack }: StudyMaterialsProps) => {
-  const [selectedSubject, setSelectedSubject] = useState<string | null>(subjects[0] || 'english');
+  const [selectedSubject, setSelectedSubject] = useState<string>('english');
   const [selectedMaterial, setSelectedMaterial] = useState<MaterialContent | null>(null);
 
-  // Filter to only show subjects that have materials
-  const availableSubjects = subjects.filter(s => SUBJECT_MATERIALS[s]);
-
-  const materials = selectedSubject ? (SUBJECT_MATERIALS[selectedSubject] || []) : [];
+  const materials = SUBJECT_MATERIALS[selectedSubject] || [];
 
   const handleMaterialClick = (material: MaterialContent) => {
     setSelectedMaterial(material);
@@ -966,23 +1858,25 @@ export const StudyMaterials = ({ subjects, onBack }: StudyMaterialsProps) => {
             <BookOpen className="w-5 h-5 text-primary" />
             Study Materials 📚
           </CardTitle>
-          <p className="text-sm text-muted-foreground">Tap any material to read or download</p>
+          <p className="text-sm text-muted-foreground">Tap any subject to view materials</p>
         </CardHeader>
         <CardContent>
-          {/* Subject Tabs */}
-          <div className="flex flex-wrap gap-2 mb-6">
-            {availableSubjects.map(subject => (
-              <Button
-                key={subject}
-                variant={selectedSubject === subject ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedSubject(subject)}
-                className="capitalize"
-              >
-                {SUBJECT_DISPLAY_NAMES[subject] || subject.replace('_', ' ')}
-              </Button>
-            ))}
-          </div>
+          {/* Subject Tabs - Scrollable */}
+          <ScrollArea className="w-full mb-6">
+            <div className="flex gap-2 pb-2">
+              {ALL_SUBJECTS.map(subject => (
+                <Button
+                  key={subject}
+                  variant={selectedSubject === subject ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedSubject(subject)}
+                  className="whitespace-nowrap capitalize shrink-0"
+                >
+                  {SUBJECT_DISPLAY_NAMES[subject] || subject.replace('_', ' ')}
+                </Button>
+              ))}
+            </div>
+          </ScrollArea>
 
           {/* Materials List */}
           <AnimatePresence mode="wait">
@@ -1039,7 +1933,7 @@ export const StudyMaterials = ({ subjects, onBack }: StudyMaterialsProps) => {
           {/* Coming Soon Banner */}
           <div className="mt-6 p-4 rounded-lg bg-gradient-to-r from-primary/10 to-green-500/10 border border-primary/20">
             <p className="text-sm text-center text-muted-foreground">
-              <span className="font-semibold text-primary">More Coming:</span> Video tutorials and past question PDFs! 🚀
+              <span className="font-semibold text-primary">More Coming:</span> Video tutorials & past question PDFs! 🚀
             </p>
           </div>
         </CardContent>
