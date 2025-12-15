@@ -791,30 +791,11 @@ const Index = () => {
               </motion.div>
 
               {/* Course Requirements Button */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="mb-4"
-              >
-                <Button
-                  variant="outline"
-                  className="w-full h-auto py-4 flex items-center justify-center gap-3 border-2 border-dashed border-primary/50 hover:border-primary hover:bg-primary/5 group"
-                  onClick={() => setCurrentStep('course-requirements')}
-                >
-                  <GraduationCap className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
-                  <div className="text-left">
-                    <span className="font-bold text-foreground block">Check Subject Combinations for Your Course</span>
-                    <span className="text-xs text-muted-foreground">Find out which courses match your subjects!</span>
-                  </div>
-                </Button>
-              </motion.div>
-
               {/* Course Tips Card */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.22 }}
+                transition={{ delay: 0.2 }}
                 className="mb-6"
               >
                 <CourseTipsCard userEmail={userEmail} userSubjects={effectiveSubjects} />
