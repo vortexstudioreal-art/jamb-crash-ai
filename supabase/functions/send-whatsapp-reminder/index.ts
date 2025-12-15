@@ -8,7 +8,9 @@ const corsHeaders = {
 
 const TWILIO_ACCOUNT_SID = Deno.env.get('TWILIO_ACCOUNT_SID');
 const TWILIO_AUTH_TOKEN = Deno.env.get('TWILIO_AUTH_TOKEN');
-const TWILIO_PHONE_NUMBER = Deno.env.get('TWILIO_PHONE_NUMBER');
+// Clean phone number - remove any spaces from stored secret
+const RAW_TWILIO_PHONE = Deno.env.get('TWILIO_PHONE_NUMBER') || '';
+const TWILIO_PHONE_NUMBER = RAW_TWILIO_PHONE.replace(/\s+/g, '');
 
 // Twilio sandbox details
 const SANDBOX_NUMBER = '+14155238886';
