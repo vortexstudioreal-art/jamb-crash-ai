@@ -112,3 +112,5 @@ export const ShareableResultCard = ({ predictedMin, predictedMax, onClose }: Sha
     </motion.div>
   );
 };
+
+export default ShareableResultCard;

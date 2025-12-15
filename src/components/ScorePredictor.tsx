@@ -337,3 +337,5 @@ export const ScorePredictor = ({ userEmail, targetScore = 300, weakSubject, onSh
     </motion.div>
   );
 };
+
+export default ScorePredictor;
