@@ -50,11 +50,20 @@ const FEATURE_LIMITS: Record<NonNullable<UserPackage>, Record<FeatureType, numbe
 interface FeatureUsageData {
   feature_type: string;
   usage_count: number;
+  bonus_uses: number;
 }
 
 export const useFeatureUsage = () => {
   const { user, userPackage, isAdmin, isOwner, hasAccess } = useAuth();
   const [usageData, setUsageData] = useState<Record<FeatureType, number>>({
+    pdf_upload: 0,
+    study_plan_days: 0,
+    syllabus_ai_explanation: 0,
+    flashcard_generation: 0,
+    quick_quiz: 0,
+    subject_change: 0,
+  });
+  const [bonusData, setBonusData] = useState<Record<FeatureType, number>>({
     pdf_upload: 0,
     study_plan_days: 0,
     syllabus_ai_explanation: 0,
@@ -83,7 +92,7 @@ export const useFeatureUsage = () => {
       const today = new Date().toISOString().split('T')[0];
       const { data, error } = await supabase
         .from('feature_usage')
-        .select('feature_type, usage_count')
+        .select('feature_type, usage_count, bonus_uses')
         .eq('email', userEmail)
         .eq('usage_date', today);
 
@@ -101,13 +110,24 @@ export const useFeatureUsage = () => {
         subject_change: 0,
       };
 
+      const bonus: Record<FeatureType, number> = {
+        pdf_upload: 0,
+        study_plan_days: 0,
+        syllabus_ai_explanation: 0,
+        flashcard_generation: 0,
+        quick_quiz: 0,
+        subject_change: 0,
+      };
+
       (data as FeatureUsageData[] || []).forEach((item) => {
         if (item.feature_type in usage) {
           usage[item.feature_type as FeatureType] = item.usage_count;
+          bonus[item.feature_type as FeatureType] = item.bonus_uses || 0;
         }
       });
 
       setUsageData(usage);
+      setBonusData(bonus);
     } finally {
       setIsLoading(false);
     }
@@ -130,19 +150,22 @@ export const useFeatureUsage = () => {
     return FEATURE_LIMITS[userPackage][feature];
   }, [userPackage, isAdmin, isOwner, isInTrial]);
 
-  // Check if user can use a feature
+  // Check if user can use a feature (including bonus uses)
   const canUseFeature = useCallback((feature: FeatureType): boolean => {
     const limit = getLimit(feature);
+    if (limit === Infinity) return true;
     const used = usageData[feature];
-    return used < limit;
-  }, [getLimit, usageData]);
+    const bonus = bonusData[feature];
+    return used < (limit + bonus);
+  }, [getLimit, usageData, bonusData]);
 
-  // Get remaining uses for a feature
+  // Get remaining uses for a feature (including bonus uses)
   const getRemainingUses = useCallback((feature: FeatureType): number => {
     const limit = getLimit(feature);
     if (limit === Infinity) return Infinity;
-    return Math.max(0, limit - usageData[feature]);
-  }, [getLimit, usageData]);
+    const totalLimit = limit + bonusData[feature];
+    return Math.max(0, totalLimit - usageData[feature]);
+  }, [getLimit, usageData, bonusData]);
 
   // Increment usage for a feature
   const incrementUsage = useCallback(async (feature: FeatureType): Promise<boolean> => {
@@ -188,18 +211,64 @@ export const useFeatureUsage = () => {
   }, [userEmail, usageData, canUseFeature]);
 
   // Get usage summary for display
-  const getUsageSummary = useCallback((feature: FeatureType): { used: number; limit: number; remaining: number } => {
+  const getUsageSummary = useCallback((feature: FeatureType): { used: number; limit: number; remaining: number; bonus: number } => {
     const limit = getLimit(feature);
     const used = usageData[feature];
+    const bonus = bonusData[feature];
+    const totalLimit = limit === Infinity ? -1 : limit + bonus;
     return {
       used,
-      limit: limit === Infinity ? -1 : limit, // -1 indicates unlimited
-      remaining: limit === Infinity ? -1 : Math.max(0, limit - used),
+      limit: limit === Infinity ? -1 : limit,
+      remaining: limit === Infinity ? -1 : Math.max(0, totalLimit - used),
+      bonus,
     };
-  }, [getLimit, usageData]);
+  }, [getLimit, usageData, bonusData]);
+
+  // Add bonus use after watching ad
+  const addBonusUse = useCallback(async (feature: FeatureType): Promise<boolean> => {
+    if (!userEmail) return false;
+
+    const today = new Date().toISOString().split('T')[0];
+    
+    try {
+      const newBonus = bonusData[feature] + 1;
+      
+      const { error } = await supabase
+        .from('feature_usage')
+        .upsert(
+          {
+            email: userEmail,
+            feature_type: feature,
+            usage_date: today,
+            usage_count: usageData[feature],
+            bonus_uses: newBonus,
+          },
+          {
+            onConflict: 'email,feature_type,usage_date',
+          }
+        );
+
+      if (error) {
+        console.error('Error adding bonus use:', error);
+        return false;
+      }
+
+      // Update local state
+      setBonusData(prev => ({
+        ...prev,
+        [feature]: prev[feature] + 1,
+      }));
+
+      return true;
+    } catch (err) {
+      console.error('Failed to add bonus use:', err);
+      return false;
+    }
+  }, [userEmail, usageData, bonusData]);
 
   return {
     usageData,
+    bonusData,
     isLoading,
     canUseFeature,
     getRemainingUses,
@@ -207,6 +276,7 @@ export const useFeatureUsage = () => {
     getUsageSummary,
     getLimit,
     refreshUsage: fetchUsage,
+    addBonusUse,
   };
 };
 

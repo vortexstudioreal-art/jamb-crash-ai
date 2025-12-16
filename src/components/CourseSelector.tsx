@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Check, AlertTriangle, GraduationCap, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -24,6 +24,16 @@ export const CourseSelector = ({
 }: CourseSelectorProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showOnlyMatching, setShowOnlyMatching] = useState(false);
+
+  // Prevent background scroll when modal is open (not embedded)
+  useEffect(() => {
+    if (!embedded) {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = '';
+      };
+    }
+  }, [embedded]);
 
   // Normalize subject names for comparison
   const normalizeSubject = (subject: string): string => {
