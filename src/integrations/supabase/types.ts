@@ -187,6 +187,7 @@ export type Database = {
       }
       feature_usage: {
         Row: {
+          bonus_uses: number | null
           created_at: string | null
           email: string
           feature_type: string
@@ -196,6 +197,7 @@ export type Database = {
           usage_date: string
         }
         Insert: {
+          bonus_uses?: number | null
           created_at?: string | null
           email: string
           feature_type: string
@@ -205,6 +207,7 @@ export type Database = {
           usage_date?: string
         }
         Update: {
+          bonus_uses?: number | null
           created_at?: string | null
           email?: string
           feature_type?: string
