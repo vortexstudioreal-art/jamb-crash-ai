@@ -113,6 +113,12 @@ const Index = () => {
   useEffect(() => {
     if (isFullyLoading) return;
     
+    // Skip auto-redirect if user is in payment flow
+    const openPayment = searchParams.get('openPayment');
+    if (openPayment === 'true' || isPaymentModalOpen || isPlanSelectionOpen) {
+      return; // Don't interfere with payment flow
+    }
+    
     // Admins/owners have full access - treat them like paid users
     const hasFullAccess = effectiveAccess || isAdmin || isOwner;
     
@@ -141,7 +147,7 @@ const Index = () => {
       setCurrentStep('subject-select');
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
-  }, [userEmail, effectiveAccess, isAdmin, isOwner, isFullyLoading, currentStep, isTrialActive, hasTrialUsed, canStartTrial, userSubjects.length]);
+  }, [userEmail, effectiveAccess, isAdmin, isOwner, isFullyLoading, currentStep, isTrialActive, hasTrialUsed, canStartTrial, userSubjects.length, searchParams, isPaymentModalOpen, isPlanSelectionOpen]);
 
   // Load user subjects
   useEffect(() => {
