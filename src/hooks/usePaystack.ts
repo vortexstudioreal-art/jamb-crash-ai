@@ -102,14 +102,24 @@ export const usePaystack = () => {
             couponId: config.couponId,
             discountApplied: config.discountApplied,
           },
-          onClose: () => {
-            setIsLoading(false);
-            onClose();
-          },
-          callback: (response) => {
+        onClose: () => {
+          setIsLoading(false);
+          onClose();
+        },
+        callback: async (response) => {
+          try {
+            // CRITICAL: Verify payment and update database BEFORE calling onSuccess
+            // This ensures hasAccess will be true when refreshAccess() is called
+            await verifyPayment(response.reference);
             setIsLoading(false);
             onSuccess(response.reference);
-          },
+          } catch (error) {
+            setIsLoading(false);
+            console.error('Payment verification failed:', error);
+            toast.error('Payment verification failed. Please contact support.');
+            onClose();
+          }
+        },
         });
 
         handler.openIframe();
