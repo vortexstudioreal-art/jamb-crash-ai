@@ -347,12 +347,24 @@ const Index = () => {
   const handleSubjectsSelected = async (subjects: string[]) => {
     setUserSubjects(subjects);
     
-    // Start the 30-minute trial NOW (after subject selection) - only for non-paid, non-admin users
-    if (!effectiveAccess && !effectiveAdmin && canStartTrial) {
+    // Refresh access to get latest payment status
+    await refreshAccess();
+    
+    // Double-check access with fresh database query to ensure we have latest payment status
+    const { data: accessData } = await supabase.rpc('check_user_access', { 
+      user_email: userEmail || '' 
+    });
+    
+    const currentAccess = accessData?.[0]?.has_access || false;
+    
+    // Only start trial if user truly has no access (not paid, not admin)
+    if (!currentAccess && !effectiveAdmin && canStartTrial) {
       const success = await startTrial();
       if (success) {
         toast.success('🎉 30-minute Premium trial started! Enjoy full access!');
       }
+    } else if (currentAccess && !effectiveAdmin) {
+      toast.success('🎉 Payment confirmed! Enjoy your subscription!');
     }
     
     setCurrentStep('dashboard');
