@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Play, CheckCircle, Clock, Gift } from 'lucide-react';
+import { X, Play, CheckCircle, Clock, Gift, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { FEATURE_NAMES, FeatureType } from '@/hooks/useFeatureUsage';
+import { getAdUnitForFeature, isMobileApp } from '@/config/admob';
 
 interface WatchAdModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface WatchAdModalProps {
 }
 
 const AD_DURATION = 15; // seconds to watch
+const IS_MOBILE = isMobileApp();
 
 export const WatchAdModal = ({ isOpen, onClose, onComplete, featureType }: WatchAdModalProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -76,6 +78,7 @@ export const WatchAdModal = ({ isOpen, onClose, onComplete, featureType }: Watch
   if (!isOpen) return null;
 
   const featureName = FEATURE_NAMES[featureType];
+  const adUnitId = getAdUnitForFeature(featureType);
 
   return (
     <AnimatePresence>
