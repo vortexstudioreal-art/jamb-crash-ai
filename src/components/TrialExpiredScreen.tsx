@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 interface TrialExpiredScreenProps {
-  onUpgrade: () => void;
+  onUpgrade: (plan: string) => void;
 }
 
 const packages = [
@@ -116,7 +116,7 @@ export const TrialExpiredScreen = ({ onUpgrade }: TrialExpiredScreenProps) => {
                 ))}
               </ul>
               <Button
-                onClick={onUpgrade}
+                onClick={() => onUpgrade(pkg.name.toLowerCase())}
                 className={`w-full ${pkg.popular ? 'gradient-primary' : ''}`}
                 variant={pkg.popular ? 'default' : 'outline'}
               >
