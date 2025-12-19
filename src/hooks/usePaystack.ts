@@ -107,15 +107,18 @@ export const usePaystack = () => {
           onClose();
         },
         callback: async (response) => {
+          console.log('[Payment] Paystack callback received, reference:', response.reference);
           try {
             // CRITICAL: Verify payment and update database BEFORE calling onSuccess
             // This ensures hasAccess will be true when refreshAccess() is called
-            await verifyPayment(response.reference);
+            console.log('[Payment] Starting verification...');
+            const verificationResult = await verifyPayment(response.reference);
+            console.log('[Payment] Verification successful:', verificationResult);
             setIsLoading(false);
             onSuccess(response.reference);
           } catch (error) {
             setIsLoading(false);
-            console.error('Payment verification failed:', error);
+            console.error('[Payment] Verification failed:', error);
             toast.error('Payment verification failed. Please contact support.');
             onClose();
           }
@@ -133,18 +136,22 @@ export const usePaystack = () => {
   );
 
   const verifyPayment = useCallback(async (reference: string) => {
+    console.log('[Payment] Calling paystack-verify for reference:', reference);
     try {
       const { data, error } = await supabase.functions.invoke('paystack-verify', {
         body: { reference },
       });
 
+      console.log('[Payment] Verify response:', { data, error });
+
       if (error || !data?.success) {
         throw new Error(data?.error || 'Verification failed');
       }
 
+      console.log('[Payment] Database updated successfully, access granted');
       return data.data;
     } catch (error) {
-      console.error('Verification error:', error);
+      console.error('[Payment] Verification error:', error);
       throw error;
     }
   }, []);
