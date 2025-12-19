@@ -401,7 +401,15 @@ const Index = () => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
-  const handleUpgradeClick = () => {
+  const handleUpgradeClick = (plan?: string) => {
+    // If a specific plan is passed, open payment modal directly
+    if (plan && plans[plan as keyof typeof plans]) {
+      setSelectedPlan(plan as keyof typeof plans);
+      setIsPaymentModalOpen(true);
+      return;
+    }
+    
+    // Otherwise scroll to pricing
     localStorage.removeItem(DASHBOARD_STATE_KEY);
     setCurrentStep('landing');
     setHighlightStandard(true);
@@ -745,7 +753,7 @@ const Index = () => {
                   <Button
                     variant="outline"
                     className="h-auto py-4 flex flex-col gap-1 opacity-60 relative"
-                    onClick={handleUpgradeClick}
+                    onClick={() => handleUpgradeClick()}
                   >
                     <div className="absolute top-1 right-1">
                       <Lock className="w-3 h-3 text-muted-foreground" />
@@ -780,7 +788,7 @@ const Index = () => {
                   <Button
                     variant="outline"
                     className="h-auto py-4 flex flex-col gap-1 opacity-60 relative"
-                    onClick={handleUpgradeClick}
+                    onClick={() => handleUpgradeClick()}
                   >
                     <div className="absolute top-1 right-1">
                       <Lock className="w-3 h-3 text-muted-foreground" />

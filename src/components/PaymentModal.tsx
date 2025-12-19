@@ -258,18 +258,22 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
                     placeholder="your@email.com"
                     value={email}
                     onChange={(e) => {
-                      setEmail(e.target.value);
-                      setEmailError('');
+                      if (!initialEmail) {
+                        setEmail(e.target.value);
+                        setEmailError('');
+                      }
                     }}
-                    className="pl-10"
+                    className={`pl-10 ${initialEmail ? 'bg-muted cursor-not-allowed' : ''}`}
                     required
+                    disabled={!!initialEmail}
+                    readOnly={!!initialEmail}
                   />
                 </div>
                 {emailError && (
                   <p className="text-sm text-destructive">{emailError}</p>
                 )}
                 <p className="text-xs text-muted-foreground">
-                  Your study plan will be sent to this email
+                  {initialEmail ? 'Using your account email for payment' : 'Your study plan will be sent to this email'}
                 </p>
               </div>
 
