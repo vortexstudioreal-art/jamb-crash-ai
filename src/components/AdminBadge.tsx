@@ -6,7 +6,10 @@ interface AdminBadgeProps {
   linkToAdmin?: boolean;
 }
 
-export const AdminBadge = ({ role = 'collaborator', linkToAdmin = false }: AdminBadgeProps) => {
+export const AdminBadge = ({ role, linkToAdmin = false }: AdminBadgeProps) => {
+  // Don't render badge if no role is assigned
+  if (!role) return null;
+  
   const isOwner = role === 'owner';
   const isAdmin = role === 'admin';
   const isCollaborator = role === 'collaborator';
