@@ -13,14 +13,14 @@ const packages = [
   {
     name: 'Basic',
     price: '₦5,000',
-    period: '30 days',
+    period: '1 year',
     features: ['30-question quiz', '3 PDF uploads', 'Basic study plan'],
     color: 'border-border',
   },
   {
     name: 'Pro',
     price: '₦10,000',
-    period: '90 days',
+    period: '1 year',
     features: ['60-question quiz', 'Unlimited PDFs', '72-hour study plan', 'WhatsApp reminders', 'Predicted score'],
     color: 'border-primary',
     popular: true,

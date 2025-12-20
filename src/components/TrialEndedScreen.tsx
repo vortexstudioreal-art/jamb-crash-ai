@@ -10,7 +10,7 @@ const packages = [
   {
     name: 'Basic',
     price: '₦5,000',
-    duration: '30 days',
+    duration: '1 year',
     features: [
       '30-question quiz',
       '3 PDF uploads max',
@@ -22,7 +22,7 @@ const packages = [
   {
     name: 'Pro',
     price: '₦10,000',
-    duration: '90 days',
+    duration: '1 year',
     features: [
       '60-question quiz',
       'Unlimited PDF uploads',
