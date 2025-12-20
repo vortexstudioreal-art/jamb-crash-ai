@@ -135,13 +135,11 @@ export const UserManagement = ({ isOwner }: UserManagementProps) => {
       
       switch (newPlan) {
         case 'basic':
-          expiryDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
-          break;
         case 'pro':
-          expiryDate = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000); // 90 days
+          expiryDate = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000); // 1 year
           break;
         case 'premium':
-          expiryDate = new Date(now.getTime() + 365 * 10 * 24 * 60 * 60 * 1000); // 10 years (lifetime)
+          expiryDate = new Date(now.getTime() + 365 * 100 * 24 * 60 * 60 * 1000); // 100 years (forever)
           break;
         default:
           throw new Error('Invalid plan');
@@ -422,15 +420,15 @@ export const UserManagement = ({ isOwner }: UserManagementProps) => {
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={() => updateUserPlan(user.email, 'basic')}>
                                 <Check className="w-4 h-4 mr-2" />
-                                Basic (30 days)
+                                Basic (1 year)
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => updateUserPlan(user.email, 'pro')}>
                                 <Check className="w-4 h-4 mr-2" />
-                                Pro (90 days)
+                                Pro (1 year)
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => updateUserPlan(user.email, 'premium')}>
                                 <Crown className="w-4 h-4 mr-2" />
-                                Premium (Lifetime)
+                                Premium (Forever)
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>

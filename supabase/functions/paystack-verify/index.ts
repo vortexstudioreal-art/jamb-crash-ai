@@ -61,12 +61,12 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const packageName = paystackData.data.metadata?.package || "basic";
-    // Access duration based on package: basic=30 days, pro=90 days, premium=1 year
-    let accessDays = 30;
+    // Access duration: basic & pro = 1 year, premium = forever (100 years)
+    let accessDays = 365; // Default 1 year for basic
     if (packageName === "pro") {
-      accessDays = 90;
+      accessDays = 365; // 1 year
     } else if (packageName === "premium") {
-      accessDays = 365;
+      accessDays = 36500; // ~100 years = forever
     }
     const accessExpiresAt = new Date();
     accessExpiresAt.setDate(accessExpiresAt.getDate() + accessDays);

@@ -11,7 +11,7 @@ const packages = [
   {
     name: 'Basic',
     price: 5000,
-    duration: '30 days',
+    duration: '1 year',
     features: ['30-question quizzes', 'Basic study plan', '3 PDFs max'],
     color: 'from-blue-500/20 to-blue-600/20',
     borderColor: 'border-blue-500/30',
@@ -19,7 +19,7 @@ const packages = [
   {
     name: 'Pro',
     price: 10000,
-    duration: '90 days',
+    duration: '1 year',
     features: ['60-question quizzes', 'Unlimited PDFs', 'WhatsApp reminders', 'Score prediction'],
     color: 'from-primary/20 to-green-500/20',
     borderColor: 'border-primary/50',
