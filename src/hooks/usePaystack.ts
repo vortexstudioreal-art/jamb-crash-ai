@@ -106,22 +106,21 @@ export const usePaystack = () => {
           setIsLoading(false);
           onClose();
         },
-        callback: async (response) => {
+        callback: (response) => {
           console.log('[Payment] Paystack callback received, reference:', response.reference);
-          try {
-            // CRITICAL: Verify payment and update database BEFORE calling onSuccess
-            // This ensures hasAccess will be true when refreshAccess() is called
-            console.log('[Payment] Starting verification...');
-            const verificationResult = await verifyPayment(response.reference);
-            console.log('[Payment] Verification successful:', verificationResult);
-            setIsLoading(false);
-            onSuccess(response.reference);
-          } catch (error) {
-            setIsLoading(false);
-            console.error('[Payment] Verification failed:', error);
-            toast.error('Payment verification failed. Please contact support.');
-            onClose();
-          }
+          setIsLoading(false);
+          // Verify payment synchronously and pass reference to onSuccess
+          // The verification will update the database, then we call onSuccess
+          verifyPayment(response.reference)
+            .then(() => {
+              console.log('[Payment] Verification successful');
+              onSuccess(response.reference);
+            })
+            .catch((error) => {
+              console.error('[Payment] Verification failed:', error);
+              toast.error('Payment verification failed. Please contact support.');
+              onClose();
+            });
         },
         });
 
