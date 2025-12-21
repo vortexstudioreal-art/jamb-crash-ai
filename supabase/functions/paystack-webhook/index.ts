@@ -26,6 +26,8 @@ async function computeHmacSha512(key: string, data: string): Promise<string> {
 }
 
 serve(async (req) => {
+  console.log("[paystack-webhook] Webhook called, method:", req.method);
+  
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -56,12 +58,13 @@ serve(async (req) => {
     }
 
     const event = JSON.parse(body);
-    console.log("Webhook event received:", event.event);
+    console.log("[paystack-webhook] Event received:", event.event);
+    console.log("[paystack-webhook] Event data:", JSON.stringify(event.data));
 
     if (event.event === "charge.success") {
       const { reference, id, customer, amount, metadata } = event.data;
 
-      console.log("Payment successful:", { reference, id, amount });
+      console.log("[paystack-webhook] Payment successful:", { reference, id, amount });
 
       const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
       const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -84,10 +87,12 @@ serve(async (req) => {
         .eq("paystack_reference", reference);
 
       if (updateError) {
-        console.error("Error updating payment:", updateError);
+        console.error("[paystack-webhook] Error updating payment:", updateError);
       } else {
-        console.log("Payment record updated successfully");
+        console.log("[paystack-webhook] Payment record updated successfully for reference:", reference);
       }
+    } else {
+      console.log("[paystack-webhook] Unhandled event type:", event.event);
     }
 
     return new Response(JSON.stringify({ received: true }), {
@@ -95,7 +100,7 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Webhook error:", error);
+    console.error("[paystack-webhook] Unexpected error:", error);
     return new Response("Webhook error", { status: 500 });
   }
 });

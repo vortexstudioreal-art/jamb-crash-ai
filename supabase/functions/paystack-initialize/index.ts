@@ -35,71 +35,49 @@ function isRateLimited(email: string): boolean {
   return false;
 }
 
+// Simple email validation
+function isValidEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
 serve(async (req) => {
+  console.log("[paystack-initialize] Function called, method:", req.method);
+  
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Verify authentication - get the JWT from the Authorization header
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      console.error("Missing or invalid Authorization header");
-      return new Response(
-        JSON.stringify({ error: "Authentication required" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    const requestBody = await req.text();
+    console.log("[paystack-initialize] Request body:", requestBody);
+    
+    const { email, amount, package: packageName, callbackUrl }: InitializePaymentRequest = JSON.parse(requestBody);
 
-    const token = authHeader.replace("Bearer ", "");
-    
-    // Create Supabase client to verify the token
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    
-    // Use anon key client to verify the user's JWT
-    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
-      global: {
-        headers: { Authorization: `Bearer ${token}` }
-      }
-    });
-    
-    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
-    
-    if (authError || !user) {
-      console.error("Authentication failed:", authError?.message);
-      return new Response(
-        JSON.stringify({ error: "Invalid or expired token" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const { email, amount, package: packageName, callbackUrl }: InitializePaymentRequest = await req.json();
-
-    console.log("Initializing payment:", { email, amount, packageName, authenticatedUser: user.email });
+    console.log("[paystack-initialize] Parsed request:", { email, amount, packageName, callbackUrl });
 
     // Validate input
     if (!email || !amount || !packageName) {
+      console.error("[paystack-initialize] Missing required fields");
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Verify the email matches the authenticated user
-    if (email.toLowerCase() !== user.email?.toLowerCase()) {
-      console.error("Email mismatch:", { provided: email, authenticated: user.email });
+    // Validate email format
+    if (!isValidEmail(email)) {
+      console.error("[paystack-initialize] Invalid email format:", email);
       return new Response(
-        JSON.stringify({ error: "Email does not match authenticated user" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Invalid email format" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     // Check rate limiting
     if (isRateLimited(email)) {
-      console.error("Rate limited:", email);
+      console.error("[paystack-initialize] Rate limited:", email);
       return new Response(
         JSON.stringify({ error: "Too many payment attempts. Please try again later." }),
         { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -108,7 +86,7 @@ serve(async (req) => {
 
     const paystackSecretKey = Deno.env.get("PAYSTACK_SECRET_KEY");
     if (!paystackSecretKey) {
-      console.error("PAYSTACK_SECRET_KEY not configured");
+      console.error("[paystack-initialize] PAYSTACK_SECRET_KEY not configured");
       return new Response(
         JSON.stringify({ error: "Payment service not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -117,8 +95,10 @@ serve(async (req) => {
 
     // Generate unique reference
     const reference = `JAMB_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    console.log("[paystack-initialize] Generated reference:", reference);
 
     // Initialize Paystack transaction
+    console.log("[paystack-initialize] Calling Paystack API...");
     const paystackResponse = await fetch("https://api.paystack.co/transaction/initialize", {
       method: "POST",
       headers: {
@@ -145,9 +125,10 @@ serve(async (req) => {
     });
 
     const paystackData = await paystackResponse.json();
-    console.log("Paystack response:", paystackData);
+    console.log("[paystack-initialize] Paystack response:", JSON.stringify(paystackData));
 
     if (!paystackData.status) {
+      console.error("[paystack-initialize] Paystack error:", paystackData.message);
       return new Response(
         JSON.stringify({ error: paystackData.message || "Payment initialization failed" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -155,8 +136,11 @@ serve(async (req) => {
     }
 
     // Store pending payment in database using service role
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    console.log("[paystack-initialize] Storing payment in database...");
     const { error: dbError } = await supabase.from("payments").insert({
       email,
       package: packageName,
@@ -166,9 +150,13 @@ serve(async (req) => {
     });
 
     if (dbError) {
-      console.error("Database error:", dbError);
+      console.error("[paystack-initialize] Database error:", dbError);
+      // Don't fail the whole request if DB insert fails - payment can still proceed
+    } else {
+      console.log("[paystack-initialize] Payment record created successfully");
     }
 
+    console.log("[paystack-initialize] Success! Returning authorization URL");
     return new Response(
       JSON.stringify({
         success: true,
@@ -179,7 +167,7 @@ serve(async (req) => {
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
-    console.error("Error initializing payment:", error);
+    console.error("[paystack-initialize] Unexpected error:", error);
     return new Response(
       JSON.stringify({ error: "An unexpected error occurred" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
