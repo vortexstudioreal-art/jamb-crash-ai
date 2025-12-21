@@ -350,6 +350,24 @@ const Index = () => {
     // Refresh access to get latest payment status
     await refreshAccess();
     
+    // Check for pending payment first - if one exists, don't start trial
+    const { data: pendingPayment } = await supabase
+      .from('payments')
+      .select('id, status')
+      .eq('email', userEmail || '')
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    
+    // If there's a pending payment, wait a bit and retry access check
+    if (pendingPayment) {
+      console.log('[Payment] Found pending payment, waiting for verification...');
+      // Wait 2 seconds for webhook/verification to complete
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      await refreshAccess();
+    }
+    
     // Double-check access with fresh database query to ensure we have latest payment status
     const { data: accessData } = await supabase.rpc('check_user_access', { 
       user_email: userEmail || '' 
@@ -357,14 +375,17 @@ const Index = () => {
     
     const currentAccess = accessData?.[0]?.has_access || false;
     
-    // Only start trial if user truly has no access (not paid, not admin)
-    if (!currentAccess && !effectiveAdmin && canStartTrial) {
+    // Only start trial if user truly has no access AND no pending payment
+    if (!currentAccess && !effectiveAdmin && canStartTrial && !pendingPayment) {
       const success = await startTrial();
       if (success) {
         toast.success('🎉 30-minute Premium trial started! Enjoy full access!');
       }
     } else if (currentAccess && !effectiveAdmin) {
       toast.success('🎉 Payment confirmed! Enjoy your subscription!');
+    } else if (pendingPayment) {
+      // Payment is being processed
+      toast.info('Your payment is being processed...');
     }
     
     setCurrentStep('dashboard');
