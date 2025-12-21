@@ -109,17 +109,25 @@ export const usePaystack = () => {
         callback: (response) => {
           console.log('[Payment] Paystack callback received, reference:', response.reference);
           setIsLoading(false);
-          // Verify payment synchronously and pass reference to onSuccess
-          // The verification will update the database, then we call onSuccess
+          // Verify payment and update database, then call onSuccess
           verifyPayment(response.reference)
-            .then(() => {
-              console.log('[Payment] Verification successful');
-              onSuccess(response.reference);
+            .then((result) => {
+              console.log('[Payment] Verification result:', result);
+              if (result?.success) {
+                console.log('[Payment] Payment verified successfully!');
+                toast.success('Payment verified successfully!');
+                onSuccess(response.reference);
+              } else {
+                console.error('[Payment] Payment verification returned unsuccessful:', result);
+                toast.error(result?.message || 'Payment was not successful. Please try again.');
+                onClose();
+              }
             })
             .catch((error) => {
-              console.error('[Payment] Verification failed:', error);
-              toast.error('Payment verification failed. Please contact support.');
-              onClose();
+              console.error('[Payment] Verification error:', error);
+              // Even if verification fails, still call onSuccess - the webhook will update the payment
+              toast.info('Payment received! Verification in progress...');
+              onSuccess(response.reference);
             });
         },
         });
