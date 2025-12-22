@@ -1,9 +1,10 @@
 import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Upload, Camera, FileText, X, CheckCircle, Sparkles, Loader2, BookOpen } from 'lucide-react';
+import { Upload, Camera, FileText, X, CheckCircle, Sparkles, Loader2, BookOpen, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useFeatureUsage } from '@/hooks/useFeatureUsage';
 
 interface ExtractedQuestion {
   question: string;
@@ -28,6 +29,9 @@ export const UploadSection = ({ onUploadComplete, userSubjects = [] }: UploadSec
   const [isProcessing, setIsProcessing] = useState(false);
   const [extractedQuestions, setExtractedQuestions] = useState<ExtractedQuestion[]>([]);
   const [aiMessage, setAiMessage] = useState('');
+  
+  // Feature usage limits
+  const { canUseFeature, incrementUsage, getRemainingUses } = useFeatureUsage();
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -74,6 +78,18 @@ export const UploadSection = ({ onUploadComplete, userSubjects = [] }: UploadSec
 
   const processWithAI = async () => {
     if (files.length === 0) return;
+    
+    // Check feature usage limit for each file
+    const remaining = getRemainingUses('pdf_upload');
+    if (remaining !== Infinity && files.length > remaining) {
+      toast.error(`You can only upload ${remaining} more file(s) today. Upgrade to Pro for unlimited!`);
+      return;
+    }
+    
+    if (!canUseFeature('pdf_upload')) {
+      toast.error('Daily PDF upload limit reached. Upgrade to Pro for unlimited uploads!');
+      return;
+    }
 
     setIsProcessing(true);
     setExtractedQuestions([]);
@@ -115,6 +131,11 @@ export const UploadSection = ({ onUploadComplete, userSubjects = [] }: UploadSec
         toast.success(`🎉 Extracted ${allQuestions.length} questions! You're crushing it!`);
       } else {
         toast.info('No questions found. Try a clearer image! 📸');
+      }
+
+      // Track usage for each file processed
+      for (let i = 0; i < files.length; i++) {
+        await incrementUsage('pdf_upload');
       }
 
       // Don't redirect to study plan - just notify completion

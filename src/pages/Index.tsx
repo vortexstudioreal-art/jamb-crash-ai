@@ -76,6 +76,9 @@ const Index = () => {
   const [showSubjectChanger, setShowSubjectChanger] = useState(false);
   const [showTrialBanner, setShowTrialBanner] = useState(true);
   
+  // Track if user just paid successfully (to prevent showing trial expired screen)
+  const [justPaidForPlan, setJustPaidForPlan] = useState(false);
+  
   // Track if we're waiting for payment flow to initialize
   const [isPaymentFlowLoading, setIsPaymentFlowLoading] = useState(() => {
     const params = new URLSearchParams(window.location.search);
@@ -338,6 +341,7 @@ const Index = () => {
 
   const handlePaymentSuccess = async (reference: string, email: string) => {
     setIsPaymentModalOpen(false);
+    setJustPaidForPlan(true); // Immediately mark as paid to bypass trial expired check
     await refreshAccess();
     toast.success('Payment successful! 🎉 Let\'s pick your subjects!');
     setCurrentStep('subject-select');
@@ -485,7 +489,7 @@ const Index = () => {
   }
 
   // Trial expired - show upgrade screen with payment modal
-  if (isTrialExpired && !effectiveAccess && !effectiveAdmin) {
+  if (isTrialExpired && !effectiveAccess && !effectiveAdmin && !justPaidForPlan) {
     return (
       <>
         <TrialExpiredScreen onUpgrade={handleUpgradeClick} />
