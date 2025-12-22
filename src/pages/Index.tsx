@@ -484,9 +484,24 @@ const Index = () => {
     );
   }
 
-  // Trial expired - show upgrade screen
+  // Trial expired - show upgrade screen with payment modal
   if (isTrialExpired && !effectiveAccess && !effectiveAdmin) {
-    return <TrialExpiredScreen onUpgrade={handleUpgradeClick} />;
+    return (
+      <>
+        <TrialExpiredScreen onUpgrade={handleUpgradeClick} />
+        
+        {/* Payment Modal - must be included here for expired trial users */}
+        {selectedPlan && (
+          <PaymentModal
+            isOpen={isPaymentModalOpen}
+            onClose={() => setIsPaymentModalOpen(false)}
+            plan={plans[selectedPlan]}
+            onSuccess={handlePaymentSuccess}
+            initialEmail={userEmail || undefined}
+          />
+        )}
+      </>
+    );
   }
 
   // Quiz step
