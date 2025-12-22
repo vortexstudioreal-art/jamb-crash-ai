@@ -13,14 +13,12 @@ const packages = [
   {
     name: 'Basic',
     price: '₦5,000',
-    period: '1 year',
     features: ['30-question quiz', '3 PDF uploads', 'Basic study plan'],
     color: 'border-border',
   },
   {
     name: 'Pro',
     price: '₦10,000',
-    period: '1 year',
     features: ['60-question quiz', 'Unlimited PDFs', '72-hour study plan', 'WhatsApp reminders', 'Predicted score'],
     color: 'border-primary',
     popular: true,
@@ -105,7 +103,7 @@ export const TrialExpiredScreen = ({ onUpgrade }: TrialExpiredScreenProps) => {
               <div className="text-center mb-4 pt-2">
                 <h3 className="text-xl font-bold text-foreground">{pkg.name}</h3>
                 <div className="text-3xl font-bold text-primary mt-2">{pkg.price}</div>
-                <p className="text-sm text-muted-foreground">{pkg.period}</p>
+                {pkg.period && <p className="text-sm text-muted-foreground">{pkg.period}</p>}
               </div>
               <ul className="space-y-2 mb-6">
                 {pkg.features.map((feature) => (

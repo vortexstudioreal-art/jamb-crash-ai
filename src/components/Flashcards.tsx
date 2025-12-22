@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, RotateCcw, Check, X, Sparkles, 
-  Brain, Shuffle, ChevronLeft, ChevronRight, Plus, Trash2 
+  Brain, Shuffle, ChevronLeft, ChevronRight, Plus, Trash2, Lock 
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useFeatureUsage } from '@/hooks/useFeatureUsage';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -58,6 +59,9 @@ export const Flashcards = ({ userEmail, subjects, onBack }: FlashcardsProps) => 
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'study' | 'browse'>('browse');
   const [sessionStats, setSessionStats] = useState({ correct: 0, incorrect: 0 });
+  
+  // Feature usage limits
+  const { canUseFeature, incrementUsage, getRemainingUses } = useFeatureUsage();
 
   // Load flashcards
   useEffect(() => {
@@ -120,6 +124,13 @@ export const Flashcards = ({ userEmail, subjects, onBack }: FlashcardsProps) => 
   };
 
   const generateFlashcards = async () => {
+    // Check feature usage limit
+    if (!canUseFeature('flashcard_generation')) {
+      const remaining = getRemainingUses('flashcard_generation');
+      toast.error(`Daily flashcard generation limit reached (${remaining} remaining). Upgrade to Pro for unlimited!`);
+      return;
+    }
+    
     setGenerating(true);
     toast.info('Generating flashcards from your quiz mistakes...');
 
@@ -197,6 +208,9 @@ export const Flashcards = ({ userEmail, subjects, onBack }: FlashcardsProps) => 
 
       if (error) throw error;
 
+      // Increment usage after successful generation
+      await incrementUsage('flashcard_generation');
+      
       toast.success(`Generated ${Math.min(newFlashcards.length, 20)} flashcards from your mistakes!`);
       loadFlashcards();
     } catch (error) {

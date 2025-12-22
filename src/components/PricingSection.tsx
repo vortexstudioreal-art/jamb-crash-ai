@@ -19,7 +19,6 @@ const plans = [
       '5-day Study Plan max',
       '5 AI explanations/day',
       '3 flashcards/day',
-      '1-year access',
     ],
   },
   {
@@ -36,7 +35,6 @@ const plans = [
       'Email reminders',
       'AI Study Tips',
       'AI Score Prediction',
-      '1-year access',
     ],
   },
   {
