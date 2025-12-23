@@ -24,6 +24,7 @@ import { Flashcards } from '@/components/Flashcards';
 import { CourseRequirements } from '@/components/CourseRequirements';
 import { CourseTipsCard } from '@/components/CourseTipsCard';
 import { TrialExpiredScreen } from '@/components/TrialExpiredScreen';
+import { UsageLimitIndicator } from '@/components/UsageLimitIndicator';
 import { TrialTimerBadge } from '@/components/TrialTimerBadge';
 import { Footer } from '@/components/Footer';
 import { BackButton } from '@/components/BackButton';
@@ -771,6 +772,9 @@ const Index = () => {
                   </p>
                 )}
               </motion.div>
+
+              {/* Usage Limit Indicators for Basic users */}
+              <UsageLimitIndicator />
 
               {/* Quick Actions */}
               <motion.div
