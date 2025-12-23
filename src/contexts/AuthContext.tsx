@@ -37,7 +37,7 @@ export const PACKAGE_FEATURES: Record<NonNullable<UserPackage>, PackageFeatures>
     hasRecentProgress: true,
     hasSubjectPerformance: true,
     // Basic BLOCKED: Practice Quiz, AI Score Prediction, WhatsApp, Refer & Earn
-    hasPracticeQuiz: false,
+    hasPracticeQuiz: true,
     hasAiScorePrediction: false,
     hasWhatsAppReminders: false,
     hasReferralBonus: false,
