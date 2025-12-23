@@ -70,7 +70,7 @@ const requiredPackage: Record<PlanFeature, 'basic' | 'pro' | 'premium'> = {
   studyStats: 'basic',
   recentProgress: 'basic',
   subjectPerformance: 'basic',
-  practiceQuiz: 'pro',
+  practiceQuiz: 'basic',
   aiScorePrediction: 'pro',
   whatsAppReminders: 'premium',
   referralBonus: 'premium',

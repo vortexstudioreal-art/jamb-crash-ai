@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { User, Mail, Crown, Shield, Calendar, Package, ArrowLeft, LogOut, Edit2, Check, X, HelpCircle, FileText, MessageCircle, Moon, Sun, Phone, Bell, Users } from 'lucide-react';
+import { User, Mail, Crown, Shield, Calendar, Package, ArrowLeft, LogOut, Edit2, Check, X, HelpCircle, FileText, MessageCircle, Moon, Sun, Phone, Bell, Users, Ticket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
+import { AdminCouponDashboard } from '@/components/AdminCouponDashboard';
 const THEME_STORAGE_KEY = 'jamb_theme';
 const SETTINGS_STORAGE_KEY = 'jamb_user_settings';
 
@@ -440,6 +440,27 @@ export default function Settings() {
             </CardContent>
           </Card>
         </motion.div>
+
+        {/* Admin Coupon Dashboard - for collaborators/admins only */}
+        {(userRole === 'admin' || userRole === 'collaborator') && !isOwner && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.17 }}
+          >
+            <Card className="mb-6">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2">
+                  <Ticket className="w-5 h-5 text-primary" />
+                  My Referral Dashboard
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AdminCouponDashboard />
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
         {/* Appearance Card */}
         <motion.div
