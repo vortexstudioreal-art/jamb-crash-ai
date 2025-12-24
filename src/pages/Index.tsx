@@ -35,9 +35,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, Lock, RefreshCw, Layers, X, GraduationCap } from 'lucide-react';
+import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, Lock, RefreshCw, Layers, X, GraduationCap, Library } from 'lucide-react';
+import { NovelBrowser, NovelDetail, NovelReader } from '@/components/novels';
 
-type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'study-plan' | 'study-materials' | 'syllabus' | 'flashcards' | 'course-requirements';
+type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'study-plan' | 'study-materials' | 'syllabus' | 'flashcards' | 'course-requirements' | 'novels' | 'novel-detail' | 'novel-reader';
 type QuizType = 'full' | 'mini' | 'subject' | 'timed-practice';
 
 interface FormData {
@@ -76,6 +77,8 @@ const Index = () => {
   const [weakSubjectFromQuiz, setWeakSubjectFromQuiz] = useState<string | null>(null);
   const [showSubjectChanger, setShowSubjectChanger] = useState(false);
   const [showTrialBanner, setShowTrialBanner] = useState(true);
+  const [selectedNovelId, setSelectedNovelId] = useState<string | null>(null);
+  const [selectedChapterId, setSelectedChapterId] = useState<string | null>(null);
   
   // Track if user just paid successfully (to prevent showing trial expired screen)
   const [justPaidForPlan, setJustPaidForPlan] = useState(false);
@@ -684,6 +687,48 @@ const Index = () => {
     );
   }
 
+  // Novels step
+  if (currentStep === 'novels' && userEmail) {
+    return (
+      <NovelBrowser
+        userEmail={userEmail}
+        onBack={handleBackToDashboard}
+        onSelectNovel={(novelId) => {
+          setSelectedNovelId(novelId);
+          setCurrentStep('novel-detail');
+        }}
+      />
+    );
+  }
+
+  // Novel Detail step
+  if (currentStep === 'novel-detail' && userEmail && selectedNovelId) {
+    return (
+      <NovelDetail
+        novelId={selectedNovelId}
+        userEmail={userEmail}
+        onBack={() => setCurrentStep('novels')}
+        onStartReading={(chapterId) => {
+          setSelectedChapterId(chapterId);
+          setCurrentStep('novel-reader');
+        }}
+      />
+    );
+  }
+
+  // Novel Reader step
+  if (currentStep === 'novel-reader' && userEmail && selectedChapterId) {
+    return (
+      <NovelReader
+        chapterId={selectedChapterId}
+        userEmail={userEmail}
+        onBack={() => setCurrentStep('novel-detail')}
+        onNextChapter={(chapterId) => setSelectedChapterId(chapterId)}
+        onPrevChapter={(chapterId) => setSelectedChapterId(chapterId)}
+      />
+    );
+  }
+
   // Upload step
   if (currentStep === 'upload' && userEmail) {
     return (
@@ -849,7 +894,7 @@ const Index = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 }}
-                className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6"
+                className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6"
               >
                 <Button
                   variant="outline"
@@ -885,6 +930,15 @@ const Index = () => {
                 >
                   <Layers className="w-6 h-6 text-orange-500" />
                   <span className="font-bold text-sm">Flashcards</span>
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="h-auto py-4 flex flex-col gap-1 hover:border-rose-500 hover:bg-rose-500/5"
+                  onClick={() => setCurrentStep('novels')}
+                >
+                  <Library className="w-6 h-6 text-rose-500" />
+                  <span className="font-bold text-sm">JAMB Novels</span>
                 </Button>
               </motion.div>
 

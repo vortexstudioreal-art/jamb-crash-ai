@@ -359,6 +359,98 @@ export type Database = {
         }
         Relationships: []
       }
+      novel_chapters: {
+        Row: {
+          chapter_number: number
+          content: string
+          created_at: string | null
+          estimated_reading_time: number | null
+          id: string
+          likely_questions: Json | null
+          novel_id: string
+          title: string
+          word_count: number | null
+        }
+        Insert: {
+          chapter_number: number
+          content: string
+          created_at?: string | null
+          estimated_reading_time?: number | null
+          id?: string
+          likely_questions?: Json | null
+          novel_id: string
+          title: string
+          word_count?: number | null
+        }
+        Update: {
+          chapter_number?: number
+          content?: string
+          created_at?: string | null
+          estimated_reading_time?: number | null
+          id?: string
+          likely_questions?: Json | null
+          novel_id?: string
+          title?: string
+          word_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "novel_chapters_novel_id_fkey"
+            columns: ["novel_id"]
+            isOneToOne: false
+            referencedRelation: "novels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      novels: {
+        Row: {
+          author: string
+          category: string
+          cover_image_url: string | null
+          created_at: string | null
+          description: string | null
+          difficulty_level: string | null
+          id: string
+          is_premium: boolean | null
+          subject: string | null
+          title: string
+          total_chapters: number | null
+          updated_at: string | null
+          year: number | null
+        }
+        Insert: {
+          author: string
+          category?: string
+          cover_image_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          difficulty_level?: string | null
+          id?: string
+          is_premium?: boolean | null
+          subject?: string | null
+          title: string
+          total_chapters?: number | null
+          updated_at?: string | null
+          year?: number | null
+        }
+        Update: {
+          author?: string
+          category?: string
+          cover_image_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          difficulty_level?: string | null
+          id?: string
+          is_premium?: boolean | null
+          subject?: string | null
+          title?: string
+          total_chapters?: number | null
+          updated_at?: string | null
+          year?: number | null
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           access_expires_at: string | null
@@ -590,6 +682,105 @@ export type Database = {
           referrer_email?: string
         }
         Relationships: []
+      }
+      user_bookmarks: {
+        Row: {
+          chapter_id: string
+          created_at: string | null
+          email: string
+          id: string
+          note: string | null
+          novel_id: string
+          scroll_position: number | null
+        }
+        Insert: {
+          chapter_id: string
+          created_at?: string | null
+          email: string
+          id?: string
+          note?: string | null
+          novel_id: string
+          scroll_position?: number | null
+        }
+        Update: {
+          chapter_id?: string
+          created_at?: string | null
+          email?: string
+          id?: string
+          note?: string | null
+          novel_id?: string
+          scroll_position?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_bookmarks_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "novel_chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_bookmarks_novel_id_fkey"
+            columns: ["novel_id"]
+            isOneToOne: false
+            referencedRelation: "novels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_novel_progress: {
+        Row: {
+          created_at: string | null
+          current_chapter_id: string | null
+          email: string
+          id: string
+          is_completed: boolean | null
+          last_read_at: string | null
+          novel_id: string
+          progress_percent: number | null
+          total_time_spent_seconds: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          current_chapter_id?: string | null
+          email: string
+          id?: string
+          is_completed?: boolean | null
+          last_read_at?: string | null
+          novel_id: string
+          progress_percent?: number | null
+          total_time_spent_seconds?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          current_chapter_id?: string | null
+          email?: string
+          id?: string
+          is_completed?: boolean | null
+          last_read_at?: string | null
+          novel_id?: string
+          progress_percent?: number | null
+          total_time_spent_seconds?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_novel_progress_current_chapter_id_fkey"
+            columns: ["current_chapter_id"]
+            isOneToOne: false
+            referencedRelation: "novel_chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_novel_progress_novel_id_fkey"
+            columns: ["novel_id"]
+            isOneToOne: false
+            referencedRelation: "novels"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_progress: {
         Row: {
