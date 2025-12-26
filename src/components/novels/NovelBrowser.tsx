@@ -121,9 +121,9 @@ export const NovelBrowser = ({ userEmail, onBack, onSelectNovel }: NovelBrowserP
               <div>
                 <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
                   <Book className="w-5 h-5 text-primary" />
-                  JAMB Novels
+                  JAMB Literary Texts
                 </h1>
-                <p className="text-sm text-muted-foreground">2024 & 2025 Literary Texts</p>
+                <p className="text-sm text-muted-foreground">2025/2026 JAMB Literature-in-English Syllabus</p>
               </div>
             </div>
           </div>

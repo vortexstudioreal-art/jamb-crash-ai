@@ -26,7 +26,8 @@ serve(async (req) => {
       year: 2025,
       is_premium: false,
       total_chapters: 12,
-      difficulty_level: "medium"
+      difficulty_level: "medium",
+      cover_image_url: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=400&h=600&fit=crop"
     };
 
     const lekkiChapters = [
@@ -479,7 +480,8 @@ Mr. Bepo's impact on the school and its community is assessed. What legacy does 
       year: 2024,
       is_premium: false,
       total_chapters: 9,
-      difficulty_level: "medium"
+      difficulty_level: "medium",
+      cover_image_url: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&h=600&fit=crop"
     };
 
     const lifeChangerChapters = [
@@ -957,7 +959,8 @@ As Omar prepares for university, he carries with him the wisdom from his mother'
         year: 2025,
         is_premium: false,
         total_chapters: 5,
-        difficulty_level: "medium"
+        difficulty_level: "medium",
+        cover_image_url: "https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?w=400&h=600&fit=crop"
       },
       {
         title: "Othello",
@@ -967,7 +970,8 @@ As Omar prepares for university, he carries with him the wisdom from his mother'
         year: 2025,
         is_premium: false,
         total_chapters: 5,
-        difficulty_level: "hard"
+        difficulty_level: "hard",
+        cover_image_url: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=600&fit=crop"
       },
       // PROSE
       {
@@ -978,7 +982,8 @@ As Omar prepares for university, he carries with him the wisdom from his mother'
         year: 2025,
         is_premium: false,
         total_chapters: 12,
-        difficulty_level: "medium"
+        difficulty_level: "medium",
+        cover_image_url: "https://images.unsplash.com/photo-1532012197267-da84d127e765?w=400&h=600&fit=crop"
       },
       {
         title: "Native Son",
@@ -988,7 +993,42 @@ As Omar prepares for university, he carries with him the wisdom from his mother'
         year: 2025,
         is_premium: false,
         total_chapters: 15,
-        difficulty_level: "hard"
+        difficulty_level: "hard",
+        cover_image_url: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=400&h=600&fit=crop"
+      },
+      // Additional recommended texts
+      {
+        title: "The Lion and the Jewel",
+        author: "Wole Soyinka",
+        description: "JAMB African Drama text. A witty comedy set in the village of Ilujinle, exploring the clash between traditional African values and modernity through the story of Sidi (the village beauty) and her two suitors: Lakunle (a modernist schoolteacher) and Baroka (the wily village chief).",
+        category: "african_drama",
+        year: 2025,
+        is_premium: false,
+        total_chapters: 3,
+        difficulty_level: "medium",
+        cover_image_url: "https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?w=400&h=600&fit=crop"
+      },
+      {
+        title: "Second Class Citizen",
+        author: "Buchi Emecheta",
+        description: "JAMB African Prose text. The compelling story of Adah, a Nigerian woman who dreams of moving to England for a better life, only to face racism, poverty, and domestic abuse.",
+        category: "african_prose",
+        year: 2025,
+        is_premium: false,
+        total_chapters: 18,
+        difficulty_level: "medium",
+        cover_image_url: "https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=400&h=600&fit=crop"
+      },
+      {
+        title: "Unexpected Joy at Dawn",
+        author: "Alex Agyei-Agyiri",
+        description: "JAMB African Prose text. A story about the expulsion of illegal aliens from Nigeria in 1983, exploring themes of identity, xenophobia, and the search for belonging.",
+        category: "african_prose",
+        year: 2025,
+        is_premium: false,
+        total_chapters: 20,
+        difficulty_level: "medium",
+        cover_image_url: "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=400&h=600&fit=crop"
       }
     ];
 
@@ -1003,7 +1043,8 @@ As Omar prepares for university, he carries with him the wisdom from his mother'
         year: 2025,
         is_premium: false,
         total_chapters: 1,
-        difficulty_level: "medium"
+        difficulty_level: "medium",
+        cover_image_url: "https://images.unsplash.com/photo-1474631245212-32dc3c8310c6?w=400&h=600&fit=crop"
       },
       {
         title: "Ambush",
@@ -1013,7 +1054,8 @@ As Omar prepares for university, he carries with him the wisdom from his mother'
         year: 2025,
         is_premium: false,
         total_chapters: 1,
-        difficulty_level: "medium"
+        difficulty_level: "medium",
+        cover_image_url: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=400&h=600&fit=crop"
       },
       {
         title: "Piano and Drums",
@@ -1023,7 +1065,8 @@ As Omar prepares for university, he carries with him the wisdom from his mother'
         year: 2025,
         is_premium: false,
         total_chapters: 1,
-        difficulty_level: "medium"
+        difficulty_level: "medium",
+        cover_image_url: "https://images.unsplash.com/photo-1461784121038-f088ca1e7714?w=400&h=600&fit=crop"
       },
       {
         title: "The Dining Table",
@@ -1033,7 +1076,8 @@ As Omar prepares for university, he carries with him the wisdom from his mother'
         year: 2025,
         is_premium: false,
         total_chapters: 1,
-        difficulty_level: "medium"
+        difficulty_level: "medium",
+        cover_image_url: "https://images.unsplash.com/photo-1449247709967-d4461a6a6103?w=400&h=600&fit=crop"
       },
       {
         title: "The Panic of Growing Older",
@@ -1043,7 +1087,8 @@ As Omar prepares for university, he carries with him the wisdom from his mother'
         year: 2025,
         is_premium: false,
         total_chapters: 1,
-        difficulty_level: "medium"
+        difficulty_level: "medium",
+        cover_image_url: "https://images.unsplash.com/photo-1509909756405-be0199881695?w=400&h=600&fit=crop"
       },
       {
         title: "The Anvil and the Hammer",
@@ -1053,7 +1098,8 @@ As Omar prepares for university, he carries with him the wisdom from his mother'
         year: 2025,
         is_premium: false,
         total_chapters: 1,
-        difficulty_level: "medium"
+        difficulty_level: "medium",
+        cover_image_url: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400&h=600&fit=crop"
       },
       // Non-African Poetry
       {
@@ -1064,7 +1110,8 @@ As Omar prepares for university, he carries with him the wisdom from his mother'
         year: 2025,
         is_premium: false,
         total_chapters: 1,
-        difficulty_level: "medium"
+        difficulty_level: "medium",
+        cover_image_url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop"
       },
       {
         title: "The Pulley",
@@ -1074,7 +1121,8 @@ As Omar prepares for university, he carries with him the wisdom from his mother'
         year: 2025,
         is_premium: false,
         total_chapters: 1,
-        difficulty_level: "medium"
+        difficulty_level: "medium",
+        cover_image_url: "https://images.unsplash.com/photo-1490730141103-6cac27abb37f?w=400&h=600&fit=crop"
       },
       {
         title: "The School Boy",
@@ -1084,7 +1132,8 @@ As Omar prepares for university, he carries with him the wisdom from his mother'
         year: 2025,
         is_premium: false,
         total_chapters: 1,
-        difficulty_level: "medium"
+        difficulty_level: "medium",
+        cover_image_url: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&h=600&fit=crop"
       },
       {
         title: "The Proud King",
@@ -1094,7 +1143,8 @@ As Omar prepares for university, he carries with him the wisdom from his mother'
         year: 2025,
         is_premium: false,
         total_chapters: 1,
-        difficulty_level: "medium"
+        difficulty_level: "medium",
+        cover_image_url: "https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=400&h=600&fit=crop"
       }
     ];
 
