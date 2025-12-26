@@ -8,8 +8,9 @@ interface TimeLeft {
   seconds: number;
 }
 
-// UTME 2026 - setting next exam date
-const UTME_DATE = new Date('2026-04-18T08:00:00');
+// UTME 2026 - Expected exam date based on 2025 pattern (April 24-May 5, 2025)
+// JAMB typically starts UTME in late April. Using April 25, 2026 (Saturday) as expected start
+const UTME_DATE = new Date('2026-04-25T08:00:00');
 
 export const CountdownTimer = () => {
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
