@@ -49,6 +49,24 @@ export default function Auth() {
   const { signIn, signUp, user, isLoading, isOwner, isAdmin, hasAccess } = useAuth();
   const navigate = useNavigate();
 
+  // Clear invalid sessions on mount to prevent glitches
+  useEffect(() => {
+    const clearInvalidSession = async () => {
+      try {
+        const { error } = await supabase.auth.getSession();
+        if (error?.message?.includes('Refresh Token Not Found') || 
+            error?.message?.includes('Invalid Refresh Token') ||
+            error?.message?.includes('refresh_token_not_found')) {
+          console.log('Clearing invalid session...');
+          await supabase.auth.signOut();
+        }
+      } catch (err) {
+        console.error('Error checking session:', err);
+      }
+    };
+    clearInvalidSession();
+  }, []);
+
   // Check for trial or payment signup flow from state
   useEffect(() => {
     const state = location.state as { flow?: string; plan?: string; returnToPayment?: boolean } | null;

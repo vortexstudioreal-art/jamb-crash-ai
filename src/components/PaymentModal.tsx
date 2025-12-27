@@ -98,6 +98,60 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
       return;
     }
 
+    // If final price is 0 (100% discount), skip Paystack and grant access directly
+    if (finalPrice === 0) {
+      try {
+        // Generate a unique reference for free transaction
+        const freeReference = `FREE_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+        
+        // Create successful payment record
+        const { error: paymentError } = await supabase.from('payments').insert({
+          email,
+          package: plan.name.toLowerCase(),
+          amount: 0,
+          status: 'success',
+          paystack_reference: freeReference,
+          access_expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 year
+        });
+
+        if (paymentError) {
+          console.error('Failed to create free payment record:', paymentError);
+          toast.error('Failed to apply discount. Please try again.');
+          return;
+        }
+
+        // Record coupon usage if applied
+        if (appliedCouponId && appliedDiscount > 0) {
+          try {
+            const isAdminReferral = couponType === 'admin_referral';
+            const creatorEarning = 0; // No earnings on free transactions
+
+            await supabase.from('coupon_usage').insert({
+              coupon_id: appliedCouponId,
+              used_by_email: email,
+              amount_paid: 0,
+              discount_applied: appliedDiscount,
+              creator_earning: creatorEarning,
+              commission_percentage: commissionPercentage,
+              commission_payable: false, // No commission on free transactions
+            });
+
+            // Increment coupon usage count
+            await supabase.rpc('increment_coupon_usage', { p_coupon_id: appliedCouponId });
+          } catch (err) {
+            console.error('Failed to record coupon usage:', err);
+          }
+        }
+
+        toast.success('100% discount applied! Access granted! 🎉');
+        onSuccess(freeReference, email);
+      } catch (err) {
+        console.error('Free transaction error:', err);
+        toast.error('Failed to apply discount. Please try again.');
+      }
+      return;
+    }
+
     await initializePayment(
       {
         email,
