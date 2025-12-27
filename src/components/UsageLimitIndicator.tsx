@@ -1,5 +1,6 @@
 import { useFeatureUsage, FeatureType, FEATURE_NAMES } from '@/hooks/useFeatureUsage';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTrialSystem } from '@/hooks/useTrialSystem';
 import { Progress } from '@/components/ui/progress';
 import { FileText, Layers } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -51,11 +52,18 @@ const UsageItem = ({ feature, icon, colorClass }: UsageItemProps) => {
 };
 
 export const UsageLimitIndicator = () => {
-  const { userPackage, isAdmin, isOwner } = useAuth();
+  const { userPackage, isAdmin, isOwner, hasAccess, user } = useAuth();
   const { isLoading } = useFeatureUsage();
   
-  // Don't show for Pro/Premium/Admin users (they have unlimited)
-  if (isAdmin || isOwner || userPackage === 'pro' || userPackage === 'premium') {
+  // Check trial status using database-backed trial system
+  const { isTrialActive } = useTrialSystem({
+    userEmail: user?.email || null,
+    isAdmin: isAdmin || isOwner,
+    hasAccess,
+  });
+  
+  // Don't show for Pro/Premium/Admin/Trial users (they have unlimited)
+  if (isAdmin || isOwner || userPackage === 'pro' || userPackage === 'premium' || isTrialActive) {
     return null;
   }
   

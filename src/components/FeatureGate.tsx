@@ -1,6 +1,6 @@
 import { ReactNode, useState } from 'react';
 import { useAuth, PACKAGE_FEATURES, UserPackage } from '@/contexts/AuthContext';
-import { useFreeTrialTimer } from '@/hooks/useFreeTrialTimer';
+import { useTrialSystem } from '@/hooks/useTrialSystem';
 import { useFeatureUsage, FeatureType, FEATURE_NAMES } from '@/hooks/useFeatureUsage';
 import { Lock, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -97,8 +97,8 @@ export const FeatureGate = ({ children, feature, fallback, onUpgrade }: FeatureG
   const { userPackage, isAdmin, isOwner, hasAccess, user, packageFeatures } = useAuth();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   
-  // Check if user is in trial - trial users get Pro access
-  const { isInTrial } = useFreeTrialTimer({
+  // Check if user is in trial using database-backed trial system
+  const { isTrialActive } = useTrialSystem({
     userEmail: user?.email || null,
     isAdmin: isAdmin || isOwner,
     hasAccess,
@@ -109,8 +109,8 @@ export const FeatureGate = ({ children, feature, fallback, onUpgrade }: FeatureG
     return <>{children}</>;
   }
 
-  // Trial users get Pro features
-  if (isInTrial && TRIAL_FEATURES.includes(feature)) {
+  // Trial users get Pro features (full access during trial)
+  if (isTrialActive && TRIAL_FEATURES.includes(feature)) {
     return <>{children}</>;
   }
 
@@ -179,8 +179,8 @@ export const useFeatureAccess = () => {
   const { userPackage, packageFeatures, isAdmin, isOwner, hasAccess, user } = useAuth();
   const featureUsage = useFeatureUsage();
   
-  // Check if user is in trial
-  const { isInTrial } = useFreeTrialTimer({
+  // Check if user is in trial using database-backed trial system
+  const { isTrialActive } = useTrialSystem({
     userEmail: user?.email || null,
     isAdmin: isAdmin || isOwner,
     hasAccess,
@@ -190,8 +190,8 @@ export const useFeatureAccess = () => {
     // Admins and owners have all features
     if (isAdmin || isOwner) return true;
     
-    // Trial users get Pro features
-    if (isInTrial && TRIAL_FEATURES.includes(feature)) {
+    // Trial users get Pro features (full access)
+    if (isTrialActive && TRIAL_FEATURES.includes(feature)) {
       return true;
     }
     
@@ -204,7 +204,7 @@ export const useFeatureAccess = () => {
     // Admins/owners get unlimited
     if (isAdmin || isOwner) return 60;
     // Trial users get Pro-level quiz (60 questions)
-    if (isInTrial) return 60;
+    if (isTrialActive) return 60;
     // Package-based
     return packageFeatures.maxQuizQuestions;
   };
@@ -216,7 +216,7 @@ export const useFeatureAccess = () => {
     // Pro/Premium have no limits
     if (userPackage === 'pro' || userPackage === 'premium') return true;
     // Trial users get Pro limits (unlimited)
-    if (isInTrial) return true;
+    if (isTrialActive) return true;
     // Basic users check daily limits
     return featureUsage.canUseFeature(limitedFeature);
   };
@@ -230,8 +230,8 @@ export const useFeatureAccess = () => {
     if (isAdmin || isOwner) return true;
     // Pro/Premium don't need tracking
     if (userPackage === 'pro' || userPackage === 'premium') return true;
-    // Trial users don't need tracking
-    if (isInTrial) return true;
+    // Trial users don't need tracking (unlimited during trial)
+    if (isTrialActive) return true;
     // Basic users track usage
     return featureUsage.incrementUsage(limitedFeature);
   };
@@ -244,7 +244,7 @@ export const useFeatureAccess = () => {
     trackUsage,
     packageFeatures,
     userPackage,
-    isInTrial,
+    isInTrial: isTrialActive,
     refreshUsage: featureUsage.refreshUsage,
   };
 };

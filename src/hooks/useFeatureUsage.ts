@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth, UserPackage } from '@/contexts/AuthContext';
-import { useFreeTrialTimer } from '@/hooks/useFreeTrialTimer';
+import { useTrialSystem } from '@/hooks/useTrialSystem';
 
 export type FeatureType = 
   | 'pdf_upload'
@@ -73,7 +73,8 @@ export const useFeatureUsage = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
 
-  const { isInTrial } = useFreeTrialTimer({
+  // Use database-backed trial system instead of local storage one
+  const { isTrialActive } = useTrialSystem({
     userEmail: user?.email || null,
     isAdmin: isAdmin || isOwner,
     hasAccess,
@@ -142,13 +143,13 @@ export const useFeatureUsage = () => {
     // Admins/owners have no limits
     if (isAdmin || isOwner) return Infinity;
     
-    // Trial users get Pro limits
-    if (isInTrial) return FEATURE_LIMITS.pro[feature];
+    // Trial users get Pro limits (unlimited)
+    if (isTrialActive) return FEATURE_LIMITS.pro[feature];
     
     // Package-based limits
     if (!userPackage) return 0;
     return FEATURE_LIMITS[userPackage][feature];
-  }, [userPackage, isAdmin, isOwner, isInTrial]);
+  }, [userPackage, isAdmin, isOwner, isTrialActive]);
 
   // Check if user can use a feature (including bonus uses)
   const canUseFeature = useCallback((feature: FeatureType): boolean => {
