@@ -1031,7 +1031,7 @@ const Index = () => {
                 <h3 className="text-xl font-bold text-foreground mb-1">2026 UTME Countdown</h3>
                 <p className="text-muted-foreground mb-3">Stay focused, stay winning! 🔥</p>
                 <div className="text-4xl font-bold text-primary">
-                  {Math.ceil((new Date('2026-04-01').getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days
+                  {Math.ceil((new Date('2026-04-25').getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days
                 </div>
                 <p className="text-sm text-muted-foreground mt-2">until UTME 2026</p>
               </motion.div>
