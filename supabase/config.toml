@@ -41,3 +41,6 @@ verify_jwt = false
 
 [functions.seed-full-novels]
 verify_jwt = false
+
+[functions.seed-all-jamb-novels]
+verify_jwt = false
