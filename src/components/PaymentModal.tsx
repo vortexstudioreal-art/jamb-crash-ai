@@ -343,6 +343,11 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
                     <Loader2 className="w-5 h-5 animate-spin" />
                     Processing...
                   </>
+                ) : finalPrice === 0 ? (
+                  <>
+                    <CheckCircle className="w-5 h-5" />
+                    Claim Free Access
+                  </>
                 ) : (
                   <>
                     <CreditCard className="w-5 h-5" />
