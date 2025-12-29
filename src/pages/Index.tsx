@@ -137,8 +137,13 @@ const Index = () => {
     
     // If user is signed in and has access (paid OR admin), go to dashboard
     if (userEmail && hasFullAccess && currentStep === 'landing') {
-      setCurrentStep('dashboard');
-      saveDashboardState('dashboard');
+      // Only prompt for subjects if they don't have any
+      if (userSubjects.length === 0 && !isAdmin && !isOwner) {
+        setCurrentStep('subject-select');
+      } else {
+        setCurrentStep('dashboard');
+        saveDashboardState('dashboard');
+      }
       window.scrollTo({ top: 0, behavior: 'instant' });
       return;
     }
