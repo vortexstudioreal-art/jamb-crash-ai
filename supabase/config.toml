@@ -44,3 +44,12 @@ verify_jwt = false
 
 [functions.seed-all-jamb-novels]
 verify_jwt = false
+
+[functions.seed-remaining-novels]
+verify_jwt = false
+
+[functions.seed-faceless-complete]
+verify_jwt = false
+
+[functions.seed-native-son]
+verify_jwt = false
