@@ -246,8 +246,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
     );
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // THEN check for existing session (and clear invalid tokens)
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      // Clear stale/invalid sessions automatically
+      if (error) {
+        const errorMsg = error.message?.toLowerCase() || '';
+        if (
+          errorMsg.includes('refresh token') || 
+          errorMsg.includes('invalid') ||
+          errorMsg.includes('not found')
+        ) {
+          console.log('Invalid session detected, signing out...');
+          supabase.auth.signOut();
+          setIsLoading(false);
+          return;
+        }
+      }
+      
       setSession(session);
       setUser(session?.user ?? null);
       

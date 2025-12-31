@@ -100,32 +100,56 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
 
     // If final price is 0 (100% discount), skip Paystack and grant access directly
     if (finalPrice === 0) {
-      try {
-        // Generate a unique reference for free transaction
-        const freeReference = `FREE_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+      const freeReference = `FREE_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+      
+      const attemptFreePayment = async (isRetry = false) => {
+        // If retrying, sign out first to clear stale session
+        if (isRetry) {
+          await supabase.auth.signOut();
+        }
         
-        // Create successful payment record
         const { error: paymentError } = await supabase.from('payments').insert({
           email,
           package: plan.name.toLowerCase(),
           amount: 0,
           status: 'success',
           paystack_reference: freeReference,
-          access_expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 year
+          access_expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
         });
+
+        return paymentError;
+      };
+
+      try {
+        let paymentError = await attemptFreePayment(false);
+        
+        // If failed due to auth issue, retry after clearing session
+        if (paymentError) {
+          const errorMsg = paymentError.message?.toLowerCase() || '';
+          const errorCode = paymentError.code?.toLowerCase() || '';
+          const isAuthError = 
+            errorMsg.includes('refresh token') || 
+            errorMsg.includes('jwt') ||
+            errorMsg.includes('token') ||
+            errorCode.includes('auth') ||
+            errorCode === 'pgrst301';
+          
+          if (isAuthError) {
+            console.log('Auth-related error detected, retrying after session reset...');
+            paymentError = await attemptFreePayment(true);
+          }
+        }
 
         if (paymentError) {
           console.error('Failed to create free payment record:', paymentError);
-          toast.error('Failed to apply discount. Please try again.');
+          toast.error('Failed to claim free access. Please refresh and try again.');
           return;
         }
 
         // Record coupon usage if applied
         if (appliedCouponId && appliedDiscount > 0) {
           try {
-            const isAdminReferral = couponType === 'admin_referral';
-            const creatorEarning = 0; // No earnings on free transactions
-
+            const creatorEarning = 0;
             await supabase.from('coupon_usage').insert({
               coupon_id: appliedCouponId,
               used_by_email: email,
@@ -133,10 +157,8 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
               discount_applied: appliedDiscount,
               creator_earning: creatorEarning,
               commission_percentage: commissionPercentage,
-              commission_payable: false, // No commission on free transactions
+              commission_payable: false,
             });
-
-            // Increment coupon usage count
             await supabase.rpc('increment_coupon_usage', { p_coupon_id: appliedCouponId });
           } catch (err) {
             console.error('Failed to record coupon usage:', err);
@@ -147,7 +169,7 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
         onSuccess(freeReference, email);
       } catch (err) {
         console.error('Free transaction error:', err);
-        toast.error('Failed to apply discount. Please try again.');
+        toast.error('Failed to claim free access. Please refresh and try again.');
       }
       return;
     }
