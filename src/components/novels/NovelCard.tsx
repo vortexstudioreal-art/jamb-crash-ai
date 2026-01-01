@@ -68,12 +68,16 @@ export const NovelCard = ({
             src={coverImageUrl} 
             alt={title}
             className="w-full h-full object-cover"
+            onError={(e) => {
+              // Hide broken image and show placeholder
+              e.currentTarget.style.display = 'none';
+              e.currentTarget.nextElementSibling?.classList.remove('hidden');
+            }}
           />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Book className="w-16 h-16 text-primary/40" />
-          </div>
-        )}
+        ) : null}
+        <div className={`w-full h-full flex items-center justify-center absolute inset-0 ${coverImageUrl ? 'hidden' : ''}`}>
+          <Book className="w-16 h-16 text-primary/40" />
+        </div>
         
         {/* Badges */}
         <div className="absolute top-2 left-2 flex gap-1.5 flex-wrap">
