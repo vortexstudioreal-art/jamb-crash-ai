@@ -35,7 +35,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, Lock, RefreshCw, Layers, X, GraduationCap, Library } from 'lucide-react';
+import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, Lock, RefreshCw, Layers, X, GraduationCap, Library, Newspaper } from 'lucide-react';
+import { JambNewsSection } from '@/components/JambNewsSection';
+import { ScholarshipSection } from '@/components/ScholarshipSection';
 import { NovelBrowser, NovelDetail, NovelReader } from '@/components/novels';
 
 type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'study-plan' | 'study-materials' | 'syllabus' | 'flashcards' | 'course-requirements' | 'novels' | 'novel-detail' | 'novel-reader';
@@ -957,6 +959,12 @@ const Index = () => {
               >
                 <CourseTipsCard userEmail={userEmail} userSubjects={effectiveSubjects} />
               </motion.div>
+
+              {/* JAMB News Section */}
+              <JambNewsSection />
+
+              {/* Scholarships Section */}
+              <ScholarshipSection />
 
               {/* Subject Tags with Change Button */}
               <motion.div
