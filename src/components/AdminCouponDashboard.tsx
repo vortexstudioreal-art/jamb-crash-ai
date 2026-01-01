@@ -48,14 +48,15 @@ export const AdminCouponDashboard = () => {
   const [usageData, setUsageData] = useState<CouponUsage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Only show for admins/collaborators (not owners - they have full CouponManager)
-  const isCollaboratorAdmin = userRole === 'admin' || userRole === 'collaborator';
+  // Only show for collaborators (content creators) - they see their personal earnings dashboard
+  // Owners and admins have full access via CouponManager instead
+  const isContentCreator = userRole === 'collaborator';
 
   useEffect(() => {
-    if (user?.email && isCollaboratorAdmin) {
+    if (user?.email && isContentCreator) {
       fetchMyCoupons();
     }
-  }, [user?.email, isCollaboratorAdmin]);
+  }, [user?.email, isContentCreator]);
 
   const fetchMyCoupons = async () => {
     if (!user?.email) return;
@@ -105,7 +106,7 @@ export const AdminCouponDashboard = () => {
   const totalUsers = new Set(usageData.map(u => u.used_by_email)).size;
   const activeCoupons = coupons.filter(c => c.is_active).length;
 
-  if (!isCollaboratorAdmin) {
+  if (!isContentCreator) {
     return null;
   }
 
@@ -129,7 +130,7 @@ export const AdminCouponDashboard = () => {
           <p className="text-muted-foreground">Track your referral coupons and earnings</p>
         </div>
         <Badge variant="secondary" className="text-sm">
-          {userRole === 'collaborator' ? 'Collaborator' : 'Admin'}
+          Content Creator
         </Badge>
       </div>
 

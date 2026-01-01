@@ -199,7 +199,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           const pkgName = result.package.toLowerCase();
           if (pkgName === 'basic') setUserPackage('basic');
           else if (pkgName === 'pro' || pkgName === 'standard') setUserPackage('pro');
-          else if (pkgName === 'premium') setUserPackage('premium');
+          else if (pkgName === 'premium' || pkgName === 'ultimate') setUserPackage('premium');
           else setUserPackage(null);
         } else {
           setUserPackage(null);
@@ -314,7 +314,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    // Clear trial data from localStorage first
+    localStorage.removeItem('jamb_trial_start');
+    localStorage.removeItem('jamb_trial_subjects');
+    localStorage.removeItem('jamb_user_email');
+    
+    // Use local scope to avoid issues with stale refresh tokens
+    await supabase.auth.signOut({ scope: 'local' });
+    
+    // Immediately clear all state
     setUser(null);
     setSession(null);
     setHasAccess(false);
