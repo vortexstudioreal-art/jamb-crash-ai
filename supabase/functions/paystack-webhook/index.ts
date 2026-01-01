@@ -72,7 +72,13 @@ serve(async (req) => {
 
       // Determine access duration based on package
       const packageName = metadata?.package || "basic";
-      const accessDays = packageName === "ultimate" ? 90 : 30;
+      // Premium/ultimate gets lifetime (100 years), pro gets 1 year, basic gets 30 days
+      let accessDays = 30; // Default for basic
+      if (packageName === "pro") {
+        accessDays = 365;
+      } else if (packageName === "premium" || packageName === "ultimate") {
+        accessDays = 36500; // ~100 years = forever
+      }
       const accessExpiresAt = new Date();
       accessExpiresAt.setDate(accessExpiresAt.getDate() + accessDays);
 

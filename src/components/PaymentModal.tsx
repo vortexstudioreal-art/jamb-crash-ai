@@ -22,6 +22,16 @@ interface PaymentModalProps {
 
 const emailSchema = z.string().email('Please enter a valid email address');
 
+// Map frontend plan names to database-valid package codes
+const getPackageCode = (planName: string): string => {
+  const mapping: Record<string, string> = {
+    'basic': 'basic',
+    'pro': 'pro',
+    'premium': 'ultimate', // DB constraint requires 'ultimate' not 'premium'
+  };
+  return mapping[planName.toLowerCase()] || planName.toLowerCase();
+};
+
 export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }: PaymentModalProps) => {
   const [email, setEmail] = useState(initialEmail || '');
   const [emailError, setEmailError] = useState('');
@@ -108,13 +118,17 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
           await supabase.auth.signOut();
         }
         
+        const packageCode = getPackageCode(plan.name);
+        // Premium/ultimate gets lifetime access (100 years)
+        const accessDays = packageCode === 'ultimate' ? 36500 : 365;
+        
         const { error: paymentError } = await supabase.from('payments').insert({
           email,
-          package: plan.name.toLowerCase(),
+          package: packageCode,
           amount: 0,
           status: 'success',
           paystack_reference: freeReference,
-          access_expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+          access_expires_at: new Date(Date.now() + accessDays * 24 * 60 * 60 * 1000).toISOString(),
         });
 
         return paymentError;
@@ -178,7 +192,7 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
       {
         email,
         amount: finalPrice,
-        package: plan.name.toLowerCase(),
+        package: getPackageCode(plan.name),
         couponId: appliedCouponId,
         discountApplied: appliedDiscount,
       },
