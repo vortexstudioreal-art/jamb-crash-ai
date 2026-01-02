@@ -1,0 +1,262 @@
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { ArrowLeft, ExternalLink, RefreshCw, Newspaper, AlertCircle, Globe } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+interface NewsItem {
+  title: string;
+  link: string | null;
+  date: string;
+  summary: string | null;
+}
+
+interface JambNewsPageProps {
+  onBack: () => void;
+}
+
+// Other reliable JAMB news sources
+const RELIABLE_SOURCES = [
+  { name: 'JAMB Official Website', url: 'https://www.jamb.gov.ng', description: 'Official JAMB portal' },
+  { name: 'MySchool JAMB News', url: 'https://myschool.ng/news/category/jamb', description: 'Latest JAMB updates' },
+  { name: 'NigeriaSchoolsInfo', url: 'https://nigeriaschoolsinfo.com.ng/category/jamb', description: 'JAMB news & guides' },
+];
+
+export const JambNewsPage = ({ onBack }: JambNewsPageProps) => {
+  const [news, setNews] = useState<NewsItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [lastFetched, setLastFetched] = useState<Date | null>(null);
+
+  const fetchNews = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('jamb-news');
+
+      if (fnError) {
+        throw fnError;
+      }
+
+      if (data?.success && data?.items) {
+        setNews(data.items);
+        setLastFetched(new Date());
+        if (data.items.length === 0) {
+          toast.info('No news items found. Check the official sources below.');
+        }
+      } else {
+        setError(data?.error || 'Failed to fetch news');
+        setNews([]);
+      }
+    } catch (err) {
+      console.error('Error fetching news:', err);
+      setError('Could not load news. Please try the official sources below.');
+      setNews([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNews();
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="pt-20 pb-8 px-4">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <Button
+              variant="ghost"
+              onClick={onBack}
+              className="mb-4"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Dashboard
+            </Button>
+
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                  <Newspaper className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+                    JAMB News & Updates
+                  </h1>
+                  <p className="text-muted-foreground text-sm">
+                    Latest official news from JAMB
+                  </p>
+                </div>
+              </div>
+
+              <Button
+                variant="outline"
+                onClick={fetchNews}
+                disabled={loading}
+                className="gap-2"
+              >
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+            </div>
+
+            {lastFetched && (
+              <p className="text-xs text-muted-foreground mt-2">
+                Last updated: {lastFetched.toLocaleTimeString()}
+              </p>
+            )}
+          </motion.div>
+
+          {/* Loading State */}
+          {loading && (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="h-24 bg-muted rounded-xl" />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && !loading && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="bg-destructive/10 border border-destructive/30 rounded-xl p-6 mb-6"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <AlertCircle className="w-5 h-5 text-destructive" />
+                <p className="font-medium text-destructive">Unable to load news</p>
+              </div>
+              <p className="text-sm text-muted-foreground">{error}</p>
+            </motion.div>
+          )}
+
+          {/* News Items */}
+          {!loading && news.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="space-y-4 mb-8"
+            >
+              {news.map((item, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <Card className="p-4 hover:shadow-lg transition-shadow">
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-foreground mb-1 line-clamp-2">
+                          {item.title}
+                        </h3>
+                        {item.summary && (
+                          <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                            {item.summary}
+                          </p>
+                        )}
+                        <Badge variant="outline" className="text-xs">
+                          {item.date}
+                        </Badge>
+                      </div>
+                      {item.link && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          asChild
+                          className="shrink-0"
+                        >
+                          <a href={item.link} target="_blank" rel="noopener noreferrer">
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
+                        </Button>
+                      )}
+                    </div>
+                  </Card>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+
+          {/* Empty State */}
+          {!loading && news.length === 0 && !error && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-12"
+            >
+              <Newspaper className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-lg text-muted-foreground">
+                No news available at the moment
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Check the official sources below for updates
+              </p>
+            </motion.div>
+          )}
+
+          {/* Reliable Sources Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+              <Globe className="w-5 h-5 text-primary" />
+              Official & Reliable Sources
+            </h2>
+            <div className="grid gap-3">
+              {RELIABLE_SOURCES.map((source, index) => (
+                <Card key={index} className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium text-foreground">{source.name}</h3>
+                      <p className="text-sm text-muted-foreground">{source.description}</p>
+                    </div>
+                    <Button variant="outline" size="sm" asChild>
+                      <a href={source.url} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Visit
+                      </a>
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Disclaimer */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="text-xs text-muted-foreground text-center mt-8"
+          >
+            News is fetched from official JAMB website. Always verify important information on{' '}
+            <a 
+              href="https://www.jamb.gov.ng" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              www.jamb.gov.ng
+            </a>
+          </motion.p>
+        </div>
+      </div>
+    </div>
+  );
+};

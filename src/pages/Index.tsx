@@ -36,11 +36,11 @@ import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, Lock, RefreshCw, Layers, X, GraduationCap, Library, Newspaper } from 'lucide-react';
-import { JambNewsSection } from '@/components/JambNewsSection';
-import { ScholarshipSection } from '@/components/ScholarshipSection';
+import { JambNewsPage } from '@/components/JambNewsPage';
+import { ScholarshipPage } from '@/components/ScholarshipPage';
 import { NovelBrowser, NovelDetail, NovelReader } from '@/components/novels';
 
-type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'study-plan' | 'study-materials' | 'syllabus' | 'flashcards' | 'course-requirements' | 'novels' | 'novel-detail' | 'novel-reader';
+type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'study-plan' | 'study-materials' | 'syllabus' | 'flashcards' | 'course-requirements' | 'novels' | 'novel-detail' | 'novel-reader' | 'news' | 'scholarships';
 type QuizType = 'full' | 'mini' | 'subject' | 'timed-practice';
 
 interface FormData {
@@ -73,6 +73,7 @@ const Index = () => {
   const [isPlanSelectionOpen, setIsPlanSelectionOpen] = useState(false);
   const [personalizationData, setPersonalizationData] = useState<FormData | null>(null);
   const [userSubjects, setUserSubjects] = useState<string[]>([]);
+  const [subjectsLoading, setSubjectsLoading] = useState(true); // Track if subjects are still loading
   const [quizType, setQuizType] = useState<QuizType>('full');
   const [quizResults, setQuizResults] = useState<any>(null);
   const [highlightStandard, setHighlightStandard] = useState(false);
@@ -118,8 +119,8 @@ const Index = () => {
   const effectiveOwner = isOwner;
   const effectiveSubjects = userSubjects.length > 0 ? userSubjects : DEFAULT_SUBJECTS;
 
-  // Combined loading state
-  const isFullyLoading = isLoading || trialLoading;
+  // Combined loading state - include subjects loading
+  const isFullyLoading = isLoading || trialLoading || subjectsLoading;
 
   // Admins/owners can use dashboard normally - no auto-redirect
   // They access admin panel via the gear (Shield) icon in header
@@ -172,17 +173,25 @@ const Index = () => {
   // Load user subjects
   useEffect(() => {
     const loadUserData = async () => {
-      if (!userEmail || isLoading) return;
+      if (!userEmail) {
+        setSubjectsLoading(false);
+        return;
+      }
+      if (isLoading) return;
+      
+      setSubjectsLoading(true);
       
       const { data } = await supabase
         .from('user_subjects')
         .select('subjects')
         .eq('email', userEmail)
-        .single();
+        .maybeSingle(); // Use maybeSingle to avoid errors when no data
       
       if (data?.subjects) {
         setUserSubjects(data.subjects as string[]);
       }
+      
+      setSubjectsLoading(false);
 
       // Load weak subject from quiz history
       const { data: quizData } = await supabase
@@ -733,6 +742,38 @@ const Index = () => {
         onNextChapter={(chapterId) => setSelectedChapterId(chapterId)}
         onPrevChapter={(chapterId) => setSelectedChapterId(chapterId)}
       />
+    );
+  }
+
+  // JAMB News step
+  if (currentStep === 'news' && userEmail) {
+    return (
+      <div className="min-h-screen bg-background">
+        <DashboardHeader 
+          userEmail={userEmail}
+          isOwner={effectiveOwner}
+          isCollaborator={isAdmin && !isOwner}
+          userRole={userRole}
+          onSignOut={handleSignOut}
+        />
+        <JambNewsPage onBack={handleBackToDashboard} />
+      </div>
+    );
+  }
+
+  // Scholarships step
+  if (currentStep === 'scholarships' && userEmail) {
+    return (
+      <div className="min-h-screen bg-background">
+        <DashboardHeader 
+          userEmail={userEmail}
+          isOwner={effectiveOwner}
+          isCollaborator={isAdmin && !isOwner}
+          userRole={userRole}
+          onSignOut={handleSignOut}
+        />
+        <ScholarshipPage onBack={handleBackToDashboard} />
+      </div>
     );
   }
 
