@@ -11,6 +11,9 @@ interface SubjectSelectorProps {
   userEmail: string;
   onComplete: (subjects: string[]) => void;
   isBypassUser?: boolean; // Bypass users skip database operations
+  initialSubjects?: string[]; // Pre-select subjects when changing
+  onCancel?: () => void; // Close handler when used as modal for changing subjects
+  isChangingSubjects?: boolean; // Show "Saved" instead of "Account" in progress
 }
 
 const SUBJECTS = [
@@ -30,8 +33,19 @@ const SUBJECTS = [
   { id: 'agricultural_science', name: 'Agric Science', icon: Wheat },
 ];
 
-export const SubjectSelector = ({ userEmail, onComplete, isBypassUser = false }: SubjectSelectorProps) => {
-  const [selected, setSelected] = useState<string[]>(['english']);
+export const SubjectSelector = ({ 
+  userEmail, 
+  onComplete, 
+  isBypassUser = false,
+  initialSubjects,
+  onCancel,
+  isChangingSubjects = false
+}: SubjectSelectorProps) => {
+  const [selected, setSelected] = useState<string[]>(
+    initialSubjects && initialSubjects.length > 0 
+      ? initialSubjects 
+      : ['english']
+  );
   const [saving, setSaving] = useState(false);
 
   const toggleSubject = (id: string) => {
@@ -111,40 +125,42 @@ export const SubjectSelector = ({ userEmail, onComplete, isBypassUser = false }:
       className="fixed inset-0 bg-background/95 backdrop-blur-sm z-50 flex items-center justify-center p-4"
     >
       <div className="bg-card rounded-3xl p-6 md:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-border shadow-2xl">
-        {/* Progress Indicator */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between max-w-xs mx-auto">
-            {/* Step 1 - Create Account (Completed) */}
-            <div className="flex flex-col items-center">
-              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-                <CheckCircle className="w-5 h-5 text-primary-foreground" />
+        {/* Progress Indicator - only show when not changing subjects */}
+        {!isChangingSubjects && (
+          <div className="mb-6">
+            <div className="flex items-center justify-between max-w-xs mx-auto">
+              {/* Step 1 - Create Account (Completed) */}
+              <div className="flex flex-col items-center">
+                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+                  <CheckCircle className="w-5 h-5 text-primary-foreground" />
+                </div>
+                <span className="text-xs mt-1.5 text-primary font-medium">Account</span>
               </div>
-              <span className="text-xs mt-1.5 text-primary font-medium">Account</span>
-            </div>
-            
-            {/* Connector (Completed) */}
-            <div className="flex-1 h-0.5 bg-primary mx-2 mb-5" />
-            
-            {/* Step 2 - Select Subjects (Active) */}
-            <div className="flex flex-col items-center">
-              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm">
-                2
+              
+              {/* Connector (Completed) */}
+              <div className="flex-1 h-0.5 bg-primary mx-2 mb-5" />
+              
+              {/* Step 2 - Select Subjects (Active) */}
+              <div className="flex flex-col items-center">
+                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm">
+                  2
+                </div>
+                <span className="text-xs mt-1.5 text-primary font-medium">Select Subjects</span>
               </div>
-              <span className="text-xs mt-1.5 text-primary font-medium">Select Subjects</span>
-            </div>
-            
-            {/* Connector */}
-            <div className="flex-1 h-0.5 bg-border mx-2 mb-5" />
-            
-            {/* Step 3 - Start Learning */}
-            <div className="flex flex-col items-center">
-              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground font-bold text-sm">
-                3
+              
+              {/* Connector */}
+              <div className="flex-1 h-0.5 bg-border mx-2 mb-5" />
+              
+              {/* Step 3 - Start Learning */}
+              <div className="flex flex-col items-center">
+                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground font-bold text-sm">
+                  3
+                </div>
+                <span className="text-xs mt-1.5 text-muted-foreground">Start Learning</span>
               </div>
-              <span className="text-xs mt-1.5 text-muted-foreground">Start Learning</span>
             </div>
           </div>
-        </div>
+        )}
 
         <div className="text-center mb-6">
           <motion.div
@@ -156,10 +172,10 @@ export const SubjectSelector = ({ userEmail, onComplete, isBypassUser = false }:
             🎓
           </motion.div>
           <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-            Choose Your JAMB Subjects! 📚
+            {isChangingSubjects ? 'Change Your Subjects 🔄' : 'Choose Your JAMB Subjects! 📚'}
           </h2>
           <p className="text-muted-foreground">
-            Pick English + 3 others. We'll prepare questions just for YOU!
+            Pick English + 3 others. {isChangingSubjects ? 'Your quiz data will be updated.' : "We'll prepare questions just for YOU!"}
           </p>
           <div className="mt-3 inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
             <Check className="w-4 h-4" />
@@ -229,6 +245,11 @@ export const SubjectSelector = ({ userEmail, onComplete, isBypassUser = false }:
         >
           {saving ? (
             "Saving your combo... 🔄"
+          ) : isChangingSubjects ? (
+            <>
+              Save Changes ✓
+              <span className="ml-2 text-sm opacity-75">({selected.length}/4)</span>
+            </>
           ) : (
             <>
               Start Studying! 🚀
@@ -236,6 +257,17 @@ export const SubjectSelector = ({ userEmail, onComplete, isBypassUser = false }:
             </>
           )}
         </Button>
+
+        {/* Cancel button - only show when changing subjects */}
+        {isChangingSubjects && onCancel && (
+          <Button
+            variant="ghost"
+            onClick={onCancel}
+            className="w-full mt-3"
+          >
+            Cancel
+          </Button>
+        )}
       </div>
     </motion.div>
   );
