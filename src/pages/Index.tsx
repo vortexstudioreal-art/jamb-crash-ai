@@ -1001,11 +1001,30 @@ const Index = () => {
                 <CourseTipsCard userEmail={userEmail} userSubjects={effectiveSubjects} />
               </motion.div>
 
-              {/* JAMB News Section */}
-              <JambNewsSection />
-
-              {/* Scholarships Section */}
-              <ScholarshipSection />
+              {/* JAMB News & Scholarship Buttons */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.22 }}
+                className="grid grid-cols-2 gap-4 mb-6"
+              >
+                <Button
+                  onClick={() => setCurrentStep('news')}
+                  variant="outline"
+                  className="h-auto py-4 flex flex-col items-center gap-2 border-2 hover:border-primary hover:bg-primary/5"
+                >
+                  <Newspaper className="w-6 h-6 text-primary" />
+                  <span className="font-semibold">JAMB News</span>
+                </Button>
+                <Button
+                  onClick={() => setCurrentStep('scholarships')}
+                  variant="outline"
+                  className="h-auto py-4 flex flex-col items-center gap-2 border-2 hover:border-primary hover:bg-primary/5"
+                >
+                  <GraduationCap className="w-6 h-6 text-primary" />
+                  <span className="font-semibold">Scholarships</span>
+                </Button>
+              </motion.div>
 
               {/* Subject Tags with Change Button */}
               <motion.div
