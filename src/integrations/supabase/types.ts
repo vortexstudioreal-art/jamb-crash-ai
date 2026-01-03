@@ -359,6 +359,45 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          created_at: string | null
+          created_by_email: string | null
+          expires_at: string | null
+          id: string
+          is_global: boolean | null
+          link: string | null
+          message: string
+          target_email: string | null
+          title: string
+          type: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by_email?: string | null
+          expires_at?: string | null
+          id?: string
+          is_global?: boolean | null
+          link?: string | null
+          message: string
+          target_email?: string | null
+          title: string
+          type?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by_email?: string | null
+          expires_at?: string | null
+          id?: string
+          is_global?: boolean | null
+          link?: string | null
+          message?: string
+          target_email?: string | null
+          title?: string
+          type?: string | null
+        }
+        Relationships: []
+      }
       novel_chapters: {
         Row: {
           chapter_number: number
@@ -724,6 +763,35 @@ export type Database = {
             columns: ["novel_id"]
             isOneToOne: false
             referencedRelation: "novels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_notification_reads: {
+        Row: {
+          email: string
+          id: string
+          notification_id: string
+          read_at: string | null
+        }
+        Insert: {
+          email: string
+          id?: string
+          notification_id: string
+          read_at?: string | null
+        }
+        Update: {
+          email?: string
+          id?: string
+          notification_id?: string
+          read_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_notification_reads_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications"
             referencedColumns: ["id"]
           },
         ]

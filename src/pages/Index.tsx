@@ -942,7 +942,7 @@ const Index = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 }}
-                className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6"
+                className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4"
               >
                 <Button
                   variant="outline"
@@ -979,7 +979,15 @@ const Index = () => {
                   <Layers className="w-6 h-6 text-orange-500" />
                   <span className="font-bold text-sm">Flashcards</span>
                 </Button>
+              </motion.div>
 
+              {/* Tertiary Actions Row - Novels, News, Scholarships */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.18 }}
+                className="grid grid-cols-3 gap-3 mb-6"
+              >
                 <Button
                   variant="outline"
                   className="h-auto py-4 flex flex-col gap-1 hover:border-rose-500 hover:bg-rose-500/5"
@@ -987,6 +995,24 @@ const Index = () => {
                 >
                   <Library className="w-6 h-6 text-rose-500" />
                   <span className="font-bold text-sm">JAMB Novels</span>
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="h-auto py-4 flex flex-col gap-1 hover:border-cyan-500 hover:bg-cyan-500/5"
+                  onClick={() => setCurrentStep('news')}
+                >
+                  <Newspaper className="w-6 h-6 text-cyan-500" />
+                  <span className="font-bold text-sm">JAMB News</span>
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="h-auto py-4 flex flex-col gap-1 hover:border-amber-500 hover:bg-amber-500/5"
+                  onClick={() => setCurrentStep('scholarships')}
+                >
+                  <GraduationCap className="w-6 h-6 text-amber-500" />
+                  <span className="font-bold text-sm">Scholarships</span>
                 </Button>
               </motion.div>
 
@@ -1001,30 +1027,6 @@ const Index = () => {
                 <CourseTipsCard userEmail={userEmail} userSubjects={effectiveSubjects} />
               </motion.div>
 
-              {/* JAMB News & Scholarship Buttons */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.22 }}
-                className="grid grid-cols-2 gap-4 mb-6"
-              >
-                <Button
-                  onClick={() => setCurrentStep('news')}
-                  variant="outline"
-                  className="h-auto py-4 flex flex-col items-center gap-2 border-2 hover:border-primary hover:bg-primary/5"
-                >
-                  <Newspaper className="w-6 h-6 text-primary" />
-                  <span className="font-semibold">JAMB News</span>
-                </Button>
-                <Button
-                  onClick={() => setCurrentStep('scholarships')}
-                  variant="outline"
-                  className="h-auto py-4 flex flex-col items-center gap-2 border-2 hover:border-primary hover:bg-primary/5"
-                >
-                  <GraduationCap className="w-6 h-6 text-primary" />
-                  <span className="font-semibold">Scholarships</span>
-                </Button>
-              </motion.div>
 
               {/* Subject Tags with Change Button */}
               <motion.div

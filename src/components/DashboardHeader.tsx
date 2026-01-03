@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { BookOpen, LogOut, Settings, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AdminBadge } from './AdminBadge';
+import { NotificationBell } from './NotificationBell';
 
 interface DashboardHeaderProps {
   userEmail: string;
@@ -50,6 +51,9 @@ export const DashboardHeader = ({
 
         {/* Right - Actions */}
         <div className="flex items-center gap-2">
+          {/* Notification Bell */}
+          <NotificationBell />
+          
           {/* Admin Panel Button - Only for owner/collaborator */}
           {showAdminButton && (
             <Button

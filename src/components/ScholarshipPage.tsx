@@ -27,13 +27,57 @@ const SCHOLARSHIPS: Scholarship[] = [
     id: 'jamb-crash-ai',
     title: 'JAMB Crash AI Scholarship',
     provider: 'JAMB Crash AI',
-    description: 'Get free premium access to JAMB Crash AI study materials, practice questions, and AI-powered study plans. We\'re committed to helping Nigerian students achieve their dreams!',
+    description: "We're sponsoring 3 outstanding students from our app! Selected students will receive full admission support for their chosen federal or state university. This isn't about premium access—it's about helping you achieve your dreams of higher education in Nigeria.",
     deadline: null,
-    amount: 'Free Premium Access',
+    amount: 'Full Admission Sponsorship (3 Students)',
     link: null,
     status: 'coming-soon',
     featured: true,
     logo: jambCrashLogo,
+  },
+  {
+    id: 'shell-scholarship',
+    title: 'Shell Nigeria Scholarship',
+    provider: 'Shell Petroleum Development Company',
+    description: 'Annual scholarship program for Nigerian undergraduates in federal and state universities. Provides financial support for tuition, accommodation, and living expenses.',
+    deadline: 'Usually opens in October',
+    amount: 'Up to ₦600,000/year',
+    link: 'https://www.shell.com.ng/sustainability/communities/education.html',
+    status: 'open',
+    featured: false,
+  },
+  {
+    id: 'chevron-scholarship',
+    title: 'Chevron Nigeria Scholarship',
+    provider: 'Chevron Nigeria Limited',
+    description: 'For students studying Engineering, Geology, Geophysics, and Environmental Sciences at accredited Nigerian universities. Must have minimum 2.5 CGPA.',
+    deadline: 'Annual - Check official website',
+    amount: 'Full Tuition + Allowance',
+    link: 'https://nigeria.chevron.com/our-businesses/policies-scholarships',
+    status: 'open',
+    featured: false,
+  },
+  {
+    id: 'ptdf-scholarship',
+    title: 'PTDF Scholarship',
+    provider: 'Petroleum Technology Development Fund',
+    description: 'Federal Government scholarship for undergraduate and postgraduate studies in engineering, geosciences, and related fields both in Nigeria and overseas.',
+    deadline: 'Varies by program',
+    amount: 'Full Scholarship',
+    link: 'https://ptdf.gov.ng',
+    status: 'open',
+    featured: false,
+  },
+  {
+    id: 'agbami-scholarship',
+    title: 'Agbami Medical & Engineering Scholarship',
+    provider: 'Agbami Parties',
+    description: 'For Nigerian students in accredited medical and engineering programs. Open to 200-level students and above with minimum CGPA of 3.0.',
+    deadline: 'Usually May-June',
+    amount: 'Up to ₦500,000/year',
+    link: 'https://agbami.ng',
+    status: 'open',
+    featured: false,
   },
   {
     id: 'agip-scholarship',
@@ -58,13 +102,24 @@ const SCHOLARSHIPS: Scholarship[] = [
     featured: false,
   },
   {
-    id: 'nnpc-scholarship',
-    title: 'NNPC/Total Scholarship',
-    provider: 'NNPC & TotalEnergies',
-    description: 'Scholarship for Nigerian undergraduates studying Engineering, Geosciences, and related fields.',
-    deadline: 'Annual application',
-    amount: 'Tuition Coverage',
-    link: 'https://scholarships.totalenergies.com',
+    id: 'nlng-scholarship',
+    title: 'NLNG Scholarship',
+    provider: 'Nigeria LNG Limited',
+    description: 'For Nigerian undergraduates in Engineering, Sciences, Social Sciences, and Humanities at accredited universities. Must have completed first year.',
+    deadline: 'Usually September-October',
+    amount: 'Comprehensive Package',
+    link: 'https://www.nlng.com/Community/Scholarships.aspx',
+    status: 'open',
+    featured: false,
+  },
+  {
+    id: 'bea-scholarship',
+    title: 'Federal Government BEA Scholarship',
+    provider: 'Federal Ministry of Education',
+    description: 'Bilateral Education Agreement scholarships for Nigerian students to study in countries with educational agreements with Nigeria (Russia, China, Morocco, etc.).',
+    deadline: 'Annual - Check FMOE website',
+    amount: 'Full Scholarship (Overseas)',
+    link: 'https://education.gov.ng',
     status: 'open',
     featured: false,
   },
@@ -143,14 +198,14 @@ export const ScholarshipPage = ({ onBack }: ScholarshipPageProps) => {
                       By JAMB Crash AI
                     </p>
                     <p className="text-muted-foreground mb-4">
-                      Get free premium access to JAMB Crash AI study materials, practice questions, and AI-powered study plans. We're committed to helping Nigerian students achieve their dreams!
+                      We're sponsoring 3 outstanding students from our app! Selected students will receive full admission support for their chosen federal or state university. This isn't about premium access—it's about helping you achieve your dreams of higher education in Nigeria.
                     </p>
 
                     <div className="flex items-center gap-4 flex-wrap">
                       <div className="flex items-center gap-2">
                         <GraduationCap className="w-4 h-4 text-primary" />
                         <span className="text-sm font-medium text-foreground">
-                          Free Premium Access
+                          3 Full Admission Sponsorships
                         </span>
                       </div>
                       <Button variant="outline" size="sm" disabled className="gap-2">
@@ -165,7 +220,7 @@ export const ScholarshipPage = ({ onBack }: ScholarshipPageProps) => {
               {/* Coming Soon Banner */}
               <div className="bg-primary/10 px-6 py-3 border-t border-primary/20">
                 <p className="text-sm text-center text-primary font-medium">
-                  🚀 We're working hard to bring this scholarship to you! Stay tuned for updates.
+                  🎓 We're selecting 3 students for full admission sponsorship! Stay tuned for application details.
                 </p>
               </div>
             </Card>
