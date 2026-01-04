@@ -53,3 +53,9 @@ verify_jwt = false
 
 [functions.seed-native-son]
 verify_jwt = false
+
+[functions.seed-second-class-citizen]
+verify_jwt = false
+
+[functions.seed-unexpected-joy]
+verify_jwt = false
