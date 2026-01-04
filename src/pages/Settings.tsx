@@ -441,8 +441,8 @@ export default function Settings() {
           </Card>
         </motion.div>
 
-        {/* Admin Coupon Dashboard - for collaborators/admins only */}
-        {(userRole === 'admin' || userRole === 'collaborator') && !isOwner && (
+        {/* Referral Dashboard - for collaborators only */}
+        {userRole === 'collaborator' && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
