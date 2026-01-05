@@ -17,14 +17,14 @@ export const AdminBadge = ({ role, linkToAdmin = false }: AdminBadgeProps) => {
   const getBadgeStyles = () => {
     if (isOwner) return 'bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-600 text-black shadow-yellow-400/50';
     if (isAdmin) return 'bg-gradient-to-r from-blue-400 to-indigo-500 text-white shadow-blue-400/50';
-    // Silver badge for collaborator
-    return 'bg-gradient-to-r from-gray-300 via-slate-400 to-gray-500 text-gray-900 shadow-gray-400/50';
+    // Purple/pink badge for content creator (collaborator)
+    return 'bg-gradient-to-r from-purple-400 via-pink-500 to-purple-600 text-white shadow-purple-400/50';
   };
 
   const getBadgeLabel = () => {
     if (isOwner) return 'Owner';
     if (isAdmin) return 'Admin';
-    return 'Collaborator';
+    return 'Content Creator';
   };
 
   const getIcon = () => {

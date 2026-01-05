@@ -12,6 +12,7 @@ import Auth from "./pages/Auth";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import AdminPanel from "./pages/AdminPanel";
 import Settings from "./pages/Settings";
+import CollaboratorDashboard from "./pages/CollaboratorDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -60,6 +61,7 @@ const App = () => {
                     </ProtectedRoute>
                   } 
                 />
+                <Route path="/collaborator-dashboard" element={<CollaboratorDashboard />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
