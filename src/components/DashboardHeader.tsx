@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, LogOut, Settings, Shield } from 'lucide-react';
+import { BookOpen, LogOut, Settings, Shield, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AdminBadge } from './AdminBadge';
 import { NotificationBell } from './NotificationBell';
@@ -23,8 +23,11 @@ export const DashboardHeader = ({
   const navigate = useNavigate();
   
   // Determine the effective role for badge display
-  const effectiveRole = isOwner ? 'owner' : (isCollaborator ? 'collaborator' : userRole);
-  const showAdminButton = isOwner || isCollaborator;
+  const effectiveRole = isOwner ? 'owner' : userRole;
+  
+  // Owner and admin get Admin Panel, collaborator gets their own dashboard
+  const showAdminButton = isOwner || userRole === 'admin';
+  const showCollaboratorButton = userRole === 'collaborator';
 
   return (
     <motion.header
@@ -54,7 +57,7 @@ export const DashboardHeader = ({
           {/* Notification Bell */}
           <NotificationBell />
           
-          {/* Admin Panel Button - Only for owner/collaborator */}
+          {/* Admin Panel Button - Only for owner and admin roles */}
           {showAdminButton && (
             <Button
               variant="ghost"
@@ -64,6 +67,19 @@ export const DashboardHeader = ({
               title="Admin Panel"
             >
               <Shield className="w-5 h-5" />
+            </Button>
+          )}
+          
+          {/* Collaborator Dashboard Button - Only for collaborator role */}
+          {showCollaboratorButton && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/collaborator-dashboard')}
+              className="text-primary hover:text-primary hover:bg-primary/10"
+              title="My Dashboard"
+            >
+              <BarChart3 className="w-5 h-5" />
             </Button>
           )}
           <Button
