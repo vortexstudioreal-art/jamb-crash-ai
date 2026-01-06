@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Users, Search, Crown, Shield, User, Clock, 
-  CreditCard, RefreshCw, ChevronDown, Check, AlertCircle
+  CreditCard, RefreshCw, ChevronDown, Check, AlertCircle, UserMinus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -164,6 +166,59 @@ export const UserManagement = ({ isOwner }: UserManagementProps) => {
     } catch (error) {
       console.error('Error updating user plan:', error);
       toast.error('Failed to update user plan');
+    } finally {
+      setUpdatingUser(null);
+    }
+  };
+
+  const updateUserRole = async (userId: string, userEmail: string, newRole: 'admin' | 'collaborator' | null) => {
+    if (!isOwner) {
+      toast.error('Only owner can change user roles');
+      return;
+    }
+
+    setUpdatingUser(userEmail);
+    try {
+      if (newRole === null) {
+        // Remove role
+        const { error } = await supabase
+          .from('user_roles')
+          .delete()
+          .eq('user_id', userId);
+
+        if (error) throw error;
+        toast.success('Role removed successfully');
+      } else {
+        // Check if role exists
+        const { data: existingRole } = await supabase
+          .from('user_roles')
+          .select('id')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+        if (existingRole) {
+          // Update existing role
+          const { error } = await supabase
+            .from('user_roles')
+            .update({ role: newRole })
+            .eq('user_id', userId);
+
+          if (error) throw error;
+        } else {
+          // Insert new role
+          const { error } = await supabase
+            .from('user_roles')
+            .insert({ user_id: userId, role: newRole });
+
+          if (error) throw error;
+        }
+        toast.success(`User is now a ${newRole}!`);
+      }
+
+      await fetchUsers();
+    } catch (error) {
+      console.error('Error updating user role:', error);
+      toast.error('Failed to update user role');
     } finally {
       setUpdatingUser(null);
     }
@@ -399,40 +454,64 @@ export const UserManagement = ({ isOwner }: UserManagementProps) => {
                     </td>
                     {isOwner && (
                       <td className="py-3 px-2 text-right">
-                        {!user.role && (
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                disabled={updatingUser === user.email}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              disabled={updatingUser === user.email || user.role === 'owner'}
+                            >
+                              {updatingUser === user.email ? (
+                                <RefreshCw className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <>
+                                  Actions
+                                  <ChevronDown className="w-4 h-4 ml-1" />
+                                </>
+                              )}
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Change Role</DropdownMenuLabel>
+                            <DropdownMenuItem 
+                              onClick={() => updateUserRole(user.id, user.email, 'admin')}
+                              disabled={user.role === 'admin'}
+                            >
+                              <Shield className="w-4 h-4 mr-2 text-blue-500" />
+                              Make Admin
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => updateUserRole(user.id, user.email, 'collaborator')}
+                              disabled={user.role === 'collaborator'}
+                            >
+                              <Users className="w-4 h-4 mr-2 text-slate-400" />
+                              Make Collaborator
+                            </DropdownMenuItem>
+                            {user.role && user.role !== 'owner' && (
+                              <DropdownMenuItem 
+                                onClick={() => updateUserRole(user.id, user.email, null)}
+                                className="text-red-600"
                               >
-                                {updatingUser === user.email ? (
-                                  <RefreshCw className="w-4 h-4 animate-spin" />
-                                ) : (
-                                  <>
-                                    Update Plan
-                                    <ChevronDown className="w-4 h-4 ml-1" />
-                                  </>
-                                )}
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => updateUserPlan(user.email, 'basic')}>
-                                <Check className="w-4 h-4 mr-2" />
-                                Basic (1 year)
+                                <UserMinus className="w-4 h-4 mr-2" />
+                                Remove Role
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => updateUserPlan(user.email, 'pro')}>
-                                <Check className="w-4 h-4 mr-2" />
-                                Pro (1 year)
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => updateUserPlan(user.email, 'premium')}>
-                                <Crown className="w-4 h-4 mr-2" />
-                                Premium (Forever)
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        )}
+                            )}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuLabel>Update Plan</DropdownMenuLabel>
+                            <DropdownMenuItem onClick={() => updateUserPlan(user.email, 'basic')}>
+                              <Check className="w-4 h-4 mr-2" />
+                              Basic (1 year)
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => updateUserPlan(user.email, 'pro')}>
+                              <Check className="w-4 h-4 mr-2" />
+                              Pro (1 year)
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => updateUserPlan(user.email, 'premium')}>
+                              <Crown className="w-4 h-4 mr-2" />
+                              Premium (Forever)
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </td>
                     )}
                   </motion.tr>

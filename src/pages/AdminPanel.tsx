@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Crown, Users, CreditCard, TrendingUp, Plus, Trash2, ArrowLeft, RefreshCw, Mail,
-  CheckCircle, XCircle, AlertCircle, Settings, Send, Key, Activity, Database, Zap, Ticket, UserCog, Bell
+  CheckCircle, XCircle, AlertCircle, Settings, Send, Key, Activity, Database, Zap, Ticket, UserCog, Bell, DollarSign
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +17,7 @@ import { AppHealthCheck } from '@/components/AppHealthCheck';
 import { CouponManager } from '@/components/CouponManager';
 import { UserManagement } from '@/components/admin/UserManagement';
 import { NotificationManager } from '@/components/admin/NotificationManager';
+import { PayoutManagement } from '@/components/admin/PayoutManagement';
 interface Payment {
   id: string;
   email: string;
@@ -454,7 +455,7 @@ const AdminPanel = () => {
 
         {/* Tabs for different sections */}
         <Tabs defaultValue="health" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-8 lg:w-auto lg:inline-grid">
             <TabsTrigger value="health" className="gap-2">
               <Zap className="w-4 h-4" />
               Health
@@ -462,6 +463,10 @@ const AdminPanel = () => {
             <TabsTrigger value="users" className="gap-2">
               <UserCog className="w-4 h-4" />
               Users
+            </TabsTrigger>
+            <TabsTrigger value="payouts" className="gap-2">
+              <DollarSign className="w-4 h-4" />
+              Payouts
             </TabsTrigger>
             <TabsTrigger value="notifications" className="gap-2">
               <Bell className="w-4 h-4" />
@@ -502,6 +507,16 @@ const AdminPanel = () => {
               animate={{ opacity: 1, y: 0 }}
             >
               <UserManagement isOwner={isOwner} />
+            </motion.div>
+          </TabsContent>
+
+          {/* Payouts Tab */}
+          <TabsContent value="payouts">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <PayoutManagement isOwner={isOwner} userEmail={userEmail || ''} />
             </motion.div>
           </TabsContent>
 
