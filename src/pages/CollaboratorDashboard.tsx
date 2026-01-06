@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, DollarSign, Users, Ticket, TrendingUp } from 'lucide-react';
+import { ArrowLeft, DollarSign, Users, Ticket, TrendingUp, Banknote, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { AdminCouponDashboard } from '@/components/AdminCouponDashboard';
+import { BankDetailsForm } from '@/components/collaborator/BankDetailsForm';
+import { PayoutHistory } from '@/components/collaborator/PayoutHistory';
+import { toast } from 'sonner';
 
 interface CollaboratorStats {
   totalEarnings: number;
@@ -14,6 +18,14 @@ interface CollaboratorStats {
   usersReferred: number;
   activeCoupons: number;
 }
+
+interface BankDetails {
+  bank_name: string;
+  account_number: string;
+  account_name: string;
+}
+
+const MINIMUM_PAYOUT = 5000; // ₦5,000 minimum
 
 const CollaboratorDashboard = () => {
   const navigate = useNavigate();
@@ -25,6 +37,11 @@ const CollaboratorDashboard = () => {
     activeCoupons: 0
   });
   const [loading, setLoading] = useState(true);
+  const [requestingPayout, setRequestingPayout] = useState(false);
+  const [hasPendingRequest, setHasPendingRequest] = useState(false);
+  const [bankDetails, setBankDetails] = useState<BankDetails | null>(null);
+
+  const userEmail = user?.email || '';
 
   useEffect(() => {
     // Redirect if not a collaborator
@@ -33,52 +50,137 @@ const CollaboratorDashboard = () => {
       return;
     }
 
-    const fetchStats = async () => {
-      if (!user?.email) return;
+    if (userEmail) {
+      fetchData();
+    }
+  }, [user, userRole, navigate, userEmail]);
 
-      try {
-        // Fetch coupons created by this collaborator
-        const { data: coupons } = await supabase
-          .from('coupon_codes')
-          .select('id, is_active')
-          .eq('creator_email', user.email);
+  const fetchData = async () => {
+    setLoading(true);
+    await Promise.all([
+      fetchStats(),
+      fetchBankDetails(),
+      checkPendingRequest()
+    ]);
+    setLoading(false);
+  };
 
-        const activeCoupons = coupons?.filter(c => c.is_active).length || 0;
-        const couponIds = coupons?.map(c => c.id) || [];
+  const fetchStats = async () => {
+    if (!userEmail) return;
 
-        // Fetch usage stats for their coupons
-        let totalEarnings = 0;
-        let pendingPayouts = 0;
-        let usersReferred = 0;
+    try {
+      // Fetch coupons created by this collaborator
+      const { data: coupons } = await supabase
+        .from('coupon_codes')
+        .select('id, is_active')
+        .eq('creator_email', userEmail);
 
-        if (couponIds.length > 0) {
-          const { data: usage } = await supabase
-            .from('coupon_usage')
-            .select('creator_earning, is_paid_out, used_by_email')
-            .in('coupon_id', couponIds);
+      const activeCoupons = coupons?.filter(c => c.is_active).length || 0;
+      const couponIds = coupons?.map(c => c.id) || [];
 
-          if (usage) {
-            totalEarnings = usage.reduce((sum, u) => sum + (u.creator_earning || 0), 0);
-            pendingPayouts = usage.filter(u => !u.is_paid_out).reduce((sum, u) => sum + (u.creator_earning || 0), 0);
-            usersReferred = new Set(usage.map(u => u.used_by_email)).size;
-          }
+      // Fetch usage stats for their coupons
+      let totalEarnings = 0;
+      let pendingPayouts = 0;
+      let usersReferred = 0;
+
+      if (couponIds.length > 0) {
+        const { data: usage } = await supabase
+          .from('coupon_usage')
+          .select('creator_earning, is_paid_out, used_by_email')
+          .in('coupon_id', couponIds);
+
+        if (usage) {
+          totalEarnings = usage.reduce((sum, u) => sum + (u.creator_earning || 0), 0);
+          pendingPayouts = usage.filter(u => !u.is_paid_out).reduce((sum, u) => sum + (u.creator_earning || 0), 0);
+          usersReferred = new Set(usage.map(u => u.used_by_email)).size;
         }
-
-        setStats({
-          totalEarnings,
-          pendingPayouts,
-          usersReferred,
-          activeCoupons
-        });
-      } catch (error) {
-        console.error('Error fetching collaborator stats:', error);
-      } finally {
-        setLoading(false);
       }
-    };
 
-    fetchStats();
-  }, [user, userRole, navigate]);
+      setStats({
+        totalEarnings,
+        pendingPayouts,
+        usersReferred,
+        activeCoupons
+      });
+    } catch (error) {
+      console.error('Error fetching collaborator stats:', error);
+    }
+  };
+
+  const fetchBankDetails = async () => {
+    if (!userEmail) return;
+
+    try {
+      const { data } = await supabase
+        .from('collaborator_bank_details')
+        .select('bank_name, account_number, account_name')
+        .eq('email', userEmail)
+        .maybeSingle();
+
+      setBankDetails(data);
+    } catch (error) {
+      console.error('Error fetching bank details:', error);
+    }
+  };
+
+  const checkPendingRequest = async () => {
+    if (!userEmail) return;
+
+    try {
+      const { data } = await supabase
+        .from('payout_requests')
+        .select('id')
+        .eq('collaborator_email', userEmail)
+        .eq('status', 'pending')
+        .maybeSingle();
+
+      setHasPendingRequest(!!data);
+    } catch (error) {
+      console.error('Error checking pending request:', error);
+    }
+  };
+
+  const requestPayout = async () => {
+    if (!userEmail || !bankDetails) {
+      toast.error('Please save your bank details first');
+      return;
+    }
+
+    if (stats.pendingPayouts < MINIMUM_PAYOUT) {
+      toast.error(`Minimum payout amount is ₦${MINIMUM_PAYOUT.toLocaleString()}`);
+      return;
+    }
+
+    if (hasPendingRequest) {
+      toast.error('You already have a pending payout request');
+      return;
+    }
+
+    setRequestingPayout(true);
+    try {
+      const { error } = await supabase
+        .from('payout_requests')
+        .insert({
+          collaborator_email: userEmail,
+          amount: stats.pendingPayouts,
+          bank_name: bankDetails.bank_name,
+          account_number: bankDetails.account_number,
+          account_name: bankDetails.account_name
+        });
+
+      if (error) throw error;
+
+      toast.success('Payout request submitted! 🎉');
+      setHasPendingRequest(true);
+    } catch (error) {
+      console.error('Error requesting payout:', error);
+      toast.error('Failed to submit payout request');
+    } finally {
+      setRequestingPayout(false);
+    }
+  };
+
+  const canRequestPayout = stats.pendingPayouts >= MINIMUM_PAYOUT && bankDetails && !hasPendingRequest;
 
   if (loading) {
     return (
@@ -167,14 +269,100 @@ const CollaboratorDashboard = () => {
           </Card>
         </motion.div>
 
-        {/* Coupon Management */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <AdminCouponDashboard />
-        </motion.div>
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Bank Details & Payout Request */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="space-y-6"
+          >
+            <BankDetailsForm userEmail={userEmail} onSave={fetchBankDetails} />
+            
+            {/* Payout Request Card */}
+            <Card className="bg-card border-border">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Banknote className="w-5 h-5 text-primary" />
+                  Request Payout
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-4 bg-muted/50 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Available for payout</p>
+                  <p className="text-3xl font-bold text-primary">₦{stats.pendingPayouts.toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Minimum payout: ₦{MINIMUM_PAYOUT.toLocaleString()}
+                  </p>
+                </div>
+
+                {hasPendingRequest && (
+                  <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg text-center">
+                    <p className="text-sm text-yellow-600">
+                      You have a pending payout request
+                    </p>
+                  </div>
+                )}
+
+                {!bankDetails && (
+                  <div className="p-3 bg-muted rounded-lg text-center">
+                    <p className="text-sm text-muted-foreground">
+                      Save your bank details above to request a payout
+                    </p>
+                  </div>
+                )}
+
+                <Button
+                  onClick={requestPayout}
+                  disabled={!canRequestPayout || requestingPayout}
+                  className="w-full gap-2"
+                  variant="hero"
+                >
+                  {requestingPayout ? (
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Banknote className="w-4 h-4" />
+                  )}
+                  Request Payout
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Right Column - Tabs */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="lg:col-span-2"
+          >
+            <Tabs defaultValue="coupons" className="space-y-4">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="coupons" className="gap-2">
+                  <Ticket className="w-4 h-4" />
+                  My Coupons
+                </TabsTrigger>
+                <TabsTrigger value="payouts" className="gap-2">
+                  <Banknote className="w-4 h-4" />
+                  Payout History
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="coupons">
+                <AdminCouponDashboard />
+              </TabsContent>
+
+              <TabsContent value="payouts">
+                <Card className="bg-card border-border">
+                  <CardContent className="p-6">
+                    <PayoutHistory userEmail={userEmail} />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </motion.div>
+        </div>
       </div>
     </div>
   );

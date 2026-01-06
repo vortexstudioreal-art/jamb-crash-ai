@@ -281,13 +281,10 @@ export default function Settings() {
       };
     }
     if (effectiveAccess && paymentInfo?.access_expires_at) {
-      const expiresAt = new Date(paymentInfo.access_expires_at);
-      const now = new Date();
-      const daysLeft = Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
       return {
         planName: paymentInfo.package || 'Premium',
-        status: `${daysLeft} days remaining`,
-        color: daysLeft > 7 ? 'bg-primary' : 'bg-orange-500',
+        status: 'Active',
+        color: 'bg-primary',
         textColor: 'text-primary-foreground'
       };
     }
@@ -419,8 +416,8 @@ export default function Settings() {
                   <p className="font-semibold text-foreground text-lg">
                     {accessStatus.planName}
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    {effectiveAdmin ? 'Full access to all features' : (paymentInfo ? `Purchased on ${new Date(paymentInfo.created_at).toLocaleDateString()}` : 'Upgrade to unlock all features')}
+                <p className="text-sm text-muted-foreground">
+                    {effectiveAdmin ? 'Full access to all features' : (paymentInfo ? 'Active subscription' : 'Upgrade to unlock all features')}
                   </p>
                 </div>
                 <Badge className={`${accessStatus.color} ${accessStatus.textColor}`}>
