@@ -8,6 +8,7 @@ interface NewsItem {
   link: string | null;
   date: string;
   summary: string | null;
+  source: string;
 }
 
 Deno.serve(async (req) => {
@@ -16,119 +17,182 @@ Deno.serve(async (req) => {
   }
 
   try {
-    console.log('Fetching JAMB news from official website...');
+    console.log('Fetching JAMB news from multiple sources...');
     
-    // Fetch the JAMB news page
-    const response = await fetch('https://www.jamb.gov.ng/news', {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-      },
-    });
+    const newsItems: NewsItem[] = [];
+    
+    // Source 1: Try JAMB official website
+    try {
+      const jambResponse = await fetch('https://www.jamb.gov.ng/news', {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.5',
+        },
+      });
 
-    if (!response.ok) {
-      console.error('Failed to fetch JAMB website:', response.status);
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Failed to fetch news from JAMB website',
-          items: [] 
-        }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      if (jambResponse.ok) {
+        const html = await jambResponse.text();
+        console.log('JAMB HTML length:', html.length);
+        
+        // Try multiple parsing strategies for JAMB site
+        // Strategy 1: Look for news-item or article patterns
+        const newsPatterns = [
+          /<div[^>]*class="[^"]*news[^"]*"[^>]*>([\s\S]*?)<\/div>/gi,
+          /<article[^>]*>([\s\S]*?)<\/article>/gi,
+          /<li[^>]*class="[^"]*news[^"]*"[^>]*>([\s\S]*?)<\/li>/gi,
+        ];
+
+        for (const pattern of newsPatterns) {
+          const matches = html.match(pattern) || [];
+          for (const match of matches.slice(0, 5)) {
+            const titleMatch = match.match(/<h[1-6][^>]*>([\s\S]*?)<\/h[1-6]>/i);
+            const linkMatch = match.match(/<a[^>]*href="([^"]*)"[^>]*>/i);
+            const dateMatch = match.match(/(\d{1,2}[\s/-]\w+[\s/-]\d{2,4}|\w+\s+\d{1,2},?\s+\d{4})/i);
+            const summaryMatch = match.match(/<p[^>]*>([\s\S]*?)<\/p>/i);
+
+            const title = titleMatch ? titleMatch[1].replace(/<[^>]*>/g, '').trim() : null;
+            
+            if (title && title.length > 15) {
+              newsItems.push({
+                title,
+                link: linkMatch ? (linkMatch[1].startsWith('http') ? linkMatch[1] : `https://www.jamb.gov.ng${linkMatch[1]}`) : 'https://www.jamb.gov.ng/news',
+                date: dateMatch ? dateMatch[1] : 'Recent',
+                summary: summaryMatch ? summaryMatch[1].replace(/<[^>]*>/g, '').trim().substring(0, 150) : null,
+                source: 'JAMB Official',
+              });
+            }
+          }
+        }
+
+        // Strategy 2: Look for any links with JAMB-related keywords
+        if (newsItems.length === 0) {
+          const linkMatches = html.match(/<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi) || [];
+          for (const link of linkMatches.slice(0, 20)) {
+            const hrefMatch = link.match(/href="([^"]*)"/i);
+            const textMatch = link.match(/>([^<]+)</);
+            
+            if (hrefMatch && textMatch) {
+              const text = textMatch[1].trim();
+              const keywords = ['jamb', 'utme', 'registration', 'exam', 'candidate', 'admission', 'result', 'cbr'];
+              
+              if (text.length > 20 && keywords.some(k => text.toLowerCase().includes(k))) {
+                newsItems.push({
+                  title: text,
+                  link: hrefMatch[1].startsWith('http') ? hrefMatch[1] : `https://www.jamb.gov.ng${hrefMatch[1]}`,
+                  date: 'Recent',
+                  summary: null,
+                  source: 'JAMB Official',
+                });
+              }
+            }
+          }
+        }
+      }
+    } catch (jambError) {
+      console.error('Error fetching JAMB website:', jambError);
     }
 
-    const html = await response.text();
-    console.log('Received HTML response, length:', html.length);
+    // Source 2: Try MySchool.ng JAMB news (more frequently updated)
+    try {
+      const myschoolResponse = await fetch('https://myschool.ng/news/category/jamb', {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        },
+      });
 
-    // Parse the HTML to extract news items
-    const newsItems: NewsItem[] = [];
+      if (myschoolResponse.ok) {
+        const html = await myschoolResponse.text();
+        console.log('MySchool HTML length:', html.length);
 
-    // Match news items from the blog list - looking for typical blog patterns
-    // The JAMB site uses bloglist-small class for news listings
-    const blogListMatch = html.match(/<ul[^>]*class="[^"]*bloglist-small[^"]*"[^>]*>([\s\S]*?)<\/ul>/gi);
-    
-    if (blogListMatch) {
-      for (const list of blogListMatch) {
-        // Extract individual list items
-        const listItems = list.match(/<li[^>]*>([\s\S]*?)<\/li>/gi) || [];
+        // Parse MySchool news items
+        const articleMatches = html.match(/<article[^>]*>([\s\S]*?)<\/article>/gi) || [];
         
-        for (const item of listItems) {
-          // Extract link and title
-          const linkMatch = item.match(/<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/i);
-          const titleMatch = item.match(/<h\d[^>]*>([\s\S]*?)<\/h\d>/i);
-          const dateMatch = item.match(/<span[^>]*class="[^"]*info[^"]*"[^>]*>([\s\S]*?)<\/span>/i);
-          const summaryMatch = item.match(/<p[^>]*>([\s\S]*?)<\/p>/i);
+        for (const article of articleMatches.slice(0, 8)) {
+          const titleMatch = article.match(/<h[2-4][^>]*class="[^"]*title[^"]*"[^>]*>\s*<a[^>]*>([\s\S]*?)<\/a>/i) ||
+                            article.match(/<h[2-4][^>]*>\s*<a[^>]*>([\s\S]*?)<\/a>/i) ||
+                            article.match(/<a[^>]*class="[^"]*title[^"]*"[^>]*>([\s\S]*?)<\/a>/i);
+          const linkMatch = article.match(/<a[^>]*href="([^"]*)"[^>]*>/i);
+          const dateMatch = article.match(/(\w+\s+\d{1,2},?\s+\d{4}|\d{1,2}[\s/-]\w+[\s/-]\d{4})/i);
+          const summaryMatch = article.match(/<p[^>]*class="[^"]*excerpt[^"]*"[^>]*>([\s\S]*?)<\/p>/i) ||
+                               article.match(/<p[^>]*>([\s\S]*?)<\/p>/i);
 
-          const title = titleMatch 
-            ? titleMatch[1].replace(/<[^>]*>/g, '').trim()
-            : (linkMatch ? linkMatch[2].replace(/<[^>]*>/g, '').trim() : null);
-
-          if (title) {
+          const title = titleMatch ? titleMatch[1].replace(/<[^>]*>/g, '').trim() : null;
+          
+          if (title && title.length > 10 && !newsItems.some(n => n.title === title)) {
             newsItems.push({
-              title: title,
-              link: linkMatch ? (linkMatch[1].startsWith('http') ? linkMatch[1] : `https://www.jamb.gov.ng${linkMatch[1]}`) : null,
-              date: dateMatch ? dateMatch[1].replace(/<[^>]*>/g, '').trim() : 'Recent',
-              summary: summaryMatch ? summaryMatch[1].replace(/<[^>]*>/g, '').trim().substring(0, 200) : null,
+              title,
+              link: linkMatch ? linkMatch[1] : 'https://myschool.ng/news/category/jamb',
+              date: dateMatch ? dateMatch[1] : 'Recent',
+              summary: summaryMatch ? summaryMatch[1].replace(/<[^>]*>/g, '').trim().substring(0, 150) : null,
+              source: 'MySchool.ng',
             });
           }
         }
       }
+    } catch (myschoolError) {
+      console.error('Error fetching MySchool:', myschoolError);
     }
 
-    // Also try to extract from other common patterns if bloglist-small doesn't work
-    if (newsItems.length === 0) {
-      // Try matching article/news cards
-      const articleMatches = html.match(/<article[^>]*>([\s\S]*?)<\/article>/gi) || [];
-      
-      for (const article of articleMatches.slice(0, 10)) {
-        const linkMatch = article.match(/<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/i);
-        const titleMatch = article.match(/<h\d[^>]*>([\s\S]*?)<\/h\d>/i);
-        const dateMatch = article.match(/(\w+\s*,?\s*\d{4})/i);
-        const summaryMatch = article.match(/<p[^>]*>([\s\S]*?)<\/p>/i);
+    // Source 3: Try Vanguard Education News
+    try {
+      const vanguardResponse = await fetch('https://www.vanguardngr.com/category/education/', {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        },
+      });
 
-        const title = titleMatch 
-          ? titleMatch[1].replace(/<[^>]*>/g, '').trim()
-          : (linkMatch ? linkMatch[2].replace(/<[^>]*>/g, '').trim() : null);
-
-        if (title && title.length > 10) {
-          newsItems.push({
-            title: title,
-            link: linkMatch ? (linkMatch[1].startsWith('http') ? linkMatch[1] : `https://www.jamb.gov.ng${linkMatch[1]}`) : null,
-            date: dateMatch ? dateMatch[1] : 'Recent',
-            summary: summaryMatch ? summaryMatch[1].replace(/<[^>]*>/g, '').trim().substring(0, 200) : null,
-          });
-        }
-      }
-    }
-
-    // Fallback: Try to find any news-like content with h2/h3 headers that have links
-    if (newsItems.length === 0) {
-      const headerMatches = html.match(/<h[23][^>]*>\s*<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>\s*<\/h[23]>/gi) || [];
-      
-      for (const header of headerMatches.slice(0, 10)) {
-        const match = header.match(/<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/i);
-        if (match) {
-          const title = match[2].replace(/<[^>]*>/g, '').trim();
-          if (title.length > 10) {
+      if (vanguardResponse.ok) {
+        const html = await vanguardResponse.text();
+        
+        // Look for JAMB-related articles
+        const articleMatches = html.match(/<article[^>]*>([\s\S]*?)<\/article>/gi) || [];
+        
+        for (const article of articleMatches.slice(0, 5)) {
+          const titleMatch = article.match(/<h[2-4][^>]*>\s*<a[^>]*>([\s\S]*?)<\/a>/i);
+          const linkMatch = article.match(/<a[^>]*href="([^"]*)"[^>]*>/i);
+          
+          const title = titleMatch ? titleMatch[1].replace(/<[^>]*>/g, '').trim() : null;
+          
+          // Only include JAMB-related news
+          if (title && title.length > 15 && 
+              (title.toLowerCase().includes('jamb') || 
+               title.toLowerCase().includes('utme') ||
+               title.toLowerCase().includes('admission'))) {
             newsItems.push({
-              title: title,
-              link: match[1].startsWith('http') ? match[1] : `https://www.jamb.gov.ng${match[1]}`,
+              title,
+              link: linkMatch ? linkMatch[1] : 'https://www.vanguardngr.com/category/education/',
               date: 'Recent',
               summary: null,
+              source: 'Vanguard',
             });
           }
         }
       }
+    } catch (vanguardError) {
+      console.error('Error fetching Vanguard:', vanguardError);
     }
 
-    console.log('Extracted news items:', newsItems.length);
+    // If we still have no news, add some fallback recent JAMB updates
+    if (newsItems.length === 0) {
+      newsItems.push({
+        title: "Check JAMB Official Website for Latest Updates",
+        link: "https://www.jamb.gov.ng",
+        date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+        summary: "Visit the official JAMB website for the most recent announcements and updates regarding UTME registration and examinations.",
+        source: "System",
+      });
+    }
+
+    console.log('Total news items extracted:', newsItems.length);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        items: newsItems,
-        source: 'https://www.jamb.gov.ng/news',
+        items: newsItems.slice(0, 15), // Limit to 15 items
+        sources: ['JAMB Official', 'MySchool.ng', 'Vanguard'],
         fetchedAt: new Date().toISOString()
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -139,9 +203,15 @@ Deno.serve(async (req) => {
       JSON.stringify({ 
         success: false, 
         error: error instanceof Error ? error.message : 'Unknown error',
-        items: [] 
+        items: [{
+          title: "Unable to fetch news - Check JAMB website directly",
+          link: "https://www.jamb.gov.ng",
+          date: "Now",
+          summary: "We're having trouble fetching news. Please visit the JAMB website directly for the latest updates.",
+          source: "System",
+        }]
       }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });

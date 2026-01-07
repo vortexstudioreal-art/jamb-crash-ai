@@ -63,19 +63,18 @@ export const NovelCard = ({
     >
       {/* Cover Image / Placeholder */}
       <div className="relative h-40 bg-gradient-to-br from-primary/20 to-accent overflow-hidden">
-        {coverImageUrl ? (
-          <img 
-            src={coverImageUrl} 
-            alt={title}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              // Hide broken image and show placeholder
-              e.currentTarget.style.display = 'none';
-              e.currentTarget.nextElementSibling?.classList.remove('hidden');
-            }}
-          />
-        ) : null}
-        <div className={`w-full h-full flex items-center justify-center absolute inset-0 ${coverImageUrl ? 'hidden' : ''}`}>
+        <img 
+          src={coverImageUrl || `https://covers.openlibrary.org/b/title/${encodeURIComponent(title)}-M.jpg`} 
+          alt={title}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            // Hide broken image and show placeholder
+            e.currentTarget.style.display = 'none';
+            const placeholder = e.currentTarget.nextElementSibling;
+            if (placeholder) placeholder.classList.remove('hidden');
+          }}
+        />
+        <div className="w-full h-full flex items-center justify-center absolute inset-0 hidden">
           <Book className="w-16 h-16 text-primary/40" />
         </div>
         
