@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, Target, Clock, Flame, BookOpen, AlertCircle, Sparkles } from 'lucide-react';
+import { TrendingUp, Target, Clock, Flame, BookOpen, AlertCircle, Sparkles, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
@@ -20,10 +20,22 @@ interface QuizAttempt {
   questions_data: unknown;
 }
 
+interface AITipResponse {
+  tip: string;
+  predictedScore?: {
+    min: number;
+    max: number;
+    likely: number;
+  } | null;
+}
+
 export const StudyStats = ({ userEmail, refreshTrigger }: StudyStatsProps) => {
   const [quizzes, setQuizzes] = useState<QuizAttempt[]>([]);
   const [loading, setLoading] = useState(true);
   const [tipIndex, setTipIndex] = useState(0);
+  const [aiTip, setAiTip] = useState<string | null>(null);
+  const [predictedScore, setPredictedScore] = useState<AITipResponse['predictedScore']>(null);
+  const [loadingTip, setLoadingTip] = useState(false);
 
   const fetchStats = useCallback(async () => {
     try {
@@ -43,6 +55,100 @@ export const StudyStats = ({ userEmail, refreshTrigger }: StudyStatsProps) => {
     }
   }, [userEmail]);
 
+  // Fetch AI-generated tip
+  const fetchAITip = useCallback(async (quizData: QuizAttempt[]) => {
+    if (quizData.length === 0) return;
+    
+    // Check cache first (cache for 1 hour)
+    const cacheKey = `ai_tip_${userEmail}`;
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) {
+      const { tip, predictedScore: ps, timestamp } = JSON.parse(cached);
+      if (Date.now() - timestamp < 60 * 60 * 1000) { // 1 hour
+        setAiTip(tip);
+        setPredictedScore(ps);
+        return;
+      }
+    }
+
+    setLoadingTip(true);
+    try {
+      // Calculate stats for AI
+      const totalQuestions = quizData.reduce((sum, q) => sum + q.total_questions, 0);
+      const totalCorrect = quizData.reduce((sum, q) => sum + q.correct_answers, 0);
+      const avgScore = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
+      const totalTimeMinutes = Math.round(quizData.reduce((sum, q) => sum + (q.time_taken_seconds || 0), 0) / 60);
+      
+      // Calculate subject performance
+      const subjectPerf: Record<string, { correct: number; total: number }> = {};
+      quizData.forEach(quiz => {
+        quiz.subjects.forEach(subject => {
+          if (!subjectPerf[subject]) subjectPerf[subject] = { correct: 0, total: 0 };
+          const perSubject = quiz.total_questions / quiz.subjects.length;
+          subjectPerf[subject].total += perSubject;
+          subjectPerf[subject].correct += (quiz.correct_answers / quiz.total_questions) * perSubject;
+        });
+      });
+
+      const subjectScores = Object.entries(subjectPerf)
+        .map(([name, data]) => ({ name, score: Math.round((data.correct / data.total) * 100) }))
+        .sort((a, b) => a.score - b.score);
+
+      const weakest = subjectScores[0];
+      const strongest = subjectScores[subjectScores.length - 1];
+      const lastQuiz = quizData[0];
+      const predictedJAMB = Math.round((avgScore / 100) * 400);
+
+      const studyData = {
+        avgScore,
+        totalQuizzes: quizData.length,
+        weakestSubject: weakest?.name || null,
+        weakestScore: weakest?.score || null,
+        strongestSubject: strongest?.name || null,
+        strongestScore: strongest?.score || null,
+        streak: calculateStreak(quizData),
+        totalTimeMinutes,
+        lastQuizScore: lastQuiz ? Math.round((lastQuiz.correct_answers / lastQuiz.total_questions) * 100) : null,
+        predictedJAMB,
+      };
+
+      const { data, error } = await supabase.functions.invoke('generate-study-tip', {
+        body: { studyData },
+      });
+
+      if (!error && data?.tip) {
+        setAiTip(data.tip);
+        setPredictedScore(data.predictedScore);
+        
+        // Cache the response
+        sessionStorage.setItem(cacheKey, JSON.stringify({
+          tip: data.tip,
+          predictedScore: data.predictedScore,
+          timestamp: Date.now(),
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching AI tip:', error);
+    } finally {
+      setLoadingTip(false);
+    }
+  }, [userEmail]);
+
+  // Calculate streak helper
+  const calculateStreak = (quizData: QuizAttempt[]) => {
+    if (quizData.length === 0) return 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    let streak = 0;
+    let currentDate = new Date(today);
+    const quizDates = new Set(quizData.map(q => new Date(q.created_at).toDateString()));
+    while (quizDates.has(currentDate.toDateString())) {
+      streak++;
+      currentDate.setDate(currentDate.getDate() - 1);
+    }
+    return streak;
+  };
+
   // Initial fetch and real-time subscription
   useEffect(() => {
     fetchStats();
@@ -60,13 +166,13 @@ export const StudyStats = ({ userEmail, refreshTrigger }: StudyStatsProps) => {
         },
         (payload) => {
           console.log('New quiz detected, updating stats:', payload);
-          // Add the new quiz to the beginning of the list
           setQuizzes(prev => [payload.new as QuizAttempt, ...prev.slice(0, 29)]);
+          // Clear cached tip to get fresh one
+          sessionStorage.removeItem(`ai_tip_${userEmail}`);
         }
       )
       .subscribe();
 
-    // Set random tip index on mount
     setTipIndex(Math.floor(Math.random() * 5));
 
     return () => {
@@ -74,12 +180,21 @@ export const StudyStats = ({ userEmail, refreshTrigger }: StudyStatsProps) => {
     };
   }, [userEmail, fetchStats]);
 
+  // Fetch AI tip when quizzes are loaded
+  useEffect(() => {
+    if (quizzes.length > 0 && !aiTip) {
+      fetchAITip(quizzes);
+    }
+  }, [quizzes, aiTip, fetchAITip]);
+
   // Refetch when refreshTrigger changes
   useEffect(() => {
     if (refreshTrigger && refreshTrigger > 0) {
       fetchStats();
+      sessionStorage.removeItem(`ai_tip_${userEmail}`);
+      setAiTip(null);
     }
-  }, [refreshTrigger, fetchStats]);
+  }, [refreshTrigger, fetchStats, userEmail]);
 
   if (loading) {
     return (
@@ -97,29 +212,8 @@ export const StudyStats = ({ userEmail, refreshTrigger }: StudyStatsProps) => {
   const avgScore = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
   const totalTimeMinutes = Math.round(quizzes.reduce((sum, q) => sum + (q.time_taken_seconds || 0), 0) / 60);
 
-  // Calculate streak
-  const calculateStreak = () => {
-    if (quizzes.length === 0) return 0;
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    let streak = 0;
-    let currentDate = new Date(today);
-    
-    const quizDates = new Set(
-      quizzes.map(q => new Date(q.created_at).toDateString())
-    );
-
-    while (quizDates.has(currentDate.toDateString())) {
-      streak++;
-      currentDate.setDate(currentDate.getDate() - 1);
-    }
-    
-    return streak;
-  };
-
-  const streak = calculateStreak();
+  // Calculate streak using the helper defined above
+  const streak = calculateStreak(quizzes);
 
   // Subject performance with detailed tracking from questions_data
   const subjectPerformance: Record<string, { correct: number; total: number; attempts: number }> = {};
@@ -303,7 +397,7 @@ export const StudyStats = ({ userEmail, refreshTrigger }: StudyStatsProps) => {
         </motion.div>
       </div>
 
-      {/* AI Insight - Enhanced */}
+      {/* AI Insight - Enhanced with real AI */}
       <motion.div 
         className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-xl p-5 border border-primary/30"
         initial={{ opacity: 0, scale: 0.95 }}
@@ -312,17 +406,28 @@ export const StudyStats = ({ userEmail, refreshTrigger }: StudyStatsProps) => {
       >
         <div className="flex items-start gap-4">
           <div className="bg-primary/20 rounded-full p-2">
-            <Sparkles className="w-6 h-6 text-primary" />
+            {loadingTip ? (
+              <RefreshCw className="w-6 h-6 text-primary animate-spin" />
+            ) : (
+              <Sparkles className="w-6 h-6 text-primary" />
+            )}
           </div>
           <div className="flex-1">
             <p className="font-semibold text-foreground flex items-center gap-2">
               AI Study Tip 
-              <span className="text-xs bg-primary/20 px-2 py-0.5 rounded-full text-primary">Personalized</span>
+              <span className="text-xs bg-primary/20 px-2 py-0.5 rounded-full text-primary">
+                {aiTip ? 'AI-Powered' : 'Personalized'}
+              </span>
             </p>
-            <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{getAIInsight()}</p>
-            {predictedJAMB > 0 && totalQuizzes > 0 && (
+            <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+              {loadingTip ? 'Generating personalized tip...' : (aiTip || getAIInsight())}
+            </p>
+            {(predictedScore || predictedJAMB > 0) && totalQuizzes > 0 && (
               <p className="text-xs text-primary mt-2 font-medium">
-                📊 Predicted JAMB Score: {predictedJAMB}/400
+                📊 Predicted JAMB Score: {predictedScore 
+                  ? `${predictedScore.min}-${predictedScore.max} (most likely: ${predictedScore.likely})`
+                  : `${predictedJAMB}/400`
+                }
               </p>
             )}
           </div>

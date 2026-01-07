@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Gift, Copy, Users, CheckCircle } from 'lucide-react';
+import { Gift, Copy, Users, CheckCircle, Wallet, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ReferralSystemProps {
   userEmail: string;
@@ -13,6 +14,7 @@ interface ReferralSystemProps {
 export const ReferralSystem = ({ userEmail }: ReferralSystemProps) => {
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [referralCount, setReferralCount] = useState(0);
+  const [referralCredits, setReferralCredits] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
@@ -27,7 +29,7 @@ export const ReferralSystem = ({ userEmail }: ReferralSystemProps) => {
         if (error) throw error;
         setReferralCode(data);
 
-        // Get referral count
+        // Get referral count (successful conversions)
         const { count } = await supabase
           .from('referrals')
           .select('*', { count: 'exact', head: true })
@@ -35,6 +37,15 @@ export const ReferralSystem = ({ userEmail }: ReferralSystemProps) => {
           .eq('is_used', true);
 
         setReferralCount(count || 0);
+
+        // Get referral credits from profiles
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('referral_credits')
+          .eq('email', userEmail)
+          .single();
+
+        setReferralCredits(profileData?.referral_credits || 0);
       } catch (err) {
         console.error('Error with referral:', err);
       } finally {
@@ -84,7 +95,7 @@ export const ReferralSystem = ({ userEmail }: ReferralSystemProps) => {
         </div>
         <div>
           <h3 className="text-lg font-semibold text-foreground">Refer & Earn</h3>
-          <p className="text-sm text-muted-foreground">Give ₦1,000 off, earn rewards!</p>
+          <p className="text-sm text-muted-foreground">Give ₦1,000 off, earn ₦500!</p>
         </div>
       </div>
 
@@ -111,12 +122,33 @@ export const ReferralSystem = ({ userEmail }: ReferralSystemProps) => {
           </div>
         </div>
 
-        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-          <div className="flex items-center gap-2">
-            <Users className="w-5 h-5 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">Friends referred</span>
+        {/* Stats Row */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="p-3 bg-muted/50 rounded-lg">
+            <div className="flex items-center gap-2">
+              <Users className="w-4 h-4 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">Friends Referred</span>
+            </div>
+            <p className="text-xl font-bold text-primary mt-1">{referralCount}</p>
           </div>
-          <span className="text-xl font-bold text-primary">{referralCount}</span>
+          
+          <div className="p-3 bg-primary/10 rounded-lg">
+            <div className="flex items-center gap-2">
+              <Wallet className="w-4 h-4 text-primary" />
+              <span className="text-xs text-muted-foreground">Your Credits</span>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info className="w-3 h-3 text-muted-foreground" />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-[200px]">
+                    <p className="text-xs">Credits can be used as discount on your next purchase!</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            <p className="text-xl font-bold text-primary mt-1">₦{referralCredits.toLocaleString()}</p>
+          </div>
         </div>
 
         <Button
@@ -126,9 +158,13 @@ export const ReferralSystem = ({ userEmail }: ReferralSystemProps) => {
           Share on WhatsApp
         </Button>
 
-        <p className="text-xs text-center text-muted-foreground">
-          Your friend gets ₦1,000 off. You earn rewards when they pay!
-        </p>
+        {/* How it works */}
+        <div className="text-xs text-center space-y-1 text-muted-foreground bg-muted/30 rounded-lg p-3">
+          <p className="font-medium text-foreground">How Refer & Earn Works:</p>
+          <p>1. Share your code with friends</p>
+          <p>2. They get ₦1,000 off when they pay</p>
+          <p>3. You earn ₦500 credit when they pay! 💰</p>
+        </div>
       </div>
     </motion.div>
   );

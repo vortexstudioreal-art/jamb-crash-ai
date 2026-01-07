@@ -244,7 +244,7 @@ export const JambCalculator = ({ isOpen, onClose }: JambCalculatorProps) => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed z-50 w-[90%] max-w-[340px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+            className="fixed z-50 w-[85%] max-w-[340px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 mx-auto"
           >
             <div className="bg-card border-2 border-border rounded-3xl shadow-2xl overflow-hidden">
               {/* Header */}
