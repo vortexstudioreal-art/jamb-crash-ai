@@ -10,8 +10,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { AdminCouponDashboard } from '@/components/AdminCouponDashboard';
 import { BankDetailsForm } from '@/components/collaborator/BankDetailsForm';
 import { PayoutHistory } from '@/components/collaborator/PayoutHistory';
+import { ProfileSettings } from '@/components/collaborator/ProfileSettings';
 import { toast } from 'sonner';
-
 interface CollaboratorStats {
   totalEarnings: number;
   pendingPayouts: number;
@@ -278,6 +278,11 @@ const CollaboratorDashboard = () => {
             transition={{ delay: 0.2 }}
             className="space-y-6"
           >
+            {/* Profile Settings - Custom Badge Title */}
+            {user?.id && (
+              <ProfileSettings userId={user.id} userEmail={userEmail} />
+            )}
+            
             <BankDetailsForm userEmail={userEmail} onSave={fetchBankDetails} />
             
             {/* Payout Request Card */}

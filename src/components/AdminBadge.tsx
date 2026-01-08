@@ -4,9 +4,10 @@ import { Link } from 'react-router-dom';
 interface AdminBadgeProps {
   role?: 'owner' | 'admin' | 'collaborator' | null;
   linkToAdmin?: boolean;
+  customTitle?: string | null;
 }
 
-export const AdminBadge = ({ role, linkToAdmin = false }: AdminBadgeProps) => {
+export const AdminBadge = ({ role, linkToAdmin = false, customTitle }: AdminBadgeProps) => {
   // Don't render badge if no role is assigned
   if (!role) return null;
   
@@ -24,7 +25,8 @@ export const AdminBadge = ({ role, linkToAdmin = false }: AdminBadgeProps) => {
   const getBadgeLabel = () => {
     if (isOwner) return 'Owner';
     if (isAdmin) return 'Admin';
-    return 'Content Creator';
+    // Use custom title for collaborators if provided
+    return customTitle || 'Content Creator';
   };
 
   const getIcon = () => {
