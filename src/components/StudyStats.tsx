@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, Target, Clock, Flame, BookOpen, AlertCircle, Sparkles, RefreshCw } from 'lucide-react';
+import { TrendingUp, Target, Clock, Flame, BookOpen, AlertCircle, Sparkles, RefreshCw, Info } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { useJambScorePredictor } from '@/hooks/useJambScorePredictor';
 
 interface StudyStatsProps {
   userEmail: string;
-  refreshTrigger?: number; // Optional trigger to force refresh
+  refreshTrigger?: number;
 }
 
 interface QuizAttempt {
@@ -20,22 +21,15 @@ interface QuizAttempt {
   questions_data: unknown;
 }
 
-interface AITipResponse {
-  tip: string;
-  predictedScore?: {
-    min: number;
-    max: number;
-    likely: number;
-  } | null;
-}
-
 export const StudyStats = ({ userEmail, refreshTrigger }: StudyStatsProps) => {
   const [quizzes, setQuizzes] = useState<QuizAttempt[]>([]);
   const [loading, setLoading] = useState(true);
   const [tipIndex, setTipIndex] = useState(0);
   const [aiTip, setAiTip] = useState<string | null>(null);
-  const [predictedScore, setPredictedScore] = useState<AITipResponse['predictedScore']>(null);
   const [loadingTip, setLoadingTip] = useState(false);
+
+  // Use the new algorithm hook
+  const prediction = useJambScorePredictor(quizzes);
 
   const fetchStats = useCallback(async () => {
     try {
@@ -44,7 +38,7 @@ export const StudyStats = ({ userEmail, refreshTrigger }: StudyStatsProps) => {
         .select('*')
         .eq('email', userEmail)
         .order('created_at', { ascending: false })
-        .limit(30);
+        .limit(50); // Increased to get more data for algorithm
 
       if (error) throw error;
       setQuizzes(data || []);
@@ -55,76 +49,67 @@ export const StudyStats = ({ userEmail, refreshTrigger }: StudyStatsProps) => {
     }
   }, [userEmail]);
 
-  // Fetch AI-generated tip
+  // Fetch AI-generated tip using the enhanced algorithm data
   const fetchAITip = useCallback(async (quizData: QuizAttempt[]) => {
     if (quizData.length === 0) return;
     
     // Check cache first (cache for 1 hour)
-    const cacheKey = `ai_tip_${userEmail}`;
+    const cacheKey = `ai_tip_v2_${userEmail}`;
     const cached = sessionStorage.getItem(cacheKey);
     if (cached) {
-      const { tip, predictedScore: ps, timestamp } = JSON.parse(cached);
-      if (Date.now() - timestamp < 60 * 60 * 1000) { // 1 hour
+      const { tip, timestamp, questionCount } = JSON.parse(cached);
+      // Invalidate cache if 25+ more questions answered
+      if (Date.now() - timestamp < 60 * 60 * 1000 && 
+          Math.abs(prediction.totalQuestions - questionCount) < 25) {
         setAiTip(tip);
-        setPredictedScore(ps);
         return;
       }
     }
 
     setLoadingTip(true);
     try {
-      // Calculate stats for AI
-      const totalQuestions = quizData.reduce((sum, q) => sum + q.total_questions, 0);
-      const totalCorrect = quizData.reduce((sum, q) => sum + q.correct_answers, 0);
-      const avgScore = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
-      const totalTimeMinutes = Math.round(quizData.reduce((sum, q) => sum + (q.time_taken_seconds || 0), 0) / 60);
-      
-      // Calculate subject performance
-      const subjectPerf: Record<string, { correct: number; total: number }> = {};
-      quizData.forEach(quiz => {
-        quiz.subjects.forEach(subject => {
-          if (!subjectPerf[subject]) subjectPerf[subject] = { correct: 0, total: 0 };
-          const perSubject = quiz.total_questions / quiz.subjects.length;
-          subjectPerf[subject].total += perSubject;
-          subjectPerf[subject].correct += (quiz.correct_answers / quiz.total_questions) * perSubject;
-        });
-      });
+      // Calculate streak
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      let streak = 0;
+      let currentDate = new Date(today);
+      const quizDates = new Set(quizData.map(q => new Date(q.created_at).toDateString()));
+      while (quizDates.has(currentDate.toDateString())) {
+        streak++;
+        currentDate.setDate(currentDate.getDate() - 1);
+      }
 
-      const subjectScores = Object.entries(subjectPerf)
-        .map(([name, data]) => ({ name, score: Math.round((data.correct / data.total) * 100) }))
-        .sort((a, b) => a.score - b.score);
+      // Find weakest subject
+      const subjectEntries = Object.entries(prediction.accuracyBySubject);
+      const weakSubject = subjectEntries.length > 0
+        ? subjectEntries.sort((a, b) => a[1].percentage - b[1].percentage)[0]?.[0]
+        : null;
 
-      const weakest = subjectScores[0];
-      const strongest = subjectScores[subjectScores.length - 1];
-      const lastQuiz = quizData[0];
-      const predictedJAMB = Math.round((avgScore / 100) * 400);
-
-      const studyData = {
-        avgScore,
+      const performanceData = {
+        avgScore: Math.round(prediction.accuracyOverall * 100),
         totalQuizzes: quizData.length,
-        weakestSubject: weakest?.name || null,
-        weakestScore: weakest?.score || null,
-        strongestSubject: strongest?.name || null,
-        strongestScore: strongest?.score || null,
-        streak: calculateStreak(quizData),
-        totalTimeMinutes,
-        lastQuizScore: lastQuiz ? Math.round((lastQuiz.correct_answers / lastQuiz.total_questions) * 100) : null,
-        predictedJAMB,
+        totalQuestions: prediction.totalQuestions,
+        accuracyLast100: prediction.accuracyLast100,
+        consistencyScore: prediction.consistencyScore,
+        subjectBalanceScore: prediction.subjectBalanceScore,
+        confidence: prediction.confidence,
+        minScore: prediction.minScore,
+        maxScore: prediction.maxScore,
+        studyStreak: streak,
+        weakSubject,
+        subjectStats: prediction.accuracyBySubject,
       };
 
       const { data, error } = await supabase.functions.invoke('generate-study-tip', {
-        body: { studyData },
+        body: { performanceData },
       });
 
       if (!error && data?.tip) {
         setAiTip(data.tip);
-        setPredictedScore(data.predictedScore);
-        
-        // Cache the response
         sessionStorage.setItem(cacheKey, JSON.stringify({
           tip: data.tip,
-          predictedScore: data.predictedScore,
           timestamp: Date.now(),
+          questionCount: prediction.totalQuestions,
         }));
       }
     } catch (error) {
@@ -132,7 +117,7 @@ export const StudyStats = ({ userEmail, refreshTrigger }: StudyStatsProps) => {
     } finally {
       setLoadingTip(false);
     }
-  }, [userEmail]);
+  }, [userEmail, prediction]);
 
   // Calculate streak helper
   const calculateStreak = (quizData: QuizAttempt[]) => {
@@ -153,7 +138,6 @@ export const StudyStats = ({ userEmail, refreshTrigger }: StudyStatsProps) => {
   useEffect(() => {
     fetchStats();
 
-    // Subscribe to real-time updates for quiz_attempts
     const channel = supabase
       .channel('quiz-stats-updates')
       .on(
@@ -166,9 +150,8 @@ export const StudyStats = ({ userEmail, refreshTrigger }: StudyStatsProps) => {
         },
         (payload) => {
           console.log('New quiz detected, updating stats:', payload);
-          setQuizzes(prev => [payload.new as QuizAttempt, ...prev.slice(0, 29)]);
-          // Clear cached tip to get fresh one
-          sessionStorage.removeItem(`ai_tip_${userEmail}`);
+          setQuizzes(prev => [payload.new as QuizAttempt, ...prev.slice(0, 49)]);
+          sessionStorage.removeItem(`ai_tip_v2_${userEmail}`);
         }
       )
       .subscribe();
@@ -191,7 +174,7 @@ export const StudyStats = ({ userEmail, refreshTrigger }: StudyStatsProps) => {
   useEffect(() => {
     if (refreshTrigger && refreshTrigger > 0) {
       fetchStats();
-      sessionStorage.removeItem(`ai_tip_${userEmail}`);
+      sessionStorage.removeItem(`ai_tip_v2_${userEmail}`);
       setAiTip(null);
     }
   }, [refreshTrigger, fetchStats, userEmail]);
@@ -207,64 +190,20 @@ export const StudyStats = ({ userEmail, refreshTrigger }: StudyStatsProps) => {
 
   // Calculate stats
   const totalQuizzes = quizzes.length;
-  const totalQuestions = quizzes.reduce((sum, q) => sum + q.total_questions, 0);
-  const totalCorrect = quizzes.reduce((sum, q) => sum + q.correct_answers, 0);
-  const avgScore = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
+  const totalQuestions = prediction.totalQuestions;
+  const avgScore = Math.round(prediction.accuracyOverall * 100);
   const totalTimeMinutes = Math.round(quizzes.reduce((sum, q) => sum + (q.time_taken_seconds || 0), 0) / 60);
-
-  // Calculate streak using the helper defined above
   const streak = calculateStreak(quizzes);
 
-  // Subject performance with detailed tracking from questions_data
-  const subjectPerformance: Record<string, { correct: number; total: number; attempts: number }> = {};
-  quizzes.forEach(quiz => {
-    // Try to get per-question data for accurate subject tracking
-    const questionsData = quiz.questions_data as any[] | null;
-    
-    if (questionsData && Array.isArray(questionsData)) {
-      // Count per-subject from actual question data
-      questionsData.forEach(q => {
-        const subject = q.subject as string;
-        if (!subject) return;
-        
-        if (!subjectPerformance[subject]) {
-          subjectPerformance[subject] = { correct: 0, total: 0, attempts: 0 };
-        }
-        subjectPerformance[subject].total += 1;
-        // Check if user answered correctly
-        if (q.userAnswer && q.userAnswer === q.correct_answer) {
-          subjectPerformance[subject].correct += 1;
-        }
-      });
-      
-      // Track attempt count
-      quiz.subjects.forEach(subject => {
-        if (subjectPerformance[subject]) {
-          subjectPerformance[subject].attempts += 1;
-        }
-      });
-    } else {
-      // Fallback: distribute evenly if no questions_data
-      quiz.subjects.forEach(subject => {
-        if (!subjectPerformance[subject]) {
-          subjectPerformance[subject] = { correct: 0, total: 0, attempts: 0 };
-        }
-        const perSubject = quiz.total_questions / quiz.subjects.length;
-        subjectPerformance[subject].total += perSubject;
-        subjectPerformance[subject].correct += (quiz.correct_answers / quiz.total_questions) * perSubject;
-        subjectPerformance[subject].attempts++;
-      });
-    }
-  });
-
-  const subjectData = Object.entries(subjectPerformance)
+  // Subject performance from the algorithm
+  const subjectData = Object.entries(prediction.accuracyBySubject)
     .map(([name, data]) => ({
       name: name.charAt(0).toUpperCase() + name.slice(1),
-      score: Math.round((data.correct / data.total) * 100) || 0,
-      correct: Math.round(data.correct),
-      total: Math.round(data.total),
-      attempts: data.attempts
+      score: Math.round(data.percentage),
+      correct: data.correct,
+      total: data.total,
     }))
+    .filter(s => s.total > 0)
     .sort((a, b) => a.score - b.score);
 
   // Daily progress chart
@@ -281,10 +220,7 @@ export const StudyStats = ({ userEmail, refreshTrigger }: StudyStatsProps) => {
   const strongestSubject = subjectData[subjectData.length - 1];
   const lastQuiz = quizzes[0];
 
-  // Calculate predicted JAMB score
-  const predictedJAMB = Math.round((avgScore / 100) * 400);
-
-  // Generate personalized AI insight
+  // Generate personalized AI insight fallback
   const getAIInsight = () => {
     if (totalQuizzes === 0) {
       const startTips = [
@@ -297,55 +233,28 @@ export const StudyStats = ({ userEmail, refreshTrigger }: StudyStatsProps) => {
       return startTips[tipIndex % startTips.length];
     }
 
-    // If there's a recent quiz (last 24 hours), give specific feedback
-    if (lastQuiz) {
-      const lastQuizScore = Math.round((lastQuiz.correct_answers / lastQuiz.total_questions) * 100);
-      const hoursAgo = (Date.now() - new Date(lastQuiz.created_at).getTime()) / (1000 * 60 * 60);
-      
-      if (hoursAgo < 1) {
-        if (lastQuizScore >= 80) {
-          return `Amazing! You just scored ${lastQuizScore}%! You're on track for ${predictedJAMB}+ 🔥`;
-        } else if (lastQuizScore >= 60) {
-          return `Good effort! ${lastQuizScore}% is solid. ${weakestSubject ? `Focus on ${weakestSubject.name} next!` : 'Keep practicing!'} 💪`;
-        } else {
-          return `${lastQuizScore}% — don't worry! ${weakestSubject ? `Practice more ${weakestSubject.name} to improve fast!` : 'Every quiz makes you stronger!'} 📈`;
-        }
-      }
+    if (prediction.confidence === 'low') {
+      return `Take ${Math.max(0, 60 - totalQuestions)} more questions to unlock accurate predictions! Current range: ${prediction.minScore}-${prediction.maxScore}`;
     }
 
-    // Weak subject specific tips
     if (weakestSubject && weakestSubject.score < 50) {
-      const weakTips = [
-        `You got ${weakestSubject.correct}/${weakestSubject.total} in ${weakestSubject.name} — practice 20 questions today to hit 280+! 🔥`,
-        `${weakestSubject.name} needs attention (${weakestSubject.score}%) — one focused session could add 30+ marks! 📊`,
-        `Your ${weakestSubject.name} score is ${weakestSubject.score}%. Master it and watch your JAMB score jump! 🎯`,
-        `Focus area: ${weakestSubject.name} at ${weakestSubject.score}%. Daily practice here = faster improvement! 💡`,
-        `${weakestSubject.name} is pulling you back. Let's turn your weakness into a strength! 💪`
-      ];
-      return weakTips[tipIndex % weakTips.length];
+      return `Focus on ${weakestSubject.name} (${weakestSubject.score}%) - improving here could add 30+ marks to your JAMB score! 🎯`;
     }
 
-    // Good performance tips
     if (avgScore >= 70) {
-      const strongTips = [
-        `You're killing it! ${avgScore}% average = predicted ${predictedJAMB} JAMB score! 🔥`,
-        `${strongestSubject?.name} is your superpower at ${strongestSubject?.score}%! Keep the momentum! 🚀`,
-        `Consistent ${avgScore}%! You're on track for 300+. Don't slow down now! 💪`,
-        `${streak} day streak + ${avgScore}% average = JAMB success incoming! 🎯`,
-        `Amazing progress! Your ${totalQuizzes} quizzes are paying off. Keep it up! ⭐`
-      ];
-      return strongTips[tipIndex % strongTips.length];
+      return `You're on track for ${prediction.minScore}-${prediction.maxScore}! Keep the momentum going! 🔥`;
     }
 
-    // General improvement tips
-    const generalTips = [
-      `${totalQuizzes} quizzes done! Aim for 1 more today to boost your ${avgScore}% average 📈`,
-      `Current: ${avgScore}%. Target: 70%+. You're ${70 - avgScore}% away — you've got this! 💪`,
-      `Daily practice = steady gains. Your ${streak || 0} day streak is building success! 🔥`,
-      `${totalTimeMinutes} mins studied! Consistent effort wins the JAMB race 🏆`,
-      `Keep going! Every quiz gets you closer to that 300+ score! 🎯`
-    ];
-    return generalTips[tipIndex % generalTips.length];
+    return `Current prediction: ${prediction.minScore}-${prediction.maxScore}. Daily practice will narrow this range and boost your score! 📈`;
+  };
+
+  // Get confidence badge color
+  const getConfidenceBadgeClass = () => {
+    switch (prediction.confidence) {
+      case 'high': return 'bg-green-500/20 text-green-500';
+      case 'medium': return 'bg-yellow-500/20 text-yellow-600';
+      default: return 'bg-muted text-muted-foreground';
+    }
   };
 
   return (
@@ -397,9 +306,45 @@ export const StudyStats = ({ userEmail, refreshTrigger }: StudyStatsProps) => {
         </motion.div>
       </div>
 
-      {/* AI Insight - Enhanced with real AI */}
+      {/* Predicted JAMB Score - Enhanced with new algorithm */}
+      {totalQuizzes > 0 && (
+        <motion.div 
+          className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-xl p-5 border border-primary/30"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.15 }}
+        >
+          <div className="flex items-start gap-4">
+            <div className="bg-primary/20 rounded-full p-2">
+              <TrendingUp className="w-6 h-6 text-primary" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="font-semibold text-foreground">Predicted JAMB Score</p>
+                <span className={`text-xs px-2 py-0.5 rounded-full ${getConfidenceBadgeClass()}`}>
+                  {prediction.confidence.charAt(0).toUpperCase() + prediction.confidence.slice(1)} Confidence
+                </span>
+              </div>
+              <p className="text-3xl font-bold text-primary mt-1">
+                {prediction.minScore} - {prediction.maxScore}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {prediction.message} • Based on {prediction.totalQuestions} questions
+              </p>
+              {prediction.confidence === 'low' && (
+                <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                  <Info className="w-3 h-3" />
+                  Take {Math.max(0, 60 - prediction.totalQuestions)} more questions for better accuracy
+                </p>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* AI Insight */}
       <motion.div 
-        className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-xl p-5 border border-primary/30"
+        className="bg-card rounded-xl p-5 border border-border"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.2 }}
@@ -422,14 +367,6 @@ export const StudyStats = ({ userEmail, refreshTrigger }: StudyStatsProps) => {
             <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
               {loadingTip ? 'Generating personalized tip...' : (aiTip || getAIInsight())}
             </p>
-            {(predictedScore || predictedJAMB > 0) && totalQuizzes > 0 && (
-              <p className="text-xs text-primary mt-2 font-medium">
-                📊 Predicted JAMB Score: {predictedScore 
-                  ? `${predictedScore.min}-${predictedScore.max} (most likely: ${predictedScore.likely})`
-                  : `${predictedJAMB}/400`
-                }
-              </p>
-            )}
           </div>
         </div>
       </motion.div>
@@ -474,27 +411,36 @@ export const StudyStats = ({ userEmail, refreshTrigger }: StudyStatsProps) => {
               <Target className="w-5 h-5 text-green-500" />
               Subject Performance
             </h3>
-            <div className="h-40">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={subjectData} layout="vertical">
-                  <XAxis type="number" domain={[0, 100]} stroke="#888" fontSize={12} />
-                  <YAxis type="category" dataKey="name" stroke="#888" fontSize={10} width={80} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--card))', 
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px'
-                    }}
-                    formatter={(value) => [`${value}%`, 'Score']}
-                  />
-                  <Bar 
-                    dataKey="score" 
-                    fill="hsl(var(--primary))"
-                    radius={[0, 4, 4, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            {subjectData.length > 0 ? (
+              <div className="h-40">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={subjectData} layout="vertical">
+                    <XAxis type="number" domain={[0, 100]} stroke="#888" fontSize={12} />
+                    <YAxis type="category" dataKey="name" stroke="#888" fontSize={10} width={80} />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'hsl(var(--card))', 
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px'
+                      }}
+                      formatter={(value, name, props) => [
+                        `${value}% (${props.payload.correct}/${props.payload.total})`, 
+                        'Score'
+                      ]}
+                    />
+                    <Bar 
+                      dataKey="score" 
+                      fill="hsl(var(--primary))"
+                      radius={[0, 4, 4, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-40 flex items-center justify-center text-muted-foreground text-sm">
+                Complete quizzes to see subject breakdown
+              </div>
+            )}
           </div>
         </div>
       )}
