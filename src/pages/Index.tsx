@@ -39,6 +39,7 @@ import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, Lock, RefreshC
 import { JambNewsPage } from '@/components/JambNewsPage';
 import { ScholarshipPage } from '@/components/ScholarshipPage';
 import { NovelBrowser, NovelDetail, NovelReader } from '@/components/novels';
+import { PaymentCancelledModal } from '@/components/PaymentCancelledModal';
 
 type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'study-plan' | 'study-materials' | 'syllabus' | 'flashcards' | 'course-requirements' | 'novels' | 'novel-detail' | 'novel-reader' | 'news' | 'scholarships';
 type QuizType = 'full' | 'mini' | 'subject' | 'timed-practice';
@@ -85,6 +86,10 @@ const Index = () => {
   
   // Track if user just paid successfully (to prevent showing trial expired screen)
   const [justPaidForPlan, setJustPaidForPlan] = useState(false);
+  
+  // Track payment cancellation for choice modal
+  const [showPaymentCancelledModal, setShowPaymentCancelledModal] = useState(false);
+  const [paymentWasCancelled, setPaymentWasCancelled] = useState(false);
   
   // Track if we're waiting for payment flow to initialize
   const [isPaymentFlowLoading, setIsPaymentFlowLoading] = useState(() => {
@@ -359,6 +364,34 @@ const Index = () => {
     setIsPaymentModalOpen(true);
   };
 
+  const handlePaymentModalClose = () => {
+    setIsPaymentModalOpen(false);
+    // If user is logged in and eligible for trial, show choice modal
+    if (user && canStartTrial && !hasAccess && !effectiveAdmin) {
+      setPaymentWasCancelled(true);
+      setShowPaymentCancelledModal(true);
+    }
+  };
+
+  const handlePaymentCancelledTrial = async () => {
+    setShowPaymentCancelledModal(false);
+    setPaymentWasCancelled(false);
+    // Start trial flow
+    if (canStartTrial) {
+      setCurrentStep('subject-select');
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  };
+
+  const handlePaymentCancelledRetry = () => {
+    setShowPaymentCancelledModal(false);
+    setPaymentWasCancelled(false);
+    // Reopen payment modal
+    if (selectedPlan) {
+      setIsPaymentModalOpen(true);
+    }
+  };
+
   const handlePaymentSuccess = async (reference: string, email: string) => {
     setIsPaymentModalOpen(false);
     setJustPaidForPlan(true); // Immediately mark as paid to bypass trial expired check
@@ -534,7 +567,7 @@ const Index = () => {
         {selectedPlan && (
           <PaymentModal
             isOpen={isPaymentModalOpen}
-            onClose={() => setIsPaymentModalOpen(false)}
+            onClose={handlePaymentModalClose}
             plan={plans[selectedPlan]}
             onSuccess={handlePaymentSuccess}
             initialEmail={userEmail || undefined}
@@ -1267,12 +1300,21 @@ const Index = () => {
       {selectedPlan && user && (
         <PaymentModal
           isOpen={isPaymentModalOpen}
-          onClose={() => setIsPaymentModalOpen(false)}
+          onClose={handlePaymentModalClose}
           plan={plans[selectedPlan]}
           onSuccess={handlePaymentSuccess}
           initialEmail={userEmail || undefined}
         />
       )}
+
+      {/* Payment Cancelled Choice Modal */}
+      <PaymentCancelledModal
+        isOpen={showPaymentCancelledModal}
+        onClose={() => setShowPaymentCancelledModal(false)}
+        onStartTrial={handlePaymentCancelledTrial}
+        onRetryPayment={handlePaymentCancelledRetry}
+        canStartTrial={canStartTrial}
+      />
     </div>
   );
 };

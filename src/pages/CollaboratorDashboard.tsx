@@ -208,7 +208,7 @@ const CollaboratorDashboard = () => {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Content Creator Dashboard</h1>
+            <h1 className="text-2xl font-bold text-foreground">Collaborator Dashboard</h1>
             <p className="text-muted-foreground">Manage your coupons and track earnings</p>
           </div>
         </motion.div>
