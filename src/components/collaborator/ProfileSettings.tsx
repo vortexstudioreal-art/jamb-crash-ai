@@ -87,14 +87,14 @@ export const ProfileSettings = ({ userId, userEmail }: ProfileSettingsProps) => 
           <Label htmlFor="displayTitle">Custom Badge Title</Label>
           <Input
             id="displayTitle"
-            placeholder="Content Creator"
+            placeholder="Collaborator"
             value={displayTitle}
             onChange={(e) => setDisplayTitle(e.target.value)}
             maxLength={20}
             className="bg-background"
           />
           <p className="text-xs text-muted-foreground">
-            This will be shown on your badge instead of "Content Creator"
+            This will be shown on your badge instead of "Collaborator"
           </p>
         </div>
 
