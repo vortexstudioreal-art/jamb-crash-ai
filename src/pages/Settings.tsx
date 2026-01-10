@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { User, Mail, Crown, Shield, Calendar, Package, ArrowLeft, LogOut, Edit2, Check, X, HelpCircle, FileText, MessageCircle, Moon, Sun, Phone, Bell, Users, Ticket } from 'lucide-react';
+import { User, Mail, Crown, Shield, Calendar, Package, ArrowLeft, LogOut, Edit2, Check, X, HelpCircle, FileText, MessageCircle, Moon, Sun, Phone, Bell, Users, Ticket, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { AdminCouponDashboard } from '@/components/AdminCouponDashboard';
+import { ChangePasswordModal } from '@/components/ChangePasswordModal';
 const THEME_STORAGE_KEY = 'jamb_theme';
 const SETTINGS_STORAGE_KEY = 'jamb_user_settings';
 
@@ -48,6 +49,7 @@ export default function Settings() {
   const [whatsappEnabled, setWhatsappEnabled] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
   // All access checks come from server-side via AuthContext
   const userEmail = user?.email?.toLowerCase() || '';
@@ -459,6 +461,33 @@ export default function Settings() {
           </motion.div>
         )}
 
+        {/* Security Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.18 }}
+        >
+          <Card className="mb-6">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2">
+                <Lock className="w-5 h-5 text-primary" />
+                Security
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-foreground">Change Password</p>
+                  <p className="text-sm text-muted-foreground">Update your account password</p>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => setShowChangePassword(true)}>
+                  Change
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
         {/* Appearance Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -643,6 +672,12 @@ export default function Settings() {
             Sign Out
           </Button>
         </motion.div>
+
+        {/* Change Password Modal */}
+        <ChangePasswordModal 
+          isOpen={showChangePassword} 
+          onClose={() => setShowChangePassword(false)} 
+        />
       </div>
     </div>
   );

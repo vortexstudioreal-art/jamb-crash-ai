@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Crown, Users, CreditCard, TrendingUp, Plus, Trash2, ArrowLeft, RefreshCw, Mail,
-  CheckCircle, XCircle, AlertCircle, Settings, Send, Key, Activity, Database, Zap, Ticket, UserCog, Bell, DollarSign, BookOpen
+  CheckCircle, XCircle, AlertCircle, Settings, Send, Key, Activity, Database, Zap, Ticket, UserCog, Bell, DollarSign
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,7 +18,6 @@ import { CouponManager } from '@/components/CouponManager';
 import { UserManagement } from '@/components/admin/UserManagement';
 import { NotificationManager } from '@/components/admin/NotificationManager';
 import { PayoutManagement } from '@/components/admin/PayoutManagement';
-import { NovelManager } from '@/components/admin/NovelManager';
 interface Payment {
   id: string;
   email: string;
@@ -456,7 +455,7 @@ const AdminPanel = () => {
 
         {/* Tabs for different sections */}
         <Tabs defaultValue="health" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-9 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-8 lg:w-auto lg:inline-grid">
             <TabsTrigger value="health" className="gap-2">
               <Zap className="w-4 h-4" />
               Health
@@ -476,10 +475,6 @@ const AdminPanel = () => {
             <TabsTrigger value="coupons" className="gap-2">
               <Ticket className="w-4 h-4" />
               Coupons
-            </TabsTrigger>
-            <TabsTrigger value="novels" className="gap-2">
-              <BookOpen className="w-4 h-4" />
-              Novels
             </TabsTrigger>
             <TabsTrigger value="questions" className="gap-2">
               <Database className="w-4 h-4" />
@@ -542,20 +537,6 @@ const AdminPanel = () => {
               animate={{ opacity: 1, y: 0 }}
             >
               <CouponManager />
-            </motion.div>
-          </TabsContent>
-
-          {/* Novels Tab */}
-          <TabsContent value="novels">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <Card className="bg-card border-border">
-                <CardContent className="p-6">
-                  <NovelManager />
-                </CardContent>
-              </Card>
             </motion.div>
           </TabsContent>
 

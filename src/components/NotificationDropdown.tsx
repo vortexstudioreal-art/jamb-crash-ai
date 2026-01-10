@@ -51,7 +51,8 @@ export const NotificationDropdown = ({
         initial={{ opacity: 0, y: -10, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: -10, scale: 0.95 }}
-        className="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-96 max-w-[calc(100vw-2rem)] bg-background border border-border rounded-lg shadow-lg z-50 overflow-hidden"
+        className="fixed sm:absolute right-2 sm:right-0 top-16 sm:top-full sm:mt-2 w-[calc(100vw-1rem)] sm:w-96 max-w-md bg-background border border-border rounded-lg shadow-lg z-50 overflow-hidden transform-none"
+        style={{ transform: 'none' }}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border bg-muted/50">

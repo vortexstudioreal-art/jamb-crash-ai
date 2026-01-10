@@ -168,19 +168,19 @@ export const ScholarshipPage = ({ onBack }: ScholarshipPageProps) => {
             className="mb-8"
           >
             <Card className="overflow-hidden border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10">
-              <div className="p-6">
-                <div className="flex items-start gap-4">
+              <div className="p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
                   {/* Logo */}
                   <div className="shrink-0">
                     <img
                       src={jambCrashLogo}
                       alt="JAMB Crash AI Logo"
-                      className="w-20 h-20 rounded-xl object-cover border-2 border-primary/30 shadow-lg"
+                      className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border-2 border-primary/30 shadow-lg"
                     />
                   </div>
 
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                    <div className="flex items-center justify-center sm:justify-start gap-2 mb-2 flex-wrap">
                       <Badge className="bg-primary text-primary-foreground">
                         <Star className="w-3 h-3 mr-1" />
                         Featured
@@ -191,17 +191,17 @@ export const ScholarshipPage = ({ onBack }: ScholarshipPageProps) => {
                       </Badge>
                     </div>
 
-                    <h2 className="text-xl font-bold text-foreground mb-1">
+                    <h2 className="text-lg sm:text-xl font-bold text-foreground mb-1">
                       JAMB Crash AI Scholarship
                     </h2>
                     <p className="text-sm text-primary font-medium mb-2">
                       By JAMB Crash AI
                     </p>
-                    <p className="text-muted-foreground mb-4">
+                    <p className="text-sm text-muted-foreground mb-4">
                       We're sponsoring 3 outstanding students from our app! Selected students will receive full admission support for their chosen federal or state university. This isn't about premium access—it's about helping you achieve your dreams of higher education in Nigeria.
                     </p>
 
-                    <div className="flex items-center gap-4 flex-wrap">
+                    <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 flex-wrap">
                       <div className="flex items-center gap-2">
                         <GraduationCap className="w-4 h-4 text-primary" />
                         <span className="text-sm font-medium text-foreground">

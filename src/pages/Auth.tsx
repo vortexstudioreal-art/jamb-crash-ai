@@ -30,7 +30,7 @@ const emailSchema = z.string()
   }, 'Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
 
-type AuthView = 'login' | 'signup' | 'forgot-password' | 'reset-password';
+type AuthView = 'login' | 'signup' | 'forgot-password' | 'reset-password' | 'verify-email';
 type SignupFlow = 'normal' | 'trial';
 
 export default function Auth() {
@@ -298,11 +298,9 @@ export default function Auth() {
             toast.error(error.message);
           }
         } else {
-          if (signupFlow === 'trial') {
-            toast.success('Account created! Starting your free trial... 🎉');
-          } else {
-            toast.success('Account created! Welcome to JAMB Crash! 🎉');
-          }
+          // Show email verification screen
+          setView('verify-email');
+          toast.success('Check your email to verify your account! 📧');
         }
       }
     } catch (err) {
@@ -321,6 +319,8 @@ export default function Auth() {
         return 'Reset Password';
       case 'reset-password':
         return 'Set New Password';
+      case 'verify-email':
+        return 'Check Your Email';
       case 'signup':
         return 'Create Account';
       default:
@@ -337,6 +337,8 @@ export default function Auth() {
         return "Enter your email and we'll send you a reset link";
       case 'reset-password':
         return 'Enter your new password below';
+      case 'verify-email':
+        return `We sent a verification link to ${email}`;
       case 'signup':
         return 'Join thousands of students crushing their JAMB goals';
       default:
@@ -447,7 +449,67 @@ export default function Auth() {
           </motion.div>
         )}
 
+        {/* Email Verification Screen */}
+        {view === 'verify-email' && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="card-elevated p-6 rounded-2xl text-center"
+          >
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+              <Mail className="w-8 h-8 text-primary" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">Verification Email Sent!</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              We've sent a verification link to <strong>{email}</strong>. 
+              Please check your inbox and click the link to verify your account.
+            </p>
+            <p className="text-xs text-muted-foreground mb-6">
+              Didn't receive the email? Check your spam folder or try again.
+            </p>
+            <div className="space-y-3">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={async () => {
+                  try {
+                    const { error } = await supabase.auth.resend({
+                      type: 'signup',
+                      email: email,
+                      options: {
+                        emailRedirectTo: window.location.origin,
+                      }
+                    });
+                    if (error) {
+                      toast.error(error.message);
+                    } else {
+                      toast.success('Verification email resent! Check your inbox.');
+                    }
+                  } catch (err) {
+                    toast.error('Failed to resend email. Please try again.');
+                  }
+                }}
+              >
+                Resend Verification Email
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full"
+                onClick={() => {
+                  setView('login');
+                  setEmail('');
+                  setPassword('');
+                }}
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Sign In
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
         {/* Form Card */}
+        {view !== 'verify-email' && (
         <div className="card-elevated p-6 rounded-2xl">
           <form onSubmit={handleSubmit} className="space-y-4">
             {view === 'signup' && (
@@ -606,9 +668,10 @@ export default function Auth() {
               >
                 {view === 'login' ? 'Sign up' : 'Sign in'}
               </button>
-            </p>
+          </p>
           )}
         </div>
+        )}
 
         {/* Footer */}
         <p className="text-center text-xs text-muted-foreground mt-6">
