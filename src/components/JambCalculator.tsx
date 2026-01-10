@@ -240,13 +240,14 @@ export const JambCalculator = ({ isOpen, onClose }: JambCalculatorProps) => {
           {/* Calculator - Centered on all devices */}
           <motion.div
             ref={calculatorRef}
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed z-50 w-[85%] max-w-[340px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 mx-auto"
+            className="fixed z-50 inset-0 flex items-center justify-center p-4"
+            style={{ transform: 'none' }}
           >
-            <div className="bg-card border-2 border-border rounded-3xl shadow-2xl overflow-hidden">
+            <div className="w-full max-w-[340px] bg-card border-2 border-border rounded-3xl shadow-2xl overflow-hidden">
               {/* Header */}
               <div className="bg-gradient-to-r from-green-700 to-green-600 px-3 md:px-4 py-2 md:py-3 flex items-center justify-between">
                 <div className="flex items-center gap-2">

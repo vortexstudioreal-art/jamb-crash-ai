@@ -389,6 +389,51 @@ export type Database = {
         }
         Relationships: []
       }
+      leaderboard_scores: {
+        Row: {
+          average_accuracy: number | null
+          best_quiz_score: number | null
+          created_at: string | null
+          email: string
+          full_name: string
+          id: string
+          is_placeholder: boolean | null
+          questions_answered: number
+          rank: number | null
+          total_score: number
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          average_accuracy?: number | null
+          best_quiz_score?: number | null
+          created_at?: string | null
+          email: string
+          full_name: string
+          id?: string
+          is_placeholder?: boolean | null
+          questions_answered?: number
+          rank?: number | null
+          total_score?: number
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          average_accuracy?: number | null
+          best_quiz_score?: number | null
+          created_at?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          is_placeholder?: boolean | null
+          questions_answered?: number
+          rank?: number | null
+          total_score?: number
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string | null
