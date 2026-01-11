@@ -35,13 +35,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, Lock, RefreshCw, Layers, X, GraduationCap, Library, Newspaper } from 'lucide-react';
+import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, Lock, RefreshCw, Layers, X, GraduationCap, Library, Newspaper, Trophy } from 'lucide-react';
 import { JambNewsPage } from '@/components/JambNewsPage';
 import { ScholarshipPage } from '@/components/ScholarshipPage';
 import { NovelBrowser, NovelDetail, NovelReader } from '@/components/novels';
 import { PaymentCancelledModal } from '@/components/PaymentCancelledModal';
+import { Leaderboard } from '@/components/Leaderboard';
 
-type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'study-plan' | 'study-materials' | 'syllabus' | 'flashcards' | 'course-requirements' | 'novels' | 'novel-detail' | 'novel-reader' | 'news' | 'scholarships';
+type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'study-plan' | 'study-materials' | 'syllabus' | 'flashcards' | 'course-requirements' | 'novels' | 'novel-detail' | 'novel-reader' | 'news' | 'scholarships' | 'leaderboard';
 type QuizType = 'full' | 'mini' | 'subject' | 'timed-practice';
 
 interface FormData {
@@ -826,6 +827,22 @@ const Index = () => {
     );
   }
 
+  // Leaderboard step
+  if (currentStep === 'leaderboard' && userEmail) {
+    return (
+      <div className="min-h-screen bg-background">
+        <DashboardHeader 
+          userEmail={userEmail}
+          isOwner={effectiveOwner}
+          isCollaborator={isAdmin && !isOwner}
+          userRole={userRole}
+          onSignOut={handleSignOut}
+        />
+        <Leaderboard onBack={handleBackToDashboard} userEmail={userEmail} />
+      </div>
+    );
+  }
+
   // Upload step
   if (currentStep === 'upload' && userEmail) {
     return (
@@ -1030,12 +1047,12 @@ const Index = () => {
                 </Button>
               </motion.div>
 
-              {/* Tertiary Actions Row - Novels, News, Scholarships */}
+              {/* Tertiary Actions Row - Novels, News, Scholarships, Leaderboard */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.18 }}
-                className="grid grid-cols-3 gap-3 mb-6"
+                className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6"
               >
                 <Button
                   variant="outline"
@@ -1062,6 +1079,15 @@ const Index = () => {
                 >
                   <GraduationCap className="w-6 h-6 text-amber-500" />
                   <span className="font-bold text-sm">Scholarships</span>
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="h-auto py-4 flex flex-col gap-1 hover:border-yellow-500 hover:bg-yellow-500/5"
+                  onClick={() => setCurrentStep('leaderboard')}
+                >
+                  <Trophy className="w-6 h-6 text-yellow-500" />
+                  <span className="font-bold text-sm">Leaderboard</span>
                 </Button>
               </motion.div>
 
