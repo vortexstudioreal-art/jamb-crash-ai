@@ -455,38 +455,38 @@ const AdminPanel = () => {
 
         {/* Tabs for different sections */}
         <Tabs defaultValue="health" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8 lg:w-auto lg:inline-grid">
-            <TabsTrigger value="health" className="gap-2">
-              <Zap className="w-4 h-4" />
-              Health
+          <TabsList className="flex overflow-x-auto scrollbar-hide pb-1 gap-1 w-full lg:w-auto lg:inline-flex">
+            <TabsTrigger value="health" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
+              <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden xs:inline">Health</span>
             </TabsTrigger>
-            <TabsTrigger value="users" className="gap-2">
-              <UserCog className="w-4 h-4" />
-              Users
+            <TabsTrigger value="users" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
+              <UserCog className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden xs:inline">Users</span>
             </TabsTrigger>
-            <TabsTrigger value="payouts" className="gap-2">
-              <DollarSign className="w-4 h-4" />
-              Payouts
+            <TabsTrigger value="payouts" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
+              <DollarSign className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden xs:inline">Payouts</span>
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="gap-2">
-              <Bell className="w-4 h-4" />
-              Notifications
+            <TabsTrigger value="notifications" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
+              <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden xs:inline">Notifs</span>
             </TabsTrigger>
-            <TabsTrigger value="coupons" className="gap-2">
-              <Ticket className="w-4 h-4" />
-              Coupons
+            <TabsTrigger value="coupons" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
+              <Ticket className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden xs:inline">Coupons</span>
             </TabsTrigger>
-            <TabsTrigger value="questions" className="gap-2">
-              <Database className="w-4 h-4" />
-              Questions
+            <TabsTrigger value="questions" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
+              <Database className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden xs:inline">Questions</span>
             </TabsTrigger>
-            <TabsTrigger value="overview" className="gap-2">
-              <Activity className="w-4 h-4" />
-              Overview
+            <TabsTrigger value="overview" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
+              <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden xs:inline">Overview</span>
             </TabsTrigger>
-            <TabsTrigger value="settings" className="gap-2">
-              <Settings className="w-4 h-4" />
-              Settings
+            <TabsTrigger value="settings" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
+              <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden xs:inline">Settings</span>
             </TabsTrigger>
           </TabsList>
 
