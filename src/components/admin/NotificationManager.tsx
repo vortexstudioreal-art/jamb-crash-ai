@@ -26,6 +26,24 @@ interface Notification {
   expires_at: string | null;
 }
 
+// Helper to normalize URLs - adds https:// if missing
+const normalizeUrl = (url: string): string => {
+  if (!url) return url;
+  const trimmed = url.trim();
+  if (!trimmed) return '';
+  
+  // Internal routes (start with /) - keep as-is
+  if (trimmed.startsWith('/')) return trimmed;
+  
+  // Already has protocol - keep as-is
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return trimmed;
+  }
+  
+  // Add https:// prefix
+  return `https://${trimmed}`;
+};
+
 export const NotificationManager = () => {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -81,7 +99,7 @@ export const NotificationManager = () => {
     const notificationData = {
       title: title.trim(),
       message: message.trim(),
-      link: link.trim() || null,
+      link: normalizeUrl(link.trim()) || null,
       type,
       is_global: isGlobal,
       target_email: isGlobal ? null : targetEmail.trim() || null,
@@ -244,7 +262,7 @@ export const NotificationManager = () => {
                   <Label htmlFor="link">Link (optional)</Label>
                   <Input
                     id="link"
-                    placeholder="https://..."
+                    placeholder="https://example.com or /page-name"
                     value={link}
                     onChange={e => setLink(e.target.value)}
                   />
