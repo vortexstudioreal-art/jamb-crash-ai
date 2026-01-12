@@ -30,7 +30,27 @@ export const Leaderboard = ({ onBack, userEmail }: LeaderboardProps) => {
 
   useEffect(() => {
     fetchLeaderboard();
-  }, []);
+
+    // Subscribe to real-time changes
+    const channel = supabase
+      .channel('leaderboard-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'leaderboard_scores'
+        },
+        () => {
+          fetchLeaderboard();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userEmail]);
 
   const fetchLeaderboard = async () => {
     try {
