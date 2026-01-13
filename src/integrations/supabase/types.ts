@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_analytics: {
+        Row: {
+          ad_source: string
+          created_at: string
+          duration_watched: number | null
+          email: string
+          event_type: string
+          feature_type: string
+          id: string
+          metadata: Json | null
+          platform: string | null
+        }
+        Insert: {
+          ad_source?: string
+          created_at?: string
+          duration_watched?: number | null
+          email: string
+          event_type: string
+          feature_type: string
+          id?: string
+          metadata?: Json | null
+          platform?: string | null
+        }
+        Update: {
+          ad_source?: string
+          created_at?: string
+          duration_watched?: number | null
+          email?: string
+          event_type?: string
+          feature_type?: string
+          id?: string
+          metadata?: Json | null
+          platform?: string | null
+        }
+        Relationships: []
+      }
       admin_users: {
         Row: {
           created_at: string
