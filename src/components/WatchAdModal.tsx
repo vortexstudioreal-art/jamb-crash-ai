@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Play, CheckCircle, Clock, Gift, Smartphone } from 'lucide-react';
+import { X, Play, CheckCircle, Clock, Gift, Smartphone, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { FEATURE_NAMES, FeatureType } from '@/hooks/useFeatureUsage';
 import { getAdUnitForFeature, isMobileApp } from '@/config/admob';
+import { toast } from 'sonner';
 
 interface WatchAdModalProps {
   isOpen: boolean;
@@ -13,13 +14,15 @@ interface WatchAdModalProps {
   featureType: FeatureType;
 }
 
-const AD_DURATION = 15; // seconds to watch
+const AD_DURATION = 15; // seconds to watch (for web simulation)
 const IS_MOBILE = isMobileApp();
 
 export const WatchAdModal = ({ isOpen, onClose, onComplete, featureType }: WatchAdModalProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [timeWatched, setTimeWatched] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [adError, setAdError] = useState<string | null>(null);
+  const [isLoadingAd, setIsLoadingAd] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const progress = Math.min((timeWatched / AD_DURATION) * 100, 100);
@@ -48,6 +51,8 @@ export const WatchAdModal = ({ isOpen, onClose, onComplete, featureType }: Watch
       setIsPlaying(false);
       setTimeWatched(0);
       setIsCompleted(false);
+      setAdError(null);
+      setIsLoadingAd(false);
     }
   }, [isOpen]);
 
@@ -63,8 +68,62 @@ export const WatchAdModal = ({ isOpen, onClose, onComplete, featureType }: Watch
     };
   }, [isOpen]);
 
-  const handleStartWatching = () => {
-    setIsPlaying(true);
+  const handleStartWatching = async () => {
+    setAdError(null);
+    const currentAdUnitId = getAdUnitForFeature(featureType);
+    
+    // If running in Capacitor mobile app, try to show real AdMob ad
+    if (IS_MOBILE) {
+      setIsLoadingAd(true);
+      try {
+        // Dynamically import AdMob to avoid issues on web
+        const { AdMob, RewardAdPluginEvents } = await import('@capacitor-community/admob');
+        
+        // Initialize AdMob if not already done
+        await AdMob.initialize({
+          initializeForTesting: import.meta.env.DEV, // Use test ads in dev mode
+        });
+        
+        // Listen for reward event
+        const rewardListener = await AdMob.addListener(RewardAdPluginEvents.Rewarded, () => {
+          // User completed the ad and earned reward
+          handleClaimReward();
+          rewardListener.remove();
+        });
+        
+        const dismissListener = await AdMob.addListener(RewardAdPluginEvents.Dismissed, () => {
+          setIsLoadingAd(false);
+          dismissListener.remove();
+        });
+        
+        const failedListener = await AdMob.addListener(RewardAdPluginEvents.FailedToLoad, (error) => {
+          console.error('Ad failed to load:', error);
+          setAdError('Ad not available. Using simulation instead.');
+          setIsLoadingAd(false);
+          // Fallback to web simulation
+          setIsPlaying(true);
+          failedListener.remove();
+        });
+        
+        // Prepare and show the rewarded video ad
+        await AdMob.prepareRewardVideoAd({
+          adId: currentAdUnitId,
+        });
+        
+        await AdMob.showRewardVideoAd();
+        setIsLoadingAd(false);
+        
+      } catch (error) {
+        console.error('AdMob error:', error);
+        setIsLoadingAd(false);
+        // Fallback to web simulation if AdMob fails
+        toast.info('Using video simulation...');
+        setIsPlaying(true);
+      }
+    } else {
+      // Web simulation - just start the timer
+      setIsPlaying(true);
+    }
   };
 
   const handleClaimReward = () => {
@@ -78,7 +137,6 @@ export const WatchAdModal = ({ isOpen, onClose, onComplete, featureType }: Watch
   if (!isOpen) return null;
 
   const featureName = FEATURE_NAMES[featureType];
-  const adUnitId = getAdUnitForFeature(featureType);
 
   return (
     <AnimatePresence>
