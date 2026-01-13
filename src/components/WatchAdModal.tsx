@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Play, CheckCircle, Clock, Gift, Smartphone, AlertCircle } from 'lucide-react';
+import { X, Play, CheckCircle, Clock, Gift } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { FEATURE_NAMES, FeatureType } from '@/hooks/useFeatureUsage';
 import { getAdUnitForFeature, isMobileApp } from '@/config/admob';
+import { useAdAnalytics } from '@/hooks/useAdAnalytics';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 interface WatchAdModalProps {
@@ -23,7 +25,12 @@ export const WatchAdModal = ({ isOpen, onClose, onComplete, featureType }: Watch
   const [isCompleted, setIsCompleted] = useState(false);
   const [adError, setAdError] = useState<string | null>(null);
   const [isLoadingAd, setIsLoadingAd] = useState(false);
+  const [adSource, setAdSource] = useState<'admob' | 'simulation'>('simulation');
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  
+  const { user } = useAuth();
+  const { trackAdStarted, trackAdCompleted, trackAdFailed, trackRewardClaimed } = useAdAnalytics();
+  const userEmail = user?.email || null;
 
   const progress = Math.min((timeWatched / AD_DURATION) * 100, 100);
   const canClaim = timeWatched >= AD_DURATION;
@@ -46,6 +53,13 @@ export const WatchAdModal = ({ isOpen, onClose, onComplete, featureType }: Watch
     };
   }, [isPlaying, canClaim]);
 
+  // Track ad completion when simulation finishes
+  useEffect(() => {
+    if (canClaim && isPlaying && adSource === 'simulation') {
+      trackAdCompleted(userEmail, featureType, 'simulation', AD_DURATION);
+    }
+  }, [canClaim, isPlaying, adSource, userEmail, featureType, trackAdCompleted]);
+
   useEffect(() => {
     if (!isOpen) {
       setIsPlaying(false);
@@ -53,6 +67,7 @@ export const WatchAdModal = ({ isOpen, onClose, onComplete, featureType }: Watch
       setIsCompleted(false);
       setAdError(null);
       setIsLoadingAd(false);
+      setAdSource('simulation');
     }
   }, [isOpen]);
 
@@ -75,6 +90,9 @@ export const WatchAdModal = ({ isOpen, onClose, onComplete, featureType }: Watch
     // If running in Capacitor mobile app, try to show real AdMob ad
     if (IS_MOBILE) {
       setIsLoadingAd(true);
+      setAdSource('admob');
+      trackAdStarted(userEmail, featureType, 'admob');
+      
       try {
         // Dynamically import AdMob to avoid issues on web
         const { AdMob, RewardAdPluginEvents } = await import('@capacitor-community/admob');
@@ -87,7 +105,8 @@ export const WatchAdModal = ({ isOpen, onClose, onComplete, featureType }: Watch
         // Listen for reward event
         const rewardListener = await AdMob.addListener(RewardAdPluginEvents.Rewarded, () => {
           // User completed the ad and earned reward
-          handleClaimReward();
+          trackAdCompleted(userEmail, featureType, 'admob', AD_DURATION);
+          handleClaimReward('admob');
           rewardListener.remove();
         });
         
@@ -98,9 +117,12 @@ export const WatchAdModal = ({ isOpen, onClose, onComplete, featureType }: Watch
         
         const failedListener = await AdMob.addListener(RewardAdPluginEvents.FailedToLoad, (error) => {
           console.error('Ad failed to load:', error);
+          trackAdFailed(userEmail, featureType, 'admob', String(error));
           setAdError('Ad not available. Using simulation instead.');
           setIsLoadingAd(false);
+          setAdSource('simulation');
           // Fallback to web simulation
+          trackAdStarted(userEmail, featureType, 'simulation');
           setIsPlaying(true);
           failedListener.remove();
         });
@@ -115,18 +137,24 @@ export const WatchAdModal = ({ isOpen, onClose, onComplete, featureType }: Watch
         
       } catch (error) {
         console.error('AdMob error:', error);
+        trackAdFailed(userEmail, featureType, 'admob', String(error));
         setIsLoadingAd(false);
+        setAdSource('simulation');
         // Fallback to web simulation if AdMob fails
         toast.info('Using video simulation...');
+        trackAdStarted(userEmail, featureType, 'simulation');
         setIsPlaying(true);
       }
     } else {
       // Web simulation - just start the timer
+      setAdSource('simulation');
+      trackAdStarted(userEmail, featureType, 'simulation');
       setIsPlaying(true);
     }
   };
 
-  const handleClaimReward = () => {
+  const handleClaimReward = (source: 'admob' | 'simulation' = adSource) => {
+    trackRewardClaimed(userEmail, featureType, source, timeWatched || AD_DURATION);
     setIsCompleted(true);
     setTimeout(() => {
       onComplete();
@@ -241,7 +269,7 @@ export const WatchAdModal = ({ isOpen, onClose, onComplete, featureType }: Watch
                 </div>
 
                 <Button
-                  onClick={handleClaimReward}
+                  onClick={() => handleClaimReward()}
                   disabled={!canClaim}
                   className="w-full bg-primary hover:bg-primary/90 disabled:opacity-50"
                 >
