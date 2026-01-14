@@ -35,7 +35,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, Lock, RefreshCw, Layers, X, GraduationCap, Library, Newspaper, Trophy } from 'lucide-react';
+import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, Lock, RefreshCw, Layers, X, GraduationCap, Library, Newspaper, Trophy, Repeat } from 'lucide-react';
 import { JambNewsPage } from '@/components/JambNewsPage';
 import { ScholarshipPage } from '@/components/ScholarshipPage';
 import { NovelBrowser, NovelDetail, NovelReader } from '@/components/novels';
@@ -1048,12 +1048,12 @@ const Index = () => {
                 </Button>
               </motion.div>
 
-              {/* Tertiary Actions Row - Novels, News, Scholarships, Leaderboard */}
+              {/* Tertiary Actions Row - Novels, News, Scholarships, Leaderboard, Repeated Questions */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.18 }}
-                className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6"
+                className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6"
               >
                 <Button
                   variant="outline"
@@ -1089,6 +1089,15 @@ const Index = () => {
                 >
                   <Trophy className="w-6 h-6 text-yellow-500" />
                   <span className="font-bold text-sm">Leaderboard</span>
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="h-auto py-4 flex flex-col gap-1 hover:border-indigo-500 hover:bg-indigo-500/5"
+                  onClick={() => navigate('/repeated-questions')}
+                >
+                  <Repeat className="w-6 h-6 text-indigo-500" />
+                  <span className="font-bold text-sm">Repeated Qs</span>
                 </Button>
               </motion.div>
 
