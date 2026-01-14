@@ -109,6 +109,7 @@ export const usePaystack = () => {
         callback: (response) => {
           console.log('[Payment] Paystack callback received, reference:', response.reference);
           setIsLoading(false);
+
           // Verify payment and update database, then call onSuccess
           verifyPayment(response.reference)
             .then((result) => {
@@ -125,7 +126,7 @@ export const usePaystack = () => {
             })
             .catch((error) => {
               console.error('[Payment] Verification error:', error);
-              // Even if verification fails, still call onSuccess - the webhook will update the payment
+              // Even if verification fails, still call onSuccess - the webhook can still update the payment
               toast.info('Payment received! Verification in progress...');
               onSuccess(response.reference);
             });
@@ -156,7 +157,18 @@ export const usePaystack = () => {
       }
 
       console.log('[Payment] Database updated successfully, access granted');
-      return data.data;
+      return data as {
+        success: boolean;
+        status?: string;
+        message?: string;
+        data?: {
+          email: string;
+          amount: number;
+          package: string;
+          reference: string;
+          access_expires_at: string;
+        };
+      };
     } catch (error) {
       console.error('[Payment] Verification error:', error);
       throw error;

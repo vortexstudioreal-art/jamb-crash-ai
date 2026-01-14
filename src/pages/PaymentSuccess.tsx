@@ -27,9 +27,10 @@ const PaymentSuccess = () => {
 
     const verify = async () => {
       try {
-        const data = await verifyPayment(reference);
+        const result = await verifyPayment(reference);
+        const data = result?.data || null;
         setPaymentData(data);
-        setStatus('success');
+        setStatus(result?.success ? 'success' : 'error');
         // Store user email for access control
         if (data?.email) {
           setUserEmail(data.email);
