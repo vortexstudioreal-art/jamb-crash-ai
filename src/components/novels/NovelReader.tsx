@@ -56,6 +56,8 @@ export const NovelReader = ({
   const [showResults, setShowResults] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const saveProgressRef = useRef<NodeJS.Timeout>();
+  const startTimeRef = useRef<number>(Date.now());
+  const accumulatedTimeRef = useRef<number>(0);
 
   const fontSizeClasses = {
     small: 'text-sm leading-relaxed',
@@ -66,6 +68,7 @@ export const NovelReader = ({
   useEffect(() => {
     const loadChapter = async () => {
       setLoading(true);
+      startTimeRef.current = Date.now();
       
       // Load chapter with novel info
       const { data: chapterData } = await supabase
@@ -98,7 +101,7 @@ export const NovelReader = ({
         setIsBookmarked(!!bookmark);
         
         // Update progress
-        await updateProgress(chapterData.novel_id, chapterId, chapterData.chapter_number, chaptersData?.length || 1);
+        await updateProgress(chapterData.novel_id, chapterId, chapterData.chapter_number, chaptersData?.length || 1, 0);
       }
       
       setLoading(false);
@@ -106,15 +109,66 @@ export const NovelReader = ({
     
     loadChapter();
     
+    // Save reading time when leaving
     return () => {
       if (saveProgressRef.current) {
         clearTimeout(saveProgressRef.current);
       }
+      // Save accumulated reading time
+      const timeSpent = Math.round((Date.now() - startTimeRef.current) / 1000);
+      if (chapter && novel && timeSpent > 5) {
+        saveReadingTime(novel.id, timeSpent);
+      }
     };
   }, [chapterId, userEmail]);
 
-  const updateProgress = async (novelId: string, currentChapterId: string, chapterNumber: number, totalChapters: number) => {
+  // Auto-save reading time every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (novel) {
+        const timeSpent = Math.round((Date.now() - startTimeRef.current) / 1000);
+        if (timeSpent > 10) {
+          saveReadingTime(novel.id, timeSpent);
+          startTimeRef.current = Date.now(); // Reset timer
+        }
+      }
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [novel]);
+
+  const saveReadingTime = async (novelId: string, seconds: number) => {
+    const { data: existingProgress } = await supabase
+      .from('user_novel_progress')
+      .select('total_time_spent_seconds')
+      .eq('email', userEmail)
+      .eq('novel_id', novelId)
+      .maybeSingle();
+
+    const currentTime = existingProgress?.total_time_spent_seconds || 0;
+    
+    await supabase
+      .from('user_novel_progress')
+      .update({
+        total_time_spent_seconds: currentTime + seconds,
+        last_read_at: new Date().toISOString(),
+      })
+      .eq('email', userEmail)
+      .eq('novel_id', novelId);
+  };
+
+  const updateProgress = async (novelId: string, currentChapterId: string, chapterNumber: number, totalChapters: number, additionalTime: number = 0) => {
     const progressPercent = Math.round((chapterNumber / totalChapters) * 100);
+    const isCompleted = chapterNumber >= totalChapters;
+    
+    const { data: existingProgress } = await supabase
+      .from('user_novel_progress')
+      .select('total_time_spent_seconds')
+      .eq('email', userEmail)
+      .eq('novel_id', novelId)
+      .maybeSingle();
+
+    const currentTime = existingProgress?.total_time_spent_seconds || 0;
     
     const { error } = await supabase
       .from('user_novel_progress')
@@ -123,6 +177,8 @@ export const NovelReader = ({
         novel_id: novelId,
         current_chapter_id: currentChapterId,
         progress_percent: progressPercent,
+        is_completed: isCompleted,
+        total_time_spent_seconds: currentTime + additionalTime,
         last_read_at: new Date().toISOString(),
       }, {
         onConflict: 'email,novel_id'
