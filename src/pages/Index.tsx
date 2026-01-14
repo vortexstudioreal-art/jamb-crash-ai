@@ -41,6 +41,7 @@ import { ScholarshipPage } from '@/components/ScholarshipPage';
 import { NovelBrowser, NovelDetail, NovelReader } from '@/components/novels';
 import { PaymentCancelledModal } from '@/components/PaymentCancelledModal';
 import { Leaderboard } from '@/components/Leaderboard';
+import { BannerAd } from '@/components/BannerAd';
 
 type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'study-plan' | 'study-materials' | 'syllabus' | 'flashcards' | 'course-requirements' | 'novels' | 'novel-detail' | 'novel-reader' | 'news' | 'scholarships' | 'leaderboard';
 type QuizType = 'full' | 'mini' | 'subject' | 'timed-practice';
@@ -1213,6 +1214,18 @@ const Index = () => {
                   "You got this, future uni star! Every question you practice brings you closer to that 300+!" 💪
                 </p>
               </motion.div>
+
+              {/* Banner Ad for free/basic users only */}
+              {!effectiveAccess && !effectiveAdmin && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 }}
+                  className="mt-8"
+                >
+                  <BannerAd placement="dashboard-footer" />
+                </motion.div>
+              )}
             </div>
           </div>
         </div>
