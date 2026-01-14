@@ -11,9 +11,17 @@ export const ADMOB_CONFIG = {
     flashcardGeneration: 'ca-app-pub-3175040135445213/2303821944', // flash card generation
   },
   
+  // Banner Ad Unit IDs by placement
+  bannerAdUnits: {
+    dashboardFooter: 'ca-app-pub-3175040135445213/XXXXXXXXXX', // Update with your banner ad unit
+    quizFooter: 'ca-app-pub-3175040135445213/XXXXXXXXXX',
+    syllabusFooter: 'ca-app-pub-3175040135445213/XXXXXXXXXX',
+  },
+  
   // Test ad unit IDs for development (use these during testing)
   testAdUnits: {
-    rewardedVideo: 'ca-app-pub-3940256099942544/5224354917', // Google's test ad unit
+    rewardedVideo: 'ca-app-pub-3940256099942544/5224354917', // Google's test rewarded ad
+    banner: 'ca-app-pub-3940256099942544/6300978111', // Google's test banner ad
   },
 };
 
@@ -29,6 +37,17 @@ export const getAdUnitForFeature = (featureType: string): string => {
   };
   
   return mapping[featureType] || ADMOB_CONFIG.testAdUnits.rewardedVideo;
+};
+
+// Get banner ad unit for placement
+export const getBannerAdUnit = (placement: string): string => {
+  const mapping: Record<string, string> = {
+    'dashboard-footer': ADMOB_CONFIG.bannerAdUnits.dashboardFooter,
+    'quiz-footer': ADMOB_CONFIG.bannerAdUnits.quizFooter,
+    'syllabus-footer': ADMOB_CONFIG.bannerAdUnits.syllabusFooter,
+  };
+  
+  return mapping[placement] || ADMOB_CONFIG.testAdUnits.banner;
 };
 
 // Check if running in a Capacitor/mobile environment
