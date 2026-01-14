@@ -13,6 +13,7 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import AdminPanel from "./pages/AdminPanel";
 import Settings from "./pages/Settings";
 import CollaboratorDashboard from "./pages/CollaboratorDashboard";
+import RepeatedQuestionsPage from "./pages/RepeatedQuestionsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -62,6 +63,7 @@ const App = () => {
                   } 
                 />
                 <Route path="/collaborator-dashboard" element={<CollaboratorDashboard />} />
+                <Route path="/repeated-questions" element={<RepeatedQuestionsPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
