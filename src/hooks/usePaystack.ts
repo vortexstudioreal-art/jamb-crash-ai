@@ -90,11 +90,11 @@ export const usePaystack = () => {
           throw new Error(data?.error || 'Failed to initialize payment');
         }
 
-        // Open Paystack popup
+        // Open Paystack popup - amount is already in kobo from initialize response
         const handler = window.PaystackPop.setup({
           key: publicKey,
           email: config.email,
-          amount: config.amount * 100, // Convert to kobo
+          amount: config.amount * 100, // Convert to kobo for popup display
           currency: 'NGN',
           ref: data.reference,
           metadata: {

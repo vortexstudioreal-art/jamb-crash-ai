@@ -107,7 +107,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         email,
-        amount: amount * 100, // Paystack expects amount in kobo
+        amount: amount * 100, // Paystack expects amount in kobo (frontend already sends Naira)
         currency: "NGN",
         reference,
         callback_url: callbackUrl,
