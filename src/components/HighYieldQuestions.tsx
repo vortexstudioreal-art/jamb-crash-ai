@@ -386,17 +386,6 @@ const HighYieldQuestions = () => {
     });
   }, []);
 
-  // Show quiz if active
-  if (activeQuiz) {
-    return (
-      <TopicQuiz
-        questions={activeQuiz.questions}
-        topicLabel={activeQuiz.topicLabel}
-        subject={activeQuiz.subject}
-        onExit={() => setActiveQuiz(null)}
-      />
-    );
-  }
 
   // Group questions by topic
   const topicGroups = useMemo(() => {
@@ -482,6 +471,18 @@ const HighYieldQuestions = () => {
     
     return { totalTopics, totalQuestions, frequencyCounts };
   }, [filteredGroups]);
+
+  // Show quiz if active - MUST be after all hooks
+  if (activeQuiz) {
+    return (
+      <TopicQuiz
+        questions={activeQuiz.questions}
+        topicLabel={activeQuiz.topicLabel}
+        subject={activeQuiz.subject}
+        onExit={() => setActiveQuiz(null)}
+      />
+    );
+  }
 
   if (isLoading) {
     return (
