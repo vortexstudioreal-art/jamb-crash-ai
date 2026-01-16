@@ -488,21 +488,52 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
       return { ...q, userAnswer };
     });
 
+    const subjectsUsed = ((quizType === 'subject' || quizType === 'timed-practice') && selectedSubjects.length > 0 
+      ? selectedSubjects 
+      : subjects) as any;
+
     try {
       const quizData = {
         email: userEmail,
         quiz_type: quizType,
-        subjects: ((quizType === 'subject' || quizType === 'timed-practice') && selectedSubjects.length > 0 
-          ? selectedSubjects 
-          : subjects) as any,
+        subjects: subjectsUsed,
         total_questions: questions.length,
         correct_answers: correctCount,
         time_taken_seconds: timeTaken,
         questions_data: resultsData
       };
 
+      // Step 1: Save quiz attempt (critical - must succeed)
       if (navigator.onLine) {
-        await supabase.from('quiz_attempts').insert(quizData);
+        const { error: quizError } = await supabase.from('quiz_attempts').insert(quizData);
+        if (quizError) throw quizError;
+        
+        // Step 2: Update leaderboard asynchronously (fire-and-forget)
+        // This runs in the background and doesn't block the UI
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        fetch(`${supabaseUrl}/functions/v1/update-leaderboard`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
+          },
+          body: JSON.stringify({
+            userEmail,
+            correctCount,
+            totalQuestions: questions.length,
+            timeTaken,
+            totalTimeSeconds
+          })
+        }).then(res => res.json()).then(data => {
+          if (data.pointsEarned > 0) {
+            toast({
+              title: `+${data.pointsEarned} leaderboard points earned!`,
+              description: `${correctCount}/${questions.length} correct answers`
+            });
+          }
+        }).catch(err => {
+          console.log('Leaderboard update queued for later:', err);
+        });
       } else {
         // Queue for sync when back online
         await addToSyncQueue('quiz_attempt', quizData);
@@ -511,111 +542,12 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
           description: "Your quiz will sync when you're back online",
         });
       }
-
-      // Calculate leaderboard points
-      const timeUsedPercentage = (timeTaken / totalTimeSeconds) * 100;
-      const accuracyPercent = (correctCount / questions.length) * 100;
-
-      let bonusPoints = 0;
-      if (timeUsedPercentage < 50) bonusPoints += 5; // Fast completion bonus
-      if (accuracyPercent >= 80) bonusPoints += 5; // High accuracy bonus
-
-      const quizPoints = correctCount + bonusPoints;
-
-      // Get user's current leaderboard entry
-      const { data: existingEntry } = await supabase
-        .from('leaderboard_scores')
-        .select('*')
-        .eq('email', userEmail)
-        .single();
-
-      // Get user's profile for full_name
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name')
-        .eq('email', userEmail)
-        .single();
-
-      const userName = profile?.full_name || userEmail.split('@')[0];
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (existingEntry) {
-        // Update existing entry
-        const newTotalScore = existingEntry.total_score + quizPoints;
-        const newQuestionsAnswered = existingEntry.questions_answered + questions.length;
-        const oldAccuracy = existingEntry.average_accuracy || 0;
-        const newAccuracy = ((oldAccuracy * existingEntry.questions_answered) + 
-          (accuracyPercent * questions.length)) / newQuestionsAnswered;
-        const newBestScore = Math.max(existingEntry.best_quiz_score || 0, Math.round(accuracyPercent));
-
-        await supabase
-          .from('leaderboard_scores')
-          .update({
-            total_score: newTotalScore,
-            questions_answered: newQuestionsAnswered,
-            average_accuracy: newAccuracy,
-            best_quiz_score: newBestScore,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', existingEntry.id);
-      } else if (user) {
-        // Create new entry
-        await supabase
-          .from('leaderboard_scores')
-          .insert({
-            user_id: user.id,
-            email: userEmail,
-            full_name: userName,
-            total_score: quizPoints,
-            questions_answered: questions.length,
-            average_accuracy: accuracyPercent,
-            best_quiz_score: Math.round(accuracyPercent),
-            is_placeholder: false
-          });
-      }
-
-      // Remove lowest placeholder if we now have >10 real users
-      const { data: allScores } = await supabase
-        .from('leaderboard_scores')
-        .select('id, is_placeholder, total_score')
-        .order('total_score', { ascending: true });
-
-      if (allScores && allScores.length > 10) {
-        const lowestPlaceholder = allScores.find(s => s.is_placeholder);
-        if (lowestPlaceholder) {
-          await supabase
-            .from('leaderboard_scores')
-            .delete()
-            .eq('id', lowestPlaceholder.id);
-        }
-      }
-
-      // Recalculate all ranks
-      const { data: rankedScores } = await supabase
-        .from('leaderboard_scores')
-        .select('id')
-        .order('total_score', { ascending: false });
-
-      if (rankedScores) {
-        for (let i = 0; i < rankedScores.length; i++) {
-          await supabase
-            .from('leaderboard_scores')
-            .update({ rank: i + 1 })
-            .eq('id', rankedScores[i].id);
-        }
-      }
-
-      // Show points earned toast
-      if (quizPoints > 0) {
-        toast({
-          title: `+${quizPoints} leaderboard points earned!`,
-          description: `${correctCount}/${questions.length} correct answers`
-        });
-      }
     } catch (error) {
       console.error('Error saving quiz:', error);
+      // Even if save fails, still show results to user
     }
 
+    // Immediately show results - don't wait for leaderboard
     onComplete({
       totalQuestions: questions.length,
       correctAnswers: correctCount,

@@ -35,7 +35,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, Lock, RefreshCw, Layers, X, GraduationCap, Library, Newspaper, Trophy, Repeat } from 'lucide-react';
+import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, Lock, RefreshCw, Layers, X, GraduationCap, Library, Newspaper, Trophy, Flame } from 'lucide-react';
 import { JambNewsPage } from '@/components/JambNewsPage';
 import { ScholarshipPage } from '@/components/ScholarshipPage';
 import { NovelBrowser, NovelDetail, NovelReader } from '@/components/novels';
@@ -1093,11 +1093,11 @@ const Index = () => {
 
                 <Button
                   variant="outline"
-                  className="h-auto py-4 flex flex-col gap-1 hover:border-indigo-500 hover:bg-indigo-500/5"
+                  className="h-auto py-4 flex flex-col gap-1 hover:border-orange-500 hover:bg-orange-500/5"
                   onClick={() => navigate('/repeated-questions')}
                 >
-                  <Repeat className="w-6 h-6 text-indigo-500" />
-                  <span className="font-bold text-sm">Repeated Qs</span>
+                  <Flame className="w-6 h-6 text-orange-500" />
+                  <span className="font-bold text-sm">High-Yield Qs</span>
                 </Button>
               </motion.div>
 

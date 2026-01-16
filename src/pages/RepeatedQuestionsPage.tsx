@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import RepeatedQuestions from '@/components/RepeatedQuestions';
+import HighYieldQuestions from '@/components/HighYieldQuestions';
 
 const RepeatedQuestionsPage = () => {
   const navigate = useNavigate();
@@ -18,7 +18,7 @@ const RepeatedQuestionsPage = () => {
           Back to Dashboard
         </Button>
         
-        <RepeatedQuestions />
+        <HighYieldQuestions />
       </div>
     </div>
   );

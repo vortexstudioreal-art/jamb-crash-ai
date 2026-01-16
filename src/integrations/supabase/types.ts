@@ -353,6 +353,7 @@ export type Database = {
           option_d: string
           question: string
           subject: Database["public"]["Enums"]["jamb_subject"]
+          topics: string[] | null
           year: number | null
         }
         Insert: {
@@ -366,6 +367,7 @@ export type Database = {
           option_d: string
           question: string
           subject: Database["public"]["Enums"]["jamb_subject"]
+          topics?: string[] | null
           year?: number | null
         }
         Update: {
@@ -379,6 +381,7 @@ export type Database = {
           option_d?: string
           question?: string
           subject?: Database["public"]["Enums"]["jamb_subject"]
+          topics?: string[] | null
           year?: number | null
         }
         Relationships: []
@@ -1203,7 +1206,17 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      topic_frequency: {
+        Row: {
+          first_year: number | null
+          last_year: number | null
+          question_count: number | null
+          subject: Database["public"]["Enums"]["jamb_subject"] | null
+          topic: string | null
+          years_appeared: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       check_user_access: {
@@ -1231,6 +1244,7 @@ export type Database = {
       }
       is_admin_or_owner: { Args: { _user_id: string }; Returns: boolean }
       is_owner: { Args: { _user_id: string }; Returns: boolean }
+      recalculate_leaderboard_ranks: { Args: never; Returns: undefined }
       validate_coupon: {
         Args: { coupon_code: string }
         Returns: {
