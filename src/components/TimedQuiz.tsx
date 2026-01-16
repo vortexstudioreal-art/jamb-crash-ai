@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, CheckCircle, XCircle, Pause, Play, Flag, ChevronLeft, ChevronRight, Sparkles, Volume2, VolumeX, Timer, Settings2, Calculator } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, Pause, Play, Flag, ChevronLeft, ChevronRight, Sparkles, Volume2, VolumeX, Timer, Settings2, Calculator, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { JambCalculator } from '@/components/JambCalculator';
+import { getQuestions, saveQuestions, addToSyncQueue } from '@/services/offlineStorage';
 
 interface Question {
   id: string;
@@ -324,34 +325,54 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
           : subjects;
         
         let allQuestions: Question[] = [];
+        const isOnline = navigator.onLine;
         
-        // For practice mode, load per-subject with year filters
-        if ((quizType === 'subject' || quizType === 'timed-practice') && Object.keys(subjectYears).length > 0) {
-          for (const subject of subjectsToUse) {
-            const yearConfig = subjectYears[subject] || { start: 2000, end: 2025 };
-            
+        // Try to load from Supabase if online
+        if (isOnline) {
+          // For practice mode, load per-subject with year filters
+          if ((quizType === 'subject' || quizType === 'timed-practice') && Object.keys(subjectYears).length > 0) {
+            for (const subject of subjectsToUse) {
+              const yearConfig = subjectYears[subject] || { start: 2000, end: 2025 };
+              
+              const { data, error } = await supabase
+                .from('jamb_questions')
+                .select('*')
+                .eq('subject', subject as any)
+                .gte('year', yearConfig.start)
+                .lte('year', yearConfig.end)
+                .limit(200);
+              
+              if (!error && data) {
+                allQuestions.push(...(data as Question[]));
+              }
+            }
+          } else {
+            // Standard query
             const { data, error } = await supabase
               .from('jamb_questions')
               .select('*')
-              .eq('subject', subject as any)
-              .gte('year', yearConfig.start)
-              .lte('year', yearConfig.end)
-              .limit(200);
+              .in('subject', subjectsToUse as any)
+              .limit(500);
             
             if (!error && data) {
-              allQuestions.push(...(data as Question[]));
+              allQuestions = data as Question[];
+              // Cache questions for offline use
+              await saveQuestions(data as Question[]);
             }
           }
-        } else {
-          // Standard query
-          const { data, error } = await supabase
-            .from('jamb_questions')
-            .select('*')
-            .in('subject', subjectsToUse as any)
-            .limit(500);
-          
-          if (!error && data) {
-            allQuestions = data as Question[];
+        }
+        
+        // Fallback to offline cache if no questions loaded
+        if (allQuestions.length === 0) {
+          const cachedQuestions = await getQuestions(subjectsToUse);
+          if (cachedQuestions.length > 0) {
+            allQuestions = cachedQuestions;
+            if (!isOnline) {
+              toast({
+                title: "Offline Mode",
+                description: "Using cached questions",
+              });
+            }
           }
         }
 
@@ -468,7 +489,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
     });
 
     try {
-      await supabase.from('quiz_attempts').insert({
+      const quizData = {
         email: userEmail,
         quiz_type: quizType,
         subjects: ((quizType === 'subject' || quizType === 'timed-practice') && selectedSubjects.length > 0 
@@ -478,7 +499,18 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
         correct_answers: correctCount,
         time_taken_seconds: timeTaken,
         questions_data: resultsData
-      });
+      };
+
+      if (navigator.onLine) {
+        await supabase.from('quiz_attempts').insert(quizData);
+      } else {
+        // Queue for sync when back online
+        await addToSyncQueue('quiz_attempt', quizData);
+        toast({
+          title: "Saved Offline",
+          description: "Your quiz will sync when you're back online",
+        });
+      }
 
       // Calculate leaderboard points
       const timeUsedPercentage = (timeTaken / totalTimeSeconds) * 100;
