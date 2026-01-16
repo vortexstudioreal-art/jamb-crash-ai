@@ -1,0 +1,300 @@
+import { openDB, DBSchema, IDBPDatabase } from 'idb';
+
+interface Question {
+  id: string;
+  question: string;
+  option_a: string;
+  option_b: string;
+  option_c: string;
+  option_d: string;
+  correct_answer: string;
+  explanation?: string;
+  subject: string;
+  year?: number;
+}
+
+interface Flashcard {
+  id: string;
+  email: string;
+  front: string;
+  back: string;
+  subject: string;
+  topic?: string;
+  mastery_level?: string;
+  times_reviewed?: number;
+  next_review_at?: string;
+}
+
+interface SyllabusItem {
+  id: string;
+  subject: string;
+  topic: string;
+  subtopic: string | null;
+  objectives: string[] | null;
+  recommended_content: string | null;
+  difficulty_level: string;
+  estimated_reading_time: number;
+  order_index: number;
+}
+
+interface SyncItem {
+  id: string;
+  type: 'quiz_attempt' | 'flashcard_update' | 'reading_progress';
+  data: any;
+  timestamp: number;
+  retries: number;
+}
+
+interface JambOfflineDB extends DBSchema {
+  questions: {
+    key: string;
+    value: Question;
+    indexes: { 'by-subject': string };
+  };
+  flashcards: {
+    key: string;
+    value: Flashcard;
+    indexes: { 'by-email': string; 'by-subject': string };
+  };
+  syllabus: {
+    key: string;
+    value: SyllabusItem;
+    indexes: { 'by-subject': string };
+  };
+  syncQueue: {
+    key: string;
+    value: SyncItem;
+    indexes: { 'by-type': string };
+  };
+  metadata: {
+    key: string;
+    value: { key: string; value: any; updatedAt: number };
+  };
+}
+
+const DB_NAME = 'jamb-offline-db';
+const DB_VERSION = 1;
+
+let dbPromise: Promise<IDBPDatabase<JambOfflineDB>> | null = null;
+
+const getDB = async (): Promise<IDBPDatabase<JambOfflineDB>> => {
+  if (!dbPromise) {
+    dbPromise = openDB<JambOfflineDB>(DB_NAME, DB_VERSION, {
+      upgrade(db) {
+        // Questions store
+        if (!db.objectStoreNames.contains('questions')) {
+          const questionsStore = db.createObjectStore('questions', { keyPath: 'id' });
+          questionsStore.createIndex('by-subject', 'subject');
+        }
+
+        // Flashcards store
+        if (!db.objectStoreNames.contains('flashcards')) {
+          const flashcardsStore = db.createObjectStore('flashcards', { keyPath: 'id' });
+          flashcardsStore.createIndex('by-email', 'email');
+          flashcardsStore.createIndex('by-subject', 'subject');
+        }
+
+        // Syllabus store
+        if (!db.objectStoreNames.contains('syllabus')) {
+          const syllabusStore = db.createObjectStore('syllabus', { keyPath: 'id' });
+          syllabusStore.createIndex('by-subject', 'subject');
+        }
+
+        // Sync queue store
+        if (!db.objectStoreNames.contains('syncQueue')) {
+          const syncStore = db.createObjectStore('syncQueue', { keyPath: 'id' });
+          syncStore.createIndex('by-type', 'type');
+        }
+
+        // Metadata store
+        if (!db.objectStoreNames.contains('metadata')) {
+          db.createObjectStore('metadata', { keyPath: 'key' });
+        }
+      },
+    });
+  }
+  return dbPromise;
+};
+
+// Questions
+export const saveQuestions = async (questions: Question[]): Promise<void> => {
+  const db = await getDB();
+  const tx = db.transaction('questions', 'readwrite');
+  await Promise.all([
+    ...questions.map(q => tx.store.put(q)),
+    tx.done,
+  ]);
+  await setMetadata('questions_last_sync', Date.now());
+};
+
+export const getQuestions = async (subjects?: string[]): Promise<Question[]> => {
+  const db = await getDB();
+  const allQuestions = await db.getAll('questions');
+  
+  if (subjects && subjects.length > 0) {
+    return allQuestions.filter(q => subjects.includes(q.subject));
+  }
+  return allQuestions;
+};
+
+export const getQuestionsBySubject = async (subject: string): Promise<Question[]> => {
+  const db = await getDB();
+  return db.getAllFromIndex('questions', 'by-subject', subject);
+};
+
+export const getQuestionsCount = async (): Promise<number> => {
+  const db = await getDB();
+  return db.count('questions');
+};
+
+// Flashcards
+export const saveFlashcards = async (flashcards: Flashcard[]): Promise<void> => {
+  const db = await getDB();
+  const tx = db.transaction('flashcards', 'readwrite');
+  await Promise.all([
+    ...flashcards.map(f => tx.store.put(f)),
+    tx.done,
+  ]);
+  await setMetadata('flashcards_last_sync', Date.now());
+};
+
+export const getFlashcards = async (email?: string): Promise<Flashcard[]> => {
+  const db = await getDB();
+  if (email) {
+    return db.getAllFromIndex('flashcards', 'by-email', email);
+  }
+  return db.getAll('flashcards');
+};
+
+export const getFlashcardsCount = async (): Promise<number> => {
+  const db = await getDB();
+  return db.count('flashcards');
+};
+
+export const updateFlashcard = async (flashcard: Flashcard): Promise<void> => {
+  const db = await getDB();
+  await db.put('flashcards', flashcard);
+};
+
+// Syllabus
+export const saveSyllabus = async (syllabus: SyllabusItem[]): Promise<void> => {
+  const db = await getDB();
+  const tx = db.transaction('syllabus', 'readwrite');
+  await Promise.all([
+    ...syllabus.map(s => tx.store.put(s)),
+    tx.done,
+  ]);
+  await setMetadata('syllabus_last_sync', Date.now());
+};
+
+export const getSyllabus = async (subjects?: string[]): Promise<SyllabusItem[]> => {
+  const db = await getDB();
+  const allSyllabus = await db.getAll('syllabus');
+  
+  if (subjects && subjects.length > 0) {
+    return allSyllabus.filter(s => subjects.includes(s.subject));
+  }
+  return allSyllabus;
+};
+
+export const getSyllabusCount = async (): Promise<number> => {
+  const db = await getDB();
+  return db.count('syllabus');
+};
+
+// Sync Queue
+export const addToSyncQueue = async (type: SyncItem['type'], data: any): Promise<void> => {
+  const db = await getDB();
+  const item: SyncItem = {
+    id: `${type}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    type,
+    data,
+    timestamp: Date.now(),
+    retries: 0,
+  };
+  await db.add('syncQueue', item);
+};
+
+export const getSyncQueue = async (): Promise<SyncItem[]> => {
+  const db = await getDB();
+  return db.getAll('syncQueue');
+};
+
+export const removeSyncItem = async (id: string): Promise<void> => {
+  const db = await getDB();
+  await db.delete('syncQueue', id);
+};
+
+export const updateSyncItemRetries = async (id: string, retries: number): Promise<void> => {
+  const db = await getDB();
+  const item = await db.get('syncQueue', id);
+  if (item) {
+    item.retries = retries;
+    await db.put('syncQueue', item);
+  }
+};
+
+export const getSyncQueueCount = async (): Promise<number> => {
+  const db = await getDB();
+  return db.count('syncQueue');
+};
+
+// Metadata
+export const setMetadata = async (key: string, value: any): Promise<void> => {
+  const db = await getDB();
+  await db.put('metadata', { key, value, updatedAt: Date.now() });
+};
+
+export const getMetadata = async (key: string): Promise<any> => {
+  const db = await getDB();
+  const item = await db.get('metadata', key);
+  return item?.value;
+};
+
+// Clear all data
+export const clearAllData = async (): Promise<void> => {
+  const db = await getDB();
+  await Promise.all([
+    db.clear('questions'),
+    db.clear('flashcards'),
+    db.clear('syllabus'),
+    db.clear('syncQueue'),
+    db.clear('metadata'),
+  ]);
+};
+
+// Get storage info
+export const getStorageInfo = async (): Promise<{
+  questionsCount: number;
+  flashcardsCount: number;
+  syllabusCount: number;
+  pendingSyncCount: number;
+  lastSync: number | null;
+}> => {
+  const [questionsCount, flashcardsCount, syllabusCount, pendingSyncCount, lastSync] = await Promise.all([
+    getQuestionsCount(),
+    getFlashcardsCount(),
+    getSyllabusCount(),
+    getSyncQueueCount(),
+    getMetadata('questions_last_sync'),
+  ]);
+
+  return {
+    questionsCount,
+    flashcardsCount,
+    syllabusCount,
+    pendingSyncCount,
+    lastSync,
+  };
+};
+
+// Check if data is stale (older than 24 hours)
+export const isDataStale = async (): Promise<boolean> => {
+  const lastSync = await getMetadata('questions_last_sync');
+  if (!lastSync) return true;
+  
+  const staleThreshold = 24 * 60 * 60 * 1000; // 24 hours
+  return Date.now() - lastSync > staleThreshold;
+};
+
+export type { Question, Flashcard, SyllabusItem, SyncItem };

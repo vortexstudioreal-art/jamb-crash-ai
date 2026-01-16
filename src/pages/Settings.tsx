@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { User, Mail, Crown, Shield, Calendar, Package, ArrowLeft, LogOut, Edit2, Check, X, HelpCircle, FileText, MessageCircle, Moon, Sun, Phone, Bell, Users, Ticket, Lock } from 'lucide-react';
+import { User, Mail, Crown, Shield, Calendar, Package, ArrowLeft, LogOut, Edit2, Check, X, HelpCircle, FileText, MessageCircle, Moon, Sun, Phone, Bell, Users, Ticket, Lock, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { AdminCouponDashboard } from '@/components/AdminCouponDashboard';
 import { ChangePasswordModal } from '@/components/ChangePasswordModal';
+import { DownloadManager } from '@/components/DownloadManager';
 const THEME_STORAGE_KEY = 'jamb_theme';
 const SETTINGS_STORAGE_KEY = 'jamb_user_settings';
 
@@ -511,6 +512,15 @@ export default function Settings() {
               </div>
             </CardContent>
           </Card>
+        </motion.div>
+
+        {/* Offline Data Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.22 }}
+        >
+          <DownloadManager userEmail={userEmail} subjects={userSubjects.length > 0 ? userSubjects : ['english', 'mathematics']} />
         </motion.div>
 
         {/* WhatsApp Reminders Card - Always visible */}
