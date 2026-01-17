@@ -196,9 +196,18 @@ export const StudyStats = ({ userEmail, refreshTrigger }: StudyStatsProps) => {
   const streak = calculateStreak(quizzes);
 
   // Subject performance from the algorithm
+  // Format subject names properly (e.g., "english" -> "English", "crs" -> "CRS")
+  const formatSubjectName = (name: string) => {
+    const upperCaseSubjects = ['crs', 'irs'];
+    if (upperCaseSubjects.includes(name.toLowerCase())) {
+      return name.toUpperCase();
+    }
+    return name.charAt(0).toUpperCase() + name.slice(1).replace(/_/g, ' ');
+  };
+
   const subjectData = Object.entries(prediction.accuracyBySubject)
     .map(([name, data]) => ({
-      name: name.charAt(0).toUpperCase() + name.slice(1),
+      name: formatSubjectName(name),
       score: Math.round(data.percentage),
       correct: data.correct,
       total: data.total,

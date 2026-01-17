@@ -78,6 +78,49 @@ export const courseTips: Record<string, CourseTip> = {
     backupCourses: ["Information Technology", "Statistics", "Mathematics"]
   },
 
+  cyberSecurity: {
+    category: "Technology",
+    targetScore: "250+",
+    focusSubjects: ["Mathematics", "Physics", "Computer Science"],
+    tips: [
+      "Strong Mathematics and logical thinking are essential",
+      "Learn networking fundamentals and security concepts",
+      "Get certified: CompTIA Security+, CEH, CISSP are valuable",
+      "Practice ethical hacking and penetration testing",
+      "Stay updated with latest cyber threats and defenses"
+    ],
+    careerProspects: ["Security Analyst", "Penetration Tester", "Security Engineer", "CISO", "Forensic Analyst"],
+    backupCourses: ["Computer Science", "Information Technology", "Software Engineering"]
+  },
+
+  softwareEngineering: {
+    category: "Technology",
+    targetScore: "250+",
+    focusSubjects: ["Mathematics", "Physics"],
+    tips: [
+      "Master data structures and algorithms",
+      "Start coding projects early - GitHub portfolio matters",
+      "Learn software development methodologies (Agile, DevOps)",
+      "Build real-world applications for experience"
+    ],
+    careerProspects: ["Software Engineer", "Full Stack Developer", "Mobile Developer", "DevOps Engineer"],
+    backupCourses: ["Computer Science", "Information Technology", "Mathematics"]
+  },
+
+  informationTechnology: {
+    category: "Technology",
+    targetScore: "230+",
+    focusSubjects: ["Mathematics", "Physics"],
+    tips: [
+      "Broad understanding of IT systems is essential",
+      "Focus on practical IT skills and certifications",
+      "Cloud computing knowledge is increasingly valuable",
+      "Consider specializing in networking, databases, or systems"
+    ],
+    careerProspects: ["IT Manager", "Network Administrator", "Database Admin", "Cloud Architect"],
+    backupCourses: ["Computer Science", "Software Engineering", "Statistics"]
+  },
+
   // Law
   law: {
     category: "Law",
@@ -572,8 +615,11 @@ export const getCourseCategory = (courseName: string): string => {
   if (name.includes('medical lab') || name.includes('medical laboratory')) return 'medLabScience';
   
   // Engineering & Technology
-  if (name.includes('engineering')) return 'engineering';
-  if (name.includes('computer') || name.includes('software') || name.includes('information technology') || name.includes('it ')) return 'computerScience';
+  if (name.includes('engineering') && !name.includes('software')) return 'engineering';
+  if (name.includes('cyber') || name.includes('security') || name.includes('cybersecurity')) return 'cyberSecurity';
+  if (name.includes('software engineering') || name.includes('software development')) return 'softwareEngineering';
+  if (name.includes('information technology') || name.includes('it ')) return 'informationTechnology';
+  if (name.includes('computer') || name.includes('software')) return 'computerScience';
   
   // Law
   if (name.includes('law') || name.includes('jurisprudence')) return 'law';
