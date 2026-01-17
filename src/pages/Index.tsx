@@ -42,6 +42,7 @@ import { NovelBrowser, NovelDetail, NovelReader } from '@/components/novels';
 import { PaymentCancelledModal } from '@/components/PaymentCancelledModal';
 import { Leaderboard } from '@/components/Leaderboard';
 import { BannerAd } from '@/components/BannerAd';
+import { DashboardSkeleton } from '@/components/DashboardSkeleton';
 
 type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'study-plan' | 'study-materials' | 'syllabus' | 'flashcards' | 'course-requirements' | 'novels' | 'novel-detail' | 'novel-reader' | 'news' | 'scholarships' | 'leaderboard';
 type QuizType = 'full' | 'mini' | 'subject' | 'timed-practice';
@@ -543,20 +544,9 @@ const Index = () => {
     );
   }
 
-  // Loading screen for authenticated users to prevent flash/glitch
+  // Loading screen for authenticated users - show skeleton for better perceived performance
   if (isFullyLoading && userEmail && currentStep === 'landing') {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center space-y-4"
-        >
-          <RefreshCw className="w-10 h-10 text-primary animate-spin mx-auto" />
-          <p className="text-lg text-muted-foreground">Loading your dashboard...</p>
-        </motion.div>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   // Trial expired - show upgrade screen with payment modal
