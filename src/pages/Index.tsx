@@ -1214,8 +1214,8 @@ const Index = () => {
                 </p>
               </motion.div>
 
-              {/* Banner Ad for free/basic users only */}
-              {!effectiveAccess && !effectiveAdmin && (
+              {/* Banner Ad for free/trial users (not for paid/admin) */}
+              {!hasAccess && !effectiveAdmin && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
