@@ -584,6 +584,492 @@ export const courseTips: Record<string, CourseTip> = {
     backupCourses: ["Geography", "Estate Management", "Architecture"]
   },
 
+  // Veterinary Medicine
+  veterinaryMedicine: {
+    category: "Medical Sciences",
+    targetScore: "270+",
+    focusSubjects: ["Biology", "Chemistry", "Physics"],
+    tips: [
+      "Strong Biology and Chemistry foundation essential",
+      "Love for animals is a must",
+      "Consider large animal or small animal specialization",
+      "Rural practice opportunities are significant"
+    ],
+    careerProspects: ["Veterinarian", "Animal Health Officer", "Livestock Specialist", "Zoo Vet"],
+    backupCourses: ["Animal Science", "Agriculture", "Biology"]
+  },
+
+  // Optometry
+  optometry: {
+    category: "Medical Sciences",
+    targetScore: "250+",
+    focusSubjects: ["Biology", "Physics", "Chemistry"],
+    tips: [
+      "Strong Physics and Biology knowledge required",
+      "Understanding of optics essential",
+      "Private practice is a common career path",
+      "Eye care demand is growing"
+    ],
+    careerProspects: ["Optometrist", "Eye Care Specialist", "Vision Therapist", "Optical Business Owner"],
+    backupCourses: ["Physics", "Medical Laboratory Science", "Biology"]
+  },
+
+  // Food Science & Technology
+  foodScience: {
+    category: "Applied Sciences",
+    targetScore: "220+",
+    focusSubjects: ["Chemistry", "Biology", "Mathematics"],
+    tips: [
+      "Understanding of food chemistry and microbiology",
+      "Quality control skills are valuable",
+      "Food industry offers many opportunities",
+      "Consider NAFDAC or food manufacturing careers"
+    ],
+    careerProspects: ["Food Scientist", "Quality Control Manager", "Food Safety Officer", "Product Developer"],
+    backupCourses: ["Microbiology", "Biochemistry", "Chemistry"]
+  },
+
+  // Petroleum Engineering
+  petroleumEngineering: {
+    category: "Engineering",
+    targetScore: "280+",
+    focusSubjects: ["Mathematics", "Physics", "Chemistry"],
+    tips: [
+      "Very competitive - aim high",
+      "Oil and gas industry offers high salaries",
+      "Field work is a major component",
+      "Consider international opportunities"
+    ],
+    careerProspects: ["Petroleum Engineer", "Reservoir Engineer", "Drilling Engineer", "Production Engineer"],
+    backupCourses: ["Chemical Engineering", "Geology", "Mechanical Engineering"]
+  },
+
+  // Chemical Engineering
+  chemicalEngineering: {
+    category: "Engineering",
+    targetScore: "260+",
+    focusSubjects: ["Chemistry", "Mathematics", "Physics"],
+    tips: [
+      "Strong Chemistry and Mathematics required",
+      "Process industries offer opportunities",
+      "Consider oil & gas or manufacturing sectors"
+    ],
+    careerProspects: ["Chemical Engineer", "Process Engineer", "Plant Manager", "Quality Engineer"],
+    backupCourses: ["Chemistry", "Petroleum Engineering", "Industrial Chemistry"]
+  },
+
+  // Electrical Engineering
+  electricalEngineering: {
+    category: "Engineering",
+    targetScore: "260+",
+    focusSubjects: ["Mathematics", "Physics", "Further Mathematics"],
+    tips: [
+      "Strong Mathematics and Physics essential",
+      "Power sector offers many opportunities",
+      "Consider renewable energy specialization"
+    ],
+    careerProspects: ["Electrical Engineer", "Power Systems Engineer", "Control Engineer", "Telecom Engineer"],
+    backupCourses: ["Physics", "Computer Engineering", "Mechanical Engineering"]
+  },
+
+  // Mechanical Engineering
+  mechanicalEngineering: {
+    category: "Engineering",
+    targetScore: "260+",
+    focusSubjects: ["Mathematics", "Physics", "Further Mathematics"],
+    tips: [
+      "Strong foundation in mechanics and thermodynamics",
+      "CAD skills are increasingly important",
+      "Manufacturing and automotive sectors offer jobs"
+    ],
+    careerProspects: ["Mechanical Engineer", "Design Engineer", "Manufacturing Engineer", "Automotive Engineer"],
+    backupCourses: ["Physics", "Industrial Design", "Civil Engineering"]
+  },
+
+  // Civil Engineering
+  civilEngineering: {
+    category: "Engineering",
+    targetScore: "260+",
+    focusSubjects: ["Mathematics", "Physics", "Further Mathematics"],
+    tips: [
+      "Strong structural analysis skills needed",
+      "Construction industry offers many opportunities",
+      "Consider specializing in roads, bridges, or buildings"
+    ],
+    careerProspects: ["Civil Engineer", "Structural Engineer", "Site Engineer", "Project Manager"],
+    backupCourses: ["Architecture", "Building Technology", "Quantity Surveying"]
+  },
+
+  // Marine Engineering
+  marineEngineering: {
+    category: "Engineering",
+    targetScore: "250+",
+    focusSubjects: ["Mathematics", "Physics", "Chemistry"],
+    tips: [
+      "Maritime industry offers global opportunities",
+      "Sea-going career requires physical fitness",
+      "Consider maritime certifications"
+    ],
+    careerProspects: ["Marine Engineer", "Ship Surveyor", "Port Engineer", "Maritime Consultant"],
+    backupCourses: ["Mechanical Engineering", "Naval Architecture", "Physics"]
+  },
+
+  // Computer Engineering
+  computerEngineering: {
+    category: "Technology",
+    targetScore: "260+",
+    focusSubjects: ["Mathematics", "Physics", "Further Mathematics"],
+    tips: [
+      "Combines hardware and software knowledge",
+      "Strong programming skills essential",
+      "Embedded systems is a growing field"
+    ],
+    careerProspects: ["Computer Engineer", "Embedded Systems Developer", "Hardware Designer", "IoT Specialist"],
+    backupCourses: ["Computer Science", "Electrical Engineering", "Software Engineering"]
+  },
+
+  // Marketing
+  marketing: {
+    category: "Business",
+    targetScore: "200+",
+    focusSubjects: ["Economics", "Commerce", "English"],
+    tips: [
+      "Strong communication and creativity needed",
+      "Digital marketing skills are essential today",
+      "Build a portfolio of campaigns",
+      "Consider certifications like Google Ads"
+    ],
+    careerProspects: ["Marketing Manager", "Brand Manager", "Digital Marketer", "Advertising Executive"],
+    backupCourses: ["Business Administration", "Mass Communication", "Economics"]
+  },
+
+  // Insurance
+  insurance: {
+    category: "Business",
+    targetScore: "200+",
+    focusSubjects: ["Mathematics", "Economics", "Commerce"],
+    tips: [
+      "Understanding of risk management important",
+      "Actuarial skills are valuable",
+      "Consider CIIN certification",
+      "Insurance industry is growing"
+    ],
+    careerProspects: ["Insurance Broker", "Underwriter", "Claims Analyst", "Risk Manager"],
+    backupCourses: ["Accounting", "Banking & Finance", "Economics"]
+  },
+
+  // Hospitality Management
+  hospitalityManagement: {
+    category: "Business",
+    targetScore: "200+",
+    focusSubjects: ["Economics", "Commerce", "English"],
+    tips: [
+      "Customer service skills essential",
+      "Consider international hotel chains",
+      "Language skills are valuable",
+      "Internships at hotels are important"
+    ],
+    careerProspects: ["Hotel Manager", "Restaurant Manager", "Event Planner", "Tourism Officer"],
+    backupCourses: ["Business Administration", "Tourism", "Mass Communication"]
+  },
+
+  // Tourism
+  tourism: {
+    category: "Business",
+    targetScore: "200+",
+    focusSubjects: ["Geography", "Economics", "English"],
+    tips: [
+      "Understanding of Nigerian tourism potential",
+      "Language skills add value",
+      "Consider tour operations or travel agencies"
+    ],
+    careerProspects: ["Tourism Officer", "Travel Consultant", "Tour Guide", "Destination Manager"],
+    backupCourses: ["Hospitality Management", "Geography", "Mass Communication"]
+  },
+
+  // Geography
+  geography: {
+    category: "Social Sciences",
+    targetScore: "200+",
+    focusSubjects: ["Geography", "Mathematics", "Economics"],
+    tips: [
+      "GIS and mapping skills are highly valuable",
+      "Consider environmental consulting",
+      "Government agencies are major employers"
+    ],
+    careerProspects: ["Geographer", "GIS Analyst", "Environmental Consultant", "Urban Planner"],
+    backupCourses: ["Urban Planning", "Environmental Science", "Geology"]
+  },
+
+  // Environmental Science
+  environmentalScience: {
+    category: "Pure Sciences",
+    targetScore: "220+",
+    focusSubjects: ["Biology", "Chemistry", "Geography"],
+    tips: [
+      "Growing field due to climate concerns",
+      "Consider environmental consulting",
+      "NGOs and government agencies offer jobs"
+    ],
+    careerProspects: ["Environmental Scientist", "Sustainability Officer", "Environmental Consultant", "Climate Analyst"],
+    backupCourses: ["Geography", "Biology", "Geology"]
+  },
+
+  // Library Science
+  libraryScience: {
+    category: "Arts & Humanities",
+    targetScore: "180+",
+    focusSubjects: ["English", "Government", "Literature"],
+    tips: [
+      "Digital library skills are essential",
+      "Information management is growing",
+      "Academic and corporate libraries offer jobs"
+    ],
+    careerProspects: ["Librarian", "Information Manager", "Archivist", "Digital Resource Manager"],
+    backupCourses: ["Mass Communication", "Computer Science", "English"]
+  },
+
+  // Fine Arts
+  fineArts: {
+    category: "Arts & Humanities",
+    targetScore: "180+",
+    focusSubjects: ["English", "Fine Art", "Literature"],
+    tips: [
+      "Build a strong portfolio of work",
+      "Network in the art community",
+      "Consider graphic design or advertising",
+      "Digital art skills are valuable"
+    ],
+    careerProspects: ["Artist", "Graphic Designer", "Art Director", "Art Teacher", "Curator"],
+    backupCourses: ["Theatre Arts", "Mass Communication", "Architecture"]
+  },
+
+  // Music
+  music: {
+    category: "Arts & Humanities",
+    targetScore: "180+",
+    focusSubjects: ["English", "Music", "Literature"],
+    tips: [
+      "Strong musical training essential",
+      "Consider music production and sound engineering",
+      "Entertainment industry offers opportunities"
+    ],
+    careerProspects: ["Musician", "Music Producer", "Sound Engineer", "Music Teacher", "Composer"],
+    backupCourses: ["Theatre Arts", "Mass Communication", "Fine Arts"]
+  },
+
+  // Religious Studies / CRS / IRS
+  religiousStudies: {
+    category: "Arts & Humanities",
+    targetScore: "180+",
+    focusSubjects: ["CRS/IRS", "English", "Government"],
+    tips: [
+      "Strong foundation in religious texts",
+      "Consider teaching or religious leadership",
+      "Counseling skills are valuable"
+    ],
+    careerProspects: ["Religious Leader", "Teacher", "Counselor", "Chaplain"],
+    backupCourses: ["Philosophy", "Education", "Sociology"]
+  },
+
+  // Physics
+  physics: {
+    category: "Pure Sciences",
+    targetScore: "240+",
+    focusSubjects: ["Physics", "Mathematics", "Further Mathematics"],
+    tips: [
+      "Strong Mathematics foundation essential",
+      "Research and academia are common paths",
+      "Consider applied physics fields"
+    ],
+    careerProspects: ["Physicist", "Researcher", "Lecturer", "Medical Physicist", "Data Scientist"],
+    backupCourses: ["Mathematics", "Computer Science", "Engineering"]
+  },
+
+  // Chemistry
+  chemistry: {
+    category: "Pure Sciences",
+    targetScore: "230+",
+    focusSubjects: ["Chemistry", "Mathematics", "Physics"],
+    tips: [
+      "Lab skills are essential",
+      "Pharmaceutical and chemical industries offer jobs",
+      "Consider industrial chemistry path"
+    ],
+    careerProspects: ["Chemist", "Quality Control Analyst", "Research Scientist", "Lab Manager"],
+    backupCourses: ["Biochemistry", "Chemical Engineering", "Industrial Chemistry"]
+  },
+
+  // Industrial Chemistry
+  industrialChemistry: {
+    category: "Applied Sciences",
+    targetScore: "230+",
+    focusSubjects: ["Chemistry", "Mathematics", "Physics"],
+    tips: [
+      "Industry-focused chemistry applications",
+      "Manufacturing sector offers opportunities",
+      "Consider quality control specialization"
+    ],
+    careerProspects: ["Industrial Chemist", "Quality Control Manager", "Production Manager", "Research Scientist"],
+    backupCourses: ["Chemistry", "Chemical Engineering", "Biochemistry"]
+  },
+
+  // Biology
+  biology: {
+    category: "Pure Sciences",
+    targetScore: "220+",
+    focusSubjects: ["Biology", "Chemistry", "Physics"],
+    tips: [
+      "Strong foundation for medical sciences",
+      "Research and teaching are common paths",
+      "Consider biotechnology field"
+    ],
+    careerProspects: ["Biologist", "Research Scientist", "Teacher", "Lab Technologist"],
+    backupCourses: ["Microbiology", "Biochemistry", "Botany"]
+  },
+
+  // Mathematics
+  mathematics: {
+    category: "Pure Sciences",
+    targetScore: "240+",
+    focusSubjects: ["Mathematics", "Further Mathematics", "Physics"],
+    tips: [
+      "Strong analytical skills essential",
+      "Data science is a lucrative path",
+      "Consider actuarial science or finance"
+    ],
+    careerProspects: ["Mathematician", "Actuary", "Data Scientist", "Lecturer", "Financial Analyst"],
+    backupCourses: ["Statistics", "Computer Science", "Economics"]
+  },
+
+  // Linguistics
+  linguistics: {
+    category: "Arts & Humanities",
+    targetScore: "200+",
+    focusSubjects: ["English", "Literature", "French/Yoruba/Igbo/Hausa"],
+    tips: [
+      "Language skills are essential",
+      "Consider translation or interpretation",
+      "NLP and AI fields are growing"
+    ],
+    careerProspects: ["Linguist", "Translator", "Interpreter", "Language Teacher", "NLP Specialist"],
+    backupCourses: ["English", "Mass Communication", "Education"]
+  },
+
+  // French
+  french: {
+    category: "Languages",
+    targetScore: "200+",
+    focusSubjects: ["French", "English", "Literature"],
+    tips: [
+      "Fluency in French is essential",
+      "Consider diplomatic or international careers",
+      "Francophone countries offer opportunities"
+    ],
+    careerProspects: ["Translator", "Diplomat", "French Teacher", "International Organization Staff"],
+    backupCourses: ["International Relations", "Linguistics", "Mass Communication"]
+  },
+
+  // Arabic
+  arabic: {
+    category: "Languages",
+    targetScore: "200+",
+    focusSubjects: ["Arabic", "English", "IRS"],
+    tips: [
+      "Arabic fluency opens Middle East opportunities",
+      "Consider translation or teaching",
+      "Islamic studies combine well"
+    ],
+    careerProspects: ["Translator", "Arabic Teacher", "Diplomat", "Islamic Scholar"],
+    backupCourses: ["Islamic Studies", "International Relations", "Linguistics"]
+  },
+
+  // Nursing Science
+  nursingScience: {
+    category: "Medical Sciences",
+    targetScore: "240+",
+    focusSubjects: ["Biology", "Chemistry", "English"],
+    tips: [
+      "Strong science foundation essential",
+      "Compassion and care are key",
+      "Specializations offer career advancement",
+      "International nursing opportunities exist"
+    ],
+    careerProspects: ["Registered Nurse", "Nurse Educator", "Clinical Nurse Specialist", "Nurse Administrator"],
+    backupCourses: ["Medical Laboratory Science", "Public Health", "Physiotherapy"]
+  },
+
+  // Public Health
+  publicHealth: {
+    category: "Medical Sciences",
+    targetScore: "220+",
+    focusSubjects: ["Biology", "Chemistry", "English"],
+    tips: [
+      "Understanding of community health essential",
+      "NGOs and government agencies employ",
+      "Epidemiology is a growing field"
+    ],
+    careerProspects: ["Public Health Officer", "Epidemiologist", "Health Educator", "Program Manager"],
+    backupCourses: ["Nursing", "Community Health", "Medical Laboratory Science"]
+  },
+
+  // Human Resource Management
+  humanResourceManagement: {
+    category: "Business",
+    targetScore: "200+",
+    focusSubjects: ["Economics", "English", "Government"],
+    tips: [
+      "People skills are essential",
+      "CIPM certification is valuable",
+      "Every organization needs HR"
+    ],
+    careerProspects: ["HR Manager", "Recruitment Specialist", "Training Manager", "HR Consultant"],
+    backupCourses: ["Business Administration", "Psychology", "Sociology"]
+  },
+
+  // Entrepreneurship
+  entrepreneurship: {
+    category: "Business",
+    targetScore: "200+",
+    focusSubjects: ["Economics", "Commerce", "Mathematics"],
+    tips: [
+      "Business acumen is key",
+      "Start small businesses while studying",
+      "Networking is essential",
+      "Consider tech entrepreneurship"
+    ],
+    careerProspects: ["Entrepreneur", "Business Consultant", "Startup Founder", "Business Development Manager"],
+    backupCourses: ["Business Administration", "Marketing", "Economics"]
+  },
+
+  // Surveying & Geoinformatics
+  surveyingGeoinformatics: {
+    category: "Environmental Sciences",
+    targetScore: "230+",
+    focusSubjects: ["Mathematics", "Physics", "Geography"],
+    tips: [
+      "GIS and mapping technology skills essential",
+      "Land surveying is in demand",
+      "Consider drone mapping technology"
+    ],
+    careerProspects: ["Land Surveyor", "GIS Specialist", "Cartographer", "Geospatial Analyst"],
+    backupCourses: ["Geography", "Urban Planning", "Estate Management"]
+  },
+
+  // Building Technology
+  buildingTechnology: {
+    category: "Environmental Sciences",
+    targetScore: "220+",
+    focusSubjects: ["Physics", "Mathematics", "Technical Drawing"],
+    tips: [
+      "Construction industry knowledge essential",
+      "Project management skills valuable",
+      "Consider green building technology"
+    ],
+    careerProspects: ["Building Technologist", "Site Manager", "Construction Manager", "Facility Manager"],
+    backupCourses: ["Civil Engineering", "Architecture", "Quantity Surveying"]
+  },
+
   // Default for unmatched courses
   default: {
     category: "General",
@@ -606,16 +1092,29 @@ export const getCourseCategory = (courseName: string): string => {
   
   // Medical Sciences (order matters - more specific first)
   if (name.includes('dental') || name.includes('dentistry')) return 'dentistry';
+  if (name.includes('veterinary') || name.includes('vet med')) return 'veterinaryMedicine';
+  if (name.includes('optometry') || name.includes('ophthal')) return 'optometry';
   if (name.includes('medicine') || name.includes('surgery') || name.includes('mbbs')) return 'medicine';
   if (name.includes('pharmacy') || name.includes('pharmaceutical')) return 'pharmacy';
-  if (name.includes('nursing') || name.includes('midwifery')) return 'nursing';
+  if (name.includes('nursing science') || name.includes('nursing')) return 'nursingScience';
+  if (name.includes('midwifery')) return 'nursing';
   if (name.includes('physiotherapy') || name.includes('physical therapy')) return 'physiotherapy';
   if (name.includes('radiography') || name.includes('radiology')) return 'radiography';
   if (name.includes('anatomy')) return 'anatomy';
   if (name.includes('medical lab') || name.includes('medical laboratory')) return 'medLabScience';
+  if (name.includes('public health') || name.includes('community health')) return 'publicHealth';
   
-  // Engineering & Technology
+  // Engineering (specific first, then general)
+  if (name.includes('petroleum') && name.includes('engineer')) return 'petroleumEngineering';
+  if (name.includes('chemical') && name.includes('engineer')) return 'chemicalEngineering';
+  if (name.includes('electrical') && name.includes('engineer')) return 'electricalEngineering';
+  if (name.includes('mechanical') && name.includes('engineer')) return 'mechanicalEngineering';
+  if (name.includes('civil') && name.includes('engineer')) return 'civilEngineering';
+  if (name.includes('marine') && name.includes('engineer')) return 'marineEngineering';
+  if (name.includes('computer') && name.includes('engineer')) return 'computerEngineering';
   if (name.includes('engineering') && !name.includes('software')) return 'engineering';
+  
+  // Technology
   if (name.includes('cyber') || name.includes('security') || name.includes('cybersecurity')) return 'cyberSecurity';
   if (name.includes('software engineering') || name.includes('software development')) return 'softwareEngineering';
   if (name.includes('information technology') || name.includes('it ')) return 'informationTechnology';
@@ -628,6 +1127,12 @@ export const getCourseCategory = (courseName: string): string => {
   if (name.includes('accounting') || name.includes('accountancy')) return 'accounting';
   if (name.includes('banking') || name.includes('finance')) return 'bankingFinance';
   if (name.includes('business admin') || name.includes('business management')) return 'businessAdmin';
+  if (name.includes('marketing')) return 'marketing';
+  if (name.includes('insurance') || name.includes('actuarial')) return 'insurance';
+  if (name.includes('hospitality') || name.includes('hotel')) return 'hospitalityManagement';
+  if (name.includes('tourism') || name.includes('travel')) return 'tourism';
+  if (name.includes('human resource') || name.includes('personnel')) return 'humanResourceManagement';
+  if (name.includes('entrepreneurship') || name.includes('entrepreneurial')) return 'entrepreneurship';
   if (name.includes('economics')) return 'economics';
   
   // Social Sciences
@@ -637,30 +1142,47 @@ export const getCourseCategory = (courseName: string): string => {
   if (name.includes('public admin')) return 'publicAdministration';
   if (name.includes('psychology')) return 'psychology';
   if (name.includes('sociology') || name.includes('social work')) return 'sociology';
+  if (name.includes('geography')) return 'geography';
   
   // Environmental Sciences
   if (name.includes('architecture') || name.includes('architectural')) return 'architecture';
   if (name.includes('estate') || name.includes('property')) return 'estateManagement';
-  if (name.includes('quantity survey') || name.includes('building')) return 'quantitySurveying';
+  if (name.includes('quantity survey')) return 'quantitySurveying';
+  if (name.includes('building') || name.includes('construction')) return 'buildingTechnology';
+  if (name.includes('surveying') || name.includes('geoinformatics')) return 'surveyingGeoinformatics';
   if (name.includes('urban') || name.includes('planning') || name.includes('town')) return 'urbanPlanning';
+  if (name.includes('environmental science') || name.includes('environmental manage')) return 'environmentalScience';
   
   // Pure Sciences
+  if (name.includes('food science') || name.includes('food tech')) return 'foodScience';
+  if (name.includes('industrial chemistry')) return 'industrialChemistry';
   if (name.includes('biochemistry')) return 'biochemistry';
   if (name.includes('microbiology')) return 'microbiology';
   if (name.includes('statistics')) return 'statistics';
   if (name.includes('geology') || name.includes('geoscience')) return 'geology';
-  if (name.includes('physics') || name.includes('chemistry') || name.includes('biology') || 
-      name.includes('mathematics') || name.includes('botany') || name.includes('zoology')) return 'sciences';
+  if (name.includes('physics')) return 'physics';
+  if (name.includes('chemistry')) return 'chemistry';
+  if (name.includes('biology') || name.includes('botany') || name.includes('zoology')) return 'biology';
+  if (name.includes('mathematics') || name.includes('maths')) return 'mathematics';
   
   // Agriculture
-  if (name.includes('agricult') || name.includes('agric') || name.includes('animal') || 
+  if (name.includes('agricult') || name.includes('agric') || name.includes('animal science') || 
       name.includes('crop') || name.includes('fishery') || name.includes('forestry')) return 'agriculture';
+  
+  // Languages
+  if (name.includes('french')) return 'french';
+  if (name.includes('arabic')) return 'arabic';
+  if (name.includes('linguistics') || name.includes('language')) return 'linguistics';
   
   // Arts & Humanities
   if (name.includes('theatre') || name.includes('drama') || name.includes('creative art')) return 'theatreArts';
+  if (name.includes('fine art') || name.includes('visual art') || name.includes('painting')) return 'fineArts';
+  if (name.includes('music')) return 'music';
+  if (name.includes('library') || name.includes('information science')) return 'libraryScience';
   if (name.includes('history') || name.includes('archaeology')) return 'history';
-  if (name.includes('philosophy') || name.includes('religious')) return 'philosophy';
-  if (name.includes('english') || name.includes('literature') || name.includes('linguistics')) return 'arts';
+  if (name.includes('philosophy')) return 'philosophy';
+  if (name.includes('religious') || name.includes('christian') || name.includes('islamic')) return 'religiousStudies';
+  if (name.includes('english') || name.includes('literature')) return 'arts';
   
   // Education
   if (name.includes('education') || name.includes('teaching')) return 'education';
