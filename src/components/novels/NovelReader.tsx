@@ -474,15 +474,39 @@ export const NovelReader = ({
             {chapter.chapter_number} / {allChapters.length}
           </span>
           
-          <Button
-            variant="outline"
-            onClick={() => navigateChapter('next')}
-            disabled={!hasNext}
-            className={isDarkReading ? 'border-zinc-700 text-zinc-300 hover:bg-zinc-800' : ''}
-          >
-            Next
-            <ChevronRight className="w-4 h-4 ml-2" />
-          </Button>
+          {hasNext ? (
+            <Button
+              variant="outline"
+              onClick={() => navigateChapter('next')}
+              className={isDarkReading ? 'border-zinc-700 text-zinc-300 hover:bg-zinc-800' : ''}
+            >
+              Next
+              <ChevronRight className="w-4 h-4 ml-2" />
+            </Button>
+          ) : (
+            <Button
+              onClick={async () => {
+                // Mark as completed
+                await supabase
+                  .from('user_novel_progress')
+                  .upsert({
+                    email: userEmail,
+                    novel_id: novel.id,
+                    current_chapter_id: chapterId,
+                    progress_percent: 100,
+                    is_completed: true,
+                    last_read_at: new Date().toISOString(),
+                  }, {
+                    onConflict: 'email,novel_id'
+                  });
+                toast.success('🎉 Congratulations! You completed this novel!');
+                onBack();
+              }}
+              className="gradient-primary text-primary-foreground"
+            >
+              Complete Novel ✓
+            </Button>
+          )}
         </div>
       </div>
     </div>
