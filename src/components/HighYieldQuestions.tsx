@@ -50,60 +50,110 @@ const SUBJECT_LABELS: Record<string, string> = {
   agricultural_science: '🌾 Agric Science'
 };
 
-// Topic patterns to identify commonly tested areas
-const TOPIC_PATTERNS: Record<string, { keywords: string[], label: string }> = {
+// Topic patterns to identify commonly tested areas - now subject-aware
+const TOPIC_PATTERNS: Record<string, { keywords: string[], label: string, subjects: string[] }> = {
   // Biology
-  'photosynthesis': { keywords: ['photosynthe', 'chlorophyll', 'light reaction', 'calvin cycle', 'chloroplast'], label: '🌱 Photosynthesis' },
-  'respiration': { keywords: ['respir', 'glycolysis', 'krebs', 'electron transport', 'atp', 'aerobic', 'anaerobic'], label: '💨 Respiration' },
-  'genetics': { keywords: ['gene', 'allele', 'chromosome', 'mendel', 'heredit', 'dna', 'rna', 'mutation'], label: '🧬 Genetics' },
-  'ecology': { keywords: ['ecosys', 'food chain', 'food web', 'habitat', 'niche', 'biome', 'population'], label: '🌿 Ecology' },
-  'reproduction': { keywords: ['reproduct', 'fertiliz', 'gamete', 'meiosis', 'embryo', 'pollination'], label: '🥚 Reproduction' },
-  'cell_biology': { keywords: ['cell membrane', 'mitochondr', 'nucleus', 'organelle', 'cytoplasm', 'mitosis'], label: '🔬 Cell Biology' },
+  'photosynthesis': { keywords: ['photosynthe', 'chlorophyll', 'light reaction', 'calvin cycle', 'chloroplast'], label: '🌱 Photosynthesis', subjects: ['biology'] },
+  'respiration': { keywords: ['respir', 'glycolysis', 'krebs', 'electron transport', 'atp', 'aerobic', 'anaerobic'], label: '💨 Respiration', subjects: ['biology'] },
+  'genetics': { keywords: ['gene', 'allele', 'chromosome', 'mendel', 'heredit', 'dna', 'rna', 'mutation'], label: '🧬 Genetics', subjects: ['biology'] },
+  'ecology': { keywords: ['ecosys', 'food chain', 'food web', 'habitat', 'niche', 'biome', 'population dynamics'], label: '🌿 Ecology', subjects: ['biology', 'agricultural_science'] },
+  'reproduction': { keywords: ['reproduct', 'fertiliz', 'gamete', 'meiosis', 'embryo', 'pollination'], label: '🥚 Reproduction', subjects: ['biology'] },
+  'cell_biology': { keywords: ['cell membrane', 'mitochondr', 'nucleus', 'organelle', 'cytoplasm', 'mitosis'], label: '🔬 Cell Biology', subjects: ['biology'] },
   
   // Chemistry
-  'organic_chemistry': { keywords: ['hydrocarbon', 'alkane', 'alkene', 'alcohol', 'ester', 'organic compound'], label: '⚗️ Organic Chemistry' },
-  'acid_base': { keywords: ['acid', 'base', 'neutraliz', 'ph', 'buffer', 'titrat'], label: '🧫 Acids & Bases' },
-  'redox': { keywords: ['oxidation', 'reduction', 'redox', 'electron transfer', 'oxidizing', 'reducing'], label: '⚡ Redox Reactions' },
-  'periodic_table': { keywords: ['periodic', 'element', 'group', 'period', 'atomic number', 'noble gas'], label: '📊 Periodic Table' },
-  'chemical_bonding': { keywords: ['ionic bond', 'covalent', 'bond', 'electronegativity', 'metallic bond'], label: '🔗 Chemical Bonding' },
+  'organic_chemistry': { keywords: ['hydrocarbon', 'alkane', 'alkene', 'alcohol', 'ester', 'organic compound', 'benzene', 'polymer'], label: '⚗️ Organic Chemistry', subjects: ['chemistry'] },
+  'acid_base': { keywords: ['acid', 'base', 'neutraliz', 'ph', 'buffer', 'titrat'], label: '🧫 Acids & Bases', subjects: ['chemistry'] },
+  'redox': { keywords: ['oxidation', 'reduction', 'redox', 'electron transfer', 'oxidizing', 'reducing'], label: '⚡ Redox Reactions', subjects: ['chemistry'] },
+  'periodic_table': { keywords: ['periodic table', 'atomic number', 'noble gas', 'transition metal', 'alkali metal', 'halogen'], label: '📊 Periodic Table', subjects: ['chemistry'] },
+  'chemical_bonding': { keywords: ['ionic bond', 'covalent bond', 'electronegativity', 'metallic bond', 'hydrogen bond'], label: '🔗 Chemical Bonding', subjects: ['chemistry'] },
+  'stoichiometry': { keywords: ['mole', 'molar mass', 'avogadro', 'stoichiometry'], label: '⚖️ Stoichiometry', subjects: ['chemistry'] },
   
   // Physics
-  'motion': { keywords: ['velocity', 'acceleration', 'momentum', 'newton', 'force', 'motion', 'kinetic'], label: '🏃 Motion & Forces' },
-  'waves': { keywords: ['wave', 'frequency', 'wavelength', 'amplitude', 'sound', 'light wave'], label: '🌊 Waves' },
-  'electricity': { keywords: ['electric', 'current', 'voltage', 'resistance', 'ohm', 'circuit'], label: '⚡ Electricity' },
-  'optics': { keywords: ['lens', 'mirror', 'reflection', 'refraction', 'light', 'optical'], label: '🔍 Optics' },
-  'thermodynamics': { keywords: ['heat', 'temperature', 'thermal', 'entropy', 'enthalpy'], label: '🌡️ Thermodynamics' },
+  'motion': { keywords: ['velocity', 'acceleration', 'momentum', 'newton', 'force', 'kinetic energy', 'projectile'], label: '🏃 Motion & Forces', subjects: ['physics'] },
+  'waves': { keywords: ['wave', 'frequency', 'wavelength', 'amplitude', 'sound wave', 'light wave', 'interference'], label: '🌊 Waves', subjects: ['physics'] },
+  'electricity': { keywords: ['electric', 'current', 'voltage', 'resistance', 'ohm', 'circuit', 'capacitor'], label: '⚡ Electricity', subjects: ['physics'] },
+  'optics': { keywords: ['lens', 'mirror', 'reflection', 'refraction', 'optical', 'prism', 'spectrum'], label: '🔍 Optics', subjects: ['physics'] },
+  'thermodynamics': { keywords: ['heat', 'temperature', 'thermal', 'entropy', 'enthalpy', 'specific heat'], label: '🌡️ Thermodynamics', subjects: ['physics', 'chemistry'] },
+  'magnetism': { keywords: ['magnetic', 'magnet', 'electromagnetic', 'flux', 'induction'], label: '🧲 Magnetism', subjects: ['physics'] },
   
   // Mathematics
-  'quadratic': { keywords: ['quadratic', 'parabola', 'completing the square', 'discriminant'], label: '📈 Quadratic Equations' },
-  'trigonometry': { keywords: ['sine', 'cosine', 'tangent', 'trig', 'angle'], label: '📐 Trigonometry' },
-  'calculus': { keywords: ['derivative', 'integral', 'differentiat', 'integrat', 'limit'], label: '∫ Calculus' },
-  'probability': { keywords: ['probability', 'combination', 'permutation', 'statistics', 'random'], label: '🎲 Probability' },
-  'logarithms': { keywords: ['logarithm', 'log', 'exponential', 'indices'], label: '📊 Logarithms' },
+  'quadratic': { keywords: ['quadratic', 'parabola', 'completing the square', 'discriminant', 'x²'], label: '📈 Quadratic Equations', subjects: ['mathematics'] },
+  'trigonometry': { keywords: ['sine', 'cosine', 'tangent', 'trig', 'radian', 'sin', 'cos', 'tan'], label: '📐 Trigonometry', subjects: ['mathematics'] },
+  'calculus': { keywords: ['derivative', 'integral', 'differentiat', 'integrat', 'limit', 'dy/dx'], label: '∫ Calculus', subjects: ['mathematics'] },
+  'probability': { keywords: ['probability', 'combination', 'permutation', 'statistics', 'random', 'binomial'], label: '🎲 Probability & Stats', subjects: ['mathematics'] },
+  'logarithms': { keywords: ['logarithm', 'log', 'exponential', 'indices', 'ln'], label: '📊 Logarithms', subjects: ['mathematics'] },
+  'algebra': { keywords: ['simultaneous', 'equation', 'inequality', 'linear equation', 'polynomial'], label: '🔢 Algebra', subjects: ['mathematics'] },
+  'geometry': { keywords: ['triangle', 'circle', 'polygon', 'area', 'perimeter', 'pythagoras'], label: '📏 Geometry', subjects: ['mathematics'] },
+  'matrices': { keywords: ['matrix', 'matrices', 'determinant', 'inverse matrix'], label: '🔲 Matrices', subjects: ['mathematics'] },
   
   // English
-  'tenses': { keywords: ['tense', 'past', 'present', 'future', 'perfect', 'continuous'], label: '⏰ Tenses' },
-  'comprehension': { keywords: ['passage', 'comprehension', 'according to', 'the author'], label: '📖 Comprehension' },
-  'vocabulary': { keywords: ['synonym', 'antonym', 'meaning of', 'define'], label: '📝 Vocabulary' },
-  'grammar': { keywords: ['noun', 'verb', 'adjective', 'adverb', 'preposition', 'pronoun'], label: '✍️ Grammar' },
+  'tenses': { keywords: ['tense', 'past tense', 'present tense', 'future tense', 'perfect tense', 'continuous'], label: '⏰ Tenses', subjects: ['english'] },
+  'comprehension': { keywords: ['passage', 'comprehension', 'according to the passage', 'the author'], label: '📖 Comprehension', subjects: ['english'] },
+  'vocabulary': { keywords: ['synonym', 'antonym', 'meaning of', 'closest in meaning', 'opposite'], label: '📝 Vocabulary', subjects: ['english'] },
+  'grammar': { keywords: ['noun', 'verb', 'adjective', 'adverb', 'preposition', 'pronoun', 'clause'], label: '✍️ Grammar', subjects: ['english'] },
+  'sentence_structure': { keywords: ['sentence', 'punctuation', 'comma', 'colon', 'semicolon'], label: '📝 Sentence Structure', subjects: ['english'] },
+  
+  // Literature
+  'literary_devices': { keywords: ['metaphor', 'simile', 'personification', 'irony', 'symbolism', 'imagery', 'alliteration'], label: '🎭 Literary Devices', subjects: ['literature'] },
+  'prose_fiction': { keywords: ['novel', 'prose', 'fiction', 'narrative', 'protagonist', 'antagonist', 'plot'], label: '📖 Prose & Fiction', subjects: ['literature'] },
+  'poetry': { keywords: ['poem', 'poet', 'stanza', 'verse', 'rhyme', 'sonnet', 'ballad', 'ode'], label: '📜 Poetry', subjects: ['literature'] },
+  'drama': { keywords: ['play', 'drama', 'tragedy', 'comedy', 'stage', 'act', 'scene', 'dialogue'], label: '🎬 Drama', subjects: ['literature'] },
+  'literary_movements': { keywords: ['realism', 'romanticism', 'gothic', 'magic realism', 'modernism', 'post-colonial'], label: '📚 Literary Movements', subjects: ['literature'] },
+  'african_literature': { keywords: ['african', 'nigeria', 'achebe', 'soyinka', 'colonial', 'post-colonial'], label: '🌍 African Literature', subjects: ['literature'] },
   
   // Economics
-  'demand_supply': { keywords: ['demand', 'supply', 'equilibrium', 'price', 'market'], label: '📉 Demand & Supply' },
-  'inflation': { keywords: ['inflation', 'deflation', 'money supply', 'monetary'], label: '💰 Inflation' },
-  'national_income': { keywords: ['gdp', 'gnp', 'national income', 'gross domestic'], label: '🏦 National Income' },
+  'demand_supply': { keywords: ['demand', 'supply', 'equilibrium', 'market price', 'elasticity'], label: '📉 Demand & Supply', subjects: ['economics'] },
+  'inflation': { keywords: ['inflation', 'deflation', 'money supply', 'monetary policy'], label: '💰 Inflation', subjects: ['economics'] },
+  'national_income': { keywords: ['gdp', 'gnp', 'national income', 'gross domestic', 'per capita'], label: '🏦 National Income', subjects: ['economics'] },
+  'banking': { keywords: ['bank', 'central bank', 'commercial bank', 'interest rate', 'credit'], label: '🏛️ Banking', subjects: ['economics', 'commerce'] },
+  'trade': { keywords: ['export', 'import', 'trade', 'balance of payment', 'tariff'], label: '🌐 International Trade', subjects: ['economics', 'commerce'] },
   
   // Government
-  'democracy': { keywords: ['democracy', 'election', 'vote', 'parliament', 'legislature'], label: '🗳️ Democracy' },
-  'federalism': { keywords: ['federal', 'federation', 'unitary', 'confederal'], label: '🏛️ Federalism' },
-  'constitution': { keywords: ['constitution', 'bill of rights', 'amendment', 'fundamental'], label: '📜 Constitution' },
+  'democracy': { keywords: ['democracy', 'election', 'vote', 'parliament', 'legislature', 'franchise'], label: '🗳️ Democracy', subjects: ['government'] },
+  'federalism': { keywords: ['federal', 'federation', 'unitary', 'confederal', 'devolution'], label: '🏛️ Federalism', subjects: ['government'] },
+  'constitution': { keywords: ['constitution', 'bill of rights', 'amendment', 'fundamental rights'], label: '📜 Constitution', subjects: ['government'] },
+  'political_parties': { keywords: ['political party', 'opposition', 'ruling party', 'multi-party'], label: '🎪 Political Parties', subjects: ['government'] },
+  'separation_of_powers': { keywords: ['executive', 'judiciary', 'legislature', 'separation of power', 'checks and balances'], label: '⚖️ Separation of Powers', subjects: ['government'] },
+  
+  // Accounting
+  'bookkeeping': { keywords: ['ledger', 'journal', 'debit', 'credit', 'trial balance', 'double entry'], label: '📒 Bookkeeping', subjects: ['accounting'] },
+  'financial_statements': { keywords: ['balance sheet', 'income statement', 'profit and loss', 'cash flow'], label: '📊 Financial Statements', subjects: ['accounting'] },
+  'depreciation': { keywords: ['depreciation', 'straight line', 'reducing balance', 'asset'], label: '📉 Depreciation', subjects: ['accounting'] },
+  
+  // Commerce
+  'business_types': { keywords: ['sole proprietor', 'partnership', 'company', 'corporation', 'cooperative'], label: '🏢 Business Types', subjects: ['commerce'] },
+  'insurance': { keywords: ['insurance', 'premium', 'policy', 'indemnity', 'insurable interest'], label: '🛡️ Insurance', subjects: ['commerce'] },
+  'marketing': { keywords: ['marketing', 'advertising', 'promotion', 'distribution', 'consumer'], label: '📢 Marketing', subjects: ['commerce'] },
+  
+  // Geography
+  'climate': { keywords: ['climate', 'weather', 'rainfall', 'temperature', 'humidity', 'wind'], label: '🌤️ Climate & Weather', subjects: ['geography'] },
+  'population': { keywords: ['population', 'census', 'migration', 'birth rate', 'death rate', 'density'], label: '👥 Population', subjects: ['geography'] },
+  'landforms': { keywords: ['mountain', 'plateau', 'valley', 'plain', 'erosion', 'deposition'], label: '⛰️ Landforms', subjects: ['geography'] },
+  'map_reading': { keywords: ['map', 'scale', 'contour', 'longitude', 'latitude', 'bearing'], label: '🗺️ Map Reading', subjects: ['geography'] },
+  
+  // CRS
+  'old_testament': { keywords: ['moses', 'abraham', 'david', 'solomon', 'exodus', 'genesis', 'prophet'], label: '📖 Old Testament', subjects: ['crs'] },
+  'new_testament': { keywords: ['jesus', 'apostle', 'gospel', 'paul', 'peter', 'resurrection'], label: '✝️ New Testament', subjects: ['crs'] },
+  'christian_living': { keywords: ['faith', 'prayer', 'worship', 'salvation', 'grace', 'sin'], label: '🙏 Christian Living', subjects: ['crs'] },
+  
+  // IRS
+  'quran': { keywords: ['quran', 'surah', 'verse', 'ayah', 'revelation'], label: '📖 Quran', subjects: ['irs'] },
+  'hadith': { keywords: ['hadith', 'sunnah', 'prophet muhammad', 'bukhari'], label: '📜 Hadith', subjects: ['irs'] },
+  'islamic_practices': { keywords: ['salat', 'zakat', 'hajj', 'fasting', 'ramadan', 'pillar'], label: '🕌 Islamic Practices', subjects: ['irs'] },
+  
+  // Agricultural Science
+  'crop_production': { keywords: ['crop', 'planting', 'harvest', 'irrigation', 'fertilizer', 'soil'], label: '🌾 Crop Production', subjects: ['agricultural_science'] },
+  'animal_husbandry': { keywords: ['livestock', 'cattle', 'poultry', 'breeding', 'feed'], label: '🐄 Animal Husbandry', subjects: ['agricultural_science'] },
+  'farm_management': { keywords: ['farm', 'agriculture', 'farming system', 'mechanization'], label: '🚜 Farm Management', subjects: ['agricultural_science'] },
 };
 
 function identifyTopics(question: Question): string[] {
   const text = `${question.question} ${question.option_a} ${question.option_b} ${question.option_c} ${question.option_d}`.toLowerCase();
   const topics: string[] = [];
   
-  for (const [topicKey, { keywords }] of Object.entries(TOPIC_PATTERNS)) {
-    if (keywords.some(keyword => text.includes(keyword))) {
+  for (const [topicKey, { keywords, subjects }] of Object.entries(TOPIC_PATTERNS)) {
+    // Only match if the topic applies to this subject
+    if (subjects.includes(question.subject) && keywords.some(keyword => text.includes(keyword))) {
       topics.push(topicKey);
     }
   }
