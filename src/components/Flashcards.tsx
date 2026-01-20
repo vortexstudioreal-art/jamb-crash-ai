@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useFeatureUsage } from '@/hooks/useFeatureUsage';
+import { FeatureLimitReached } from '@/components/FeatureLimitReached';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -59,9 +60,10 @@ export const Flashcards = ({ userEmail, subjects, onBack }: FlashcardsProps) => 
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'study' | 'browse'>('browse');
   const [sessionStats, setSessionStats] = useState({ correct: 0, incorrect: 0 });
+  const [showLimitReached, setShowLimitReached] = useState(false);
   
   // Feature usage limits
-  const { canUseFeature, incrementUsage, getRemainingUses } = useFeatureUsage();
+  const { canUseFeature, incrementUsage, getRemainingUses, refreshUsage } = useFeatureUsage();
 
   // Load flashcards
   useEffect(() => {
@@ -123,11 +125,16 @@ export const Flashcards = ({ userEmail, subjects, onBack }: FlashcardsProps) => 
     setIsFlipped(false);
   };
 
+  const handleBonusEarned = async () => {
+    await refreshUsage();
+    setShowLimitReached(false);
+    toast.success('Bonus use earned! You can now generate flashcards.');
+  };
+
   const generateFlashcards = async () => {
     // Check feature usage limit
     if (!canUseFeature('flashcard_generation')) {
-      const remaining = getRemainingUses('flashcard_generation');
-      toast.error(`Daily flashcard generation limit reached (${remaining} remaining). Upgrade to Pro for unlimited!`);
+      setShowLimitReached(true);
       return;
     }
     
@@ -369,6 +376,15 @@ export const Flashcards = ({ userEmail, subjects, onBack }: FlashcardsProps) => 
           <p className="text-muted-foreground mb-6">
             {flashcards.length} cards across {topicList.length} topics
           </p>
+
+          {/* Show limit reached component if daily limit is hit */}
+          {showLimitReached && (
+            <FeatureLimitReached
+              featureType="flashcard_generation"
+              onBonusEarned={handleBonusEarned}
+              className="mb-6"
+            />
+          )}
 
           {/* Subject filter */}
           <div className="flex flex-wrap gap-2 mb-6">

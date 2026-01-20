@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useFeatureUsage } from '@/hooks/useFeatureUsage';
+import { FeatureLimitReached } from '@/components/FeatureLimitReached';
 
 interface ExtractedQuestion {
   question: string;
@@ -29,9 +30,10 @@ export const UploadSection = ({ onUploadComplete, userSubjects = [] }: UploadSec
   const [isProcessing, setIsProcessing] = useState(false);
   const [extractedQuestions, setExtractedQuestions] = useState<ExtractedQuestion[]>([]);
   const [aiMessage, setAiMessage] = useState('');
+  const [showLimitReached, setShowLimitReached] = useState(false);
   
   // Feature usage limits
-  const { canUseFeature, incrementUsage, getRemainingUses } = useFeatureUsage();
+  const { canUseFeature, incrementUsage, getRemainingUses, refreshUsage } = useFeatureUsage();
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -76,18 +78,28 @@ export const UploadSection = ({ onUploadComplete, userSubjects = [] }: UploadSec
     });
   };
 
+  const handleBonusEarned = async () => {
+    await refreshUsage();
+    setShowLimitReached(false);
+    toast.success('Bonus use earned! You can now upload 1 more file.');
+  };
+
   const processWithAI = async () => {
     if (files.length === 0) return;
     
     // Check feature usage limit for each file
     const remaining = getRemainingUses('pdf_upload');
     if (remaining !== Infinity && files.length > remaining) {
+      if (remaining === 0) {
+        setShowLimitReached(true);
+        return;
+      }
       toast.error(`You can only upload ${remaining} more file(s) today. Upgrade to Pro for unlimited!`);
       return;
     }
     
     if (!canUseFeature('pdf_upload')) {
-      toast.error('Daily PDF upload limit reached. Upgrade to Pro for unlimited uploads!');
+      setShowLimitReached(true);
       return;
     }
 
@@ -165,6 +177,15 @@ export const UploadSection = ({ onUploadComplete, userSubjects = [] }: UploadSec
             Upload PDFs or snap photos — our AI extracts & explains every question! ✨
           </p>
         </motion.div>
+
+        {/* Show limit reached component if daily limit is hit */}
+        {showLimitReached && (
+          <FeatureLimitReached
+            featureType="pdf_upload"
+            onBonusEarned={handleBonusEarned}
+            className="mb-8"
+          />
+        )}
 
         {/* Upload area */}
         <motion.div
