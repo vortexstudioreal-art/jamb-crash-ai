@@ -567,7 +567,11 @@ const AdminPanel = () => {
                           try {
                             const { data, error } = await supabase.functions.invoke('seed-jamb-questions');
                             if (error) throw error;
-                            toast.success(`Seeded ${data?.inserted || 0} questions!`, { id: 'seed' });
+                            if (data?.inserted === 0) {
+                              toast.success(`All ${data?.totalInDatabase || 0} questions already in database!`, { id: 'seed' });
+                            } else {
+                              toast.success(`Seeded ${data?.inserted || 0} new questions! Total: ${data?.totalInDatabase || 0}`, { id: 'seed' });
+                            }
                             fetchData();
                           } catch (err: any) {
                             toast.error('Seed failed: ' + err.message, { id: 'seed' });
