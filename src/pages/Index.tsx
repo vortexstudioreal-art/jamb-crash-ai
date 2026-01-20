@@ -17,6 +17,7 @@ import { SubjectChanger } from '@/components/SubjectChanger';
 import { TimedQuiz } from '@/components/TimedQuiz';
 import { QuizResults } from '@/components/QuizResults';
 import { StudyStats } from '@/components/StudyStats';
+import { TopicMasteryTracker } from '@/components/TopicMasteryTracker';
 import { StudyPlanGenerator } from '@/components/StudyPlanGenerator';
 import { StudyMaterials } from '@/components/StudyMaterials';
 import { SyllabusReader } from '@/components/SyllabusReader';
@@ -1158,6 +1159,11 @@ const Index = () => {
                   Your Study Stats 📊
                 </h2>
                 <StudyStats userEmail={userEmail} />
+                
+                {/* Topic Mastery Tracker */}
+                <div className="mt-6">
+                  <TopicMasteryTracker userEmail={userEmail} />
+                </div>
               </motion.div>
 
               {/* Premium Dashboard Features */}
