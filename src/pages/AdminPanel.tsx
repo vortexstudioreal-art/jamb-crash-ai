@@ -653,6 +653,28 @@ const AdminPanel = () => {
                           <Database className="w-4 h-4" />
                           Seed All Subjects
                         </Button>
+                        <Button 
+                          onClick={async () => {
+                            toast.loading('Seeding 200+ NEW questions (2025 batch)...', { id: 'seed-extra' });
+                            try {
+                              const { data, error } = await supabase.functions.invoke('seed-extra-questions');
+                              if (error) throw error;
+                              if (data?.inserted === 0) {
+                                toast.success(`All 2025 questions already loaded! (${data?.total_in_database || 0} total)`, { id: 'seed-extra' });
+                              } else {
+                                toast.success(`🎉 Added ${data?.inserted || 0} NEW questions! Total: ${data?.total_in_database || 0}`, { id: 'seed-extra' });
+                              }
+                              fetchData();
+                            } catch (err: any) {
+                              toast.error('Seed failed: ' + err.message, { id: 'seed-extra' });
+                            }
+                          }}
+                          size="sm"
+                          className="gap-2 bg-green-600 hover:bg-green-700"
+                        >
+                          <Plus className="w-4 h-4" />
+                          +200 NEW Questions
+                        </Button>
                       </div>
                     )}
                   </CardTitle>
