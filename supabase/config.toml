@@ -65,3 +65,6 @@ verify_jwt = false
 
 [functions.jamb-news]
 verify_jwt = false
+
+[functions.seed-extra-questions]
+verify_jwt = false
