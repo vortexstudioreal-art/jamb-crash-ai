@@ -555,34 +555,105 @@ const AdminPanel = () => {
             >
               <Card className="bg-card border-border">
                 <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
+                  <CardTitle className="flex items-center justify-between flex-wrap gap-2">
                     <div className="flex items-center gap-2">
                       <Database className="w-5 h-5 text-primary" />
                       Question Database Overview
                     </div>
                     {isOwner && (
-                      <Button 
-                        onClick={async () => {
-                          toast.loading('Seeding questions...', { id: 'seed' });
-                          try {
-                            const { data, error } = await supabase.functions.invoke('seed-jamb-questions');
-                            if (error) throw error;
-                            if (data?.inserted === 0) {
-                              toast.success(`All ${data?.totalInDatabase || 0} questions already in database!`, { id: 'seed' });
-                            } else {
-                              toast.success(`Seeded ${data?.inserted || 0} new questions! Total: ${data?.totalInDatabase || 0}`, { id: 'seed' });
+                      <div className="flex flex-wrap gap-2">
+                        <Button 
+                          onClick={async () => {
+                            toast.loading('Seeding base questions...', { id: 'seed' });
+                            try {
+                              const { data, error } = await supabase.functions.invoke('seed-jamb-questions');
+                              if (error) throw error;
+                              if (data?.inserted === 0) {
+                                toast.success(`All base questions already loaded! (${data?.totalInDatabase || 0} total)`, { id: 'seed' });
+                              } else {
+                                toast.success(`Added ${data?.inserted || 0} questions! Total: ${data?.totalInDatabase || 0}`, { id: 'seed' });
+                              }
+                              fetchData();
+                            } catch (err: any) {
+                              toast.error('Seed failed: ' + err.message, { id: 'seed' });
                             }
-                            fetchData();
-                          } catch (err: any) {
-                            toast.error('Seed failed: ' + err.message, { id: 'seed' });
-                          }
-                        }}
-                        size="sm"
-                        className="gap-2"
-                      >
-                        <Database className="w-4 h-4" />
-                        Seed Questions
-                      </Button>
+                          }}
+                          size="sm"
+                          variant="outline"
+                          className="gap-2"
+                        >
+                          <Database className="w-4 h-4" />
+                          Base Questions
+                        </Button>
+                        <Button 
+                          onClick={async () => {
+                            toast.loading('Seeding more questions...', { id: 'seed-more' });
+                            try {
+                              const { data, error } = await supabase.functions.invoke('seed-more-questions');
+                              if (error) throw error;
+                              if (data?.inserted === 0) {
+                                toast.success(`All additional questions already loaded!`, { id: 'seed-more' });
+                              } else {
+                                toast.success(`Added ${data?.inserted || 0} new questions!`, { id: 'seed-more' });
+                              }
+                              fetchData();
+                            } catch (err: any) {
+                              toast.error('Seed failed: ' + err.message, { id: 'seed-more' });
+                            }
+                          }}
+                          size="sm"
+                          variant="outline"
+                          className="gap-2"
+                        >
+                          <Plus className="w-4 h-4" />
+                          More Questions
+                        </Button>
+                        <Button 
+                          onClick={async () => {
+                            toast.loading('Seeding low-count subjects...', { id: 'seed-low' });
+                            try {
+                              const { data, error } = await supabase.functions.invoke('seed-low-count-subjects');
+                              if (error) throw error;
+                              if (data?.inserted === 0) {
+                                toast.success(`All subjects already covered!`, { id: 'seed-low' });
+                              } else {
+                                toast.success(`Added ${data?.inserted || 0} questions for underrepresented subjects!`, { id: 'seed-low' });
+                              }
+                              fetchData();
+                            } catch (err: any) {
+                              toast.error('Seed failed: ' + err.message, { id: 'seed-low' });
+                            }
+                          }}
+                          size="sm"
+                          variant="outline"
+                          className="gap-2"
+                        >
+                          <Zap className="w-4 h-4" />
+                          Low-Count Subjects
+                        </Button>
+                        <Button 
+                          onClick={async () => {
+                            toast.loading('Seeding all subjects comprehensively...', { id: 'seed-all' });
+                            try {
+                              const { data, error } = await supabase.functions.invoke('seed-all-subjects');
+                              if (error) throw error;
+                              if (data?.inserted === 0) {
+                                toast.success(`All subjects fully seeded! (${data?.totalInDatabase || 0} total)`, { id: 'seed-all' });
+                              } else {
+                                toast.success(`Added ${data?.inserted || 0} questions! Total: ${data?.totalInDatabase || 0}`, { id: 'seed-all' });
+                              }
+                              fetchData();
+                            } catch (err: any) {
+                              toast.error('Seed failed: ' + err.message, { id: 'seed-all' });
+                            }
+                          }}
+                          size="sm"
+                          className="gap-2"
+                        >
+                          <Database className="w-4 h-4" />
+                          Seed All Subjects
+                        </Button>
+                      </div>
                     )}
                   </CardTitle>
                 </CardHeader>
