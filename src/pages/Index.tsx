@@ -136,6 +136,7 @@ const Index = () => {
   
   // Auto-redirect logic for all users
   useEffect(() => {
+    // Wait for ALL loading to complete including subjects
     if (isFullyLoading) return;
     
     // Skip auto-redirect if user is in payment flow
@@ -149,10 +150,18 @@ const Index = () => {
     
     // If user is signed in and has access (paid OR admin), go to dashboard
     if (userEmail && hasFullAccess && currentStep === 'landing') {
-      // Only prompt for subjects if they don't have any
-      if (userSubjects.length === 0 && !isAdmin && !isOwner) {
+      // Check if user already has subjects saved - if so, go straight to dashboard
+      if (userSubjects.length > 0) {
+        setCurrentStep('dashboard');
+        saveDashboardState('dashboard');
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        return;
+      }
+      // Only prompt for subjects if they don't have any (and not admin/owner)
+      if (!isAdmin && !isOwner) {
         setCurrentStep('subject-select');
       } else {
+        // Admins/owners go to dashboard even without subjects
         setCurrentStep('dashboard');
         saveDashboardState('dashboard');
       }
@@ -162,12 +171,14 @@ const Index = () => {
     
     // Trial users: if logged in and has active trial → go to dashboard
     if (userEmail && !hasFullAccess && isTrialActive && currentStep === 'landing') {
-      if (userSubjects.length === 0) {
-        setCurrentStep('subject-select');
-      } else {
+      if (userSubjects.length > 0) {
         setCurrentStep('dashboard');
         saveDashboardState('dashboard');
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        return;
       }
+      // Need subjects first
+      setCurrentStep('subject-select');
       window.scrollTo({ top: 0, behavior: 'instant' });
       return;
     }

@@ -275,7 +275,8 @@ export const StudyPlanGenerator = ({
   };
 
   const handleDownloadPDF = () => {
-    const content = `
+    try {
+      const content = `
 JAMB PERSONALIZED STUDY PLAN
 Generated for: ${userEmail}
 Target Score: ${targetScore}+
@@ -322,15 +323,103 @@ ${quizPerformance.filter(p => p.accuracy < 60).length > 0 ? `
 `}
 
 🎯 You've got this, future uni star! That ${targetScore}+ is yours! 💪
-    `.trim();
+      `.trim();
 
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `JAMB_AI_Study_Plan_${new Date().toISOString().split('T')[0]}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+      const filename = `JAMB_AI_Study_Plan_${new Date().toISOString().split('T')[0]}.txt`;
+      
+      // Check if we're on mobile/iOS or if regular download might fail
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+      
+      if (isMobile) {
+        // Mobile-friendly approach: open in new window for copy/save
+        const newWindow = window.open('', '_blank');
+        if (newWindow) {
+          newWindow.document.write(`
+            <html>
+              <head>
+                <title>${filename}</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <style>
+                  body { 
+                    font-family: monospace; 
+                    padding: 20px; 
+                    white-space: pre-wrap; 
+                    word-wrap: break-word;
+                    background: #1a1a2e;
+                    color: #eee;
+                    line-height: 1.5;
+                  }
+                  .actions {
+                    position: sticky;
+                    top: 0;
+                    background: #16213e;
+                    padding: 15px;
+                    margin: -20px -20px 20px -20px;
+                    text-align: center;
+                    border-bottom: 1px solid #0f3460;
+                  }
+                  button {
+                    background: #e94560;
+                    color: white;
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    cursor: pointer;
+                    margin: 5px;
+                  }
+                  button:active { opacity: 0.8; }
+                </style>
+              </head>
+              <body>
+                <div class="actions">
+                  <p style="margin: 0 0 10px 0; color: #94a3b8;">📋 Long press to select all, or use the button below</p>
+                  <button onclick="
+                    const textArea = document.createElement('textarea');
+                    textArea.value = document.getElementById('content').innerText;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    this.innerText = '✓ Copied!';
+                    setTimeout(() => this.innerText = 'Copy to Clipboard', 2000);
+                  ">Copy to Clipboard</button>
+                </div>
+                <pre id="content">${content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+              </body>
+            </html>
+          `);
+          newWindow.document.close();
+        } else {
+          // Fallback: copy to clipboard
+          navigator.clipboard?.writeText(content).then(() => {
+            alert('Study plan copied to clipboard! Paste it in Notes or any text app to save.');
+          }).catch(() => {
+            alert('Could not download. Please take a screenshot of your study plan.');
+          });
+        }
+      } else {
+        // Desktop: standard download approach
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        // Clean up after a delay to ensure download starts
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 100);
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+      // Ultimate fallback
+      alert('Download failed. Please take a screenshot of your study plan instead.');
+    }
   };
 
   // Configuration Step
