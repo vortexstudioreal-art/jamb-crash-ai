@@ -68,3 +68,6 @@ verify_jwt = false
 
 [functions.seed-extra-questions]
 verify_jwt = false
+
+[functions.chat]
+verify_jwt = false

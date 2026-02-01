@@ -9,6 +9,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PasswordRecoveryHandler } from "@/components/PasswordRecoveryHandler";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import { ChatBot } from "@/components/ChatBot";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import PaymentSuccess from "./pages/PaymentSuccess";
@@ -72,6 +73,8 @@ const App = () => {
               {/* PWA Components */}
               <OfflineIndicator variant="minimal" />
               <InstallPrompt />
+              {/* AI Chatbot */}
+              <ChatBot />
             </PasswordRecoveryHandler>
           </AuthProvider>
         </BrowserRouter>
