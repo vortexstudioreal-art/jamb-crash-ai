@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import ReactMarkdown from 'react-markdown';
+import { useLocation } from 'react-router-dom';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -30,6 +31,7 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 export const ChatBot = () => {
   const { user, userPackage, hasAccess } = useAuth();
   const isMobile = useIsMobile();
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -38,8 +40,8 @@ export const ChatBot = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Don't show chatbot if user is not logged in
-  if (!user) return null;
+  // Only show chatbot on dashboard (root path) and when user is logged in
+  if (!user || location.pathname !== '/') return null;
 
   // Fetch user context on mount
   useEffect(() => {
