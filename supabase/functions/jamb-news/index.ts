@@ -54,9 +54,13 @@ Deno.serve(async (req) => {
             const title = titleMatch ? titleMatch[1].replace(/<[^>]*>/g, '').trim() : null;
             
             if (title && title.length > 15) {
+              const rawLink = linkMatch ? linkMatch[1] : null;
+              const fullLink = rawLink 
+                ? (rawLink.startsWith('http') ? rawLink : `https://www.jamb.gov.ng${rawLink.startsWith('/') ? '' : '/'}${rawLink}`)
+                : 'https://www.jamb.gov.ng/news';
               newsItems.push({
                 title,
-                link: linkMatch ? (linkMatch[1].startsWith('http') ? linkMatch[1] : `https://www.jamb.gov.ng${linkMatch[1]}`) : 'https://www.jamb.gov.ng/news',
+                link: fullLink,
                 date: dateMatch ? dateMatch[1] : 'Recent',
                 summary: summaryMatch ? summaryMatch[1].replace(/<[^>]*>/g, '').trim().substring(0, 150) : null,
                 source: 'JAMB Official',
@@ -77,9 +81,11 @@ Deno.serve(async (req) => {
               const keywords = ['jamb', 'utme', 'registration', 'exam', 'candidate', 'admission', 'result', 'cbr'];
               
               if (text.length > 20 && keywords.some(k => text.toLowerCase().includes(k))) {
+                const rawHref = hrefMatch[1];
+                const fullHref = rawHref.startsWith('http') ? rawHref : `https://www.jamb.gov.ng${rawHref.startsWith('/') ? '' : '/'}${rawHref}`;
                 newsItems.push({
                   title: text,
-                  link: hrefMatch[1].startsWith('http') ? hrefMatch[1] : `https://www.jamb.gov.ng${hrefMatch[1]}`,
+                  link: fullHref,
                   date: 'Recent',
                   summary: null,
                   source: 'JAMB Official',
