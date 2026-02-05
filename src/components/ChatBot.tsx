@@ -40,9 +40,6 @@ export const ChatBot = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Only show chatbot on dashboard (root path) and when user is logged in
-  if (!user || location.pathname !== '/') return null;
-
   // Fetch user context on mount
   useEffect(() => {
     const fetchUserContext = async () => {
@@ -109,6 +106,9 @@ export const ChatBot = () => {
       inputRef.current.focus();
     }
   }, [isOpen]);
+
+  // Only show chatbot on dashboard (root path) and when user is logged in
+  if (!user || location.pathname !== '/') return null;
 
   const streamChat = async (userMessages: Message[]) => {
     const resp = await fetch(CHAT_URL, {
