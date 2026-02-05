@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ExternalLink, RefreshCw, Newspaper, AlertCircle, Globe, Clock, Sparkles } from 'lucide-react';
+import { ArrowLeft, ExternalLink, RefreshCw, Newspaper, AlertCircle, Globe, Clock, Sparkles, Bell, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAccessControl } from '@/hooks/useAccessControl';
 
 interface NewsItem {
   title: string;
@@ -31,6 +32,33 @@ export const JambNewsPage = ({ onBack }: JambNewsPageProps) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastFetched, setLastFetched] = useState<Date | null>(null);
+  const [sendingNotification, setSendingNotification] = useState<number | null>(null);
+  const { isAdmin, adminRole } = useAccessControl();
+
+  const canSendNotifications = isAdmin && adminRole === 'owner';
+
+  const sendNotificationFromNews = async (newsItem: NewsItem, index: number) => {
+    setSendingNotification(index);
+    try {
+      const { error } = await supabase
+        .from('notifications')
+        .insert({
+          title: `🚨 ${newsItem.title}`,
+          message: newsItem.summary || `New JAMB update: ${newsItem.title}. Check the JAMB News section for details.`,
+          type: 'info',
+          is_global: true,
+          link: newsItem.link,
+        });
+
+      if (error) throw error;
+      toast.success('Notification sent to all users! 📢');
+    } catch (err) {
+      console.error('Error sending notification:', err);
+      toast.error('Failed to send notification');
+    } finally {
+      setSendingNotification(null);
+    }
+  };
 
   const fetchNews = async () => {
     setLoading(true);
@@ -197,18 +225,36 @@ export const JambNewsPage = ({ onBack }: JambNewsPageProps) => {
                               </p>
                             )}
                           </div>
-                          {item.link && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              asChild
-                              className="shrink-0 opacity-60 group-hover:opacity-100 transition-opacity"
-                            >
-                              <a href={item.link} target="_blank" rel="noopener noreferrer">
-                                <ExternalLink className="w-4 h-4" />
-                              </a>
-                            </Button>
-                          )}
+                          <div className="flex items-center gap-1 shrink-0">
+                            {canSendNotifications && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => sendNotificationFromNews(item, index)}
+                                disabled={sendingNotification === index}
+                                className="opacity-60 hover:opacity-100 transition-opacity text-primary"
+                                title="Send as notification to all users"
+                              >
+                                {sendingNotification === index ? (
+                                  <RefreshCw className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <Send className="w-4 h-4" />
+                                )}
+                              </Button>
+                            )}
+                            {item.link && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                asChild
+                                className="opacity-60 group-hover:opacity-100 transition-opacity"
+                              >
+                                <a href={item.link} target="_blank" rel="noopener noreferrer">
+                                  <ExternalLink className="w-4 h-4" />
+                                </a>
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
