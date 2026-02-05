@@ -121,6 +121,71 @@ async function sendWhatsAppMessage(to: string, message: string): Promise<{ succe
   }
 }
 
+// Type for question data
+interface JambQuestion {
+  question: string;
+  option_a: string;
+  option_b: string;
+  option_c: string;
+  option_d: string;
+  correct_answer: string;
+  subject: string;
+}
+
+// deno-lint-ignore no-explicit-any
+async function getPersonalizedQuestions(email: string, supabaseClient: any): Promise<string> {
+  try {
+    // Get user's subjects
+    const { data: userSubjects } = await supabaseClient
+      .from('user_subjects')
+      .select('subjects')
+      .eq('email', email)
+      .maybeSingle();
+
+    const subjects = (userSubjects?.subjects || []) as string[];
+    if (subjects.length === 0) {
+      return ''; // No subjects set
+    }
+
+    // Get 3 random questions from user's subjects
+    const randomSubject = subjects[Math.floor(Math.random() * subjects.length)];
+    
+    const { data: questionsData } = await supabaseClient
+      .from('jamb_questions')
+      .select('question, option_a, option_b, option_c, option_d, correct_answer, subject')
+      .eq('subject', randomSubject)
+      .limit(50);
+
+    const questions = (questionsData || []) as JambQuestion[];
+    if (questions.length === 0) {
+      return '';
+    }
+
+    // Pick 3 random questions
+    const shuffled = questions.sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, 3);
+
+    // Format questions for WhatsApp
+    const subjectName = randomSubject.charAt(0).toUpperCase() + randomSubject.slice(1).replace('_', ' ');
+    let formattedQuestions = `\n\n📚 *Today's ${subjectName} Questions:*\n`;
+    
+    selected.forEach((q: JambQuestion, i: number) => {
+      const questionText = q.question.slice(0, 100) + (q.question.length > 100 ? '...' : '');
+      formattedQuestions += `\n*Q${i + 1}:* ${questionText}\n`;
+      formattedQuestions += `A) ${q.option_a.slice(0, 30)}${q.option_a.length > 30 ? '...' : ''}\n`;
+      formattedQuestions += `B) ${q.option_b.slice(0, 30)}${q.option_b.length > 30 ? '...' : ''}\n`;
+      formattedQuestions += `C) ${q.option_c.slice(0, 30)}${q.option_c.length > 30 ? '...' : ''}\n`;
+      formattedQuestions += `D) ${q.option_d.slice(0, 30)}${q.option_d.length > 30 ? '...' : ''}\n`;
+      formattedQuestions += `✅ Answer: ${q.correct_answer.toUpperCase()}\n`;
+    });
+
+    return formattedQuestions;
+  } catch (err) {
+    console.error('Error getting personalized questions:', err);
+    return '';
+  }
+}
+
 // Generate daily motivational messages
 function getDailyGreeting(): string {
   const hour = new Date().getUTCHours() + 1; // Nigerian time (WAT = UTC+1)
@@ -234,11 +299,14 @@ serve(async (req) => {
         }
 
         const greeting = getDailyGreeting();
+        
+        // Get personalized questions for this user
+        const personalizedQuestions = await getPersonalizedQuestions(reminder.email, supabase);
+        
         const message = `${greeting}
 
-🎯 *Jamb Crash AI*
-
-Ready for today's 20 JAMB questions? 📚
+🎯 *Jamb Crash AI - Daily Practice*
+${personalizedQuestions || '\n📚 Practice your subjects today!'}
 
 💪 Every question gets you closer to 300+!
 

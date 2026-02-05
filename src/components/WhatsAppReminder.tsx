@@ -1,11 +1,16 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MessageCircle, Bell, CheckCircle } from 'lucide-react';
+import { MessageCircle, Bell, CheckCircle, AlertTriangle, ExternalLink, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 interface WhatsAppReminderProps {
   userEmail: string;
@@ -14,12 +19,15 @@ interface WhatsAppReminderProps {
 }
 
 const SETTINGS_STORAGE_KEY = 'jamb_user_settings';
+const SANDBOX_NUMBER = '+14155238886';
+const SANDBOX_JOIN_MESSAGE = 'join sound-sound';
 
 export const WhatsAppReminder = ({ userEmail, isAdmin = false, onSetupComplete }: WhatsAppReminderProps) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSetup, setIsSetup] = useState(false);
   const [savedNumber, setSavedNumber] = useState('');
+  const [showHelp, setShowHelp] = useState(false);
 
   // Check if already setup
   useEffect(() => {
@@ -140,7 +148,7 @@ export const WhatsAppReminder = ({ userEmail, isAdmin = false, onSetupComplete }
         </motion.div>
         <h3 className="text-lg font-semibold text-foreground mb-2">✅ Reminders Active!</h3>
         <p className="text-muted-foreground text-sm mb-3">
-          You'll receive your timetable + 3 practice questions every morning at 6 AM
+          You'll receive personalized practice questions every morning at 6 AM
         </p>
         <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/30">
           <p className="text-sm text-green-600 font-medium">
@@ -150,6 +158,47 @@ export const WhatsAppReminder = ({ userEmail, isAdmin = false, onSetupComplete }
             First reminder coming tomorrow! 🎯
           </p>
         </div>
+        
+        {/* One-time activation reminder */}
+        <Collapsible open={showHelp} onOpenChange={setShowHelp} className="mt-4">
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
+              <HelpCircle className="w-4 h-4" />
+              Not receiving messages?
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-3">
+            <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-left">
+              <div className="flex gap-2 mb-2">
+                <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                <p className="text-sm font-medium text-amber-600">One-time Activation Required</p>
+              </div>
+              <p className="text-xs text-muted-foreground mb-3">
+                You need to activate WhatsApp once by sending a message:
+              </p>
+              <ol className="text-xs text-muted-foreground space-y-2 list-decimal list-inside">
+                <li>Open WhatsApp and send <strong className="text-foreground">"{SANDBOX_JOIN_MESSAGE}"</strong> to <strong className="text-foreground">{SANDBOX_NUMBER}</strong></li>
+                <li>Wait for confirmation reply</li>
+                <li>Done! You'll now receive daily reminders</li>
+              </ol>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="mt-3 gap-2 w-full"
+                asChild
+              >
+                <a 
+                  href={`https://wa.me/14155238886?text=${encodeURIComponent(SANDBOX_JOIN_MESSAGE)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  Open WhatsApp to Activate
+                </a>
+              </Button>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       </motion.div>
     );
   }
@@ -166,8 +215,18 @@ export const WhatsAppReminder = ({ userEmail, isAdmin = false, onSetupComplete }
         </div>
         <div>
           <h3 className="text-lg font-semibold text-foreground">Daily WhatsApp Reminders</h3>
-          <p className="text-sm text-muted-foreground">Get your timetable + 3 questions every morning</p>
+          <p className="text-sm text-muted-foreground">Get personalized questions from YOUR subjects every morning</p>
         </div>
+      </div>
+
+      {/* Setup steps info */}
+      <div className="p-3 rounded-lg bg-muted/50 border border-border mb-4">
+        <p className="text-xs font-medium text-foreground mb-2">📋 How it works:</p>
+        <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
+          <li>Enter your WhatsApp number below</li>
+          <li>After setup, send <strong className="text-foreground">"{SANDBOX_JOIN_MESSAGE}"</strong> to <strong className="text-foreground">{SANDBOX_NUMBER}</strong> on WhatsApp</li>
+          <li>Receive personalized JAMB questions daily at 6 AM! 🎉</li>
+        </ol>
       </div>
 
       <div className="space-y-4">
