@@ -171,6 +171,34 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     ? PACKAGE_FEATURES[userPackage] 
     : defaultFeatures;
 
+  // Restore cached access state for offline support
+  const restoreCachedAccess = (email: string) => {
+    try {
+      const cached = localStorage.getItem(`jamb_access_${email}`);
+      if (cached) {
+        const data = JSON.parse(cached);
+        setHasAccess(data.hasAccess || false);
+        setIsAdmin(data.isAdmin || false);
+        setUserRole(data.userRole || null);
+        setIsOwner(data.isOwner || false);
+        setUserPackage(data.userPackage || null);
+        console.log('[Offline] Restored cached access for', email);
+        return true;
+      }
+    } catch (e) {
+      console.error('Failed to restore cached access:', e);
+    }
+    return false;
+  };
+
+  const cacheAccessState = (email: string, accessData: { hasAccess: boolean; isAdmin: boolean; userRole: string | null; isOwner: boolean; userPackage: UserPackage }) => {
+    try {
+      localStorage.setItem(`jamb_access_${email}`, JSON.stringify(accessData));
+    } catch (e) {
+      console.error('Failed to cache access state:', e);
+    }
+  };
+
   const checkUserAccess = async (email: string) => {
     try {
       const { data, error } = await supabase.rpc('check_user_access', {
@@ -179,31 +207,41 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       if (error) {
         console.error('Error checking access:', error);
+        // Fallback to cached data when offline/error
+        if (!navigator.onLine) {
+          restoreCachedAccess(email.toLowerCase());
+        }
         return;
       }
 
       if (data && data.length > 0) {
         const result = data[0];
-        setHasAccess(result.has_access || false);
-        setIsAdmin(result.is_admin || false);
-        
-        const role = result.admin_role as 'owner' | 'admin' | 'collaborator' | null;
-        setUserRole(role);
-        setIsOwner(role === 'owner');
+        const accessState = {
+          hasAccess: result.has_access || false,
+          isAdmin: result.is_admin || false,
+          userRole: (result.admin_role as 'owner' | 'admin' | 'collaborator' | null),
+          isOwner: result.admin_role === 'owner',
+          userPackage: null as UserPackage,
+        };
 
-        // Determine package - admins/owners get premium
-        if (role === 'owner' || role === 'admin' || role === 'collaborator') {
-          setUserPackage('admin');
+        // Determine package
+        if (accessState.userRole === 'owner' || accessState.userRole === 'admin' || accessState.userRole === 'collaborator') {
+          accessState.userPackage = 'admin';
         } else if (result.package) {
-          // Map database package names to our package types
           const pkgName = result.package.toLowerCase();
-          if (pkgName === 'basic') setUserPackage('basic');
-          else if (pkgName === 'pro' || pkgName === 'standard') setUserPackage('pro');
-          else if (pkgName === 'premium' || pkgName === 'ultimate') setUserPackage('premium');
-          else setUserPackage(null);
-        } else {
-          setUserPackage(null);
+          if (pkgName === 'basic') accessState.userPackage = 'basic';
+          else if (pkgName === 'pro' || pkgName === 'standard') accessState.userPackage = 'pro';
+          else if (pkgName === 'premium' || pkgName === 'ultimate') accessState.userPackage = 'premium';
         }
+
+        setHasAccess(accessState.hasAccess);
+        setIsAdmin(accessState.isAdmin);
+        setUserRole(accessState.userRole);
+        setIsOwner(accessState.isOwner);
+        setUserPackage(accessState.userPackage);
+
+        // Cache for offline use
+        cacheAccessState(email.toLowerCase(), accessState);
       } else {
         setHasAccess(false);
         setIsAdmin(false);
@@ -213,6 +251,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
     } catch (err) {
       console.error('Access check failed:', err);
+      // Fallback to cached data when offline
+      if (!navigator.onLine) {
+        restoreCachedAccess(email.toLowerCase());
+      }
     }
   };
 
@@ -314,10 +356,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const signOut = async () => {
-    // Clear trial data from localStorage first
+    // Clear trial data and cached access from localStorage
+    const email = user?.email?.toLowerCase();
     localStorage.removeItem('jamb_trial_start');
     localStorage.removeItem('jamb_trial_subjects');
     localStorage.removeItem('jamb_user_email');
+    if (email) {
+      localStorage.removeItem(`jamb_access_${email}`);
+      localStorage.removeItem(`jamb_subjects_${email}`);
+    }
     
     // Use local scope to avoid issues with stale refresh tokens
     await supabase.auth.signOut({ scope: 'local' });

@@ -190,7 +190,7 @@ const Index = () => {
     }
   }, [userEmail, effectiveAccess, isAdmin, isOwner, isFullyLoading, currentStep, isTrialActive, hasTrialUsed, canStartTrial, userSubjects.length, searchParams, isPaymentModalOpen, isPlanSelectionOpen]);
 
-  // Load user subjects
+  // Load user subjects (with offline cache fallback)
   useEffect(() => {
     const loadUserData = async () => {
       if (!userEmail) {
@@ -201,14 +201,35 @@ const Index = () => {
       
       setSubjectsLoading(true);
       
-      const { data } = await supabase
-        .from('user_subjects')
-        .select('subjects')
-        .eq('email', userEmail)
-        .maybeSingle(); // Use maybeSingle to avoid errors when no data
-      
-      if (data?.subjects) {
-        setUserSubjects(data.subjects as string[]);
+      try {
+        const { data, error } = await supabase
+          .from('user_subjects')
+          .select('subjects')
+          .eq('email', userEmail)
+          .maybeSingle();
+        
+        if (data?.subjects) {
+          setUserSubjects(data.subjects as string[]);
+          // Cache subjects for offline use
+          localStorage.setItem(`jamb_subjects_${userEmail}`, JSON.stringify(data.subjects));
+        } else if (error && !navigator.onLine) {
+          // Offline fallback: restore from cache
+          const cached = localStorage.getItem(`jamb_subjects_${userEmail}`);
+          if (cached) {
+            setUserSubjects(JSON.parse(cached));
+            console.log('[Offline] Restored cached subjects');
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load subjects:', err);
+        // Offline fallback
+        if (!navigator.onLine) {
+          const cached = localStorage.getItem(`jamb_subjects_${userEmail}`);
+          if (cached) {
+            setUserSubjects(JSON.parse(cached));
+            console.log('[Offline] Restored cached subjects from catch');
+          }
+        }
       }
       
       setSubjectsLoading(false);
