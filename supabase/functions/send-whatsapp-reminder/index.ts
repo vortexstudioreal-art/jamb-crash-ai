@@ -17,7 +17,7 @@ const SANDBOX_NUMBER = '+14155238886';
 const SANDBOX_JOIN_MESSAGE = "join sound-sound";
 
 // App link
-const APP_LINK = 'https://otpczgpmpnabbvzthvjv.lovableproject.com';
+const APP_LINK = 'https://jamb.lovable.app';
 
 // Rate limiting: track requests per phone number (in-memory, resets on function restart)
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
@@ -83,7 +83,8 @@ async function sendWhatsAppMessage(to: string, message: string): Promise<{ succe
   
   const formData = new URLSearchParams();
   formData.append('To', `whatsapp:${to}`);
-  formData.append('From', `whatsapp:${TWILIO_PHONE_NUMBER}`);
+  // Use Twilio sandbox number for sending
+  formData.append('From', `whatsapp:${SANDBOX_NUMBER}`);
   formData.append('Body', message);
 
   try {

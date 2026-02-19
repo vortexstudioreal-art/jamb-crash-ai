@@ -252,22 +252,35 @@ const TOPIC_PATTERNS: Record<string, { keywords: string[], label: string, subjec
 };
 
 function identifyTopics(question: Question): string[] {
-  const text = `${question.question} ${question.option_a} ${question.option_b} ${question.option_c} ${question.option_d}`.toLowerCase();
-  const topics: string[] = [];
+  // Include explanation for better matching context
+  const text = `${question.question} ${question.option_a} ${question.option_b} ${question.option_c} ${question.option_d} ${question.explanation || ''}`.toLowerCase();
+  const matchedTopics: { key: string; score: number }[] = [];
   
   for (const [topicKey, { keywords, subjects }] of Object.entries(TOPIC_PATTERNS)) {
     // Only match if the topic applies to this subject
-    if (subjects.includes(question.subject) && keywords.some(keyword => text.includes(keyword))) {
-      topics.push(topicKey);
+    if (!subjects.includes(question.subject)) continue;
+    
+    // Count how many keywords match for better scoring
+    let matchCount = 0;
+    for (const keyword of keywords) {
+      if (text.includes(keyword)) {
+        matchCount++;
+      }
+    }
+    
+    if (matchCount > 0) {
+      matchedTopics.push({ key: topicKey, score: matchCount });
     }
   }
   
-  // If no topic matched, categorize by subject
-  if (topics.length === 0) {
-    topics.push(`${question.subject}_general`);
+  // Sort by match score (most relevant first), take top 2
+  if (matchedTopics.length > 0) {
+    matchedTopics.sort((a, b) => b.score - a.score);
+    return matchedTopics.slice(0, 2).map(t => t.key);
   }
   
-  return topics;
+  // If no topic matched, categorize by subject
+  return [`${question.subject}_general`];
 }
 
 function getFrequencyLevel(count: number): 'very_high' | 'high' | 'medium' {
