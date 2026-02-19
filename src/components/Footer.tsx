@@ -1,4 +1,5 @@
 import { BookOpen, Mail } from 'lucide-react';
+import { SocialFollowLinks } from './SocialFollowBanner';
 
 export const Footer = () => {
   return (
@@ -12,9 +13,10 @@ export const Footer = () => {
               </div>
               <span className="font-bold text-lg">Jamb Crash AI</span>
             </div>
-            <p className="text-sm text-background/70">
+            <p className="text-sm text-background/70 mb-4">
               AI-powered JAMB preparation to help you score 300+ in just 48 hours of focused study.
             </p>
+            <SocialFollowLinks />
           </div>
 
           <div className="flex flex-col sm:flex-row gap-8">
@@ -24,6 +26,22 @@ export const Footer = () => {
                 <li className="flex items-center gap-2">
                   <Mail className="w-4 h-4" />
                   support@jambcrash.ai
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-4">Follow Us</h4>
+              <ul className="space-y-2 text-sm text-background/70">
+                <li>
+                  <a href="https://www.tiktok.com/@jamb.crash.ai" target="_blank" rel="noopener noreferrer" className="hover:text-background transition-colors">
+                    🎵 TikTok
+                  </a>
+                </li>
+                <li>
+                  <a href="https://whatsapp.com/channel/0029VbBXiJs1nozBfLioDZ1X" target="_blank" rel="noopener noreferrer" className="hover:text-background transition-colors">
+                    💬 WhatsApp Channel
+                  </a>
                 </li>
               </ul>
             </div>
