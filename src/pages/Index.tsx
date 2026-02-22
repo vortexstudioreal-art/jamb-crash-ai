@@ -45,6 +45,7 @@ import { Leaderboard } from '@/components/Leaderboard';
 import { BannerAd } from '@/components/BannerAd';
 import { DashboardSkeleton } from '@/components/DashboardSkeleton';
 import { SocialFollowBanner } from '@/components/SocialFollowBanner';
+import { ChatBot } from '@/components/ChatBot';
 
 type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'study-plan' | 'study-materials' | 'syllabus' | 'flashcards' | 'course-requirements' | 'novels' | 'novel-detail' | 'novel-reader' | 'news' | 'scholarships' | 'leaderboard';
 type QuizType = 'full' | 'mini' | 'subject' | 'timed-practice';
@@ -1395,6 +1396,9 @@ const Index = () => {
         onRetryPayment={handlePaymentCancelledRetry}
         canStartTrial={canStartTrial}
       />
+
+      {/* AI Chatbot - only on dashboard */}
+      {currentStep === 'dashboard' && user && <ChatBot />}
     </div>
   );
 };

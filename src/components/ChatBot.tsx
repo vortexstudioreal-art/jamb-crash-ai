@@ -107,8 +107,8 @@ export const ChatBot = () => {
     }
   }, [isOpen]);
 
-  // Only show chatbot on dashboard (root path) and when user is logged in
-  if (!user || location.pathname !== '/') return null;
+  // Only show when user is logged in (route/step gating handled by parent)
+  if (!user) return null;
 
   const streamChat = async (userMessages: Message[]) => {
     const resp = await fetch(CHAT_URL, {

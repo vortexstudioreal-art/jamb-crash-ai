@@ -51,26 +51,21 @@ function validatePhoneNumber(phone: string): { valid: boolean; formatted: string
     cleaned = '+' + cleaned;
   }
   
+  // Fix common Nigerian number issue: +2340XXXXXXXXX → +234XXXXXXXXX
+  if (cleaned.startsWith('+2340')) {
+    cleaned = '+234' + cleaned.substring(5);
+    console.log(`Fixed Nigerian number format: ${phone} → ${cleaned}`);
+  }
+  
   // Remove the + for digit validation
   const digitsOnly = cleaned.substring(1);
   
-  // Check if it's all digits
   if (!/^\d+$/.test(digitsOnly)) {
     return { valid: false, formatted: '', error: 'Phone number must contain only digits' };
   }
   
-  // Check length (international numbers are typically 10-15 digits after country code)
   if (digitsOnly.length < 10 || digitsOnly.length > 15) {
     return { valid: false, formatted: '', error: 'Phone number must be 10-15 digits. Use international format (+234...)' };
-  }
-  
-  // Validate common country codes (basic check)
-  const validCountryCodes = ['1', '234', '233', '254', '27', '44', '49', '33', '39', '81', '86', '91', '61', '55'];
-  const hasValidCountryCode = validCountryCodes.some(code => digitsOnly.startsWith(code));
-  
-  if (!hasValidCountryCode) {
-    // Still allow it but log a warning
-    console.log(`Warning: Unusual country code for phone: ${cleaned}`);
   }
   
   return { valid: true, formatted: cleaned };
