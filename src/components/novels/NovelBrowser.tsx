@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Book, Filter, Search } from 'lucide-react';
+import { ArrowLeft, Book, Search, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -8,6 +8,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { NovelCard } from './NovelCard';
 import { NovelProgress } from './NovelProgress';
 import { supabase } from '@/integrations/supabase/client';
+import { saveNovels, getCachedNovels, saveNovelChapters } from '@/services/offlineStorage';
 
 interface Novel {
   id: string;
@@ -45,35 +46,60 @@ export const NovelBrowser = ({ userEmail, onBack, onSelectNovel }: NovelBrowserP
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
   useEffect(() => {
     const loadNovels = async () => {
       setLoading(true);
       
-      // Load all novels
-      const { data: novelsData, error } = await supabase
-        .from('novels')
-        .select('*')
-        .order('year', { ascending: false })
-        .order('title');
-      
-      if (novelsData) {
-        setNovels(novelsData);
-        setFilteredNovels(novelsData);
-      }
-      
-      // Load user progress
-      const { data: progressData } = await supabase
-        .from('user_novel_progress')
-        .select('novel_id, progress_percent')
-        .eq('email', userEmail);
-      
-      if (progressData) {
-        const progressMap: Record<string, number> = {};
-        progressData.forEach(p => {
-          progressMap[p.novel_id] = p.progress_percent;
-        });
-        setUserProgress(progressMap);
+      try {
+        // Try loading from network first
+        const { data: novelsData, error } = await supabase
+          .from('novels')
+          .select('*')
+          .order('year', { ascending: false })
+          .order('title');
+        
+        if (novelsData && !error) {
+          setNovels(novelsData);
+          setFilteredNovels(novelsData);
+          
+          // Cache novels for offline use
+          await saveNovels(novelsData);
+          
+          // Pre-cache all chapters in background
+          cacheAllChapters(novelsData.map(n => n.id));
+        } else {
+          throw new Error('Network fetch failed');
+        }
+        
+        // Load user progress
+        const { data: progressData } = await supabase
+          .from('user_novel_progress')
+          .select('novel_id, progress_percent')
+          .eq('email', userEmail);
+        
+        if (progressData) {
+          const progressMap: Record<string, number> = {};
+          progressData.forEach(p => {
+            progressMap[p.novel_id] = p.progress_percent;
+          });
+          setUserProgress(progressMap);
+        }
+      } catch {
+        // Fallback to cached data
+        console.log('[Offline] Loading novels from cache');
+        setIsOffline(true);
+        const cachedNovels = await getCachedNovels();
+        if (cachedNovels.length > 0) {
+          const mapped = cachedNovels.map(n => ({
+            ...n,
+            total_chapters: n.total_chapters || 0,
+            is_premium: n.is_premium || false,
+          })) as Novel[];
+          setNovels(mapped);
+          setFilteredNovels(mapped);
+        }
       }
       
       setLoading(false);
@@ -82,15 +108,30 @@ export const NovelBrowser = ({ userEmail, onBack, onSelectNovel }: NovelBrowserP
     loadNovels();
   }, [userEmail]);
 
+  // Pre-cache chapters in background
+  const cacheAllChapters = async (novelIds: string[]) => {
+    try {
+      const { data: chapters } = await supabase
+        .from('novel_chapters')
+        .select('id, novel_id, chapter_number, title, content, estimated_reading_time, word_count, likely_questions')
+        .in('novel_id', novelIds);
+      
+      if (chapters && chapters.length > 0) {
+        await saveNovelChapters(chapters);
+        console.log(`[Offline] Cached ${chapters.length} novel chapters`);
+      }
+    } catch (err) {
+      console.error('Failed to cache novel chapters:', err);
+    }
+  };
+
   useEffect(() => {
     let filtered = novels;
     
-    // Filter by category
     if (selectedCategory !== 'all') {
       filtered = filtered.filter(n => n.category === selectedCategory);
     }
     
-    // Filter by search
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(n => 
@@ -102,7 +143,6 @@ export const NovelBrowser = ({ userEmail, onBack, onSelectNovel }: NovelBrowserP
     setFilteredNovels(filtered);
   }, [novels, selectedCategory, searchQuery]);
 
-  // Get in-progress novels for "Continue Reading" section
   const inProgressNovels = novels.filter(n => {
     const progress = userProgress[n.id];
     return progress && progress > 0 && progress < 100;
@@ -110,6 +150,16 @@ export const NovelBrowser = ({ userEmail, onBack, onSelectNovel }: NovelBrowserP
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Offline indicator */}
+      {isOffline && (
+        <div className="bg-amber-500/10 border-b border-amber-500/30 px-4 py-2 text-center">
+          <p className="text-sm text-amber-600 dark:text-amber-400 flex items-center justify-center gap-2">
+            <WifiOff className="w-4 h-4" />
+            Offline mode — showing cached novels
+          </p>
+        </div>
+      )}
+
       {/* Header */}
       <div className="sticky top-0 z-40 bg-background/95 backdrop-blur border-b">
         <div className="max-w-6xl mx-auto px-4 py-4">
@@ -128,7 +178,6 @@ export const NovelBrowser = ({ userEmail, onBack, onSelectNovel }: NovelBrowserP
             </div>
           </div>
           
-          {/* Search */}
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
@@ -139,7 +188,6 @@ export const NovelBrowser = ({ userEmail, onBack, onSelectNovel }: NovelBrowserP
             />
           </div>
           
-          {/* Category Tabs */}
           <ScrollArea className="w-full whitespace-nowrap">
             <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
               <TabsList className="inline-flex h-9 bg-muted/50">
@@ -166,7 +214,6 @@ export const NovelBrowser = ({ userEmail, onBack, onSelectNovel }: NovelBrowserP
           </div>
         ) : (
           <>
-            {/* Reading Stats */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -175,7 +222,6 @@ export const NovelBrowser = ({ userEmail, onBack, onSelectNovel }: NovelBrowserP
               <NovelProgress userEmail={userEmail} />
             </motion.div>
 
-            {/* Continue Reading */}
             {inProgressNovels.length > 0 && selectedCategory === 'all' && !searchQuery && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -204,7 +250,6 @@ export const NovelBrowser = ({ userEmail, onBack, onSelectNovel }: NovelBrowserP
               </motion.div>
             )}
 
-            {/* All Novels */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
