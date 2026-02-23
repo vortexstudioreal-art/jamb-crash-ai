@@ -6,6 +6,8 @@ import {
   saveQuestions,
   saveFlashcards,
   saveSyllabus,
+  saveNovels,
+  saveNovelChapters,
   getMetadata,
   setMetadata,
   type SyncItem 
@@ -105,6 +107,26 @@ export const downloadAllForOffline = async (
     
     if (syllabus && syllabus.length > 0) {
       await saveSyllabus(syllabus);
+    }
+
+    onProgress?.({ stage: 'Downloading novels...', percent: 85 });
+
+    // Stage 4: Download novels and chapters
+    const { data: novels } = await supabase
+      .from('novels')
+      .select('*');
+
+    if (novels && novels.length > 0) {
+      await saveNovels(novels);
+
+      const { data: chapters } = await supabase
+        .from('novel_chapters')
+        .select('id, novel_id, chapter_number, title, content, estimated_reading_time, word_count, likely_questions')
+        .in('novel_id', novels.map(n => n.id));
+
+      if (chapters && chapters.length > 0) {
+        await saveNovelChapters(chapters);
+      }
     }
 
     onProgress?.({ stage: 'All data downloaded!', percent: 100 });

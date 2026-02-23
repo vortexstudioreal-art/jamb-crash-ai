@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Book, BookOpen, Check, Clock, Lock, Play, Star, User } from 'lucide-react';
+import { ArrowLeft, Book, BookOpen, Check, Clock, Play, Star, User, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
+import { getCachedNovel, getCachedChaptersByNovel } from '@/services/offlineStorage';
 
 interface Chapter {
   id: string;
@@ -26,38 +27,63 @@ export const NovelDetail = ({ novelId, userEmail, onBack, onStartReading }: Nove
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [progress, setProgress] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isOffline, setIsOffline] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
       
-      // Load novel
-      const { data: novelData } = await supabase
-        .from('novels')
-        .select('*')
-        .eq('id', novelId)
-        .single();
-      
-      if (novelData) setNovel(novelData);
-      
-      // Load chapters
-      const { data: chaptersData } = await supabase
-        .from('novel_chapters')
-        .select('id, chapter_number, title, estimated_reading_time')
-        .eq('novel_id', novelId)
-        .order('chapter_number');
-      
-      if (chaptersData) setChapters(chaptersData);
-      
-      // Load user progress
-      const { data: progressData } = await supabase
-        .from('user_novel_progress')
-        .select('*, current_chapter:novel_chapters(chapter_number)')
-        .eq('novel_id', novelId)
-        .eq('email', userEmail)
-        .maybeSingle();
-      
-      if (progressData) setProgress(progressData);
+      try {
+        // Try network first
+        const { data: novelData, error: novelError } = await supabase
+          .from('novels')
+          .select('*')
+          .eq('id', novelId)
+          .single();
+        
+        if (novelError) throw novelError;
+        if (novelData) setNovel(novelData);
+        
+        const { data: chaptersData } = await supabase
+          .from('novel_chapters')
+          .select('id, chapter_number, title, estimated_reading_time')
+          .eq('novel_id', novelId)
+          .order('chapter_number');
+        
+        if (chaptersData) setChapters(chaptersData);
+        
+        const { data: progressData } = await supabase
+          .from('user_novel_progress')
+          .select('*, current_chapter:novel_chapters(chapter_number)')
+          .eq('novel_id', novelId)
+          .eq('email', userEmail)
+          .maybeSingle();
+        
+        if (progressData) setProgress(progressData);
+      } catch {
+        // Fallback to cache
+        console.log('[Offline] Loading novel detail from cache');
+        setIsOffline(true);
+        
+        const cachedNovel = await getCachedNovel(novelId);
+        if (cachedNovel) {
+          setNovel(cachedNovel);
+        }
+        
+        const cachedChapters = await getCachedChaptersByNovel(novelId);
+        if (cachedChapters.length > 0) {
+          setChapters(
+            cachedChapters
+              .map(ch => ({
+                id: ch.id,
+                chapter_number: ch.chapter_number,
+                title: ch.title,
+                estimated_reading_time: ch.estimated_reading_time || 5,
+              }))
+              .sort((a, b) => a.chapter_number - b.chapter_number)
+          );
+        }
+      }
       
       setLoading(false);
     };
@@ -76,8 +102,17 @@ export const NovelDetail = ({ novelId, userEmail, onBack, onStartReading }: Nove
   if (!novel) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">Novel not found</p>
-        <Button variant="outline" onClick={onBack} className="mt-4">
+        <Book className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+        <h3 className="text-lg font-semibold text-foreground mb-2">Novel not available</h3>
+        <p className="text-muted-foreground mb-1">
+          {navigator.onLine 
+            ? "This novel couldn't be loaded." 
+            : "This novel hasn't been cached for offline reading."}
+        </p>
+        <p className="text-sm text-muted-foreground mb-4">
+          {!navigator.onLine && "Open it once while online to cache it."}
+        </p>
+        <Button variant="outline" onClick={onBack}>
           <ArrowLeft className="w-4 h-4 mr-2" /> Go Back
         </Button>
       </div>
@@ -88,7 +123,6 @@ export const NovelDetail = ({ novelId, userEmail, onBack, onStartReading }: Nove
   const totalReadingTime = chapters.reduce((acc, ch) => acc + ch.estimated_reading_time, 0);
   
   const handleStartReading = () => {
-    // Start from current chapter or first chapter
     const startChapter = progress?.current_chapter_id || chapters[0]?.id;
     if (startChapter) {
       onStartReading(startChapter);
@@ -97,7 +131,15 @@ export const NovelDetail = ({ novelId, userEmail, onBack, onStartReading }: Nove
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
-      {/* Back Button */}
+      {isOffline && (
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg px-4 py-2 mb-4 text-center">
+          <p className="text-sm text-amber-600 dark:text-amber-400 flex items-center justify-center gap-2">
+            <WifiOff className="w-4 h-4" />
+            Offline mode — reading from cache
+          </p>
+        </div>
+      )}
+
       <Button variant="ghost" onClick={onBack} className="mb-4 -ml-2">
         <ArrowLeft className="w-4 h-4 mr-2" /> Back to Library
       </Button>
@@ -108,7 +150,6 @@ export const NovelDetail = ({ novelId, userEmail, onBack, onStartReading }: Nove
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col md:flex-row gap-6 mb-8"
       >
-        {/* Cover */}
         <div className="w-full md:w-48 h-64 rounded-xl bg-gradient-to-br from-primary/20 to-accent overflow-hidden flex-shrink-0">
           {novel.cover_image_url ? (
             <img 
@@ -123,7 +164,6 @@ export const NovelDetail = ({ novelId, userEmail, onBack, onStartReading }: Nove
           )}
         </div>
         
-        {/* Info */}
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2 flex-wrap">
             {novel.year === 2025 && (
@@ -156,7 +196,6 @@ export const NovelDetail = ({ novelId, userEmail, onBack, onStartReading }: Nove
             </span>
           </div>
           
-          {/* Progress */}
           {progress && progress.progress_percent > 0 && (
             <div className="mb-4">
               <div className="flex justify-between text-sm mb-1">
@@ -172,7 +211,6 @@ export const NovelDetail = ({ novelId, userEmail, onBack, onStartReading }: Nove
             </div>
           )}
           
-          {/* CTA Button */}
           <Button 
             onClick={handleStartReading}
             className="gradient-primary text-primary-foreground"

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, 
   ArrowRight, 
+  Book,
   Bookmark, 
   BookmarkCheck, 
   ChevronLeft, 
@@ -21,6 +22,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { getCachedChapter, getCachedChaptersByNovel, getCachedNovel } from '@/services/offlineStorage';
 
 interface LikelyQuestion {
   question: string;
@@ -70,38 +72,59 @@ export const NovelReader = ({
       setLoading(true);
       startTimeRef.current = Date.now();
       
-      // Load chapter with novel info
-      const { data: chapterData } = await supabase
-        .from('novel_chapters')
-        .select('*, novel:novels(*)')
-        .eq('id', chapterId)
-        .single();
-      
-      if (chapterData) {
-        setChapter(chapterData);
-        setNovel(chapterData.novel);
-        
-        // Load all chapters for navigation
-        const { data: chaptersData } = await supabase
+      try {
+        // Try network first
+        const { data: chapterData, error } = await supabase
           .from('novel_chapters')
-          .select('id, chapter_number, title')
-          .eq('novel_id', chapterData.novel_id)
-          .order('chapter_number');
+          .select('*, novel:novels(*)')
+          .eq('id', chapterId)
+          .single();
         
-        if (chaptersData) setAllChapters(chaptersData);
+        if (error) throw error;
         
-        // Check if bookmarked
-        const { data: bookmark } = await supabase
-          .from('user_bookmarks')
-          .select('id')
-          .eq('chapter_id', chapterId)
-          .eq('email', userEmail)
-          .maybeSingle();
+        if (chapterData) {
+          setChapter(chapterData);
+          setNovel(chapterData.novel);
+          
+          const { data: chaptersData } = await supabase
+            .from('novel_chapters')
+            .select('id, chapter_number, title')
+            .eq('novel_id', chapterData.novel_id)
+            .order('chapter_number');
+          
+          if (chaptersData) setAllChapters(chaptersData);
+          
+          // Check if bookmarked
+          const { data: bookmark } = await supabase
+            .from('user_bookmarks')
+            .select('id')
+            .eq('chapter_id', chapterId)
+            .eq('email', userEmail)
+            .maybeSingle();
+          
+          setIsBookmarked(!!bookmark);
+          
+          // Update progress
+          await updateProgress(chapterData.novel_id, chapterId, chapterData.chapter_number, chaptersData?.length || 1, 0);
+        }
+      } catch {
+        // Fallback to cached data
+        console.log('[Offline] Loading chapter from cache');
         
-        setIsBookmarked(!!bookmark);
-        
-        // Update progress
-        await updateProgress(chapterData.novel_id, chapterId, chapterData.chapter_number, chaptersData?.length || 1, 0);
+        const cachedChapter = await getCachedChapter(chapterId);
+        if (cachedChapter) {
+          setChapter(cachedChapter);
+          
+          const cachedNovel = await getCachedNovel(cachedChapter.novel_id);
+          if (cachedNovel) setNovel(cachedNovel);
+          
+          const cachedChapters = await getCachedChaptersByNovel(cachedChapter.novel_id);
+          setAllChapters(
+            cachedChapters
+              .map(ch => ({ id: ch.id, chapter_number: ch.chapter_number, title: ch.title }))
+              .sort((a, b) => a.chapter_number - b.chapter_number)
+          );
+        }
       }
       
       setLoading(false);
@@ -109,12 +132,10 @@ export const NovelReader = ({
     
     loadChapter();
     
-    // Save reading time when leaving
     return () => {
       if (saveProgressRef.current) {
         clearTimeout(saveProgressRef.current);
       }
-      // Save accumulated reading time
       const timeSpent = Math.round((Date.now() - startTimeRef.current) / 1000);
       if (chapter && novel && timeSpent > 5) {
         saveReadingTime(novel.id, timeSpent);
@@ -254,8 +275,17 @@ export const NovelReader = ({
   if (!chapter) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">Chapter not found</p>
-        <Button variant="outline" onClick={onBack} className="mt-4">
+        <Book className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+        <h3 className="text-lg font-semibold text-foreground mb-2">Chapter not available</h3>
+        <p className="text-muted-foreground mb-1">
+          {navigator.onLine
+            ? "This chapter couldn't be loaded."
+            : "This chapter hasn't been cached for offline reading."}
+        </p>
+        <p className="text-sm text-muted-foreground mb-4">
+          {!navigator.onLine && "Open it once while online to cache it."}
+        </p>
+        <Button variant="outline" onClick={onBack}>
           <ArrowLeft className="w-4 h-4 mr-2" /> Go Back
         </Button>
       </div>

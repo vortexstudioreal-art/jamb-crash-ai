@@ -45,6 +45,31 @@ interface SyncItem {
   retries: number;
 }
 
+interface CachedNovel {
+  id: string;
+  title: string;
+  author: string;
+  description: string | null;
+  cover_image_url: string | null;
+  category: string;
+  total_chapters: number | null;
+  year: number | null;
+  is_premium: boolean | null;
+  difficulty_level: string | null;
+  subject: string | null;
+}
+
+interface CachedChapter {
+  id: string;
+  novel_id: string;
+  chapter_number: number;
+  title: string;
+  content: string;
+  estimated_reading_time: number | null;
+  word_count: number | null;
+  likely_questions: any;
+}
+
 interface JambOfflineDB extends DBSchema {
   questions: {
     key: string;
@@ -70,10 +95,20 @@ interface JambOfflineDB extends DBSchema {
     key: string;
     value: { key: string; value: any; updatedAt: number };
   };
+  novels: {
+    key: string;
+    value: CachedNovel;
+    indexes: { 'by-category': string };
+  };
+  novelChapters: {
+    key: string;
+    value: CachedChapter;
+    indexes: { 'by-novel': string };
+  };
 }
 
 const DB_NAME = 'jamb-offline-db';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 let dbPromise: Promise<IDBPDatabase<JambOfflineDB>> | null = null;
 
@@ -109,6 +144,18 @@ const getDB = async (): Promise<IDBPDatabase<JambOfflineDB>> => {
         // Metadata store
         if (!db.objectStoreNames.contains('metadata')) {
           db.createObjectStore('metadata', { keyPath: 'key' });
+        }
+
+        // Novels store
+        if (!db.objectStoreNames.contains('novels')) {
+          const novelsStore = db.createObjectStore('novels', { keyPath: 'id' });
+          novelsStore.createIndex('by-category', 'category');
+        }
+
+        // Novel chapters store
+        if (!db.objectStoreNames.contains('novelChapters')) {
+          const chaptersStore = db.createObjectStore('novelChapters', { keyPath: 'id' });
+          chaptersStore.createIndex('by-novel', 'novel_id');
         }
       },
     });
@@ -202,6 +249,57 @@ export const getSyllabusCount = async (): Promise<number> => {
   return db.count('syllabus');
 };
 
+// Novels
+export const saveNovels = async (novels: CachedNovel[]): Promise<void> => {
+  const db = await getDB();
+  const tx = db.transaction('novels', 'readwrite');
+  await Promise.all([
+    ...novels.map(n => tx.store.put(n)),
+    tx.done,
+  ]);
+  await setMetadata('novels_last_sync', Date.now());
+};
+
+export const getCachedNovels = async (): Promise<CachedNovel[]> => {
+  const db = await getDB();
+  return db.getAll('novels');
+};
+
+export const getCachedNovel = async (id: string): Promise<CachedNovel | undefined> => {
+  const db = await getDB();
+  return db.get('novels', id);
+};
+
+export const getNovelsCount = async (): Promise<number> => {
+  const db = await getDB();
+  return db.count('novels');
+};
+
+// Novel Chapters
+export const saveNovelChapters = async (chapters: CachedChapter[]): Promise<void> => {
+  const db = await getDB();
+  const tx = db.transaction('novelChapters', 'readwrite');
+  await Promise.all([
+    ...chapters.map(ch => tx.store.put(ch)),
+    tx.done,
+  ]);
+};
+
+export const getCachedChaptersByNovel = async (novelId: string): Promise<CachedChapter[]> => {
+  const db = await getDB();
+  return db.getAllFromIndex('novelChapters', 'by-novel', novelId);
+};
+
+export const getCachedChapter = async (chapterId: string): Promise<CachedChapter | undefined> => {
+  const db = await getDB();
+  return db.get('novelChapters', chapterId);
+};
+
+export const getNovelChaptersCount = async (): Promise<number> => {
+  const db = await getDB();
+  return db.count('novelChapters');
+};
+
 // Sync Queue
 export const addToSyncQueue = async (type: SyncItem['type'], data: any): Promise<void> => {
   const db = await getDB();
@@ -260,6 +358,8 @@ export const clearAllData = async (): Promise<void> => {
     db.clear('syllabus'),
     db.clear('syncQueue'),
     db.clear('metadata'),
+    db.clear('novels'),
+    db.clear('novelChapters'),
   ]);
 };
 
@@ -269,13 +369,17 @@ export const getStorageInfo = async (): Promise<{
   flashcardsCount: number;
   syllabusCount: number;
   pendingSyncCount: number;
+  novelsCount: number;
+  novelChaptersCount: number;
   lastSync: number | null;
 }> => {
-  const [questionsCount, flashcardsCount, syllabusCount, pendingSyncCount, lastSync] = await Promise.all([
+  const [questionsCount, flashcardsCount, syllabusCount, pendingSyncCount, novelsCount, novelChaptersCount, lastSync] = await Promise.all([
     getQuestionsCount(),
     getFlashcardsCount(),
     getSyllabusCount(),
     getSyncQueueCount(),
+    getNovelsCount(),
+    getNovelChaptersCount(),
     getMetadata('questions_last_sync'),
   ]);
 
@@ -284,6 +388,8 @@ export const getStorageInfo = async (): Promise<{
     flashcardsCount,
     syllabusCount,
     pendingSyncCount,
+    novelsCount,
+    novelChaptersCount,
     lastSync,
   };
 };
@@ -297,4 +403,4 @@ export const isDataStale = async (): Promise<boolean> => {
   return Date.now() - lastSync > staleThreshold;
 };
 
-export type { Question, Flashcard, SyllabusItem, SyncItem };
+export type { Question, Flashcard, SyllabusItem, SyncItem, CachedNovel, CachedChapter };
