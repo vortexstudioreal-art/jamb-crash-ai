@@ -192,7 +192,7 @@ const Index = () => {
     }
   }, [userEmail, effectiveAccess, isAdmin, isOwner, isFullyLoading, currentStep, isTrialActive, hasTrialUsed, canStartTrial, userSubjects.length, searchParams, isPaymentModalOpen, isPlanSelectionOpen]);
 
-  // Load user subjects (with offline cache fallback)
+  // Load user subjects - use cache FIRST for instant redirect, then sync from server
   useEffect(() => {
     const loadUserData = async () => {
       if (!userEmail) {
@@ -201,36 +201,36 @@ const Index = () => {
       }
       if (isLoading) return;
       
-      setSubjectsLoading(true);
+      // IMMEDIATE: Load cached subjects first so returning users skip to dashboard instantly
+      const cached = localStorage.getItem(`jamb_subjects_${userEmail}`);
+      if (cached) {
+        try {
+          const cachedSubjects = JSON.parse(cached);
+          if (Array.isArray(cachedSubjects) && cachedSubjects.length > 0) {
+            setUserSubjects(cachedSubjects);
+            setSubjectsLoading(false); // Unblock UI immediately
+            console.log('[Cache] Restored subjects instantly:', cachedSubjects);
+          }
+        } catch {}
+      } else {
+        setSubjectsLoading(true);
+      }
       
-      try {
-        const { data, error } = await supabase
-          .from('user_subjects')
-          .select('subjects')
-          .eq('email', userEmail)
-          .maybeSingle();
-        
-        if (data?.subjects) {
-          setUserSubjects(data.subjects as string[]);
-          // Cache subjects for offline use
-          localStorage.setItem(`jamb_subjects_${userEmail}`, JSON.stringify(data.subjects));
-        } else if (error && !navigator.onLine) {
-          // Offline fallback: restore from cache
-          const cached = localStorage.getItem(`jamb_subjects_${userEmail}`);
-          if (cached) {
-            setUserSubjects(JSON.parse(cached));
-            console.log('[Offline] Restored cached subjects');
+      // BACKGROUND: Sync from server if online
+      if (navigator.onLine) {
+        try {
+          const { data } = await supabase
+            .from('user_subjects')
+            .select('subjects')
+            .eq('email', userEmail)
+            .maybeSingle();
+          
+          if (data?.subjects) {
+            setUserSubjects(data.subjects as string[]);
+            localStorage.setItem(`jamb_subjects_${userEmail}`, JSON.stringify(data.subjects));
           }
-        }
-      } catch (err) {
-        console.error('Failed to load subjects:', err);
-        // Offline fallback
-        if (!navigator.onLine) {
-          const cached = localStorage.getItem(`jamb_subjects_${userEmail}`);
-          if (cached) {
-            setUserSubjects(JSON.parse(cached));
-            console.log('[Offline] Restored cached subjects from catch');
-          }
+        } catch (err) {
+          console.error('Failed to sync subjects:', err);
         }
       }
       
