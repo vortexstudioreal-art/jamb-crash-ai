@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { DashboardHeader } from '@/components/DashboardHeader';
@@ -14,14 +14,9 @@ import { AdminBadge } from '@/components/AdminBadge';
 import { PremiumDashboard } from '@/components/PremiumDashboard';
 import { SubjectSelector } from '@/components/SubjectSelector';
 import { SubjectChanger } from '@/components/SubjectChanger';
-import { TimedQuiz } from '@/components/TimedQuiz';
 import { QuizResults } from '@/components/QuizResults';
 import { StudyStats } from '@/components/StudyStats';
 import { TopicMasteryTracker } from '@/components/TopicMasteryTracker';
-import { StudyPlanGenerator } from '@/components/StudyPlanGenerator';
-import { StudyMaterials } from '@/components/StudyMaterials';
-import { SyllabusReader } from '@/components/SyllabusReader';
-import { Flashcards } from '@/components/Flashcards';
 import { CourseRequirements } from '@/components/CourseRequirements';
 import { CourseTipsCard } from '@/components/CourseTipsCard';
 import { TrialExpiredScreen } from '@/components/TrialExpiredScreen';
@@ -36,18 +31,42 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, Lock, RefreshCw, Layers, X, GraduationCap, Library, Newspaper, Trophy, Flame } from 'lucide-react';
-import { JambNewsPage } from '@/components/JambNewsPage';
-import { ScholarshipPage } from '@/components/ScholarshipPage';
-import { NovelBrowser, NovelDetail, NovelReader } from '@/components/novels';
+import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, Lock, RefreshCw, Layers, X, GraduationCap, Library, Newspaper, Trophy, Flame, StickyNote, Gamepad2, Download } from 'lucide-react';
 import { PaymentCancelledModal } from '@/components/PaymentCancelledModal';
-import { Leaderboard } from '@/components/Leaderboard';
 import { BannerAd } from '@/components/BannerAd';
 import { DashboardSkeleton } from '@/components/DashboardSkeleton';
 import { SocialFollowBanner } from '@/components/SocialFollowBanner';
 import { ChatBot } from '@/components/ChatBot';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ApkDownloadCard } from '@/components/ApkDownloadCard';
 
-type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'study-plan' | 'study-materials' | 'syllabus' | 'flashcards' | 'course-requirements' | 'novels' | 'novel-detail' | 'novel-reader' | 'news' | 'scholarships' | 'leaderboard';
+// Lazy-loaded heavy components
+const TimedQuiz = lazy(() => import('@/components/TimedQuiz').then(m => ({ default: m.TimedQuiz })));
+const Flashcards = lazy(() => import('@/components/Flashcards').then(m => ({ default: m.Flashcards })));
+const StudyPlanGenerator = lazy(() => import('@/components/StudyPlanGenerator').then(m => ({ default: m.StudyPlanGenerator })));
+const SyllabusReader = lazy(() => import('@/components/SyllabusReader').then(m => ({ default: m.SyllabusReader })));
+const StudyMaterials = lazy(() => import('@/components/StudyMaterials').then(m => ({ default: m.StudyMaterials })));
+const NovelBrowser = lazy(() => import('@/components/novels/NovelBrowser').then(m => ({ default: m.NovelBrowser })));
+const NovelDetail = lazy(() => import('@/components/novels/NovelDetail').then(m => ({ default: m.NovelDetail })));
+const NovelReader = lazy(() => import('@/components/novels/NovelReader').then(m => ({ default: m.NovelReader })));
+const JambNewsPage = lazy(() => import('@/components/JambNewsPage').then(m => ({ default: m.JambNewsPage })));
+const ScholarshipPage = lazy(() => import('@/components/ScholarshipPage').then(m => ({ default: m.ScholarshipPage })));
+const Leaderboard = lazy(() => import('@/components/Leaderboard').then(m => ({ default: m.Leaderboard })));
+const StudyNotes = lazy(() => import('@/components/StudyNotes').then(m => ({ default: m.StudyNotes })));
+const SpeedRound = lazy(() => import('@/components/SpeedRound').then(m => ({ default: m.SpeedRound })));
+const StreakChallenge = lazy(() => import('@/components/StreakChallenge').then(m => ({ default: m.StreakChallenge })));
+
+const LazyFallback = () => (
+  <div className="min-h-screen bg-background flex items-center justify-center">
+    <div className="space-y-4 w-full max-w-md px-4">
+      <Skeleton className="h-8 w-3/4 mx-auto" />
+      <Skeleton className="h-4 w-1/2 mx-auto" />
+      <Skeleton className="h-32 w-full" />
+    </div>
+  </div>
+);
+
+type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'study-plan' | 'study-materials' | 'syllabus' | 'flashcards' | 'course-requirements' | 'novels' | 'novel-detail' | 'novel-reader' | 'news' | 'scholarships' | 'leaderboard' | 'notes' | 'speed-round' | 'streak';
 type QuizType = 'full' | 'mini' | 'subject' | 'timed-practice';
 
 interface FormData {
@@ -79,8 +98,34 @@ const Index = () => {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isPlanSelectionOpen, setIsPlanSelectionOpen] = useState(false);
   const [personalizationData, setPersonalizationData] = useState<FormData | null>(null);
-  const [userSubjects, setUserSubjects] = useState<string[]>([]);
-  const [subjectsLoading, setSubjectsLoading] = useState(true); // Track if subjects are still loading
+  const [userSubjects, setUserSubjects] = useState<string[]>(() => {
+    // Pre-load from cache for instant redirect
+    const lastEmail = localStorage.getItem('jamb_last_email');
+    if (lastEmail) {
+      const cached = localStorage.getItem(`jamb_subjects_${lastEmail}`);
+      if (cached) {
+        try {
+          const subjects = JSON.parse(cached);
+          if (Array.isArray(subjects) && subjects.length > 0) return subjects;
+        } catch {}
+      }
+    }
+    return [];
+  });
+  const [subjectsLoading, setSubjectsLoading] = useState(() => {
+    // If we have cached subjects, don't block loading
+    const lastEmail = localStorage.getItem('jamb_last_email');
+    if (lastEmail) {
+      const cached = localStorage.getItem(`jamb_subjects_${lastEmail}`);
+      if (cached) {
+        try {
+          const subjects = JSON.parse(cached);
+          if (Array.isArray(subjects) && subjects.length > 0) return false;
+        } catch {}
+      }
+    }
+    return true;
+  });
   const [quizType, setQuizType] = useState<QuizType>('full');
   const [quizResults, setQuizResults] = useState<any>(null);
   const [highlightStandard, setHighlightStandard] = useState(false);
@@ -272,6 +317,13 @@ const Index = () => {
     
     loadUserData();
   }, [userEmail, isLoading]);
+
+  // Save last email for cache pre-loading on next visit
+  useEffect(() => {
+    if (userEmail) {
+      localStorage.setItem('jamb_last_email', userEmail);
+    }
+  }, [userEmail]);
 
   // Handle URL params
   useEffect(() => {
@@ -620,13 +672,15 @@ const Index = () => {
         />
         <div className="pt-16">
           <BackButton onClick={handleBackToDashboard} />
-          <TimedQuiz
-            userEmail={userEmail}
-            subjects={effectiveSubjects}
-            quizType={quizType}
-            onComplete={handleQuizComplete}
-            onExit={handleBackToDashboard}
-          />
+          <Suspense fallback={<LazyFallback />}>
+            <TimedQuiz
+              userEmail={userEmail}
+              subjects={effectiveSubjects}
+              quizType={quizType}
+              onComplete={handleQuizComplete}
+              onExit={handleBackToDashboard}
+            />
+          </Suspense>
         </div>
       </div>
     );
@@ -779,17 +833,70 @@ const Index = () => {
     );
   }
 
+  // Study Notes step
+  if (currentStep === 'notes' && userEmail) {
+    return (
+      <Suspense fallback={<LazyFallback />}>
+        <StudyNotes
+          userEmail={userEmail}
+          subjects={effectiveSubjects}
+          isOwner={effectiveOwner}
+          isAdmin={isAdmin}
+          userRole={userRole}
+          onSignOut={handleSignOut}
+          onBack={handleBackToDashboard}
+        />
+      </Suspense>
+    );
+  }
+
+  // Speed Round step
+  if (currentStep === 'speed-round' && userEmail) {
+    return (
+      <Suspense fallback={<LazyFallback />}>
+        <SpeedRound
+          userEmail={userEmail}
+          subjects={effectiveSubjects}
+          isOwner={effectiveOwner}
+          isAdmin={isAdmin}
+          userRole={userRole}
+          onSignOut={handleSignOut}
+          onBack={handleBackToDashboard}
+        />
+      </Suspense>
+    );
+  }
+
+  // Streak Challenge step
+  if (currentStep === 'streak' && userEmail) {
+    return (
+      <Suspense fallback={<LazyFallback />}>
+        <StreakChallenge
+          userEmail={userEmail}
+          subjects={effectiveSubjects}
+          isOwner={effectiveOwner}
+          isAdmin={isAdmin}
+          userRole={userRole}
+          onSignOut={handleSignOut}
+          onBack={handleBackToDashboard}
+        />
+      </Suspense>
+    );
+  }
+
   // Novels step
   if (currentStep === 'novels' && userEmail) {
     return (
-      <NovelBrowser
-        userEmail={userEmail}
-        onBack={handleBackToDashboard}
-        onSelectNovel={(novelId) => {
-          setSelectedNovelId(novelId);
-          setCurrentStep('novel-detail');
-        }}
-      />
+      <Suspense fallback={<LazyFallback />}>
+        <NovelBrowser
+          userEmail={userEmail}
+          onBack={handleBackToDashboard}
+          onSelectNovel={(novelId) => {
+            setSelectedNovelId(novelId);
+            setCurrentStep('novel-detail');
+          }}
+        />
+      </Suspense>
     );
   }
 
@@ -1126,6 +1233,52 @@ const Index = () => {
                 >
                   <Flame className="w-6 h-6 text-orange-500" />
                   <span className="font-bold text-sm">High-Yield Qs</span>
+                </Button>
+              </motion.div>
+
+              {/* Notes, Games & APK Row */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.19 }}
+                className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6"
+              >
+                <Button
+                  variant="outline"
+                  className="h-auto py-4 flex flex-col gap-1 hover:border-teal-500 hover:bg-teal-500/5"
+                  onClick={() => setCurrentStep('notes')}
+                >
+                  <StickyNote className="w-6 h-6 text-teal-500" />
+                  <span className="font-bold text-sm">Study Notes</span>
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="h-auto py-4 flex flex-col gap-1 hover:border-primary hover:bg-primary/5"
+                  onClick={() => setCurrentStep('speed-round')}
+                >
+                  <Zap className="w-6 h-6 text-primary" />
+                  <span className="font-bold text-sm">Speed Round</span>
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="h-auto py-4 flex flex-col gap-1 hover:border-orange-500 hover:bg-orange-500/5"
+                  onClick={() => setCurrentStep('streak')}
+                >
+                  <Flame className="w-6 h-6 text-orange-500" />
+                  <span className="font-bold text-sm">Streak 🔥</span>
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="h-auto py-4 flex flex-col gap-1 hover:border-green-500 hover:bg-green-500/5"
+                  asChild
+                >
+                  <a href="https://drive.google.com/file/d/YOUR_FILE_ID/view?usp=sharing" target="_blank" rel="noopener noreferrer">
+                    <Download className="w-6 h-6 text-green-500" />
+                    <span className="font-bold text-sm">Get APK</span>
+                  </a>
                 </Button>
               </motion.div>
 
