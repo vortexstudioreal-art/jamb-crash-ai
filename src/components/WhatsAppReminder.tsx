@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MessageCircle, Bell, CheckCircle, AlertTriangle, ExternalLink, HelpCircle } from 'lucide-react';
+import { MessageCircle, Bell, CheckCircle, AlertTriangle, ExternalLink, HelpCircle, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -28,6 +28,7 @@ export const WhatsAppReminder = ({ userEmail, isAdmin = false, onSetupComplete }
   const [isSetup, setIsSetup] = useState(false);
   const [savedNumber, setSavedNumber] = useState('');
   const [showHelp, setShowHelp] = useState(false);
+  const [isSendingTest, setIsSendingTest] = useState(false);
 
   // Check if already setup
   useEffect(() => {
@@ -158,8 +159,59 @@ export const WhatsAppReminder = ({ userEmail, isAdmin = false, onSetupComplete }
             First reminder coming tomorrow! 🎯
           </p>
         </div>
+
+        {/* Send Test Message button */}
+        <Button
+          variant="outline"
+          size="sm"
+          className="mt-3 gap-2"
+          disabled={isSendingTest}
+          onClick={async () => {
+            setIsSendingTest(true);
+            try {
+              const { data, error } = await supabase.functions.invoke('send-whatsapp-reminder', {
+                body: { phone: savedNumber, email: userEmail, test: false }
+              });
+              if (error) throw error;
+              toast.success('Test message sent! Check your WhatsApp 📱');
+            } catch (err) {
+              toast.error('Failed to send test. Make sure you\'ve joined the sandbox first.');
+            } finally {
+              setIsSendingTest(false);
+            }
+          }}
+        >
+          <Send className="w-3.5 h-3.5" />
+          {isSendingTest ? 'Sending...' : 'Send Test Message'}
+        </Button>
         
-        {/* One-time activation reminder */}
+        {/* Important activation notice - always visible */}
+        <div className="mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-left">
+          <div className="flex gap-2 mb-2">
+            <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+            <p className="text-sm font-medium text-amber-600">⚠️ Must Activate First!</p>
+          </div>
+          <p className="text-xs text-muted-foreground mb-2">
+            Send <strong className="text-foreground">"{SANDBOX_JOIN_MESSAGE}"</strong> to <strong className="text-foreground">{SANDBOX_NUMBER}</strong> on WhatsApp. You must re-do this every 72 hours.
+          </p>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="gap-2 w-full"
+            asChild
+          >
+            <a 
+              href={`https://wa.me/14155238886?text=${encodeURIComponent(SANDBOX_JOIN_MESSAGE)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ExternalLink className="w-3 h-3" />
+              Open WhatsApp to Activate
+            </a>
+          </Button>
+        </div>
+
+        {/* Collapsible extra help */}
         <Collapsible open={showHelp} onOpenChange={setShowHelp} className="mt-4">
           <CollapsibleTrigger asChild>
             <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
