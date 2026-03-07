@@ -169,6 +169,13 @@ const Index = () => {
     loading: trialLoading,
   } = trialSystem;
 
+  // Wrap step changes in startTransition to prevent suspense errors with lazy-loaded components
+  const navigateStep = useCallback((step: Step) => {
+    startTransition(() => {
+      setCurrentStep(step);
+    });
+  }, []);
+
   const userEmail = user?.email?.toLowerCase() || null;
   const effectiveAccess = hasAccess || isOwner || isAdmin;
   const effectiveAdmin = isAdmin || isOwner;
