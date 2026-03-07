@@ -1293,6 +1293,13 @@ const Index = () => {
                 <CourseTipsCard userEmail={userEmail} userSubjects={effectiveSubjects} />
               </motion.div>
 
+  // Wrap step changes in startTransition to prevent suspense errors with lazy-loaded components
+  const navigateStep = useCallback((step: Step) => {
+    startTransition(() => {
+      setCurrentStep(step);
+    });
+  }, []);
+
 
               {/* Subject Tags with Change Button */}
               <motion.div
