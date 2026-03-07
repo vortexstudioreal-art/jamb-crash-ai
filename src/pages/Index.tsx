@@ -900,7 +900,7 @@ const Index = () => {
           onBack={handleBackToDashboard}
           onSelectNovel={(novelId) => {
             setSelectedNovelId(novelId);
-            setCurrentStep('novel-detail');
+            navigateStep('novel-detail');
           }}
         />
       </Suspense>
@@ -913,10 +913,10 @@ const Index = () => {
       <NovelDetail
         novelId={selectedNovelId}
         userEmail={userEmail}
-        onBack={() => setCurrentStep('novels')}
+        onBack={() => navigateStep('novels')}
         onStartReading={(chapterId) => {
           setSelectedChapterId(chapterId);
-          setCurrentStep('novel-reader');
+          navigateStep('novel-reader');
         }}
       />
     );
@@ -928,7 +928,7 @@ const Index = () => {
       <NovelReader
         chapterId={selectedChapterId}
         userEmail={userEmail}
-        onBack={() => setCurrentStep('novel-detail')}
+        onBack={() => navigateStep('novel-detail')}
         onNextChapter={(chapterId) => setSelectedChapterId(chapterId)}
         onPrevChapter={(chapterId) => setSelectedChapterId(chapterId)}
       />
