@@ -1309,7 +1309,9 @@ const Index = () => {
                     <span className="text-xs text-muted-foreground">Don't break the chain</span>
                   </Button>
                 </motion.div>
-              )
+              )}
+
+
 
               {/* Course Requirements Button */}
               {/* Course Tips Card */}
