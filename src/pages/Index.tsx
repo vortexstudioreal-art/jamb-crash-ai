@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense, startTransition, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { DashboardHeader } from '@/components/DashboardHeader';
@@ -168,6 +168,13 @@ const Index = () => {
     startTrial,
     loading: trialLoading,
   } = trialSystem;
+
+  // Wrap step changes in startTransition to prevent suspense errors with lazy-loaded components
+  const navigateStep = useCallback((step: Step) => {
+    startTransition(() => {
+      setCurrentStep(step);
+    });
+  }, []);
 
   const userEmail = user?.email?.toLowerCase() || null;
   const effectiveAccess = hasAccess || isOwner || isAdmin;
@@ -548,24 +555,24 @@ const Index = () => {
   const handleFormSubmit = (data: unknown) => {
     setPersonalizationData(data as FormData);
     toast.success('Creating your personalized study plan... 🚀');
-    setCurrentStep('study-plan');
+    navigateStep('study-plan');
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   const handleGenerateStudyPlan = () => {
-    setCurrentStep('study-plan');
+    navigateStep('study-plan');
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   const handleStartQuiz = (type: QuizType) => {
     setQuizType(type);
-    setCurrentStep('quiz');
+    navigateStep('quiz');
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   const handleQuizComplete = (results: any) => {
     setQuizResults(results);
-    setCurrentStep('quiz-results');
+    navigateStep('quiz-results');
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
@@ -893,7 +900,7 @@ const Index = () => {
           onBack={handleBackToDashboard}
           onSelectNovel={(novelId) => {
             setSelectedNovelId(novelId);
-            setCurrentStep('novel-detail');
+            navigateStep('novel-detail');
           }}
         />
       </Suspense>
@@ -906,10 +913,10 @@ const Index = () => {
       <NovelDetail
         novelId={selectedNovelId}
         userEmail={userEmail}
-        onBack={() => setCurrentStep('novels')}
+        onBack={() => navigateStep('novels')}
         onStartReading={(chapterId) => {
           setSelectedChapterId(chapterId);
-          setCurrentStep('novel-reader');
+          navigateStep('novel-reader');
         }}
       />
     );
@@ -921,7 +928,7 @@ const Index = () => {
       <NovelReader
         chapterId={selectedChapterId}
         userEmail={userEmail}
-        onBack={() => setCurrentStep('novel-detail')}
+        onBack={() => navigateStep('novel-detail')}
         onNextChapter={(chapterId) => setSelectedChapterId(chapterId)}
         onPrevChapter={(chapterId) => setSelectedChapterId(chapterId)}
       />
@@ -1167,7 +1174,7 @@ const Index = () => {
                 <Button
                   variant="outline"
                   className="h-auto py-4 flex flex-col gap-1 hover:border-purple-500 hover:bg-purple-500/5"
-                  onClick={() => setCurrentStep('syllabus')}
+                  onClick={() => navigateStep('syllabus')}
                 >
                   <BookOpen className="w-6 h-6 text-purple-500" />
                   <span className="font-bold text-sm">Syllabus</span>
@@ -1176,7 +1183,7 @@ const Index = () => {
                 <Button
                   variant="outline"
                   className="h-auto py-4 flex flex-col gap-1 hover:border-orange-500 hover:bg-orange-500/5"
-                  onClick={() => setCurrentStep('flashcards')}
+                  onClick={() => navigateStep('flashcards')}
                 >
                   <Layers className="w-6 h-6 text-orange-500" />
                   <span className="font-bold text-sm">Flashcards</span>
@@ -1193,7 +1200,7 @@ const Index = () => {
                 <Button
                   variant="outline"
                   className="h-auto py-4 flex flex-col gap-1 hover:border-rose-500 hover:bg-rose-500/5"
-                  onClick={() => setCurrentStep('novels')}
+                  onClick={() => navigateStep('novels')}
                 >
                   <Library className="w-6 h-6 text-rose-500" />
                   <span className="font-bold text-sm">JAMB Novels</span>
@@ -1202,7 +1209,7 @@ const Index = () => {
                 <Button
                   variant="outline"
                   className="h-auto py-4 flex flex-col gap-1 hover:border-cyan-500 hover:bg-cyan-500/5"
-                  onClick={() => setCurrentStep('news')}
+                  onClick={() => navigateStep('news')}
                 >
                   <Newspaper className="w-6 h-6 text-cyan-500" />
                   <span className="font-bold text-sm">JAMB News</span>
@@ -1211,7 +1218,7 @@ const Index = () => {
                 <Button
                   variant="outline"
                   className="h-auto py-4 flex flex-col gap-1 hover:border-amber-500 hover:bg-amber-500/5"
-                  onClick={() => setCurrentStep('scholarships')}
+                  onClick={() => navigateStep('scholarships')}
                 >
                   <GraduationCap className="w-6 h-6 text-amber-500" />
                   <span className="font-bold text-sm">Scholarships</span>
@@ -1220,7 +1227,7 @@ const Index = () => {
                 <Button
                   variant="outline"
                   className="h-auto py-4 flex flex-col gap-1 hover:border-yellow-500 hover:bg-yellow-500/5"
-                  onClick={() => setCurrentStep('leaderboard')}
+                  onClick={() => navigateStep('leaderboard')}
                 >
                   <Trophy className="w-6 h-6 text-yellow-500" />
                   <span className="font-bold text-sm">Leaderboard</span>
@@ -1246,7 +1253,7 @@ const Index = () => {
                 <Button
                   variant="outline"
                   className="h-auto py-4 flex flex-col gap-1 hover:border-teal-500 hover:bg-teal-500/5"
-                  onClick={() => setCurrentStep('notes')}
+                  onClick={() => navigateStep('notes')}
                 >
                   <StickyNote className="w-6 h-6 text-teal-500" />
                   <span className="font-bold text-sm">Study Notes</span>
@@ -1255,7 +1262,7 @@ const Index = () => {
                 <Button
                   variant="outline"
                   className="h-auto py-4 flex flex-col gap-1 hover:border-primary hover:bg-primary/5"
-                  onClick={() => setCurrentStep('speed-round')}
+                  onClick={() => navigateStep('speed-round')}
                 >
                   <Zap className="w-6 h-6 text-primary" />
                   <span className="font-bold text-sm">Speed Round</span>
@@ -1264,7 +1271,7 @@ const Index = () => {
                 <Button
                   variant="outline"
                   className="h-auto py-4 flex flex-col gap-1 hover:border-orange-500 hover:bg-orange-500/5"
-                  onClick={() => setCurrentStep('streak')}
+                  onClick={() => navigateStep('streak')}
                 >
                   <Flame className="w-6 h-6 text-orange-500" />
                   <span className="font-bold text-sm">Streak 🔥</span>
