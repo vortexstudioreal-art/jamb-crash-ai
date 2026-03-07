@@ -1196,7 +1196,7 @@ const Index = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.18 }}
-                className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6"
+                className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-3"
               >
                 <Button
                   variant="outline"
@@ -1249,7 +1249,7 @@ const Index = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.19 }}
-                className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6"
+                className="grid grid-cols-3 gap-3 mb-6"
               >
                 <Button
                   variant="outline"
@@ -1262,20 +1262,11 @@ const Index = () => {
 
                 <Button
                   variant="outline"
-                  className="h-auto py-4 flex flex-col gap-1 hover:border-primary hover:bg-primary/5"
-                  onClick={() => navigateStep('speed-round')}
+                  className={`h-auto py-4 flex flex-col gap-1 hover:border-primary hover:bg-primary/5 ${showGamePicker ? 'border-primary bg-primary/5' : ''}`}
+                  onClick={() => setShowGamePicker(!showGamePicker)}
                 >
-                  <Zap className="w-6 h-6 text-primary" />
-                  <span className="font-bold text-sm">Speed Round</span>
-                </Button>
-
-                <Button
-                  variant="outline"
-                  className="h-auto py-4 flex flex-col gap-1 hover:border-orange-500 hover:bg-orange-500/5"
-                  onClick={() => navigateStep('streak')}
-                >
-                  <Flame className="w-6 h-6 text-orange-500" />
-                  <span className="font-bold text-sm">Streak 🔥</span>
+                  <Gamepad2 className="w-6 h-6 text-primary" />
+                  <span className="font-bold text-sm">Games 🎮</span>
                 </Button>
 
                 <Button
@@ -1289,6 +1280,36 @@ const Index = () => {
                   </a>
                 </Button>
               </motion.div>
+
+              {/* Game Picker */}
+              {showGamePicker && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="grid grid-cols-2 gap-3 mb-6 -mt-3"
+                >
+                  <Button
+                    variant="outline"
+                    className="h-auto py-5 flex flex-col gap-2 border-primary/30 hover:border-primary hover:bg-primary/5"
+                    onClick={() => { setShowGamePicker(false); navigateStep('speed-round'); }}
+                  >
+                    <Zap className="w-8 h-8 text-primary" />
+                    <span className="font-bold text-sm">⚡ Speed Round</span>
+                    <span className="text-xs text-muted-foreground">60s blitz</span>
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    className="h-auto py-5 flex flex-col gap-2 border-orange-500/30 hover:border-orange-500 hover:bg-orange-500/5"
+                    onClick={() => { setShowGamePicker(false); navigateStep('streak'); }}
+                  >
+                    <Flame className="w-8 h-8 text-orange-500" />
+                    <span className="font-bold text-sm">🔥 Streak Challenge</span>
+                    <span className="text-xs text-muted-foreground">Don't break the chain</span>
+                  </Button>
+                </motion.div>
+              )
 
               {/* Course Requirements Button */}
               {/* Course Tips Card */}
