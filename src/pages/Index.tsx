@@ -1519,6 +1519,11 @@ const Index = () => {
         />
         <HowItWorksSection onStartTrial={handleStartFreeTrial} />
         <PricingSection onSelectPlan={handleSelectPlan} highlightStandard={highlightStandard} />
+        
+        {/* APK Download Card on Landing Page */}
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <ApkDownloadCard />
+        </div>
       </div>
       <Footer />
 
