@@ -501,8 +501,16 @@ const Index = () => {
     setIsPaymentModalOpen(false);
     setJustPaidForPlan(true); // Immediately mark as paid to bypass trial expired check
     await refreshAccess();
-    toast.success('Payment successful! 🎉 Let\'s pick your subjects!');
-    setCurrentStep('subject-select');
+    
+    // If user already has subjects (e.g. trial-expired user upgrading), go straight to dashboard
+    if (userSubjects.length > 0) {
+      toast.success('Payment successful! 🎉 Welcome back!');
+      setCurrentStep('dashboard');
+      saveDashboardState('dashboard');
+    } else {
+      toast.success('Payment successful! 🎉 Let\'s pick your subjects!');
+      setCurrentStep('subject-select');
+    }
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
