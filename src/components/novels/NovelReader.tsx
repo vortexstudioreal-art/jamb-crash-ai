@@ -57,7 +57,7 @@ export const NovelReader = ({
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({});
   const [showResults, setShowResults] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
-  const saveProgressRef = useRef<NodeJS.Timeout>();
+  const saveProgressRef = useRef<ReturnType<typeof setTimeout>>();
   const startTimeRef = useRef<number>(Date.now());
   const accumulatedTimeRef = useRef<number>(0);
 

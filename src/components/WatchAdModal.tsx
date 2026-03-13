@@ -26,7 +26,7 @@ export const WatchAdModal = ({ isOpen, onClose, onComplete, featureType }: Watch
   const [adError, setAdError] = useState<string | null>(null);
   const [isLoadingAd, setIsLoadingAd] = useState(false);
   const [adSource, setAdSource] = useState<'admob' | 'simulation'>('simulation');
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   
   const { user } = useAuth();
   const { trackAdStarted, trackAdCompleted, trackAdFailed, trackRewardClaimed } = useAdAnalytics();
