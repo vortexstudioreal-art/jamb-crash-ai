@@ -501,8 +501,16 @@ const Index = () => {
     setIsPaymentModalOpen(false);
     setJustPaidForPlan(true); // Immediately mark as paid to bypass trial expired check
     await refreshAccess();
-    toast.success('Payment successful! 🎉 Let\'s pick your subjects!');
-    setCurrentStep('subject-select');
+    
+    // If user already has subjects (e.g. trial-expired user upgrading), go straight to dashboard
+    if (userSubjects.length > 0) {
+      toast.success('Payment successful! 🎉 Welcome back!');
+      setCurrentStep('dashboard');
+      saveDashboardState('dashboard');
+    } else {
+      toast.success('Payment successful! 🎉 Let\'s pick your subjects!');
+      setCurrentStep('subject-select');
+    }
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
@@ -1256,7 +1264,7 @@ const Index = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.19 }}
-                className="grid grid-cols-3 gap-3 mb-6"
+                className="grid grid-cols-2 gap-3 mb-6"
               >
                 <Button
                   variant="outline"
@@ -1274,17 +1282,6 @@ const Index = () => {
                 >
                   <Gamepad2 className="w-6 h-6 text-primary" />
                   <span className="font-bold text-sm">Games 🎮</span>
-                </Button>
-
-                <Button
-                  variant="outline"
-                  className="h-auto py-4 flex flex-col gap-1 hover:border-green-500 hover:bg-green-500/5"
-                  asChild
-                >
-                  <a href="https://drive.google.com/file/d/YOUR_FILE_ID/view?usp=sharing" target="_blank" rel="noopener noreferrer">
-                    <Download className="w-6 h-6 text-green-500" />
-                    <span className="font-bold text-sm">Get APK</span>
-                  </a>
                 </Button>
               </motion.div>
 
@@ -1522,6 +1519,11 @@ const Index = () => {
         />
         <HowItWorksSection onStartTrial={handleStartFreeTrial} />
         <PricingSection onSelectPlan={handleSelectPlan} highlightStandard={highlightStandard} />
+        
+        {/* APK Download Card on Landing Page */}
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <ApkDownloadCard />
+        </div>
       </div>
       <Footer />
 
