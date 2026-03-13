@@ -242,6 +242,13 @@ const Index = () => {
     if (userEmail && !hasFullAccess && !hasTrialUsed && canStartTrial && currentStep === 'landing') {
       setCurrentStep('subject-select');
       window.scrollTo({ top: 0, behavior: 'instant' });
+      return;
+    }
+
+    // Catch-all: Any logged-in user without subjects should pick subjects first
+    if (userEmail && userSubjects.length === 0 && currentStep === 'landing' && !isAdmin && !isOwner) {
+      setCurrentStep('subject-select');
+      window.scrollTo({ top: 0, behavior: 'instant' });
     }
   }, [userEmail, effectiveAccess, isAdmin, isOwner, isFullyLoading, currentStep, isTrialActive, hasTrialUsed, canStartTrial, userSubjects.length, searchParams, isPaymentModalOpen, isPlanSelectionOpen]);
 
