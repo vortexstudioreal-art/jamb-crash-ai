@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { TrendingUp, Target, Award, Brain, BarChart3, BookOpen, Clock, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { useJambScorePredictor } from '@/hooks/useJambScorePredictor';
 
 interface QuizAttempt {
   id: string;
@@ -12,25 +13,6 @@ interface QuizAttempt {
   time_taken_seconds: number;
   created_at: string;
   questions_data?: any;
-}
-
-interface ReadingProgress {
-  subject: string;
-  progress_percent: number;
-  mastery_level: string;
-}
-
-interface FlashcardData {
-  subject: string;
-  times_correct: number;
-  times_reviewed: number;
-  mastery_level: string;
-}
-
-interface StudySession {
-  subject: string;
-  time_spent_seconds: number;
-  created_at: string;
 }
 
 interface ScorePredictorProps {
