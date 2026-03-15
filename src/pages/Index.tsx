@@ -247,7 +247,7 @@ const Index = () => {
 
     // Catch-all: Any logged-in user without subjects should pick subjects first
     if (userEmail && userSubjects.length === 0 && currentStep === 'landing' && !isAdmin && !isOwner) {
-      setCurrentStep('subject-select');
+      startTransition(() => setCurrentStep('subject-select'));
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
   }, [userEmail, effectiveAccess, isAdmin, isOwner, isFullyLoading, currentStep, isTrialActive, hasTrialUsed, canStartTrial, userSubjects.length, searchParams, isPaymentModalOpen, isPlanSelectionOpen]);
