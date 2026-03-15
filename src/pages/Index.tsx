@@ -227,13 +227,13 @@ const Index = () => {
     // Trial users: if logged in and has active trial → go to dashboard
     if (userEmail && !hasFullAccess && isTrialActive && currentStep === 'landing') {
       if (userSubjects.length > 0) {
-        setCurrentStep('dashboard');
+        startTransition(() => setCurrentStep('dashboard'));
         saveDashboardState('dashboard');
         window.scrollTo({ top: 0, behavior: 'instant' });
         return;
       }
       // Need subjects first
-      setCurrentStep('subject-select');
+      startTransition(() => setCurrentStep('subject-select'));
       window.scrollTo({ top: 0, behavior: 'instant' });
       return;
     }
