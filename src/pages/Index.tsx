@@ -558,7 +558,7 @@ const Index = () => {
       toast.info('Your payment is being processed...');
     }
     
-    setCurrentStep('dashboard');
+    startTransition(() => setCurrentStep('dashboard'));
     saveDashboardState('dashboard');
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
