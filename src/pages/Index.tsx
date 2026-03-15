@@ -240,7 +240,7 @@ const Index = () => {
     
     // New user (no trial used yet) - show subject selection to start trial
     if (userEmail && !hasFullAccess && !hasTrialUsed && canStartTrial && currentStep === 'landing') {
-      setCurrentStep('subject-select');
+      startTransition(() => setCurrentStep('subject-select'));
       window.scrollTo({ top: 0, behavior: 'instant' });
       return;
     }
