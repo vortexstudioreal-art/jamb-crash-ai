@@ -364,7 +364,7 @@ const Index = () => {
     }
     
     if (step === 'dashboard' && (effectiveAccess || isTrialActive) && userEmail) {
-      setCurrentStep('dashboard');
+      startTransition(() => setCurrentStep('dashboard'));
       setSearchParams({});
       window.scrollTo({ top: 0, behavior: 'instant' });
       return;
