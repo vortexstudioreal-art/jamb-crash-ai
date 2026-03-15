@@ -374,13 +374,13 @@ const Index = () => {
     
     if (step === 'upload' && userEmail) {
       if (userSubjects.length === 0 && !effectiveAdmin) {
-        setCurrentStep('subject-select');
+        startTransition(() => setCurrentStep('subject-select'));
       } else {
-        setCurrentStep('upload');
+        startTransition(() => setCurrentStep('upload'));
       }
       setSearchParams({});
     } else if (step === 'dashboard' && userEmail && (effectiveAccess || isTrialActive)) {
-      setCurrentStep('dashboard');
+      startTransition(() => setCurrentStep('dashboard'));
       setSearchParams({});
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
