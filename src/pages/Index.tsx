@@ -1206,7 +1206,7 @@ const Index = () => {
                 </Button>
               </motion.div>
 
-              {/* Tertiary Actions Row - Novels, News, Scholarships, Leaderboard, Repeated Questions */}
+              {/* Tertiary Actions Row */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -1259,12 +1259,12 @@ const Index = () => {
                 </Button>
               </motion.div>
 
-              {/* Notes, Games & APK Row */}
+              {/* Notes & Games Row */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.19 }}
-                className="grid grid-cols-2 gap-3 mb-6"
+                className="grid grid-cols-2 gap-3 mb-3"
               >
                 <Button
                   variant="outline"
