@@ -602,7 +602,7 @@ const Index = () => {
     
     // Otherwise scroll to pricing
     localStorage.removeItem(DASHBOARD_STATE_KEY);
-    setCurrentStep('landing');
+    startTransition(() => setCurrentStep('landing'));
     setHighlightStandard(true);
     setTimeout(() => {
       const pricingSection = document.getElementById('pricing');
