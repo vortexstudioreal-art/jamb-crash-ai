@@ -419,7 +419,7 @@ const Index = () => {
     
     // If user can start trial, go to subject selection
     if (canStartTrial) {
-      setCurrentStep('subject-select');
+      startTransition(() => setCurrentStep('subject-select'));
       window.scrollTo({ top: 0, behavior: 'instant' });
     } else if (hasTrialUsed) {
       toast.error('You have already used your free trial. Please upgrade to continue.');
