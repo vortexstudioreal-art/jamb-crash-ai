@@ -207,17 +207,17 @@ const Index = () => {
     if (userEmail && hasFullAccess && currentStep === 'landing') {
       // Check if user already has subjects saved - if so, go straight to dashboard
       if (userSubjects.length > 0) {
-        setCurrentStep('dashboard');
+        startTransition(() => setCurrentStep('dashboard'));
         saveDashboardState('dashboard');
         window.scrollTo({ top: 0, behavior: 'instant' });
         return;
       }
       // Only prompt for subjects if they don't have any (and not admin/owner)
       if (!isAdmin && !isOwner) {
-        setCurrentStep('subject-select');
+        startTransition(() => setCurrentStep('subject-select'));
       } else {
         // Admins/owners go to dashboard even without subjects
-        setCurrentStep('dashboard');
+        startTransition(() => setCurrentStep('dashboard'));
         saveDashboardState('dashboard');
       }
       window.scrollTo({ top: 0, behavior: 'instant' });
