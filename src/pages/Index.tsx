@@ -737,7 +737,7 @@ const Index = () => {
   if (currentStep === 'subject-select' && userEmail) {
     // Admins with no subjects selected - go to dashboard (they have full access)
     if (effectiveAdmin) {
-      setCurrentStep('dashboard');
+      startTransition(() => setCurrentStep('dashboard'));
       return null;
     }
     
