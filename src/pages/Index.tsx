@@ -483,7 +483,7 @@ const Index = () => {
     setPaymentWasCancelled(false);
     // Start trial flow
     if (canStartTrial) {
-      setCurrentStep('subject-select');
+      startTransition(() => setCurrentStep('subject-select'));
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
   };
