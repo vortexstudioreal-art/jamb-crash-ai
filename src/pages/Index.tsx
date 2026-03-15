@@ -455,7 +455,7 @@ const Index = () => {
       navigate('/auth', { state: { flow: 'trial' } });
       return;
     }
-    setCurrentStep('subject-select');
+    startTransition(() => setCurrentStep('subject-select'));
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
