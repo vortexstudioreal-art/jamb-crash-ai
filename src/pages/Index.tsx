@@ -626,7 +626,7 @@ const Index = () => {
   };
 
   const handleBackToDashboard = () => {
-    setCurrentStep('dashboard');
+    startTransition(() => setCurrentStep('dashboard'));
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
