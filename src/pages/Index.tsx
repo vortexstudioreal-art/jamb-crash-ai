@@ -207,17 +207,17 @@ const Index = () => {
     if (userEmail && hasFullAccess && currentStep === 'landing') {
       // Check if user already has subjects saved - if so, go straight to dashboard
       if (userSubjects.length > 0) {
-        setCurrentStep('dashboard');
+        startTransition(() => setCurrentStep('dashboard'));
         saveDashboardState('dashboard');
         window.scrollTo({ top: 0, behavior: 'instant' });
         return;
       }
       // Only prompt for subjects if they don't have any (and not admin/owner)
       if (!isAdmin && !isOwner) {
-        setCurrentStep('subject-select');
+        startTransition(() => setCurrentStep('subject-select'));
       } else {
         // Admins/owners go to dashboard even without subjects
-        setCurrentStep('dashboard');
+        startTransition(() => setCurrentStep('dashboard'));
         saveDashboardState('dashboard');
       }
       window.scrollTo({ top: 0, behavior: 'instant' });
@@ -227,27 +227,27 @@ const Index = () => {
     // Trial users: if logged in and has active trial → go to dashboard
     if (userEmail && !hasFullAccess && isTrialActive && currentStep === 'landing') {
       if (userSubjects.length > 0) {
-        setCurrentStep('dashboard');
+        startTransition(() => setCurrentStep('dashboard'));
         saveDashboardState('dashboard');
         window.scrollTo({ top: 0, behavior: 'instant' });
         return;
       }
       // Need subjects first
-      setCurrentStep('subject-select');
+      startTransition(() => setCurrentStep('subject-select'));
       window.scrollTo({ top: 0, behavior: 'instant' });
       return;
     }
     
     // New user (no trial used yet) - show subject selection to start trial
     if (userEmail && !hasFullAccess && !hasTrialUsed && canStartTrial && currentStep === 'landing') {
-      setCurrentStep('subject-select');
+      startTransition(() => setCurrentStep('subject-select'));
       window.scrollTo({ top: 0, behavior: 'instant' });
       return;
     }
 
     // Catch-all: Any logged-in user without subjects should pick subjects first
     if (userEmail && userSubjects.length === 0 && currentStep === 'landing' && !isAdmin && !isOwner) {
-      setCurrentStep('subject-select');
+      startTransition(() => setCurrentStep('subject-select'));
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
   }, [userEmail, effectiveAccess, isAdmin, isOwner, isFullyLoading, currentStep, isTrialActive, hasTrialUsed, canStartTrial, userSubjects.length, searchParams, isPaymentModalOpen, isPlanSelectionOpen]);
@@ -364,7 +364,7 @@ const Index = () => {
     }
     
     if (step === 'dashboard' && (effectiveAccess || isTrialActive) && userEmail) {
-      setCurrentStep('dashboard');
+      startTransition(() => setCurrentStep('dashboard'));
       setSearchParams({});
       window.scrollTo({ top: 0, behavior: 'instant' });
       return;
@@ -374,13 +374,13 @@ const Index = () => {
     
     if (step === 'upload' && userEmail) {
       if (userSubjects.length === 0 && !effectiveAdmin) {
-        setCurrentStep('subject-select');
+        startTransition(() => setCurrentStep('subject-select'));
       } else {
-        setCurrentStep('upload');
+        startTransition(() => setCurrentStep('upload'));
       }
       setSearchParams({});
     } else if (step === 'dashboard' && userEmail && (effectiveAccess || isTrialActive)) {
-      setCurrentStep('dashboard');
+      startTransition(() => setCurrentStep('dashboard'));
       setSearchParams({});
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
@@ -419,7 +419,7 @@ const Index = () => {
     
     // If user can start trial, go to subject selection
     if (canStartTrial) {
-      setCurrentStep('subject-select');
+      startTransition(() => setCurrentStep('subject-select'));
       window.scrollTo({ top: 0, behavior: 'instant' });
     } else if (hasTrialUsed) {
       toast.error('You have already used your free trial. Please upgrade to continue.');
@@ -455,7 +455,7 @@ const Index = () => {
       navigate('/auth', { state: { flow: 'trial' } });
       return;
     }
-    setCurrentStep('subject-select');
+    startTransition(() => setCurrentStep('subject-select'));
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
@@ -483,7 +483,7 @@ const Index = () => {
     setPaymentWasCancelled(false);
     // Start trial flow
     if (canStartTrial) {
-      setCurrentStep('subject-select');
+      startTransition(() => setCurrentStep('subject-select'));
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
   };
@@ -505,11 +505,11 @@ const Index = () => {
     // If user already has subjects (e.g. trial-expired user upgrading), go straight to dashboard
     if (userSubjects.length > 0) {
       toast.success('Payment successful! 🎉 Welcome back!');
-      setCurrentStep('dashboard');
+      startTransition(() => setCurrentStep('dashboard'));
       saveDashboardState('dashboard');
     } else {
       toast.success('Payment successful! 🎉 Let\'s pick your subjects!');
-      setCurrentStep('subject-select');
+      startTransition(() => setCurrentStep('subject-select'));
     }
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
@@ -558,7 +558,7 @@ const Index = () => {
       toast.info('Your payment is being processed...');
     }
     
-    setCurrentStep('dashboard');
+    startTransition(() => setCurrentStep('dashboard'));
     saveDashboardState('dashboard');
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
@@ -602,7 +602,7 @@ const Index = () => {
     
     // Otherwise scroll to pricing
     localStorage.removeItem(DASHBOARD_STATE_KEY);
-    setCurrentStep('landing');
+    startTransition(() => setCurrentStep('landing'));
     setHighlightStandard(true);
     setTimeout(() => {
       const pricingSection = document.getElementById('pricing');
@@ -618,7 +618,7 @@ const Index = () => {
   const handleSignOut = async () => {
     localStorage.removeItem(DASHBOARD_STATE_KEY);
     await signOut();
-    setCurrentStep('landing');
+    startTransition(() => setCurrentStep('landing'));
     setUserSubjects([]);
     setPersonalizationData(null);
     navigate('/');
@@ -626,7 +626,7 @@ const Index = () => {
   };
 
   const handleBackToDashboard = () => {
-    setCurrentStep('dashboard');
+    startTransition(() => setCurrentStep('dashboard'));
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
@@ -737,7 +737,7 @@ const Index = () => {
   if (currentStep === 'subject-select' && userEmail) {
     // Admins with no subjects selected - go to dashboard (they have full access)
     if (effectiveAdmin) {
-      setCurrentStep('dashboard');
+      startTransition(() => setCurrentStep('dashboard'));
       return null;
     }
     
