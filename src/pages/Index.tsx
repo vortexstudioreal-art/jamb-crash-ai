@@ -618,7 +618,7 @@ const Index = () => {
   const handleSignOut = async () => {
     localStorage.removeItem(DASHBOARD_STATE_KEY);
     await signOut();
-    setCurrentStep('landing');
+    startTransition(() => setCurrentStep('landing'));
     setUserSubjects([]);
     setPersonalizationData(null);
     navigate('/');
