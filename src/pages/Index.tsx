@@ -1257,15 +1257,7 @@ const Index = () => {
                   <Flame className="w-6 h-6 text-orange-500" />
                   <span className="font-bold text-sm">High-Yield Qs</span>
                 </Button>
-              </motion.div>
 
-              {/* Notes, Games & APK Row */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.19 }}
-                className="grid grid-cols-2 gap-3 mb-6"
-              >
                 <Button
                   variant="outline"
                   className="h-auto py-4 flex flex-col gap-1 hover:border-teal-500 hover:bg-teal-500/5"
