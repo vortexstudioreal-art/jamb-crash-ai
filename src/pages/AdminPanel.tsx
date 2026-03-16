@@ -299,7 +299,7 @@ const AdminPanel = () => {
     try {
       const { data, error } = await supabase.functions.invoke('send-test-email', {
         body: {
-          email: OWNER_EMAIL,
+          email: userEmail || '',
           test_mode: false
         }
       });
