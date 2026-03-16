@@ -1558,8 +1558,8 @@ const Index = () => {
         canStartTrial={canStartTrial}
       />
 
-      {/* AI Chatbot - only on dashboard */}
-      {currentStep === 'dashboard' && user && <ChatBot />}
+
+
     </div>
   );
 };
