@@ -17,7 +17,9 @@ import AdminPanel from "./pages/AdminPanel";
 import Settings from "./pages/Settings";
 import CollaboratorDashboard from "./pages/CollaboratorDashboard";
 import RepeatedQuestionsPage from "./pages/RepeatedQuestionsPage";
+import GamesPage from "./pages/GamesPage";
 import NotFound from "./pages/NotFound";
+import { ChatBot } from "./components/ChatBot";
 
 const queryClient = new QueryClient();
 
