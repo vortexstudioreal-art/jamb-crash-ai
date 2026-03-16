@@ -129,7 +129,7 @@ const Index = () => {
   const [highlightStandard, setHighlightStandard] = useState(false);
   const [weakSubjectFromQuiz, setWeakSubjectFromQuiz] = useState<string | null>(null);
   const [showSubjectChanger, setShowSubjectChanger] = useState(false);
-  const [showGamePicker, setShowGamePicker] = useState(false);
+  
   const [showTrialBanner, setShowTrialBanner] = useState(true);
   const [selectedNovelId, setSelectedNovelId] = useState<string | null>(null);
   const [selectedChapterId, setSelectedChapterId] = useState<string | null>(null);
