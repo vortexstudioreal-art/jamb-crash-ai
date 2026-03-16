@@ -871,39 +871,8 @@ const Index = () => {
     );
   }
 
-  // Speed Round step
-  if (currentStep === 'speed-round' && userEmail) {
-    return (
-      <Suspense fallback={<LazyFallback />}>
-        <SpeedRound
-          userEmail={userEmail}
-          subjects={effectiveSubjects}
-          isOwner={effectiveOwner}
-          isAdmin={isAdmin}
-          userRole={userRole}
-          onSignOut={handleSignOut}
-          onBack={handleBackToDashboard}
-        />
-      </Suspense>
-    );
-  }
 
-  // Streak Challenge step
-  if (currentStep === 'streak' && userEmail) {
-    return (
-      <Suspense fallback={<LazyFallback />}>
-        <StreakChallenge
-          userEmail={userEmail}
-          subjects={effectiveSubjects}
-          isOwner={effectiveOwner}
-          isAdmin={isAdmin}
-          userRole={userRole}
-          onSignOut={handleSignOut}
-          onBack={handleBackToDashboard}
-        />
-      </Suspense>
-    );
-  }
+
 
   // Novels step
   if (currentStep === 'novels' && userEmail) {
