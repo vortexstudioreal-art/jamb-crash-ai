@@ -53,7 +53,7 @@ interface Stats {
   totalQuestions: number;
 }
 
-const OWNER_EMAIL = 'saeedabdulbasit933@gmail.com';
+
 
 const AdminPanel = () => {
   const navigate = useNavigate();
