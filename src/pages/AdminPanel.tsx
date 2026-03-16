@@ -53,7 +53,7 @@ interface Stats {
   totalQuestions: number;
 }
 
-const OWNER_EMAIL = 'saeedabdulbasit933@gmail.com';
+
 
 const AdminPanel = () => {
   const navigate = useNavigate();
@@ -74,7 +74,7 @@ const AdminPanel = () => {
   const [emailConfigured, setEmailConfigured] = useState<boolean | null>(null);
   const [whatsappConfigured, setWhatsappConfigured] = useState<boolean | null>(null);
 
-  const isOwner = authIsOwner || userEmail?.toLowerCase() === OWNER_EMAIL.toLowerCase();
+  const isOwner = authIsOwner;
   const canEdit = isOwner; // Only owner can edit settings
 
   useEffect(() => {
@@ -260,7 +260,7 @@ const AdminPanel = () => {
       const { data, error } = await supabase.functions.invoke('send-whatsapp-reminder', {
         body: {
           phone_number: '+2347073996465',
-          email: userEmail || OWNER_EMAIL,
+          email: userEmail || '',
           test_mode: false
         }
       });
@@ -299,7 +299,7 @@ const AdminPanel = () => {
     try {
       const { data, error } = await supabase.functions.invoke('send-test-email', {
         body: {
-          email: OWNER_EMAIL,
+          email: userEmail || '',
           test_mode: false
         }
       });
@@ -311,7 +311,7 @@ const AdminPanel = () => {
       }
       
       if (data?.success) {
-        toast.success(`Email sent to ${OWNER_EMAIL}! 📧`);
+        toast.success(`Email sent to ${userEmail}! 📧`);
         setEmailConfigured(true);
       } else {
         toast.error(data?.error || 'Failed to send email');
@@ -1138,7 +1138,7 @@ const AdminPanel = () => {
                     {/* Test Email */}
                     <div className="p-3 rounded-lg bg-muted/50">
                       <p className="text-sm font-medium text-foreground mb-1">Test Email To</p>
-                      <code className="text-sm text-primary font-mono">{OWNER_EMAIL}</code>
+                      <code className="text-sm text-primary font-mono">{userEmail || 'Not logged in'}</code>
                     </div>
 
                     {/* Test Button */}
