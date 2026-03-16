@@ -172,17 +172,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     : defaultFeatures;
 
   // Restore cached access state for offline support
+  // Only cache non-sensitive fields (hasAccess, userPackage) - never trust cached admin/owner status
   const restoreCachedAccess = (email: string) => {
     try {
       const cached = localStorage.getItem(`jamb_access_${email}`);
       if (cached) {
         const data = JSON.parse(cached);
         setHasAccess(data.hasAccess || false);
-        setIsAdmin(data.isAdmin || false);
-        setUserRole(data.userRole || null);
-        setIsOwner(data.isOwner || false);
+        // Never restore admin/owner from cache - only server can determine these
+        setIsAdmin(false);
+        setUserRole(null);
+        setIsOwner(false);
         setUserPackage(data.userPackage || null);
-        console.log('[Offline] Restored cached access for', email);
+        console.log('[Offline] Restored cached access for', email, '(admin/owner not cached)');
         return true;
       }
     } catch (e) {

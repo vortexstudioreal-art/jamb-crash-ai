@@ -170,7 +170,7 @@ export const WhatsAppReminder = ({ userEmail, isAdmin = false, onSetupComplete }
             setIsSendingTest(true);
             try {
               const { data, error } = await supabase.functions.invoke('send-whatsapp-reminder', {
-                body: { phone: savedNumber, email: userEmail, test: false }
+                body: { phone_number: savedNumber, email: userEmail }
               });
               if (error) throw error;
               toast.success('Test message sent! Check your WhatsApp 📱');

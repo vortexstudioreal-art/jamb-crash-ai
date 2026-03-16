@@ -243,13 +243,19 @@ export const AppHealthCheck = () => {
         }
 
         case 'Owner bypass (never sees paywall)': {
+          // Use current authenticated user's email instead of hardcoded value
+          const currentSession = await supabase.auth.getSession();
+          const currentEmail = currentSession.data.session?.user?.email;
+          if (!currentEmail) {
+            return { working: false, details: 'Not authenticated' };
+          }
           const { data } = await supabase.rpc('check_user_access', { 
-            user_email: 'saeedabdulbasit933@gmail.com' 
+            user_email: currentEmail 
           });
           const ownerAccess = data?.[0];
           return { 
             working: ownerAccess?.has_access === true && ownerAccess?.is_admin === true,
-            details: ownerAccess?.admin_role === 'owner' ? 'Owner role confirmed' : 'Owner role missing'
+            details: ownerAccess?.admin_role === 'owner' ? 'Owner role confirmed' : (ownerAccess?.admin_role || 'No admin role')
           };
         }
 
