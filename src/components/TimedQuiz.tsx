@@ -510,15 +510,16 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
         
         // Step 2: Update leaderboard asynchronously (fire-and-forget)
         // This runs in the background and doesn't block the UI
+        const session = await supabase.auth.getSession();
+        const accessToken = session.data.session?.access_token;
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
         fetch(`${supabaseUrl}/functions/v1/update-leaderboard`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
+            'Authorization': `Bearer ${accessToken || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
           },
           body: JSON.stringify({
-            userEmail,
             correctCount,
             totalQuestions: questions.length,
             timeTaken,

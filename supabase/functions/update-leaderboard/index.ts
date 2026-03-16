@@ -6,7 +6,6 @@ const corsHeaders = {
 };
 
 interface LeaderboardUpdate {
-  userEmail: string;
   correctCount: number;
   totalQuestions: number;
   timeTaken: number;
@@ -20,18 +19,52 @@ Deno.serve(async (req) => {
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+    // Authenticate the user
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Verify the user's token using anon key client
+    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const userEmail = claimsData.claims.email as string;
+    if (!userEmail) {
+      return new Response(
+        JSON.stringify({ error: 'No email in token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Use service role for DB operations
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { userEmail, correctCount, totalQuestions, timeTaken, totalTimeSeconds }: LeaderboardUpdate = await req.json();
+    const { correctCount, totalQuestions, timeTaken, totalTimeSeconds }: LeaderboardUpdate = await req.json();
 
     // Calculate leaderboard points
     const timeUsedPercentage = (timeTaken / totalTimeSeconds) * 100;
     const accuracyPercent = (correctCount / totalQuestions) * 100;
 
     let bonusPoints = 0;
-    if (timeUsedPercentage < 50) bonusPoints += 5; // Fast completion bonus
-    if (accuracyPercent >= 80) bonusPoints += 5; // High accuracy bonus
+    if (timeUsedPercentage < 50) bonusPoints += 5;
+    if (accuracyPercent >= 80) bonusPoints += 5;
 
     const quizPoints = correctCount + bonusPoints;
 
@@ -52,7 +85,6 @@ Deno.serve(async (req) => {
     const userName = profile?.full_name || userEmail.split('@')[0];
 
     if (existingEntry) {
-      // Update existing entry
       const newTotalScore = existingEntry.total_score + quizPoints;
       const newQuestionsAnswered = existingEntry.questions_answered + totalQuestions;
       const oldAccuracy = existingEntry.average_accuracy || 0;
@@ -71,7 +103,6 @@ Deno.serve(async (req) => {
         })
         .eq('id', existingEntry.id);
     } else if (profile?.id) {
-      // Create new entry
       await supabase
         .from('leaderboard_scores')
         .insert({
@@ -102,7 +133,6 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Recalculate all ranks using efficient database function
     await supabase.rpc('recalculate_leaderboard_ranks');
 
     return new Response(
@@ -111,9 +141,8 @@ Deno.serve(async (req) => {
     );
   } catch (error) {
     console.error('Error updating leaderboard:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

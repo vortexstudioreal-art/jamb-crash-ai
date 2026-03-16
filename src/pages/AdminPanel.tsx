@@ -1138,7 +1138,7 @@ const AdminPanel = () => {
                     {/* Test Email */}
                     <div className="p-3 rounded-lg bg-muted/50">
                       <p className="text-sm font-medium text-foreground mb-1">Test Email To</p>
-                      <code className="text-sm text-primary font-mono">{OWNER_EMAIL}</code>
+                      <code className="text-sm text-primary font-mono">{userEmail || 'Not logged in'}</code>
                     </div>
 
                     {/* Test Button */}
