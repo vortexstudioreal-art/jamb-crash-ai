@@ -87,7 +87,7 @@ export const AppHealthCheck = () => {
     {
       name: 'Owner bypass (never sees paywall)',
       icon: <Shield className="w-5 h-5" />,
-      fixPrompt: 'Fix Owner Access: The owner email saeedabdulbasit933@gmail.com should always have full access to all features without seeing any paywall. Check useAccessControl hook and check_user_access database function to ensure owner role grants permanent access.',
+      fixPrompt: 'Fix Owner Access: The owner should always have full access to all features without seeing any paywall. Check useAccessControl hook and check_user_access database function to ensure owner role grants permanent access.',
     },
     {
       name: 'Paystack test payment',
@@ -243,13 +243,19 @@ export const AppHealthCheck = () => {
         }
 
         case 'Owner bypass (never sees paywall)': {
+          // Use current authenticated user's email instead of hardcoded value
+          const currentSession = await supabase.auth.getSession();
+          const currentEmail = currentSession.data.session?.user?.email;
+          if (!currentEmail) {
+            return { working: false, details: 'Not authenticated' };
+          }
           const { data } = await supabase.rpc('check_user_access', { 
-            user_email: 'saeedabdulbasit933@gmail.com' 
+            user_email: currentEmail 
           });
           const ownerAccess = data?.[0];
           return { 
             working: ownerAccess?.has_access === true && ownerAccess?.is_admin === true,
-            details: ownerAccess?.admin_role === 'owner' ? 'Owner role confirmed' : 'Owner role missing'
+            details: ownerAccess?.admin_role === 'owner' ? 'Owner role confirmed' : (ownerAccess?.admin_role || 'No admin role')
           };
         }
 
