@@ -13,6 +13,15 @@ interface InitializePaymentRequest {
   callbackUrl: string;
 }
 
+// Server-side price lookup - NEVER trust client-supplied amounts
+const PACKAGE_PRICES: Record<string, number> = {
+  basic: 5000,
+  pro: 10000,
+  standard: 10000,
+  premium: 15000,
+  ultimate: 15000,
+};
+
 // Rate limiting - 5 payment initializations per email per hour
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT_MAX = 5;
@@ -51,15 +60,12 @@ serve(async (req) => {
 
   try {
     const requestBody = await req.text();
-    console.log("[paystack-initialize] Request body:", requestBody);
-    
     const { email, amount, package: packageName, callbackUrl }: InitializePaymentRequest = JSON.parse(requestBody);
 
-    console.log("[paystack-initialize] Parsed request:", { email, amount, packageName, callbackUrl });
+    console.log("[paystack-initialize] Parsed request:", { email, amount, packageName });
 
     // Validate input
     if (!email || !amount || !packageName) {
-      console.error("[paystack-initialize] Missing required fields");
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -68,16 +74,34 @@ serve(async (req) => {
 
     // Validate email format
     if (!isValidEmail(email)) {
-      console.error("[paystack-initialize] Invalid email format:", email);
       return new Response(
         JSON.stringify({ error: "Invalid email format" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
+    // Server-side price validation - never trust client amount
+    const expectedPrice = PACKAGE_PRICES[packageName.toLowerCase()];
+    if (!expectedPrice) {
+      console.error("[paystack-initialize] Invalid package:", packageName);
+      return new Response(
+        JSON.stringify({ error: "Invalid package selected" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Amount must not exceed expected price (coupons can reduce it, but never below 0)
+    // and must be a positive number
+    if (typeof amount !== 'number' || amount <= 0 || amount > expectedPrice) {
+      console.error("[paystack-initialize] Invalid amount:", amount, "expected max:", expectedPrice);
+      return new Response(
+        JSON.stringify({ error: "Invalid amount for selected package" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Check rate limiting
     if (isRateLimited(email)) {
-      console.error("[paystack-initialize] Rate limited:", email);
       return new Response(
         JSON.stringify({ error: "Too many payment attempts. Please try again later." }),
         { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -95,10 +119,8 @@ serve(async (req) => {
 
     // Generate unique reference
     const reference = `JAMB_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    console.log("[paystack-initialize] Generated reference:", reference);
 
     // Initialize Paystack transaction
-    console.log("[paystack-initialize] Calling Paystack API...");
     const paystackResponse = await fetch("https://api.paystack.co/transaction/initialize", {
       method: "POST",
       headers: {
@@ -107,12 +129,13 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         email,
-        amount: amount * 100, // Paystack expects amount in kobo (frontend already sends Naira)
+        amount: amount * 100, // Paystack expects amount in kobo
         currency: "NGN",
         reference,
         callback_url: callbackUrl,
         metadata: {
           package: packageName,
+          expected_price: expectedPrice,
           custom_fields: [
             {
               display_name: "Package",
@@ -125,7 +148,6 @@ serve(async (req) => {
     });
 
     const paystackData = await paystackResponse.json();
-    console.log("[paystack-initialize] Paystack response:", JSON.stringify(paystackData));
 
     if (!paystackData.status) {
       console.error("[paystack-initialize] Paystack error:", paystackData.message);
@@ -140,7 +162,6 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    console.log("[paystack-initialize] Storing payment in database...");
     const { error: dbError } = await supabase.from("payments").insert({
       email,
       package: packageName,
@@ -151,12 +172,8 @@ serve(async (req) => {
 
     if (dbError) {
       console.error("[paystack-initialize] Database error:", dbError);
-      // Don't fail the whole request if DB insert fails - payment can still proceed
-    } else {
-      console.log("[paystack-initialize] Payment record created successfully");
     }
 
-    console.log("[paystack-initialize] Success! Returning authorization URL");
     return new Response(
       JSON.stringify({
         success: true,
