@@ -53,8 +53,6 @@ const JambNewsPage = lazy(() => import('@/components/JambNewsPage').then(m => ({
 const ScholarshipPage = lazy(() => import('@/components/ScholarshipPage').then(m => ({ default: m.ScholarshipPage })));
 const Leaderboard = lazy(() => import('@/components/Leaderboard').then(m => ({ default: m.Leaderboard })));
 const StudyNotes = lazy(() => import('@/components/StudyNotes').then(m => ({ default: m.StudyNotes })));
-const SpeedRound = lazy(() => import('@/components/SpeedRound').then(m => ({ default: m.SpeedRound })));
-const StreakChallenge = lazy(() => import('@/components/StreakChallenge').then(m => ({ default: m.StreakChallenge })));
 
 const LazyFallback = () => (
   <div className="min-h-screen bg-background flex items-center justify-center">
