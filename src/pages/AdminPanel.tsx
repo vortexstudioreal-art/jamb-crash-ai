@@ -260,7 +260,7 @@ const AdminPanel = () => {
       const { data, error } = await supabase.functions.invoke('send-whatsapp-reminder', {
         body: {
           phone_number: '+2347073996465',
-          email: userEmail || OWNER_EMAIL,
+          email: userEmail || '',
           test_mode: false
         }
       });
