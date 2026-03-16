@@ -36,7 +36,7 @@ import { PaymentCancelledModal } from '@/components/PaymentCancelledModal';
 import { BannerAd } from '@/components/BannerAd';
 import { DashboardSkeleton } from '@/components/DashboardSkeleton';
 import { SocialFollowBanner } from '@/components/SocialFollowBanner';
-import { ChatBot } from '@/components/ChatBot';
+
 import { Skeleton } from '@/components/ui/skeleton';
 import { ApkDownloadCard } from '@/components/ApkDownloadCard';
 
@@ -53,8 +53,6 @@ const JambNewsPage = lazy(() => import('@/components/JambNewsPage').then(m => ({
 const ScholarshipPage = lazy(() => import('@/components/ScholarshipPage').then(m => ({ default: m.ScholarshipPage })));
 const Leaderboard = lazy(() => import('@/components/Leaderboard').then(m => ({ default: m.Leaderboard })));
 const StudyNotes = lazy(() => import('@/components/StudyNotes').then(m => ({ default: m.StudyNotes })));
-const SpeedRound = lazy(() => import('@/components/SpeedRound').then(m => ({ default: m.SpeedRound })));
-const StreakChallenge = lazy(() => import('@/components/StreakChallenge').then(m => ({ default: m.StreakChallenge })));
 
 const LazyFallback = () => (
   <div className="min-h-screen bg-background flex items-center justify-center">
@@ -131,7 +129,7 @@ const Index = () => {
   const [highlightStandard, setHighlightStandard] = useState(false);
   const [weakSubjectFromQuiz, setWeakSubjectFromQuiz] = useState<string | null>(null);
   const [showSubjectChanger, setShowSubjectChanger] = useState(false);
-  const [showGamePicker, setShowGamePicker] = useState(false);
+  
   const [showTrialBanner, setShowTrialBanner] = useState(true);
   const [selectedNovelId, setSelectedNovelId] = useState<string | null>(null);
   const [selectedChapterId, setSelectedChapterId] = useState<string | null>(null);
@@ -873,39 +871,8 @@ const Index = () => {
     );
   }
 
-  // Speed Round step
-  if (currentStep === 'speed-round' && userEmail) {
-    return (
-      <Suspense fallback={<LazyFallback />}>
-        <SpeedRound
-          userEmail={userEmail}
-          subjects={effectiveSubjects}
-          isOwner={effectiveOwner}
-          isAdmin={isAdmin}
-          userRole={userRole}
-          onSignOut={handleSignOut}
-          onBack={handleBackToDashboard}
-        />
-      </Suspense>
-    );
-  }
 
-  // Streak Challenge step
-  if (currentStep === 'streak' && userEmail) {
-    return (
-      <Suspense fallback={<LazyFallback />}>
-        <StreakChallenge
-          userEmail={userEmail}
-          subjects={effectiveSubjects}
-          isOwner={effectiveOwner}
-          isAdmin={isAdmin}
-          userRole={userRole}
-          onSignOut={handleSignOut}
-          onBack={handleBackToDashboard}
-        />
-      </Suspense>
-    );
-  }
+
 
   // Novels step
   if (currentStep === 'novels' && userEmail) {
@@ -1277,43 +1244,13 @@ const Index = () => {
 
                 <Button
                   variant="outline"
-                  className={`h-auto py-4 flex flex-col gap-1 hover:border-primary hover:bg-primary/5 ${showGamePicker ? 'border-primary bg-primary/5' : ''}`}
-                  onClick={() => setShowGamePicker(!showGamePicker)}
+                  className="h-auto py-4 flex flex-col gap-1 hover:border-primary hover:bg-primary/5"
+                  onClick={() => navigate('/games')}
                 >
                   <Gamepad2 className="w-6 h-6 text-primary" />
                   <span className="font-bold text-sm">Games 🎮</span>
                 </Button>
               </motion.div>
-
-              {/* Game Picker */}
-              {showGamePicker && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="grid grid-cols-2 gap-3 mb-6 -mt-3"
-                >
-                  <Button
-                    variant="outline"
-                    className="h-auto py-5 flex flex-col gap-2 border-primary/30 hover:border-primary hover:bg-primary/5"
-                    onClick={() => { setShowGamePicker(false); navigateStep('speed-round'); }}
-                  >
-                    <Zap className="w-8 h-8 text-primary" />
-                    <span className="font-bold text-sm">⚡ Speed Round</span>
-                    <span className="text-xs text-muted-foreground">60s blitz</span>
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    className="h-auto py-5 flex flex-col gap-2 border-orange-500/30 hover:border-orange-500 hover:bg-orange-500/5"
-                    onClick={() => { setShowGamePicker(false); navigateStep('streak'); }}
-                  >
-                    <Flame className="w-8 h-8 text-orange-500" />
-                    <span className="font-bold text-sm">🔥 Streak Challenge</span>
-                    <span className="text-xs text-muted-foreground">Don't break the chain</span>
-                  </Button>
-                </motion.div>
-              )}
 
 
 
@@ -1590,8 +1527,8 @@ const Index = () => {
         canStartTrial={canStartTrial}
       />
 
-      {/* AI Chatbot - only on dashboard */}
-      {currentStep === 'dashboard' && user && <ChatBot />}
+
+
     </div>
   );
 };
