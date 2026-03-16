@@ -74,7 +74,7 @@ const AdminPanel = () => {
   const [emailConfigured, setEmailConfigured] = useState<boolean | null>(null);
   const [whatsappConfigured, setWhatsappConfigured] = useState<boolean | null>(null);
 
-  const isOwner = authIsOwner || userEmail?.toLowerCase() === OWNER_EMAIL.toLowerCase();
+  const isOwner = authIsOwner;
   const canEdit = isOwner; // Only owner can edit settings
 
   useEffect(() => {
