@@ -311,7 +311,7 @@ const AdminPanel = () => {
       }
       
       if (data?.success) {
-        toast.success(`Email sent to ${OWNER_EMAIL}! 📧`);
+        toast.success(`Email sent to ${userEmail}! 📧`);
         setEmailConfigured(true);
       } else {
         toast.error(data?.error || 'Failed to send email');
