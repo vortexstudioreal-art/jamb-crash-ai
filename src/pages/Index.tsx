@@ -36,7 +36,7 @@ import { PaymentCancelledModal } from '@/components/PaymentCancelledModal';
 import { BannerAd } from '@/components/BannerAd';
 import { DashboardSkeleton } from '@/components/DashboardSkeleton';
 import { SocialFollowBanner } from '@/components/SocialFollowBanner';
-import { ChatBot } from '@/components/ChatBot';
+
 import { Skeleton } from '@/components/ui/skeleton';
 import { ApkDownloadCard } from '@/components/ApkDownloadCard';
 
