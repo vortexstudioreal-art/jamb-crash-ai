@@ -1139,7 +1139,7 @@ const Index = () => {
                 <Button
                   variant="outline"
                   className="h-auto py-4 flex flex-col gap-1 hover:border-blue-500 hover:bg-blue-500/5"
-                  onClick={() => setCurrentStep('upload')}
+                  onClick={() => startTransition(() => setCurrentStep('upload'))}
                 >
                   <FileText className="w-6 h-6 text-blue-500" />
                   <span className="font-bold text-sm">Upload PDF</span>
@@ -1402,11 +1402,13 @@ const Index = () => {
 
   // Landing page
   const handleGoToDashboard = () => {
-    if (userSubjects.length === 0 && !effectiveAdmin) {
-      setCurrentStep('subject-select');
-    } else {
-      setCurrentStep('dashboard');
-    }
+    startTransition(() => {
+      if (userSubjects.length === 0 && !effectiveAdmin) {
+        setCurrentStep('subject-select');
+      } else {
+        setCurrentStep('dashboard');
+      }
+    });
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 

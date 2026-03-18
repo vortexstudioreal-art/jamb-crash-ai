@@ -69,7 +69,7 @@ const App = () => {
                 />
                 <Route path="/collaborator-dashboard" element={<CollaboratorDashboard />} />
                 <Route path="/repeated-questions" element={<RepeatedQuestionsPage />} />
-                <Route path="/games" element={<GamesPage />} />
+                <Route path="/games" element={<ProtectedRoute><GamesPage /></ProtectedRoute>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
