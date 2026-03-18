@@ -1402,11 +1402,13 @@ const Index = () => {
 
   // Landing page
   const handleGoToDashboard = () => {
-    if (userSubjects.length === 0 && !effectiveAdmin) {
-      setCurrentStep('subject-select');
-    } else {
-      setCurrentStep('dashboard');
-    }
+    startTransition(() => {
+      if (userSubjects.length === 0 && !effectiveAdmin) {
+        setCurrentStep('subject-select');
+      } else {
+        setCurrentStep('dashboard');
+      }
+    });
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 

@@ -19,8 +19,8 @@ interface WhatsAppReminderProps {
 }
 
 const SETTINGS_STORAGE_KEY = 'jamb_user_settings';
-const SANDBOX_NUMBER = '+14155238886';
-const SANDBOX_JOIN_MESSAGE = 'join sound-sound';
+// Sandbox config fetched from edge function at runtime
+const WHATSAPP_SETUP_URL = 'https://wa.me';
 
 export const WhatsAppReminder = ({ userEmail, isAdmin = false, onSetupComplete }: WhatsAppReminderProps) => {
   const [phoneNumber, setPhoneNumber] = useState('');
