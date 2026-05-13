@@ -19,11 +19,11 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { novel_title, chapter_number, enrich_all_poetry } = await req.json();
+    const { novel_title, chapter_number, enrich_all_poetry, poem_title } = await req.json();
 
     // Mode 1: Enrich poetry by splitting into multiple chapters
     if (enrich_all_poetry) {
-      return await enrichAllPoetry(supabase, LOVABLE_API_KEY);
+      return await enrichAllPoetry(supabase, LOVABLE_API_KEY, poem_title);
     }
 
     const targetTitle = novel_title || "The Life Changer";
@@ -128,11 +128,13 @@ serve(async (req) => {
 });
 
 // Split poetry into multiple analysis chapters
-async function enrichAllPoetry(supabase: any, apiKey: string) {
-  const { data: poems } = await supabase
+async function enrichAllPoetry(supabase: any, apiKey: string, onlyTitle?: string) {
+  let q = supabase
     .from("novels")
     .select("id, title, author, total_chapters, category")
     .like("category", "%poetry%");
+  if (onlyTitle) q = q.eq("title", onlyTitle);
+  const { data: poems } = await q;
 
   if (!poems?.length) {
     return new Response(JSON.stringify({ message: "No poetry found" }), {
