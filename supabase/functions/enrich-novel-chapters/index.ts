@@ -65,7 +65,7 @@ serve(async (req) => {
     for (const chapter of chapters) {
       console.log(`Enriching: ${novel.title} - Chapter ${chapter.chapter_number}: ${chapter.title}`);
 
-      const isPoetry = novel.category === "poetry";
+      const isPoetry = (novel.category || "").includes("poetry");
       const prompt = isPoetry
         ? buildPoetryPrompt(novel, chapter)
         : buildProsePrompt(novel, chapter);
@@ -132,7 +132,7 @@ async function enrichAllPoetry(supabase: any, apiKey: string) {
   const { data: poems } = await supabase
     .from("novels")
     .select("id, title, author, total_chapters, category")
-    .eq("category", "poetry");
+    .like("category", "%poetry%");
 
   if (!poems?.length) {
     return new Response(JSON.stringify({ message: "No poetry found" }), {
