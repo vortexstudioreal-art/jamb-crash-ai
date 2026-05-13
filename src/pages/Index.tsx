@@ -1178,7 +1178,7 @@ const Index = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.18 }}
-                className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-3"
+                className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3"
               >
                 <Button
                   variant="outline"
@@ -1231,7 +1231,7 @@ const Index = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.19 }}
-                className="grid grid-cols-2 gap-3 mb-3"
+                className="grid grid-cols-2 gap-3 mt-3 mb-3"
               >
                 <Button
                   variant="outline"
