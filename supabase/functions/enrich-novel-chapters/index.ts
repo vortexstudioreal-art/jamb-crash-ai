@@ -19,11 +19,15 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { novel_title, chapter_number, enrich_all_poetry } = await req.json();
+    const { novel_title, chapter_number, enrich_all_poetry, poem_title } = await req.json();
 
-    // Mode 1: Enrich poetry by splitting into multiple chapters
+    // Mode 1: Enrich poetry by splitting into multiple chapters (background)
     if (enrich_all_poetry) {
-      return await enrichAllPoetry(supabase, LOVABLE_API_KEY);
+      // @ts-ignore EdgeRuntime is available in Deno deploy
+      EdgeRuntime.waitUntil(enrichAllPoetry(supabase, LOVABLE_API_KEY, poem_title));
+      return new Response(JSON.stringify({ status: "started", mode: "poetry", poem_title: poem_title || "all" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const targetTitle = novel_title || "The Life Changer";
@@ -60,61 +64,13 @@ serve(async (req) => {
       });
     }
 
-    const results: any[] = [];
-
-    for (const chapter of chapters) {
-      console.log(`Enriching: ${novel.title} - Chapter ${chapter.chapter_number}: ${chapter.title}`);
-
-      const isPoetry = novel.category === "poetry";
-      const prompt = isPoetry
-        ? buildPoetryPrompt(novel, chapter)
-        : buildProsePrompt(novel, chapter);
-
-      try {
-        const enrichedContent = await callAI(LOVABLE_API_KEY, prompt, novel);
-        if (!enrichedContent) {
-          results.push({ chapter: chapter.chapter_number, status: "error", error: "No content generated" });
-          continue;
-        }
-
-        const wordCount = enrichedContent.split(/\s+/).length;
-        const readingTime = Math.ceil(wordCount / 200);
-        const questions = extractQuestions(enrichedContent);
-
-        const { error: updateError } = await supabase
-          .from("novel_chapters")
-          .update({
-            content: enrichedContent,
-            word_count: wordCount,
-            estimated_reading_time: readingTime,
-            likely_questions: questions,
-          })
-          .eq("id", chapter.id);
-
-        if (updateError) {
-          results.push({ chapter: chapter.chapter_number, status: "error", error: updateError.message });
-        } else {
-          results.push({
-            chapter: chapter.chapter_number,
-            title: chapter.title,
-            status: "enriched",
-            oldLength: chapter.content.length,
-            newLength: enrichedContent.length,
-            wordCount,
-          });
-          console.log(`✅ Chapter ${chapter.chapter_number} enriched: ${wordCount} words`);
-        }
-
-        if (chapters.length > 1) await new Promise(r => setTimeout(r, 2000));
-      } catch (err) {
-        results.push({ chapter: chapter.chapter_number, status: "error", error: String(err) });
-      }
-    }
-
+    // Background prose/drama enrichment
+    // @ts-ignore
+    EdgeRuntime.waitUntil(enrichProseChapters(supabase, LOVABLE_API_KEY, novel, chapters));
     return new Response(JSON.stringify({
+      status: "started",
       novel: novel.title,
-      chaptersProcessed: results.length,
-      results,
+      chaptersQueued: chapters.length,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
@@ -127,12 +83,40 @@ serve(async (req) => {
   }
 });
 
+async function enrichProseChapters(supabase: any, apiKey: string, novel: any, chapters: any[]) {
+  for (const chapter of chapters) {
+    try {
+      console.log(`Enriching: ${novel.title} - Ch ${chapter.chapter_number}`);
+      const isPoetry = (novel.category || "").includes("poetry");
+      const prompt = isPoetry ? buildPoetryPrompt(novel, chapter) : buildProsePrompt(novel, chapter);
+      const enrichedContent = await callAI(apiKey, prompt, novel);
+      if (!enrichedContent) continue;
+      const wordCount = enrichedContent.split(/\s+/).length;
+      const readingTime = Math.ceil(wordCount / 200);
+      const questions = extractQuestions(enrichedContent);
+      await supabase.from("novel_chapters").update({
+        content: enrichedContent,
+        word_count: wordCount,
+        estimated_reading_time: readingTime,
+        likely_questions: questions,
+      }).eq("id", chapter.id);
+      console.log(`✅ ${novel.title} Ch ${chapter.chapter_number}: ${wordCount} words`);
+      await new Promise(r => setTimeout(r, 1500));
+    } catch (err) {
+      console.error(`Failed ${novel.title} Ch ${chapter.chapter_number}:`, err);
+    }
+  }
+  console.log(`🎉 Done enriching ${novel.title}`);
+}
+
 // Split poetry into multiple analysis chapters
-async function enrichAllPoetry(supabase: any, apiKey: string) {
-  const { data: poems } = await supabase
+async function enrichAllPoetry(supabase: any, apiKey: string, onlyTitle?: string) {
+  let q = supabase
     .from("novels")
     .select("id, title, author, total_chapters, category")
-    .eq("category", "poetry");
+    .like("category", "%poetry%");
+  if (onlyTitle) q = q.eq("title", onlyTitle);
+  const { data: poems } = await q;
 
   if (!poems?.length) {
     return new Response(JSON.stringify({ message: "No poetry found" }), {
