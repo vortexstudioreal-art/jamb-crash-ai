@@ -212,28 +212,40 @@ IMPORTANT: Be factually accurate about this poem. This is a JAMB 2025 prescribed
 }
 
 async function callAI(apiKey: string, prompt: string, novel: any): Promise<string | null> {
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
-      messages: [
-        { role: "system", content: "You are an expert literature teacher specializing in JAMB exam preparation for Nigerian students." },
-        { role: "user", content: prompt },
-      ],
-    }),
-  });
+  const maxAttempts = 6;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: "You are an expert literature teacher specializing in JAMB exam preparation for Nigerian students." },
+          { role: "user", content: prompt },
+        ],
+      }),
+    });
 
-  if (!response.ok) {
+    if (response.ok) {
+      const data = await response.json();
+      return data.choices?.[0]?.message?.content || null;
+    }
+
+    if (response.status === 429 || response.status === 503) {
+      const wait = Math.min(60000, 5000 * Math.pow(2, attempt - 1));
+      console.warn(`AI ${response.status}, retry ${attempt}/${maxAttempts} after ${wait}ms`);
+      await new Promise(r => setTimeout(r, wait));
+      continue;
+    }
+
     console.error(`AI error: ${response.status}`);
     return null;
   }
-
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content || null;
+  console.error("AI exhausted retries");
+  return null;
 }
 
 function buildProsePrompt(novel: any, chapter: any): string {
