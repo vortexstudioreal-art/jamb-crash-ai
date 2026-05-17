@@ -1,0 +1,2 @@
+UPDATE user_novel_progress SET current_chapter_id = 'bdf02d83-8987-46ad-b4e0-a1b5befa37b3' WHERE current_chapter_id IN ('592c00bb-c1dd-498e-8867-86583ab5bdd4','a356d14f-1e41-4491-a5a0-8c10b3538ed0');
+DELETE FROM novel_chapters WHERE id IN ('592c00bb-c1dd-498e-8867-86583ab5bdd4','a356d14f-1e41-4491-a5a0-8c10b3538ed0');
