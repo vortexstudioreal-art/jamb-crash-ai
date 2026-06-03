@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { JambCalculator } from '@/components/JambCalculator';
 import { getQuestions, saveQuestions, addToSyncQueue } from '@/services/offlineStorage';
+import { shuffleQuestionList } from '@/lib/quizShuffle';
 
 interface Question {
   id: string;
@@ -394,10 +395,10 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
             const j = Math.floor(Math.random() * (i + 1));
             [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
           }
-          setQuestions(shuffled.slice(0, totalQuestions));
+          setQuestions(shuffleQuestionList(shuffled.slice(0, totalQuestions)));
         } else if (filteredQuestions.length > 0) {
           const shuffled = [...filteredQuestions].sort(() => Math.random() - 0.5);
-          setQuestions(shuffled);
+          setQuestions(shuffleQuestionList(shuffled));
           setTotalQuestions(shuffled.length);
           toast({
             title: `Only ${shuffled.length} questions available`,

@@ -12,6 +12,7 @@ import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { shuffleQuestionList } from '@/lib/quizShuffle';
 
 interface Question {
   id: string;

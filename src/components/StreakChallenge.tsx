@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { BackButton } from '@/components/BackButton';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { supabase } from '@/integrations/supabase/client';
+import { shuffleQuestionList } from '@/lib/quizShuffle';
 
 interface StreakChallengeProps {
   userEmail: string;
@@ -55,11 +56,18 @@ export const StreakChallenge = ({ userEmail, subjects, isOwner, isAdmin, userRol
       .limit(200);
 
     if (data) {
-      setQuestions(data.sort(() => Math.random() - 0.5) as Question[]);
+      setQuestions(shuffleQuestionList(data.sort(() => Math.random() - 0.5) as Question[]));
     }
   }, [subjects]);
 
   useEffect(() => { loadQuestions(); }, [loadQuestions]);
+
+  // Defensive: clear selection whenever the question changes, in case the
+  // advance timeout was interrupted (back nav, lives-out, etc.)
+  useEffect(() => {
+    setSelectedAnswer(null);
+    setShowExplanation(false);
+  }, [currentIndex]);
 
   const startGame = () => {
     setGameState('playing');
