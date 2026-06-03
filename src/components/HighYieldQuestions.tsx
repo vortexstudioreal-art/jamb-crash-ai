@@ -12,6 +12,7 @@ import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { shuffleQuestionList } from '@/lib/quizShuffle';
 
 interface Question {
   id: string;
@@ -314,7 +315,7 @@ const TopicQuiz = ({ questions, topicLabel, subject, onExit }: TopicQuizProps) =
       const j = Math.floor(Math.random() * (i + 1));
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
-    return shuffled.slice(0, Math.min(20, shuffled.length)); // Max 20 questions
+    return shuffleQuestionList(shuffled.slice(0, Math.min(20, shuffled.length))); // Max 20, options randomised
   });
   const [showFeedback, setShowFeedback] = useState<string | null>(null);
 

@@ -8,6 +8,7 @@ import { BackButton } from '@/components/BackButton';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { shuffleQuestionList } from '@/lib/quizShuffle';
 
 interface SpeedRoundProps {
   userEmail: string;
@@ -54,7 +55,7 @@ export const SpeedRound = ({ userEmail, subjects, isOwner, isAdmin, userRole, on
     if (data) {
       // Shuffle
       const shuffled = data.sort(() => Math.random() - 0.5);
-      setQuestions(shuffled as Question[]);
+      setQuestions(shuffleQuestionList(shuffled as Question[]));
     }
   }, [subjects]);
 
@@ -115,6 +116,11 @@ export const SpeedRound = ({ userEmail, subjects, isOwner, isAdmin, userRole, on
   useEffect(() => {
     return () => clearInterval(timerRef.current);
   }, []);
+
+  // Defensive: clear any lingering correct/wrong flash when the question changes
+  useEffect(() => {
+    setLastAnswer(null);
+  }, [currentIndex]);
 
   const currentQ = questions[currentIndex];
 

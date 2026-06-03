@@ -71,6 +71,69 @@ export type Database = {
         }
         Relationships: []
       }
+      airtime_rewards: {
+        Row: {
+          amount: number
+          claimed_at: string | null
+          created_at: string
+          email: string
+          id: string
+          network: string | null
+          notes: string | null
+          phone: string | null
+          referral_id: string | null
+          sent_at: string | null
+          source: string
+          status: string
+        }
+        Insert: {
+          amount?: number
+          claimed_at?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          network?: string | null
+          notes?: string | null
+          phone?: string | null
+          referral_id?: string | null
+          sent_at?: string | null
+          source?: string
+          status?: string
+        }
+        Update: {
+          amount?: number
+          claimed_at?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          network?: string | null
+          notes?: string | null
+          phone?: string | null
+          referral_id?: string | null
+          sent_at?: string | null
+          source?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      app_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       collaborator_bank_details: {
         Row: {
           account_name: string
@@ -564,6 +627,8 @@ export type Database = {
           created_at: string | null
           description: string | null
           difficulty_level: string | null
+          full_book_pdf_path: string | null
+          full_book_pdf_url: string | null
           id: string
           is_premium: boolean | null
           subject: string | null
@@ -579,6 +644,8 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           difficulty_level?: string | null
+          full_book_pdf_path?: string | null
+          full_book_pdf_url?: string | null
           id?: string
           is_premium?: boolean | null
           subject?: string | null
@@ -594,6 +661,8 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           difficulty_level?: string | null
+          full_book_pdf_path?: string | null
+          full_book_pdf_url?: string | null
           id?: string
           is_premium?: boolean | null
           subject?: string | null
@@ -881,6 +950,54 @@ export type Database = {
           referral_code?: string
           referred_email?: string | null
           referrer_email?: string
+        }
+        Relationships: []
+      }
+      subject_books: {
+        Row: {
+          author: string | null
+          cover_image_url: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          pdf_path: string | null
+          pdf_url: string | null
+          subject: string
+          title: string
+          updated_at: string
+          uploaded_by: string | null
+          year: number | null
+        }
+        Insert: {
+          author?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          pdf_path?: string | null
+          pdf_url?: string | null
+          subject: string
+          title: string
+          updated_at?: string
+          uploaded_by?: string | null
+          year?: number | null
+        }
+        Update: {
+          author?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          pdf_path?: string | null
+          pdf_url?: string | null
+          subject?: string
+          title?: string
+          updated_at?: string
+          uploaded_by?: string | null
+          year?: number | null
         }
         Relationships: []
       }

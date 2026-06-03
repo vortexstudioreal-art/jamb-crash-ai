@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { supabase } from '@/integrations/supabase/client';
 
 interface TimeLeft {
   days: number;
@@ -8,31 +9,55 @@ interface TimeLeft {
   seconds: number;
 }
 
-// UTME 2026 - Expected exam date based on 2025 pattern (April 24-May 5, 2025)
-// JAMB typically starts UTME in late April. Using April 25, 2026 (Saturday) as expected start
-const UTME_DATE = new Date('2026-04-25T08:00:00');
+// Fallback if app_settings has not been seeded yet
+const DEFAULT_UTME_DATE = new Date('2027-04-24T08:00:00');
 
 export const CountdownTimer = () => {
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const [examDate, setExamDate] = useState<Date>(DEFAULT_UTME_DATE);
+  const [hasPassed, setHasPassed] = useState(false);
+
+  // Fetch admin-editable exam date from app_settings
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from('app_settings')
+        .select('value')
+        .eq('key', 'jamb_exam_date')
+        .maybeSingle();
+      if (!cancelled && data?.value) {
+        const raw = typeof data.value === 'string' ? data.value : (data.value as any);
+        const parsed = new Date(raw);
+        if (!isNaN(parsed.getTime())) setExamDate(parsed);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     const calculateTimeLeft = () => {
-      const difference = UTME_DATE.getTime() - new Date().getTime();
-      
+      const difference = examDate.getTime() - new Date().getTime();
+
       if (difference > 0) {
+        setHasPassed(false);
         setTimeLeft({
           days: Math.floor(difference / (1000 * 60 * 60 * 24)),
           hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
           minutes: Math.floor((difference / 1000 / 60) % 60),
           seconds: Math.floor((difference / 1000) % 60),
         });
+      } else {
+        // Clamp — never show negative
+        setHasPassed(true);
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
       }
     };
 
     calculateTimeLeft();
     const timer = setInterval(calculateTimeLeft, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [examDate]);
 
   const timeUnits = [
     { label: 'Days', value: timeLeft.days },
@@ -40,6 +65,19 @@ export const CountdownTimer = () => {
     { label: 'Mins', value: timeLeft.minutes },
     { label: 'Secs', value: timeLeft.seconds },
   ];
+
+  if (hasPassed) {
+    return (
+      <div className="text-center py-4">
+        <p className="text-lg md:text-2xl font-semibold text-foreground">
+          🎓 JAMB UTME is here — best of luck!
+        </p>
+        <p className="text-sm text-muted-foreground mt-1">
+          A new countdown will start once the next exam date is set.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex justify-center gap-3 md:gap-6">
