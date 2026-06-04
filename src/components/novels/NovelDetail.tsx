@@ -398,6 +398,10 @@ export const NovelDetail = ({ novelId, userEmail, onBack, onStartReading }: Nove
                       Download
                     </Button>
                   </a>
+                  <Button variant="outline" onClick={() => setFocusMode(true)}>
+                    <Maximize2 className="w-4 h-4 mr-2" />
+                    Focus mode
+                  </Button>
                 </div>
                 <div className="rounded-lg border bg-card overflow-hidden h-[600px]">
                   <iframe
@@ -418,6 +422,55 @@ export const NovelDetail = ({ novelId, userEmail, onBack, onStartReading }: Nove
           </TabsContent>
         </Tabs>
       </motion.div>
+
+      {focusMode && pdfUrl && (
+        <div className="fixed inset-0 z-[100] bg-background flex flex-col">
+          <div className="flex items-center justify-between px-3 py-2 border-b bg-card/95 backdrop-blur">
+            <div className="flex items-center gap-2 min-w-0">
+              <BookOpen className="w-4 h-4 text-primary shrink-0" />
+              <p className="text-sm font-medium text-foreground truncate">{novel.title}</p>
+            </div>
+            <div className="flex items-center gap-1">
+              <Button size="sm" variant="ghost" onClick={() => setZoom((z) => Math.max(50, z - 10))} aria-label="Zoom out">
+                <ZoomOut className="w-4 h-4" />
+              </Button>
+              <span className="text-xs text-muted-foreground tabular-nums w-10 text-center">{zoom}%</span>
+              <Button size="sm" variant="ghost" onClick={() => setZoom((z) => Math.min(200, z + 10))} aria-label="Zoom in">
+                <ZoomIn className="w-4 h-4" />
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setNightMode((n) => !n)} aria-label="Toggle night mode">
+                {nightMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setFocusMode(false)} aria-label="Exit focus mode">
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+          <div
+            className="flex-1 overflow-auto"
+            style={{ background: nightMode ? '#0a0a0a' : 'hsl(var(--muted))' }}
+          >
+            <div
+              className="mx-auto h-full"
+              style={{
+                width: `${zoom}%`,
+                minWidth: '50%',
+                maxWidth: '200%',
+              }}
+            >
+              <iframe
+                src={pdfUrl}
+                title={`${novel.title} — Focus`}
+                className="w-full h-full border-0"
+                style={{
+                  filter: nightMode ? 'invert(0.92) hue-rotate(180deg)' : 'none',
+                  minHeight: '100%',
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
