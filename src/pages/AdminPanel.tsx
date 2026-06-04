@@ -487,6 +487,10 @@ const AdminPanel = () => {
               <BarChart3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="hidden xs:inline">Ads</span>
             </TabsTrigger>
+            <TabsTrigger value="books" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
+              <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden xs:inline">Books</span>
+            </TabsTrigger>
             <TabsTrigger value="overview" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
               <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="hidden xs:inline">Overview</span>
