@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Book, BookOpen, Check, Clock, Play, Star, User, WifiOff } from 'lucide-react';
+import { ArrowLeft, Book, BookOpen, Check, Clock, Play, Star, User, WifiOff, FileText, Download, ExternalLink, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { getCachedNovel, getCachedChaptersByNovel } from '@/services/offlineStorage';
 
@@ -28,6 +29,37 @@ export const NovelDetail = ({ novelId, userEmail, onBack, onStartReading }: Nove
   const [progress, setProgress] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isOffline, setIsOffline] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const [hasAccess, setHasAccess] = useState(false);
+
+  useEffect(() => {
+    const checkAccess = async () => {
+      if (!userEmail) return;
+      const { data } = await supabase.rpc('check_user_access', { user_email: userEmail });
+      if (data && data[0]) setHasAccess(!!data[0].has_access);
+    };
+    checkAccess();
+  }, [userEmail]);
+
+  useEffect(() => {
+    const loadPdf = async () => {
+      if (!novel) return;
+      if (novel.full_book_pdf_url) {
+        setPdfUrl(novel.full_book_pdf_url);
+        return;
+      }
+      if (novel.full_book_pdf_path) {
+        setPdfLoading(true);
+        const { data, error } = await supabase.storage
+          .from('book-pdfs')
+          .createSignedUrl(novel.full_book_pdf_path, 60 * 60);
+        if (!error && data?.signedUrl) setPdfUrl(data.signedUrl);
+        setPdfLoading(false);
+      }
+    };
+    loadPdf();
+  }, [novel]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -129,6 +161,8 @@ export const NovelDetail = ({ novelId, userEmail, onBack, onStartReading }: Nove
     }
   };
 
+  const hasFullBook = !!(novel?.full_book_pdf_url || novel?.full_book_pdf_path);
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
       {isOffline && (
@@ -223,18 +257,31 @@ export const NovelDetail = ({ novelId, userEmail, onBack, onStartReading }: Nove
         </div>
       </motion.div>
       
-      {/* Table of Contents */}
+      {/* Tabs: Study Guide | Full Book */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-primary" />
-          Table of Contents
-        </h2>
-        
-        <ScrollArea className="h-[400px] rounded-lg border bg-card p-4">
+        <Tabs defaultValue="guide" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="guide">
+              <BookOpen className="w-4 h-4 mr-2" />
+              Study Guide
+            </TabsTrigger>
+            <TabsTrigger value="fullbook">
+              <FileText className="w-4 h-4 mr-2" />
+              Full Book
+              {hasFullBook && <Badge variant="secondary" className="ml-2 h-5 text-xs">PDF</Badge>}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="guide">
+            <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-primary" />
+              Table of Contents
+            </h2>
+            <ScrollArea className="h-[400px] rounded-lg border bg-card p-4">
           {chapters.length === 0 ? (
             <p className="text-center text-muted-foreground py-8">
               No chapters available yet
@@ -286,7 +333,71 @@ export const NovelDetail = ({ novelId, userEmail, onBack, onStartReading }: Nove
               })}
             </div>
           )}
-        </ScrollArea>
+            </ScrollArea>
+          </TabsContent>
+
+          <TabsContent value="fullbook">
+            <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+              <FileText className="w-5 h-5 text-primary" />
+              Full Book (PDF)
+            </h2>
+
+            {!hasFullBook ? (
+              <div className="rounded-lg border bg-card p-8 text-center">
+                <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
+                <p className="text-foreground font-medium mb-1">Full book PDF not available yet</p>
+                <p className="text-sm text-muted-foreground">
+                  We're working on adding the complete book. For now, use the Study Guide.
+                </p>
+              </div>
+            ) : !hasAccess ? (
+              <div className="rounded-lg border bg-card p-8 text-center">
+                <Lock className="w-12 h-12 mx-auto text-primary mb-3" />
+                <p className="text-foreground font-medium mb-1">Premium content</p>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Upgrade to read the full book PDF.
+                </p>
+                <Button onClick={onBack} variant="outline">Back</Button>
+              </div>
+            ) : pdfLoading ? (
+              <div className="rounded-lg border bg-card p-8 text-center">
+                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+              </div>
+            ) : pdfUrl ? (
+              <div className="space-y-3">
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    onClick={() => window.open(pdfUrl, '_blank', 'noopener,noreferrer')}
+                    className="gradient-primary text-primary-foreground"
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    Open in new tab
+                  </Button>
+                  <a href={pdfUrl} download target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline">
+                      <Download className="w-4 h-4 mr-2" />
+                      Download
+                    </Button>
+                  </a>
+                </div>
+                <div className="rounded-lg border bg-card overflow-hidden h-[600px]">
+                  <iframe
+                    src={pdfUrl}
+                    title={`${novel.title} — Full Book`}
+                    className="w-full h-full"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground text-center">
+                  Trouble viewing? Tap "Open in new tab" — works best on mobile.
+                </p>
+              </div>
+            ) : (
+              <div className="rounded-lg border bg-card p-8 text-center">
+                <p className="text-sm text-muted-foreground">Could not load PDF.</p>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </motion.div>
     </div>
   );
