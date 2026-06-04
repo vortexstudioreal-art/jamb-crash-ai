@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Book, BookOpen, Check, Clock, Play, Star, User, WifiOff, FileText, Download, ExternalLink, Lock } from 'lucide-react';
+import { ArrowLeft, Book, BookOpen, Check, Clock, Play, Star, User, WifiOff, FileText, Download, ExternalLink, Lock, Maximize2, Minimize2, ZoomIn, ZoomOut, Moon, Sun, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -32,6 +32,25 @@ export const NovelDetail = ({ novelId, userEmail, onBack, onStartReading }: Nove
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [hasAccess, setHasAccess] = useState(false);
+  const [focusMode, setFocusMode] = useState(false);
+  const [zoom, setZoom] = useState(100);
+  const [nightMode, setNightMode] = useState(false);
+
+  useEffect(() => {
+    if (!focusMode) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setFocusMode(false);
+      if (e.key === '+' || e.key === '=') setZoom((z) => Math.min(200, z + 10));
+      if (e.key === '-') setZoom((z) => Math.max(50, z - 10));
+    };
+    window.addEventListener('keydown', onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [focusMode]);
 
   useEffect(() => {
     const checkAccess = async () => {
