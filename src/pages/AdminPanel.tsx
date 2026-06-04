@@ -19,6 +19,7 @@ import { UserManagement } from '@/components/admin/UserManagement';
 import { NotificationManager } from '@/components/admin/NotificationManager';
 import { PayoutManagement } from '@/components/admin/PayoutManagement';
 import { AdAnalyticsDashboard } from '@/components/admin/AdAnalyticsDashboard';
+import { BookPdfManager } from '@/components/admin/BookPdfManager';
 
 interface Payment {
   id: string;
