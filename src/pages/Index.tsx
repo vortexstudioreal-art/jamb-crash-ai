@@ -25,8 +25,6 @@ import { TrialTimerBadge } from '@/components/TrialTimerBadge';
 import { Footer } from '@/components/Footer';
 import { BackButton } from '@/components/BackButton';
 import { FeatureGate, useFeatureAccess } from '@/components/FeatureGate';
-import { ChatBot } from '@/components/ChatBot';
-import { CountdownTimer } from '@/components/CountdownTimer';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTrialSystem } from '@/hooks/useTrialSystem';
 import { supabase } from '@/integrations/supabase/client';
@@ -128,7 +126,6 @@ const Index = () => {
   });
   const [quizType, setQuizType] = useState<QuizType>('full');
   const [quizResults, setQuizResults] = useState<any>(null);
-  const [practiceSubjectOverride, setPracticeSubjectOverride] = useState<string | null>(null);
   const [highlightStandard, setHighlightStandard] = useState(false);
   const [weakSubjectFromQuiz, setWeakSubjectFromQuiz] = useState<string | null>(null);
   const [showSubjectChanger, setShowSubjectChanger] = useState(false);
@@ -627,7 +624,6 @@ const Index = () => {
   };
 
   const handleBackToDashboard = () => {
-    setPracticeSubjectOverride(null);
     startTransition(() => setCurrentStep('dashboard'));
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
@@ -700,7 +696,7 @@ const Index = () => {
           <Suspense fallback={<LazyFallback />}>
             <TimedQuiz
               userEmail={userEmail}
-              subjects={practiceSubjectOverride ? [practiceSubjectOverride] : effectiveSubjects}
+              subjects={effectiveSubjects}
               quizType={quizType}
               onComplete={handleQuizComplete}
               onExit={handleBackToDashboard}
@@ -1316,15 +1312,7 @@ const Index = () => {
                   <BookOpen className="w-5 h-5 text-primary" />
                   Your Study Stats 📊
                 </h2>
-                <StudyStats
-                  userEmail={userEmail}
-                  onPracticeSubject={(subject) => {
-                    if (!effectiveSubjects.includes(subject)) return;
-                    setPracticeSubjectOverride(subject);
-                    setQuizType('mini');
-                    startTransition(() => setCurrentStep('quiz'));
-                  }}
-                />
+                <StudyStats userEmail={userEmail} />
                 
                 {/* Topic Mastery Tracker */}
                 <div className="mt-6">
@@ -1350,9 +1338,12 @@ const Index = () => {
                 className="mt-8 bg-gradient-to-r from-primary/20 to-green-500/20 rounded-2xl p-6 text-center border border-primary/30"
               >
                 <Calendar className="w-10 h-10 text-primary mx-auto mb-3" />
-                <h3 className="text-xl font-bold text-foreground mb-1">UTME Countdown</h3>
-                <p className="text-muted-foreground mb-4">Stay focused, stay winning! 🔥</p>
-                <CountdownTimer />
+                <h3 className="text-xl font-bold text-foreground mb-1">2026 UTME Countdown</h3>
+                <p className="text-muted-foreground mb-3">Stay focused, stay winning! 🔥</p>
+                <div className="text-4xl font-bold text-primary">
+                  {Math.ceil((new Date('2026-04-25').getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">until UTME 2026</p>
               </motion.div>
 
               {/* AI Tips */}
@@ -1397,7 +1388,6 @@ const Index = () => {
             </div>
           </div>
         </div>
-        <ChatBot />
       </PaywallGate>
     );
   }
