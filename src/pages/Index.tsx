@@ -25,6 +25,8 @@ import { TrialTimerBadge } from '@/components/TrialTimerBadge';
 import { Footer } from '@/components/Footer';
 import { BackButton } from '@/components/BackButton';
 import { FeatureGate, useFeatureAccess } from '@/components/FeatureGate';
+import { ChatBot } from '@/components/ChatBot';
+import { CountdownTimer } from '@/components/CountdownTimer';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTrialSystem } from '@/hooks/useTrialSystem';
 import { supabase } from '@/integrations/supabase/client';
@@ -1338,12 +1340,9 @@ const Index = () => {
                 className="mt-8 bg-gradient-to-r from-primary/20 to-green-500/20 rounded-2xl p-6 text-center border border-primary/30"
               >
                 <Calendar className="w-10 h-10 text-primary mx-auto mb-3" />
-                <h3 className="text-xl font-bold text-foreground mb-1">2026 UTME Countdown</h3>
-                <p className="text-muted-foreground mb-3">Stay focused, stay winning! 🔥</p>
-                <div className="text-4xl font-bold text-primary">
-                  {Math.ceil((new Date('2026-04-25').getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days
-                </div>
-                <p className="text-sm text-muted-foreground mt-2">until UTME 2026</p>
+                <h3 className="text-xl font-bold text-foreground mb-1">UTME Countdown</h3>
+                <p className="text-muted-foreground mb-4">Stay focused, stay winning! 🔥</p>
+                <CountdownTimer />
               </motion.div>
 
               {/* AI Tips */}
