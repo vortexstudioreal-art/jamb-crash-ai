@@ -1387,6 +1387,7 @@ const Index = () => {
             </div>
           </div>
         </div>
+        <ChatBot />
       </PaywallGate>
     );
   }
