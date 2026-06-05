@@ -128,6 +128,7 @@ const Index = () => {
   });
   const [quizType, setQuizType] = useState<QuizType>('full');
   const [quizResults, setQuizResults] = useState<any>(null);
+  const [practiceSubjectOverride, setPracticeSubjectOverride] = useState<string | null>(null);
   const [highlightStandard, setHighlightStandard] = useState(false);
   const [weakSubjectFromQuiz, setWeakSubjectFromQuiz] = useState<string | null>(null);
   const [showSubjectChanger, setShowSubjectChanger] = useState(false);
@@ -698,7 +699,7 @@ const Index = () => {
           <Suspense fallback={<LazyFallback />}>
             <TimedQuiz
               userEmail={userEmail}
-              subjects={effectiveSubjects}
+              subjects={practiceSubjectOverride ? [practiceSubjectOverride] : effectiveSubjects}
               quizType={quizType}
               onComplete={handleQuizComplete}
               onExit={handleBackToDashboard}
@@ -1314,7 +1315,15 @@ const Index = () => {
                   <BookOpen className="w-5 h-5 text-primary" />
                   Your Study Stats 📊
                 </h2>
-                <StudyStats userEmail={userEmail} />
+                <StudyStats
+                  userEmail={userEmail}
+                  onPracticeSubject={(subject) => {
+                    if (!effectiveSubjects.includes(subject)) return;
+                    setPracticeSubjectOverride(subject);
+                    setQuizType('mini');
+                    startTransition(() => setCurrentStep('quiz'));
+                  }}
+                />
                 
                 {/* Topic Mastery Tracker */}
                 <div className="mt-6">
