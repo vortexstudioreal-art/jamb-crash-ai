@@ -282,7 +282,7 @@ export const Leaderboard = ({ onBack, userEmail }: LeaderboardProps) => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.7 + index * 0.05 }}
                     className={`flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors ${
-                      entry.email.toLowerCase() === userEmail?.toLowerCase() ? 'bg-primary/10' : ''
+                      entry.user_id && entry.user_id === currentUserId ? 'bg-primary/10' : ''
                     }`}
                   >
                     {/* Rank */}
@@ -294,7 +294,7 @@ export const Leaderboard = ({ onBack, userEmail }: LeaderboardProps) => {
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-foreground truncate">
                         {entry.full_name}
-                        {entry.email.toLowerCase() === userEmail?.toLowerCase() && (
+                        {entry.user_id && entry.user_id === currentUserId && (
                           <Badge variant="outline" className="ml-2 text-xs">You</Badge>
                         )}
                       </p>
