@@ -13,7 +13,7 @@ interface LeaderboardProps {
 
 interface LeaderboardEntry {
   id: string;
-  email: string;
+  user_id: string | null;
   full_name: string;
   total_score: number;
   questions_answered: number;
@@ -56,7 +56,7 @@ export const Leaderboard = ({ onBack, userEmail }: LeaderboardProps) => {
     try {
       const { data, error } = await supabase
         .from('leaderboard_scores')
-        .select('*')
+        .select('id, user_id, full_name, total_score, questions_answered, average_accuracy, best_quiz_score, rank, is_placeholder')
         .order('total_score', { ascending: false })
         .limit(10);
 
@@ -70,9 +70,10 @@ export const Leaderboard = ({ onBack, userEmail }: LeaderboardProps) => {
 
       setEntries(rankedData);
 
-      // Find user's rank if they exist
-      if (userEmail) {
-        const userEntry = rankedData.find(e => e.email.toLowerCase() === userEmail.toLowerCase());
+      // Find user's rank by user_id (email no longer exposed for privacy)
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.id) {
+        const userEntry = rankedData.find(e => e.user_id === user.id);
         if (userEntry) {
           setUserRank(userEntry.rank);
         }
