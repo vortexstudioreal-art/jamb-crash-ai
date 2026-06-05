@@ -1,13 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, Target, Clock, Flame, BookOpen, AlertCircle, Sparkles, RefreshCw, Info } from 'lucide-react';
+import { TrendingUp, TrendingDown, Target, Clock, Flame, BookOpen, AlertCircle, Sparkles, RefreshCw, Info, ChevronRight, Minus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { useJambScorePredictor } from '@/hooks/useJambScorePredictor';
 
 interface StudyStatsProps {
   userEmail: string;
   refreshTrigger?: number;
+  onPracticeSubject?: (subject: string) => void;
 }
 
 interface QuizAttempt {
@@ -21,7 +22,7 @@ interface QuizAttempt {
   questions_data: unknown;
 }
 
-export const StudyStats = ({ userEmail, refreshTrigger }: StudyStatsProps) => {
+export const StudyStats = ({ userEmail, refreshTrigger, onPracticeSubject }: StudyStatsProps) => {
   const [quizzes, setQuizzes] = useState<QuizAttempt[]>([]);
   const [loading, setLoading] = useState(true);
   const [tipIndex, setTipIndex] = useState(0);
