@@ -19,7 +19,6 @@ import CollaboratorDashboard from "./pages/CollaboratorDashboard";
 import RepeatedQuestionsPage from "./pages/RepeatedQuestionsPage";
 import GamesPage from "./pages/GamesPage";
 import NotFound from "./pages/NotFound";
-import { ChatBot } from "./components/ChatBot";
 
 const queryClient = new QueryClient();
 
@@ -74,7 +73,6 @@ const App = () => {
                 <Route path="*" element={<NotFound />} />
               </Routes>
               {/* Global Components */}
-              <ChatBot />
               <OfflineIndicator variant="minimal" />
               <InstallPrompt />
             </PasswordRecoveryHandler>
