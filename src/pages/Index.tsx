@@ -627,6 +627,7 @@ const Index = () => {
   };
 
   const handleBackToDashboard = () => {
+    setPracticeSubjectOverride(null);
     startTransition(() => setCurrentStep('dashboard'));
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
