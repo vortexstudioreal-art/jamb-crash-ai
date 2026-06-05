@@ -385,66 +385,128 @@ export const StudyStats = ({ userEmail, refreshTrigger, onPracticeSubject }: Stu
       {totalQuizzes > 0 && (
         <div className="grid md:grid-cols-2 gap-6">
           {/* Progress Chart */}
-          <div className="bg-card rounded-xl p-4 border border-border">
-            <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-primary" />
-              Recent Progress
-            </h3>
-            <div className="h-40">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={dailyData}>
-                  <XAxis dataKey="date" stroke="#888" fontSize={12} />
-                  <YAxis stroke="#888" fontSize={12} domain={[0, 100]} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--card))', 
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px'
-                    }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="score" 
-                    stroke="hsl(var(--primary))" 
-                    strokeWidth={3}
-                    dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2 }}
-                    activeDot={{ r: 6, fill: 'hsl(var(--primary))' }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+          {/* Progress Chart */}
+          {(() => {
+            const last = dailyData[dailyData.length - 1]?.score ?? 0;
+            const prev = dailyData[dailyData.length - 2]?.score ?? last;
+            const delta = last - prev;
+            const TrendIcon = delta > 0 ? TrendingUp : delta < 0 ? TrendingDown : Minus;
+            const trendColor = delta > 0 ? 'text-green-500' : delta < 0 ? 'text-red-500' : 'text-muted-foreground';
+            const trendBg = delta > 0 ? 'bg-green-500/10' : delta < 0 ? 'bg-red-500/10' : 'bg-muted';
+            return (
+              <div className="bg-card rounded-xl p-5 border border-border">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h3 className="font-bold text-foreground flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-primary" />
+                      Recent Progress
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-1">Last {dailyData.length} quiz{dailyData.length === 1 ? '' : 'zes'}</p>
+                  </div>
+                  <div className={`flex items-center gap-1 px-2 py-1 rounded-full ${trendBg}`}>
+                    <TrendIcon className={`w-3.5 h-3.5 ${trendColor}`} />
+                    <span className={`text-xs font-semibold ${trendColor}`}>
+                      {delta > 0 ? '+' : ''}{delta}%
+                    </span>
+                  </div>
+                </div>
+                <div className="h-40">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={dailyData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="progressFill" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.4} />
+                          <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                      <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} />
+                      <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} domain={[0, 100]} tickLine={false} axisLine={false} />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: 'hsl(var(--card))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '8px',
+                          fontSize: '12px'
+                        }}
+                        formatter={(value) => [`${value}%`, 'Score']}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="score"
+                        stroke="hsl(var(--primary))"
+                        strokeWidth={2.5}
+                        fill="url(#progressFill)"
+                        dot={{ fill: 'hsl(var(--primary))', r: 3 }}
+                        activeDot={{ r: 5 }}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground border-t border-border pt-3">
+                  <span>Latest: <span className="font-semibold text-foreground">{last}%</span></span>
+                  <span>Best: <span className="font-semibold text-foreground">{Math.max(...dailyData.map(d => d.score), 0)}%</span></span>
+                  <span>Avg: <span className="font-semibold text-foreground">{Math.round(dailyData.reduce((s, d) => s + d.score, 0) / Math.max(dailyData.length, 1))}%</span></span>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Subject Performance */}
-          <div className="bg-card rounded-xl p-4 border border-border">
-            <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
-              <Target className="w-5 h-5 text-green-500" />
-              Subject Performance
-            </h3>
+          <div className="bg-card rounded-xl p-5 border border-border">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-foreground flex items-center gap-2">
+                <Target className="w-5 h-5 text-green-500" />
+                Subject Performance
+              </h3>
+              {subjectData.length > 0 && (
+                <span className="text-xs text-muted-foreground">Tap to practice</span>
+              )}
+            </div>
             {subjectData.length > 0 ? (
-              <div className="h-40">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={subjectData} layout="vertical">
-                    <XAxis type="number" domain={[0, 100]} stroke="#888" fontSize={12} />
-                    <YAxis type="category" dataKey="name" stroke="#888" fontSize={10} width={80} />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: 'hsl(var(--card))', 
-                        border: '1px solid hsl(var(--border))',
-                        borderRadius: '8px'
-                      }}
-                      formatter={(value, name, props) => [
-                        `${value}% (${props.payload.correct}/${props.payload.total})`, 
-                        'Score'
-                      ]}
-                    />
-                    <Bar 
-                      dataKey="score" 
-                      fill="hsl(var(--primary))"
-                      radius={[0, 4, 4, 0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
+              <div className="space-y-3">
+                {subjectData.slice(0, 6).map((s) => {
+                  const color = s.score >= 70 ? 'bg-green-500' : s.score >= 50 ? 'bg-yellow-500' : 'bg-red-500';
+                  const label = s.score >= 70 ? 'Strong' : s.score >= 50 ? 'Improving' : 'Weak';
+                  const labelColor = s.score >= 70 ? 'text-green-500' : s.score >= 50 ? 'text-yellow-600' : 'text-red-500';
+                  const subjectKey = s.name.toLowerCase().replace(/ /g, '_');
+                  return (
+                    <button
+                      key={s.name}
+                      onClick={() => onPracticeSubject?.(subjectKey)}
+                      disabled={!onPracticeSubject}
+                      className="w-full text-left group disabled:cursor-default"
+                    >
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-foreground">{s.name}</span>
+                          <span className={`text-[10px] font-semibold uppercase tracking-wide ${labelColor}`}>
+                            {label}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">
+                            {s.correct}/{s.total}
+                          </span>
+                          <span className="text-sm font-bold text-foreground tabular-nums w-10 text-right">
+                            {s.score}%
+                          </span>
+                          {onPracticeSubject && (
+                            <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                          )}
+                        </div>
+                      </div>
+                      <div className="h-2 bg-muted rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${s.score}%` }}
+                          transition={{ duration: 0.8, ease: 'easeOut' }}
+                          className={`h-full ${color} rounded-full`}
+                        />
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             ) : (
               <div className="h-40 flex items-center justify-center text-muted-foreground text-sm">
