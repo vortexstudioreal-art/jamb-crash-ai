@@ -13,7 +13,7 @@ interface LeaderboardProps {
 
 interface LeaderboardEntry {
   id: string;
-  email: string;
+  user_id: string | null;
   full_name: string;
   total_score: number;
   questions_answered: number;
@@ -27,6 +27,7 @@ export const Leaderboard = ({ onBack, userEmail }: LeaderboardProps) => {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [userRank, setUserRank] = useState<number | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchLeaderboard();
@@ -56,7 +57,7 @@ export const Leaderboard = ({ onBack, userEmail }: LeaderboardProps) => {
     try {
       const { data, error } = await supabase
         .from('leaderboard_scores')
-        .select('*')
+        .select('id, user_id, full_name, total_score, questions_answered, average_accuracy, best_quiz_score, rank, is_placeholder')
         .order('total_score', { ascending: false })
         .limit(10);
 
@@ -70,9 +71,11 @@ export const Leaderboard = ({ onBack, userEmail }: LeaderboardProps) => {
 
       setEntries(rankedData);
 
-      // Find user's rank if they exist
-      if (userEmail) {
-        const userEntry = rankedData.find(e => e.email.toLowerCase() === userEmail.toLowerCase());
+      // Find user's rank by user_id (email no longer exposed for privacy)
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.id) {
+        setCurrentUserId(user.id);
+        const userEntry = rankedData.find(e => e.user_id === user.id);
         if (userEntry) {
           setUserRank(userEntry.rank);
         }
@@ -279,7 +282,7 @@ export const Leaderboard = ({ onBack, userEmail }: LeaderboardProps) => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.7 + index * 0.05 }}
                     className={`flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors ${
-                      entry.email.toLowerCase() === userEmail?.toLowerCase() ? 'bg-primary/10' : ''
+                      entry.user_id && entry.user_id === currentUserId ? 'bg-primary/10' : ''
                     }`}
                   >
                     {/* Rank */}
@@ -291,7 +294,7 @@ export const Leaderboard = ({ onBack, userEmail }: LeaderboardProps) => {
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-foreground truncate">
                         {entry.full_name}
-                        {entry.email.toLowerCase() === userEmail?.toLowerCase() && (
+                        {entry.user_id && entry.user_id === currentUserId && (
                           <Badge variant="outline" className="ml-2 text-xs">You</Badge>
                         )}
                       </p>
