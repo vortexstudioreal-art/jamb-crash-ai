@@ -27,6 +27,7 @@ export const Leaderboard = ({ onBack, userEmail }: LeaderboardProps) => {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [userRank, setUserRank] = useState<number | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchLeaderboard();
@@ -73,6 +74,7 @@ export const Leaderboard = ({ onBack, userEmail }: LeaderboardProps) => {
       // Find user's rank by user_id (email no longer exposed for privacy)
       const { data: { user } } = await supabase.auth.getUser();
       if (user?.id) {
+        setCurrentUserId(user.id);
         const userEntry = rankedData.find(e => e.user_id === user.id);
         if (userEntry) {
           setUserRank(userEntry.rank);
