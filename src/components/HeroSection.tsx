@@ -86,7 +86,7 @@ export const HeroSection = ({ onGetStarted, hasAccess, onSeeHowItWorks }: HeroSe
             transition={{ delay: 0.7 }}
           >
             <p className="text-sm font-medium text-muted-foreground mb-4 uppercase tracking-wide">
-              Time Until UTME 2026
+              Time Until UTME {year}
             </p>
             <CountdownTimer />
           </motion.div>
