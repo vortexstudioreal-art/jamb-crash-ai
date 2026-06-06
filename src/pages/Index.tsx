@@ -152,6 +152,7 @@ const Index = () => {
   });
   
   const { user, isLoading, hasAccess, isAdmin, isOwner, userRole, signOut, refreshAccess } = useAuth();
+  const { year: examYear } = useExamDate();
   const navigate = useNavigate();
   const { hasFeature } = useFeatureAccess();
   
