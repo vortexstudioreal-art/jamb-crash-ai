@@ -12,6 +12,7 @@ interface HeroSectionProps {
 }
 
 export const HeroSection = ({ onGetStarted, hasAccess, onSeeHowItWorks }: HeroSectionProps) => {
+  const { year } = useExamDate();
   return (
     <section className="relative min-h-screen gradient-hero overflow-hidden">
       {/* Background pattern */}
