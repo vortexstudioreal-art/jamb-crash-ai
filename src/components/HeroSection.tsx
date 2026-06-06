@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Zap, Clock, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CountdownTimer } from './CountdownTimer';
+import { useExamDate } from '@/hooks/useExamDate';
 import { LiveCounter } from './LiveCounter';
 
 interface HeroSectionProps {
