@@ -216,14 +216,30 @@ export const StudyStats = ({ userEmail, refreshTrigger, onPracticeSubject }: Stu
     .filter(s => s.total > 0)
     .sort((a, b) => a.score - b.score);
 
-  // Daily progress chart
-  const dailyData = quizzes
-    .slice(0, 7)
-    .reverse()
-    .map(q => ({
-      date: new Date(q.created_at).toLocaleDateString('en-US', { weekday: 'short' }),
-      score: Math.round((q.correct_answers / q.total_questions) * 100)
-    }));
+  // Recent Progress chart — one point per quiz attempt (no daily aggregation).
+  // Same-day attempts get suffixes like "Wed", "Wed 2", "Wed 3" so 3 quizzes on
+  // Wednesday show as 3 distinct columns.
+  const recentAttempts = quizzes.slice(0, 10).reverse();
+  const dayCounts: Record<string, number> = {};
+  const dailyData = recentAttempts.map((q) => {
+    const d = new Date(q.created_at);
+    const weekday = d.toLocaleDateString('en-US', { weekday: 'short' });
+    dayCounts[weekday] = (dayCounts[weekday] || 0) + 1;
+    const n = dayCounts[weekday];
+    return {
+      date: n === 1 ? weekday : `${weekday} ${n}`,
+      fullDate: d.toLocaleString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+      }),
+      score: q.total_questions > 0
+        ? Math.round((q.correct_answers / q.total_questions) * 100)
+        : 0,
+    };
+  });
 
   // Find weakest and strongest subjects
   const weakestSubject = subjectData[0];
