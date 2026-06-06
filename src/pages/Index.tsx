@@ -27,6 +27,7 @@ import { BackButton } from '@/components/BackButton';
 import { FeatureGate, useFeatureAccess } from '@/components/FeatureGate';
 import { ChatBot } from '@/components/ChatBot';
 import { CountdownTimer } from '@/components/CountdownTimer';
+import { useExamDate } from '@/hooks/useExamDate';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTrialSystem } from '@/hooks/useTrialSystem';
 import { supabase } from '@/integrations/supabase/client';
