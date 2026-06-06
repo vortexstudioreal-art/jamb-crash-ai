@@ -417,7 +417,7 @@ export const StudyStats = ({ userEmail, refreshTrigger, onPracticeSubject }: Stu
                       <TrendingUp className="w-5 h-5 text-primary" />
                       Recent Progress
                     </h3>
-                    <p className="text-xs text-muted-foreground mt-1">Last {dailyData.length} quiz{dailyData.length === 1 ? '' : 'zes'}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Last {dailyData.length} attempt{dailyData.length === 1 ? '' : 's'} — one bar per quiz</p>
                   </div>
                   <div className={`flex items-center gap-1 px-2 py-1 rounded-full ${trendBg}`}>
                     <TrendIcon className={`w-3.5 h-3.5 ${trendColor}`} />
@@ -446,6 +446,10 @@ export const StudyStats = ({ userEmail, refreshTrigger, onPracticeSubject }: Stu
                           fontSize: '12px'
                         }}
                         formatter={(value) => [`${value}%`, 'Score']}
+                        labelFormatter={(_label, payload) => {
+                          const item: any = Array.isArray(payload) ? payload[0]?.payload : null;
+                          return item?.fullDate || _label;
+                        }}
                       />
                       <Area
                         type="monotone"
