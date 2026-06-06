@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Zap, Clock, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CountdownTimer } from './CountdownTimer';
+import { useExamDate } from '@/hooks/useExamDate';
 import { LiveCounter } from './LiveCounter';
 
 interface HeroSectionProps {
@@ -11,6 +12,7 @@ interface HeroSectionProps {
 }
 
 export const HeroSection = ({ onGetStarted, hasAccess, onSeeHowItWorks }: HeroSectionProps) => {
+  const { year } = useExamDate();
   return (
     <section className="relative min-h-screen gradient-hero overflow-hidden">
       {/* Background pattern */}
@@ -84,7 +86,7 @@ export const HeroSection = ({ onGetStarted, hasAccess, onSeeHowItWorks }: HeroSe
             transition={{ delay: 0.7 }}
           >
             <p className="text-sm font-medium text-muted-foreground mb-4 uppercase tracking-wide">
-              Time Until UTME 2026
+              Time Until UTME {year}
             </p>
             <CountdownTimer />
           </motion.div>

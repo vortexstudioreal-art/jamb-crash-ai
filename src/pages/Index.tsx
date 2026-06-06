@@ -27,6 +27,7 @@ import { BackButton } from '@/components/BackButton';
 import { FeatureGate, useFeatureAccess } from '@/components/FeatureGate';
 import { ChatBot } from '@/components/ChatBot';
 import { CountdownTimer } from '@/components/CountdownTimer';
+import { useExamDate } from '@/hooks/useExamDate';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTrialSystem } from '@/hooks/useTrialSystem';
 import { supabase } from '@/integrations/supabase/client';
@@ -151,6 +152,7 @@ const Index = () => {
   });
   
   const { user, isLoading, hasAccess, isAdmin, isOwner, userRole, signOut, refreshAccess } = useAuth();
+  const { year: examYear } = useExamDate();
   const navigate = useNavigate();
   const { hasFeature } = useFeatureAccess();
   
@@ -1350,7 +1352,7 @@ const Index = () => {
                 className="mt-8 bg-gradient-to-r from-primary/20 to-green-500/20 rounded-2xl p-6 text-center border border-primary/30"
               >
                 <Calendar className="w-10 h-10 text-primary mx-auto mb-3" />
-                <h3 className="text-xl font-bold text-foreground mb-1">UTME Countdown</h3>
+                <h3 className="text-xl font-bold text-foreground mb-1">UTME {examYear} Countdown</h3>
                 <p className="text-muted-foreground mb-4">Stay focused, stay winning! 🔥</p>
                 <CountdownTimer />
               </motion.div>
