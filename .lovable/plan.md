@@ -1,110 +1,85 @@
-# Fix-Up Pass (pre-admin / pre-pricing)
+## Context
 
-Grouped by area. After all of this is shipped & verified, we move on to **admin dashboard + price changes** in a separate round.
+Your APK is an **appbuilder24 WebView wrapper** pointing at `https://jamb.lovable.app`. It is NOT a Capacitor build, so:
+
+- The wrapper loads the live URL on every cold start.
+- If the user is offline on cold start with no cached HTML, they see a white screen / "no internet" error from the WebView.
+- Offline therefore depends entirely on the **service worker registered inside that URL** during the user's first online visit.
+
+The current setup already has `vite-plugin-pwa` + `/sw.js` + `NetworkFirst` for HTML, but a few gaps stop the wrapper from being reliably usable offline.
 
 ---
 
-## 1. Novels — two modes: Summary + Full Book
+## Part 1 — Offline that actually works in the wrapper
 
-Current "Summary" mode (AI study guide) stays as-is. Add a parallel **Full Book** mode.
+### 1. App shell + navigation (no white screen)
 
-- DB: add `full_book_pdf_url` (text) + `full_book_pdf_path` (text, for storage) to `novels`.
-- New private storage bucket `book-pdfs` with admin-only write, signed-URL read for paid users.
-- Admin panel → Novels: form to either **upload a PDF** (stored in bucket) OR **paste an external URL** (Archive.org etc.). Per book, either field works.
-- Novel detail page: two tabs — **Study Guide** (existing chapters) and **Full Book** (PDF viewer).
-- Mobile: open in new window (existing iOS workaround pattern).
+- Confirm `navigateFallback: "/index.html"` is producing a precached `index.html` (it is, but verify Workbox precache list includes it after build).
+- Widen `globPatterns` to include `json` and `webmanifest` so the manifest and any static JSON load offline.
+- Add a tiny **offline fallback page** (`public/offline.html`) and wire it via `navigateFallback` so if even `index.html` is missing on first-ever offline open, the user sees a branded "You're offline — open the app once online to install it" screen instead of a WebView error. This matters specifically for the wrapper.
 
-## 2. Core subject books as PDFs (English, Maths, Physics, etc.)
+### 2. Last-viewed pages auto-cached
 
-- New table `subject_books` (subject, title, author, year, pdf_url, pdf_path, uploaded_by, is_active).
-- Shown inside **Study Materials** per subject as a "📘 Recommended Books" section.
-- Same admin upload-OR-URL flow as novels.
-- Filtered by the user's selected subjects (English + 3).
+- Add a `runtimeCaching` rule for same-origin navigations using `NetworkFirst` with a small `pages-cache` (already partially covered by navigateFallback, but make it explicit with a 7-day expiration so revisits to recently-seen routes work offline).
+- Add `CacheFirst` for same-origin hashed JS/CSS chunks (Workbox precache already covers built assets, but lazy-loaded route chunks visited at runtime need a runtime rule).
+- Add `StaleWhileRevalidate` for images under `/assets/` and Supabase storage public URLs (so downloaded book covers / PDFs thumbnails stay visible offline).
 
-## 3. Quiz bugs
+### 3. Downloaded quizzes / flashcards / syllabus
 
-- **Highlight persists on next question**: in `TimedQuiz`, `selectedAnswer` UI state isn't being cleared between questions. Reset selection + feedback state in the `onNext` handler (and on `currentIndex` change via `useEffect`).
-- **Answer B bias**: questions are stored with a fixed `correct_answer` letter. Shuffle options at render time per question and remap the correct letter so position is random across A/B/C/D. Store shuffle seed per question in session so review screens still match.
+- Already handled by `DownloadManager` → IndexedDB via `src/services/offlineStorage.ts`. No change needed; verify reads work when `navigator.onLine === false`.
+- Add a small audit pass: every screen that calls Supabase for "downloaded" content should fall back to `offlineStorage` when offline. Targets to check: `TimedQuiz`, `Flashcards`, `SyllabusReader`, `StudyMaterials`, `NovelReader`.
 
-## 4. Mastery Tracker — stricter rule
+### 4. Auth/session persistence offline
 
-Replace current heuristic. A syllabus topic is **Completed** only when **both**:
-1. Reading progress on that topic = 100%, AND
-2. User has scored ≥70% on **5 separate quiz attempts** tagged to that topic.
+- Supabase client already persists session in `localStorage` by default — survives offline.
+- Guard `AuthContext` so it does **not** sign the user out when `getUser()` fails due to network error (only sign out on explicit 401). This is the main reason users get bounced to the login screen offline.
+- `ProtectedRoute` should treat "session exists in storage + offline" as authenticated and render cached content instead of redirecting to `/auth`.
 
-Levels: Not started → Learning (any progress) → Practicing (1–4 passing quizzes) → **Mastered** (5+ passing quizzes + 100% read).
-- Add `topic` tag to `quiz_attempts.questions_data` aggregation (already partially there) and compute counts from `jamb_questions.topics`.
+### 5. First-install UX for wrapper users
 
-## 5. More questions
+- On the landing page, show a one-time banner: *"Open the app once with internet to enable offline mode."* Dismiss after the SW has activated (`navigator.serviceWorker.ready`).
+- Suppress the existing `InstallPrompt` PWA card when running inside the wrapper (detect via UA string `appbuilder24` or absence of `beforeinstallprompt`).
 
-- Add ~1,000 more questions across the 4 lowest-count subjects via a new `seed-extra-questions-v2` edge function (Gemini-generated, deduped by question hash).
-- Run from admin once, idempotent.
+### 6. Cache hygiene
 
-## 6. High-Yield Topics accuracy
+- Keep `registerType: "autoUpdate"` (already set) so the wrapper picks up new builds automatically next time it's online.
+- Add a "Clear offline cache" button in Settings → calls `caches.keys()` + `indexedDB` clears, for support cases.
 
-- Currently pulls any question loosely matching a topic name → some out-of-subject leaks.
-- Fix: filter strictly by `subject = X AND topics @> ARRAY[topic]` (Postgres array contains). No fuzzy matching.
-- Drop topics with <5 real questions in that subject so we never show "high yield" topics that have no real coverage.
+---
 
-## 7. Offline mode — must-be-online-first gate
+## Part 2 — Dashboard polish (after offline ships)
 
-- Remove the always-available offline toggle.
-- New rule: offline mode is **opt-in per device**. User must tap **"Enable Offline Mode"** while online → triggers full download (questions, syllabus, novels, flashcards for their subjects) → only then can the app run offline.
-- If they haven't enabled it and go offline → show "You need to enable offline mode while online first" screen instead of cached fallback.
-- Store `offline_enabled: true` flag in IndexedDB alongside the download.
+Queued for the follow-up turn, not this one:
 
-## 8. Referrals — switch to Airtime rewards
-
-Replace the 500 NGN account credit model.
-
-- Reward = **₦200 airtime** per successful referral (referred user must complete a paid signup).
-- New table `airtime_rewards` (email, network, phone, amount, status: pending/sent/failed, created_at, sent_at).
-- User flow: dashboard "Refer & Earn" → shows pending airtime balance → "Claim" button asks for **phone + network** → creates a `pending` row.
-- Admin panel: "Airtime Payouts" tab → list pending → mark sent (manual delivery for v1; automated VTU integration later).
-- Minimum claim: ₦200 (1 successful referral).
-
-## 9. Countdown — negative values
-
-- JAMB countdown currently subtracts past dates without clamping → shows negative days.
-- Fix: clamp to 0 and switch UI to **"Exam in progress / completed"** state when `examDate <= today`.
-- Add admin-editable `exam_date` setting (single row in `app_settings` table) so it's not hardcoded.
-
-## 10. "NEW" tool that doesn't work
-
-- Need to identify which tool. Based on dashboard, this is likely the new feature card with a "NEW" badge that has no handler / broken route.
-- I'll audit all `NEW`-badged cards in `DashboardHeader` / `Index` / `PremiumDashboard` and either wire the missing route or hide the badge until working.
-- (If you can name it before I start, even better — but I'll find it.)
+- **Recent Progress**: add empty state + week-over-week delta badge.
+- **Subject Performance**: tap a row → opens a sheet with "Weakest topics in {subject}" pulled from Topic Mastery.
+- **Topic Mastery**: filter by subject, sort by mastery, "Practice weak topics" CTA wired to `TimedQuiz`.
+- Visual consistency pass: shared card header style, consistent muted/primary semantic tokens, motion on data load.
 
 ---
 
 ## Technical details
 
+**Files to change for Part 1:**
+
 ```text
-DB migrations
-├── novels: + full_book_pdf_url, full_book_pdf_path
-├── new: subject_books (id, subject, title, author, year, pdf_url, pdf_path, is_active)
-├── new: airtime_rewards (id, email, phone, network, amount, status, created_at, sent_at)
-├── new: app_settings (key, value jsonb) — for exam_date etc.
-└── storage bucket: book-pdfs (private, admin-write, signed-url read for paid users)
-
-Edge functions
-├── seed-extra-questions-v2 (deduped Gemini generation)
-└── sign-book-pdf (returns signed URL after paid-access check)
-
-Frontend
-├── NovelDetail: Summary | Full Book tabs + PDF viewer
-├── StudyMaterials: per-subject "Recommended Books" section
-├── TimedQuiz: clear selection on next + shuffle options
-├── TopicMasteryTracker: new 5-quiz rule
-├── HighYieldQuestions: strict subject+topic array filter
-├── Offline gate screen + opt-in flow
-├── ReferralSystem: airtime claim UI
-├── Countdown: clamp + admin-editable date
-└── Audit + fix the broken "NEW" tool
+vite.config.ts                  – widen globPatterns; add runtimeCaching for
+                                  navigations, hashed assets, images, storage
+public/offline.html             – new branded offline fallback
+src/registerSW.ts               – on activation, prefetch /offline.html + /
+src/contexts/AuthContext.tsx    – don't sign out on network error
+src/components/ProtectedRoute.tsx – allow cached session when offline
+src/components/InstallPrompt.tsx – hide inside appbuilder24 wrapper
+src/components/OfflineIndicator.tsx – reuse for the first-install hint
+src/pages/Settings.tsx          – "Clear offline cache" button
 ```
 
-## Out of scope (next round)
+**No backend / DB / edge-function changes.** Pure frontend + service-worker config.
 
-- Admin dashboard redesign
-- Price changes
-- Automated airtime VTU integration
+**Verification after build:**
+1. Open published URL once online → DevTools → Application → Service Workers shows `/sw.js` active.
+2. Throttle to Offline → hard refresh → app shell loads, downloaded quizzes accessible, session intact.
+3. Cold-start wrapper offline (never opened before) → branded offline page, not WebView error.
+4. Cold-start wrapper offline (opened once online) → full app loads with cached content.
+
+Part 2 dashboard work will be planned separately once Part 1 is verified.
