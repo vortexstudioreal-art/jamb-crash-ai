@@ -24,6 +24,19 @@ export const InstallPrompt = () => {
       return;
     }
 
+    // Hide inside native wrappers (appbuilder24, Capacitor, generic WebViews)
+    // — they don't fire `beforeinstallprompt` and the "Install" CTA is misleading.
+    const ua = navigator.userAgent.toLowerCase();
+    const isWrapper =
+      ua.includes('appbuilder24') ||
+      ua.includes('wv') || // Android WebView token
+      // @ts-ignore - non-standard Capacitor global
+      typeof (window as any).Capacitor !== 'undefined';
+    if (isWrapper) {
+      setIsInstalled(true);
+      return;
+    }
+
     // Check if dismissed recently
     const dismissedAt = localStorage.getItem(INSTALL_DISMISSED_KEY);
     if (dismissedAt && Date.now() - parseInt(dismissedAt) < DISMISS_DURATION) {
