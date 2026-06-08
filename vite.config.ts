@@ -15,9 +15,13 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
+      injectRegister: null,
+      filename: "sw.js",
       includeAssets: ["favicon.ico", "favicon.png", "robots.txt"],
       manifest: false, // We use our own manifest.webmanifest
       workbox: {
+        navigateFallback: "/index.html",
+        navigateFallbackDenylist: [/^\/~oauth/],
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff,woff2}"],
         runtimeCaching: [
           {
