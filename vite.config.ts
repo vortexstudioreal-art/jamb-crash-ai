@@ -29,9 +29,9 @@ export default defineConfig(({ mode }) => ({
         runtimeCaching: [
           // Same-origin SPA navigations — keep recent pages available offline
           {
-            urlPattern: ({ request, url }) =>
+            urlPattern: ({ request, url, sameOrigin }: any) =>
               request.mode === "navigate" &&
-              url.origin === self.location.origin &&
+              sameOrigin &&
               !url.pathname.startsWith("/~oauth"),
             handler: "NetworkFirst",
             options: {
@@ -46,8 +46,8 @@ export default defineConfig(({ mode }) => ({
           },
           // Same-origin hashed JS/CSS chunks loaded at runtime (lazy routes)
           {
-            urlPattern: ({ request, url }) =>
-              url.origin === self.location.origin &&
+            urlPattern: ({ request, sameOrigin }: any) =>
+              sameOrigin &&
               (request.destination === "script" || request.destination === "style"),
             handler: "CacheFirst",
             options: {
@@ -61,7 +61,7 @@ export default defineConfig(({ mode }) => ({
           },
           // Images — keep covers/thumbs available offline
           {
-            urlPattern: ({ request }) => request.destination === "image",
+            urlPattern: ({ request }: any) => request.destination === "image",
             handler: "StaleWhileRevalidate",
             options: {
               cacheName: "image-cache",
