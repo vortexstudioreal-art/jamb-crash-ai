@@ -9,6 +9,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PasswordRecoveryHandler } from "@/components/PasswordRecoveryHandler";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import { OfflineReadyChecklist } from "@/components/OfflineReadyChecklist";
 
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -75,6 +76,7 @@ const App = () => {
               {/* Global Components */}
               <OfflineIndicator variant="minimal" />
               <InstallPrompt />
+              <OfflineReadyChecklist />
             </PasswordRecoveryHandler>
           </AuthProvider>
         </BrowserRouter>
