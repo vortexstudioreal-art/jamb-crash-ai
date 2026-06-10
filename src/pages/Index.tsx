@@ -205,6 +205,21 @@ const Index = () => {
     
     // Admins/owners have full access - treat them like paid users
     const hasFullAccess = effectiveAccess || isAdmin || isOwner;
+
+    // OFFLINE FAST PATH: if there's a signed-in user with cached subjects but
+    // we couldn't verify access/trial from the server, still drop them into
+    // the dashboard so the wrapper / desktop browser isn't stuck on landing.
+    if (
+      !navigator.onLine &&
+      userEmail &&
+      userSubjects.length > 0 &&
+      currentStep === 'landing'
+    ) {
+      startTransition(() => setCurrentStep('dashboard'));
+      saveDashboardState('dashboard');
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      return;
+    }
     
     // If user is signed in and has access (paid OR admin), go to dashboard
     if (userEmail && hasFullAccess && currentStep === 'landing') {
