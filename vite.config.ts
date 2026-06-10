@@ -22,6 +22,9 @@ export default defineConfig(({ mode }) => ({
       workbox: {
         navigateFallback: "/index.html",
         navigateFallbackDenylist: [/^\/~oauth/],
+        navigationPreload: true,
+        skipWaiting: true,
+        clientsClaim: true,
         globPatterns: [
           "**/*.{js,css,html,ico,png,svg,jpg,jpeg,webp,woff,woff2,json,webmanifest}",
         ],

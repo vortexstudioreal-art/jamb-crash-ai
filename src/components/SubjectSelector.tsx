@@ -91,6 +91,27 @@ export const SubjectSelector = ({
     }
     
     try {
+      // OFFLINE: save locally + queue for later sync so the user isn't blocked.
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        try {
+          localStorage.setItem(
+            `jamb_subjects_${userEmail}`,
+            JSON.stringify(selected),
+          );
+          const queueRaw = localStorage.getItem("jamb_pending_subjects") || "[]";
+          const queue = JSON.parse(queueRaw);
+          queue.push({ email: userEmail, subjects: selected, ts: Date.now() });
+          localStorage.setItem("jamb_pending_subjects", JSON.stringify(queue));
+        } catch {}
+        toast({
+          title: "Saved offline 📴",
+          description: "We'll sync your subjects when you're back online.",
+        });
+        onComplete(selected);
+        setSaving(false);
+        return;
+      }
+
       const { error } = await supabase
         .from('user_subjects')
         .upsert({
@@ -105,9 +126,35 @@ export const SubjectSelector = ({
         title: "Awesome choice! 🎉",
         description: "Your subjects are saved. Let's crush JAMB together!"
       });
+      try {
+        localStorage.setItem(
+          `jamb_subjects_${userEmail}`,
+          JSON.stringify(selected),
+        );
+      } catch {}
       onComplete(selected);
     } catch (error) {
       console.error('Error saving subjects:', error);
+      // Network failure mid-save: still let the user in, cache + queue.
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        try {
+          localStorage.setItem(
+            `jamb_subjects_${userEmail}`,
+            JSON.stringify(selected),
+          );
+          const queueRaw = localStorage.getItem("jamb_pending_subjects") || "[]";
+          const queue = JSON.parse(queueRaw);
+          queue.push({ email: userEmail, subjects: selected, ts: Date.now() });
+          localStorage.setItem("jamb_pending_subjects", JSON.stringify(queue));
+        } catch {}
+        toast({
+          title: "Saved offline 📴",
+          description: "We'll sync your subjects when you're back online.",
+        });
+        onComplete(selected);
+        setSaving(false);
+        return;
+      }
       toast({
         title: "Oops! Something went wrong",
         description: "Please try again",
