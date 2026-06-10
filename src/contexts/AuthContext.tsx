@@ -202,6 +202,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const checkUserAccess = async (email: string) => {
+    // Offline: skip the network RPC entirely and use the cached snapshot so
+    // ProtectedRoute / Index don't strand the user on landing.
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      restoreCachedAccess(email.toLowerCase());
+      return;
+    }
     try {
       const { data, error } = await supabase.rpc('check_user_access', {
         user_email: email.toLowerCase(),

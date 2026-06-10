@@ -358,6 +358,34 @@ const Index = () => {
     }
   }, [userEmail]);
 
+  // Flush any subjects saved while offline once we're back online.
+  useEffect(() => {
+    const flushPendingSubjects = async () => {
+      if (!navigator.onLine) return;
+      const raw = localStorage.getItem('jamb_pending_subjects');
+      if (!raw) return;
+      try {
+        const queue: { email: string; subjects: string[] }[] = JSON.parse(raw);
+        if (!Array.isArray(queue) || queue.length === 0) return;
+        // Keep only the latest entry per email
+        const byEmail = new Map<string, string[]>();
+        queue.forEach((q) => byEmail.set(q.email, q.subjects));
+        for (const [email, subjects] of byEmail) {
+          await supabase.from('user_subjects').upsert(
+            { email, subjects: subjects as any, updated_at: new Date().toISOString() },
+            { onConflict: 'email' },
+          );
+        }
+        localStorage.removeItem('jamb_pending_subjects');
+      } catch (e) {
+        console.warn('Failed to flush pending subjects:', e);
+      }
+    };
+    flushPendingSubjects();
+    window.addEventListener('online', flushPendingSubjects);
+    return () => window.removeEventListener('online', flushPendingSubjects);
+  }, []);
+
   // Handle URL params
   useEffect(() => {
     const step = searchParams.get('step');
