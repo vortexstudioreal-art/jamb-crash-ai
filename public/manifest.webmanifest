@@ -4,7 +4,7 @@
   "description": "Your AI-powered JAMB preparation companion - study offline, take quizzes, and ace your exams!",
   "start_url": "/",
   "scope": "/",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#0a0a0a",
   "theme_color": "#22c55e",
   "orientation": "portrait-primary",
