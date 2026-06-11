@@ -2,6 +2,28 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 const TRIAL_DURATION_MS = 30 * 60 * 1000; // 30 minutes
+const TRIAL_CACHE_PREFIX = 'jamb_trial_cache_';
+
+type CachedTrial = {
+  trial_used: boolean;
+  trial_expires_at: string;
+  subscription_plan: string | null;
+};
+
+const readCachedTrial = (email: string): CachedTrial | null => {
+  try {
+    const raw = localStorage.getItem(TRIAL_CACHE_PREFIX + email);
+    return raw ? (JSON.parse(raw) as CachedTrial) : null;
+  } catch {
+    return null;
+  }
+};
+
+const writeCachedTrial = (email: string, data: CachedTrial) => {
+  try {
+    localStorage.setItem(TRIAL_CACHE_PREFIX + email, JSON.stringify(data));
+  } catch {}
+};
 
 interface UseTrialSystemProps {
   userEmail: string | null;
@@ -36,6 +58,29 @@ export const useTrialSystem = ({ userEmail, isAdmin, hasAccess }: UseTrialSystem
       return;
     }
 
+    // Offline: restore from cache so the dashboard isn't blocked.
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      const cached = readCachedTrial(userEmail);
+      if (cached) {
+        setHasTrialUsed(cached.trial_used);
+        setSubscriptionPlan(cached.subscription_plan);
+        const expiresAt = new Date(cached.trial_expires_at);
+        setTrialExpiresAt(expiresAt);
+        const now = new Date();
+        if (expiresAt > now && cached.trial_used) {
+          setIsTrialActive(true);
+          setIsTrialExpired(false);
+          setTimeRemaining(expiresAt.getTime() - now.getTime());
+        } else if (cached.trial_used) {
+          setIsTrialActive(false);
+          setIsTrialExpired(true);
+          setTimeRemaining(0);
+        }
+      }
+      setLoading(false);
+      return;
+    }
+
     try {
       const { data, error } = await supabase
         .from('user_trials')
@@ -54,6 +99,11 @@ export const useTrialSystem = ({ userEmail, isAdmin, hasAccess }: UseTrialSystem
         setSubscriptionPlan(data.subscription_plan);
         const expiresAt = new Date(data.trial_expires_at);
         setTrialExpiresAt(expiresAt);
+        writeCachedTrial(userEmail, {
+          trial_used: data.trial_used,
+          trial_expires_at: data.trial_expires_at,
+          subscription_plan: data.subscription_plan,
+        });
         
         const now = new Date();
         if (expiresAt > now && data.trial_used) {
