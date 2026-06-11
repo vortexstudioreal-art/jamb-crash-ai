@@ -27,9 +27,27 @@ export function registerServiceWorker() {
     return;
   }
 
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch((err) => {
-      console.warn("SW registration failed:", err);
+  const register = () => {
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then((reg) => {
+        if (import.meta.env.PROD) {
+          console.log("[SW] registered, scope:", reg.scope);
+        }
+      })
+      .catch((err) => {
+        console.warn("SW registration failed:", err);
+      });
+  };
+  if (document.readyState === "complete") register();
+  else window.addEventListener("load", register);
+
+  if (import.meta.env.PROD) {
+    navigator.serviceWorker.ready.then(() => {
+      console.log(
+        "[SW] ready. controller:",
+        navigator.serviceWorker.controller ? "active" : "none",
+      );
     });
-  });
+  }
 }
