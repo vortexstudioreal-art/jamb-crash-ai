@@ -51,7 +51,19 @@ export const OfflineReadyChecklist = () => {
     let cancelled = false;
     navigator.serviceWorker.ready
       .then(() => {
-        if (!cancelled) setSwReady(true);
+        if (cancelled) return;
+        // Require the SW to actually control this page, otherwise the next
+        // hard refresh while offline will hit the network and fail.
+        if (navigator.serviceWorker.controller) {
+          setSwReady(true);
+        } else {
+          const onCtrl = () => setSwReady(true);
+          navigator.serviceWorker.addEventListener(
+            'controllerchange',
+            onCtrl,
+            { once: true },
+          );
+        }
       })
       .catch(() => {});
     return () => {
