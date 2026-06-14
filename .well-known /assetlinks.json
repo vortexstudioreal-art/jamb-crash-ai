@@ -1,0 +1,22 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.jambcrash.ai",
+      "sha256_cert_fingerprints": [
+        "07:99:C1:0A:1B:AA:44:AF:99:C0:16:87:43:4F:4F:F9:92:F6:49:0E:FD:C4:8E:70:62:82"
+      ]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.jambcrash.ai",
+      "sha256_cert_fingerprints": [
+        "B2:BA:C1:13:9D:95:1A:28:33:E1:77:FA:00:B2:96:55:18:75:F6:96:CD:04:8B:74:C9:03:E9:7E:AC:E2:D9:CB"
+      ]
+    }
+  }
+]
