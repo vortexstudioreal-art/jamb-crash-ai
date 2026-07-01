@@ -1363,6 +1363,7 @@ const Index = () => {
                 </h2>
                 <StudyStats
                   userEmail={userEmail}
+                  allowedSubjects={effectiveSubjects}
                   onPracticeSubject={(subject) => {
                     if (!effectiveSubjects.includes(subject)) return;
                     setPracticeSubjectOverride(subject);
@@ -1373,7 +1374,7 @@ const Index = () => {
                 
                 {/* Topic Mastery Tracker */}
                 <div className="mt-6">
-                  <TopicMasteryTracker userEmail={userEmail} />
+                  <TopicMasteryTracker userEmail={userEmail} allowedSubjects={effectiveSubjects} />
                 </div>
               </motion.div>
 

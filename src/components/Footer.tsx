@@ -1,4 +1,5 @@
 import { BookOpen, Mail } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { SocialFollowLinks } from './SocialFollowBanner';
 
 export const Footer = () => {
@@ -49,9 +50,9 @@ export const Footer = () => {
             <div>
               <h4 className="font-semibold mb-4">Legal</h4>
               <ul className="space-y-2 text-sm text-background/70">
-                <li><a href="#" className="hover:text-background transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-background transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-background transition-colors">Refund Policy</a></li>
+                <li><Link to="/privacy" className="hover:text-background transition-colors">Privacy Policy</Link></li>
+                <li><Link to="/privacy#terms" className="hover:text-background transition-colors">Terms of Service</Link></li>
+                <li><Link to="/privacy#refund" className="hover:text-background transition-colors">Refund Policy</Link></li>
               </ul>
             </div>
           </div>
