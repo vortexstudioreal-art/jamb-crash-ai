@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 interface TopicMasteryTrackerProps {
   userEmail: string;
   refreshTrigger?: number;
+  allowedSubjects?: string[];
 }
 
 interface QuestionData {
@@ -173,7 +174,7 @@ const getMasteryIcon = (level: TopicStats['masteryLevel']) => {
   }
 };
 
-export const TopicMasteryTracker = ({ userEmail, refreshTrigger }: TopicMasteryTrackerProps) => {
+export const TopicMasteryTracker = ({ userEmail, refreshTrigger, allowedSubjects }: TopicMasteryTrackerProps) => {
   const [loading, setLoading] = useState(true);
   const [subjectTopics, setSubjectTopics] = useState<SubjectTopics[]>([]);
   const [expandedSubjects, setExpandedSubjects] = useState<Set<string>>(new Set());
@@ -199,6 +200,10 @@ export const TopicMasteryTracker = ({ userEmail, refreshTrigger }: TopicMasteryT
         if (!questions || !Array.isArray(questions)) return;
         
         questions.forEach(q => {
+          const subj = (q.subject || '').toLowerCase();
+          if (allowedSubjects && allowedSubjects.length > 0 && !allowedSubjects.map(s => s.toLowerCase()).includes(subj)) {
+            return;
+          }
           const topic = identifyTopic(q);
           const subject = q.subject.toLowerCase();
           const key = `${subject}:${topic}`;
