@@ -373,34 +373,56 @@ export const StudyStats = ({ userEmail, refreshTrigger, onPracticeSubject, allow
         </motion.div>
       )}
 
-      {/* AI Insight */}
-      <motion.div 
-        className="bg-card rounded-xl p-5 border border-border"
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.2 }}
-      >
-        <div className="flex items-start gap-4">
-          <div className="bg-primary/20 rounded-full p-2">
-            {loadingTip ? (
-              <RefreshCw className="w-6 h-6 text-primary animate-spin" />
-            ) : (
-              <Sparkles className="w-6 h-6 text-primary" />
-            )}
-          </div>
-          <div className="flex-1">
-            <p className="font-semibold text-foreground flex items-center gap-2">
-              AI Study Tip 
-              <span className="text-xs bg-primary/20 px-2 py-0.5 rounded-full text-primary">
-                {aiTip ? 'AI-Powered' : 'Personalized'}
-              </span>
-            </p>
-            <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-              {loadingTip ? 'Generating personalized tip...' : (aiTip || getAIInsight())}
-            </p>
-          </div>
-        </div>
-      </motion.div>
+      {/* Next Best Action */}
+      {(() => {
+        const focus = weakestSubject && weakestSubject.score < 70 ? weakestSubject : null;
+        const focusKey = focus ? focus.name.toLowerCase().replace(/ /g, '_') : null;
+        const headline = totalQuizzes === 0
+          ? 'Take your first quiz to unlock personalized guidance.'
+          : focus
+            ? `Focus on ${focus.name} — currently ${focus.score}%.`
+            : `You're performing well across all subjects. Keep the streak going!`;
+        const subtext = loadingTip
+          ? 'Analyzing your recent performance...'
+          : (aiTip || getAIInsight());
+        return (
+          <motion.div
+            className="bg-gradient-to-br from-primary/10 via-card to-card rounded-xl p-5 border border-primary/20"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="flex items-start gap-4">
+              <div className="bg-primary/20 rounded-full p-2 shrink-0">
+                {loadingTip ? (
+                  <RefreshCw className="w-6 h-6 text-primary animate-spin" />
+                ) : (
+                  <Target className="w-6 h-6 text-primary" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-foreground flex items-center gap-2 flex-wrap">
+                  Your Next Best Action
+                  <span className="text-[10px] uppercase tracking-wide bg-primary/20 px-2 py-0.5 rounded-full text-primary">
+                    Personalized
+                  </span>
+                </p>
+                <p className="text-sm text-foreground mt-1 font-medium">{headline}</p>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{subtext}</p>
+                {focusKey && onPracticeSubject && (
+                  <button
+                    onClick={() => onPracticeSubject(focusKey)}
+                    className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold bg-primary text-primary-foreground px-3 py-1.5 rounded-lg hover:opacity-90 transition"
+                  >
+                    Practice {focus!.name} now
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        );
+      })()}
 
       {/* Charts */}
       {totalQuizzes > 0 && (
