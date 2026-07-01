@@ -9,6 +9,7 @@ interface StudyStatsProps {
   userEmail: string;
   refreshTrigger?: number;
   onPracticeSubject?: (subject: string) => void;
+  allowedSubjects?: string[];
 }
 
 interface QuizAttempt {
@@ -22,7 +23,7 @@ interface QuizAttempt {
   questions_data: unknown;
 }
 
-export const StudyStats = ({ userEmail, refreshTrigger, onPracticeSubject }: StudyStatsProps) => {
+export const StudyStats = ({ userEmail, refreshTrigger, onPracticeSubject, allowedSubjects }: StudyStatsProps) => {
   const [quizzes, setQuizzes] = useState<QuizAttempt[]>([]);
   const [loading, setLoading] = useState(true);
   const [tipIndex, setTipIndex] = useState(0);
@@ -206,7 +207,11 @@ export const StudyStats = ({ userEmail, refreshTrigger, onPracticeSubject }: Stu
     return name.charAt(0).toUpperCase() + name.slice(1).replace(/_/g, ' ');
   };
 
+  const allowedSet = new Set((allowedSubjects || []).map(s => s.toLowerCase()));
+  const isAllowed = (name: string) => allowedSet.size === 0 || allowedSet.has(name.toLowerCase());
+
   const subjectData = Object.entries(prediction.accuracyBySubject)
+    .filter(([name]) => isAllowed(name))
     .map(([name, data]) => ({
       name: formatSubjectName(name),
       score: Math.round(data.percentage),
