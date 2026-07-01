@@ -20,6 +20,7 @@ import CollaboratorDashboard from "./pages/CollaboratorDashboard";
 import RepeatedQuestionsPage from "./pages/RepeatedQuestionsPage";
 import GamesPage from "./pages/GamesPage";
 import NotFound from "./pages/NotFound";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +71,7 @@ const App = () => {
                 <Route path="/collaborator-dashboard" element={<CollaboratorDashboard />} />
                 <Route path="/repeated-questions" element={<RepeatedQuestionsPage />} />
                 <Route path="/games" element={<ProtectedRoute><GamesPage /></ProtectedRoute>} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
