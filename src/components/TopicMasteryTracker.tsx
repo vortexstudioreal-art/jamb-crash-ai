@@ -264,7 +264,7 @@ export const TopicMasteryTracker = ({ userEmail, refreshTrigger, allowedSubjects
     } finally {
       setLoading(false);
     }
-  }, [userEmail]);
+  }, [userEmail, allowedSubjects]);
 
   useEffect(() => {
     fetchTopicData();
