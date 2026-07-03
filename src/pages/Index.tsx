@@ -39,6 +39,8 @@ import { PaymentCancelledModal } from '@/components/PaymentCancelledModal';
 import { BannerAd } from '@/components/BannerAd';
 import { DashboardSkeleton } from '@/components/DashboardSkeleton';
 import { SocialFollowBanner } from '@/components/SocialFollowBanner';
+import { BottomNav, type DashboardTab } from '@/components/BottomNav';
+import { Sparkles, Settings as SettingsIcon, Crown, Bell, MessageCircle, Youtube } from 'lucide-react';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { ApkDownloadCard } from '@/components/ApkDownloadCard';
@@ -137,6 +139,7 @@ const Index = () => {
   const [showTrialBanner, setShowTrialBanner] = useState(true);
   const [selectedNovelId, setSelectedNovelId] = useState<string | null>(null);
   const [selectedChapterId, setSelectedChapterId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<DashboardTab>('home');
   
   // Track if user just paid successfully (to prevent showing trial expired screen)
   const [justPaidForPlan, setJustPaidForPlan] = useState(false);
