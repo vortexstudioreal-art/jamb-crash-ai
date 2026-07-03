@@ -1,32 +1,58 @@
-## Status
+## Goal
 
-The web side is already correct — no repo changes needed.
+Replace the single scrolling dashboard with a modern 5-tab bottom navigation, matching the mockup you shared. All existing features stay — they just move into the tab where they belong.
 
-- `https://jamb-crash-ai.vercel.app/.well-known/assetlinks.json` returns `200`, `Content-Type: application/json`, with both SHA-256 fingerprints.
-- Google's Digital Asset Links API confirms both statements are valid for package `com.jambcrash.ai`:
-  ```
-  https://digitalassetlinks.googleapis.com/v1/statements:list?source.web.site=https://jamb-crash-ai.vercel.app&relation=delegate_permission/common.handle_all_urls
-  ```
-  Returns 2 statements, both fingerprints accepted.
+## Bottom Nav (always visible when signed in)
 
-Since the fingerprints came from Play Console and PWABuilder, they should be the right ones (Play App Signing cert + PWABuilder upload cert). So the TWA verification should pass on a fresh install.
+```
+🏠 Home    📚 Study    🤖 AI    🏆 Community    👤 Profile
+```
 
-## What to do next (no code)
+- Fixed to bottom of the viewport, safe-area padding for iOS.
+- Active tab uses the green primary color (matches mockup).
+- Visible on both mobile and desktop (centered, max-width). Say the word if you want it mobile-only.
+- The top `DashboardHeader` (logo, notifications, admin shield) stays.
 
-1. Uninstall the current app from your test device.
-2. Install the latest build fresh from Play Store (or the internal test track).
-3. Open it — the URL bar should be gone.
+## Tab contents
 
-TWA only re-runs Digital Asset Links verification on install/update, and it caches the result. That's why an already-installed app can keep showing the bar even after the server file is fixed.
+**🏠 Home** — "one screen, minimal scroll"
+- Greeting ("Good morning, {name} 👋")
+- Predicted JAMB Score card (existing `ScorePredictor`)
+- Study Streak + Today's Goal row (compact)
+- Quick Actions grid: Full Quiz · Mini Quiz · Practice · Ask AI
+- AI Tip card (existing daily tip)
+- Continue Studying (last quiz / last novel)
 
-## If the bar still shows after a fresh install
+**📚 Study**
+- Study Plan · Flashcards · Notes · PDFs · Syllabus · Novels · High-Yield Questions
+- Rendered as a clean list/grid of feature cards that route into the existing components.
 
-Then it's an Android-side mismatch, not a web-side one. Report back and I'll help with:
+**🤖 AI** — the "wow" tab
+- Ask AI (ChatBot)
+- Score Prediction (full detailed view)
+- Weakness Analysis (from `TopicMasteryTracker` + weak subject)
+- Study Recommendations (AI-generated)
+- AI Generated Quiz entry point
+- Slight gradient / glow treatment so it feels premium.
 
-- Confirming the TWA's `hostName` in the Android manifest is exactly `jamb-crash-ai.vercel.app` (no `www`, no path).
-- Re-pulling both fingerprints from Play Console → Test and release → App integrity → **App signing key certificate** and **Upload key certificate**, and diffing against what's in `public/.well-known/assetlinks.json`.
-- Checking Chrome on the device: `chrome://flags` → enable *Site engagement* logging, or use `adb logcat | grep -i "digital_asset"` to see the exact verification error.
+**🏆 Community**
+- Leaderboard · Scholarships · WhatsApp Channel · TikTok · Challenges (Speed Round / Streak) · Daily Streaks
 
-## Optional cleanup
+**👤 Profile**
+- Study Stats · Achievements · Settings · Notifications · Premium (upgrade / manage) · Logout
 
-The Lovable-hosted mirror at `jamb.lovable.app` currently 404s on `/.well-known/assetlinks.json` because that build hasn't been re-published since the file was added. Not required for the Play Store app (it uses the Vercel host), but if you also want the Lovable URL usable as a TWA origin later, we'd re-publish the Lovable deployment.
+## Technical approach
+
+- New `src/components/BottomNav.tsx` — 5 tabs, active state, motion transitions.
+- New `src/components/tabs/` folder with `HomeTab.tsx`, `StudyTab.tsx`, `AITab.tsx`, `CommunityTab.tsx`, `ProfileTab.tsx`. Each is a thin composition of existing components — no business logic rewrites.
+- `Index.tsx` dashboard branch switches from the current long scroll to `<ActiveTab />` based on a new `activeTab` state; the existing `currentStep` state machine (quiz, quiz-results, novel-reader, etc.) still handles full-screen sub-views.
+- Add `pb-20` to tab content to clear the bottom nav.
+- Deep links preserved: `?step=...` still works; new `?tab=home|study|ai|community|profile` for tab routing.
+
+## Out of scope (unless you ask)
+
+- Redesigning individual feature components (Flashcards, Leaderboard, etc.) — they stay as they are.
+- Changing landing / auth / admin / collaborator pages.
+- Changing pricing/payment flows.
+
+Reply "go" and I'll build it. Or tell me: **mobile-only bottom nav, or all screens?**
