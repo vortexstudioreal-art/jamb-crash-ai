@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { WhatsAppReminder } from './WhatsAppReminder';
 import { ScorePredictor } from './ScorePredictor';
 import { ShareableResultCard } from './ShareableResultCard';
-import { ReferralSystem } from './ReferralSystem';
 import { FeatureGate } from './FeatureGate';
 import { Sparkles, Crown } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -73,12 +72,6 @@ export const PremiumDashboard = ({ userEmail, isAdmin, adminRole, targetScore, w
           />
         </FeatureGate>
 
-        {/* Referral System - Premium only */}
-        <div className="md:col-span-2">
-          <FeatureGate feature="referralBonus" onUpgrade={onUpgrade}>
-            <ReferralSystem userEmail={userEmail} />
-          </FeatureGate>
-        </div>
       </div>
 
       {/* Shareable Result Card Modal */}
