@@ -41,6 +41,10 @@ import { DashboardSkeleton } from '@/components/DashboardSkeleton';
 import { SocialFollowBanner } from '@/components/SocialFollowBanner';
 import { BottomNav, type DashboardTab } from '@/components/BottomNav';
 import { Sparkles, Settings as SettingsIcon, Crown, Bell, MessageCircle, Youtube } from 'lucide-react';
+import { HomeSummary } from '@/components/HomeSummary';
+import { ReferralSystem } from '@/components/ReferralSystem';
+import { LiveCounter } from '@/components/LiveCounter';
+import { Award, Users, Brain } from 'lucide-react';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { ApkDownloadCard } from '@/components/ApkDownloadCard';
