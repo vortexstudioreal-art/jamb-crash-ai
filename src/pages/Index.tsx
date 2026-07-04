@@ -41,6 +41,10 @@ import { DashboardSkeleton } from '@/components/DashboardSkeleton';
 import { SocialFollowBanner } from '@/components/SocialFollowBanner';
 import { BottomNav, type DashboardTab } from '@/components/BottomNav';
 import { Sparkles, Settings as SettingsIcon, Crown, Bell, MessageCircle, Youtube } from 'lucide-react';
+import { HomeSummary } from '@/components/HomeSummary';
+import { ReferralSystem } from '@/components/ReferralSystem';
+import { LiveCounter } from '@/components/LiveCounter';
+import { Award, Users, Brain } from 'lucide-react';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { ApkDownloadCard } from '@/components/ApkDownloadCard';
@@ -1088,23 +1092,6 @@ const Index = () => {
           />
           <div className="pt-20 pb-24 px-4">
             <div className="max-w-6xl mx-auto">
-              {/* Welcome Header (compact) */}
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-6"
-              >
-                <p className="text-muted-foreground text-sm">Good day,</p>
-                <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-                  {(user?.user_metadata?.full_name?.split(' ')[0]) || 'Champion'} 👋
-                </h1>
-                {isTrialActive && (
-                  <p className="text-xs text-primary mt-1 font-medium">
-                    🎁 Free Trial - {formattedTime} remaining
-                  </p>
-                )}
-              </motion.div>
-
               {/* ================= HOME TAB ================= */}
               {activeTab === 'home' && (
                 <motion.div
@@ -1113,10 +1100,32 @@ const Index = () => {
                   animate={{ opacity: 1, y: 0 }}
                   className="space-y-5"
                 >
-                  <SocialFollowBanner />
-                  <UsageLimitIndicator />
+                  {/* Greeting — home only */}
+                  <div>
+                    <p className="text-muted-foreground text-base">Good Morning,</p>
+                    <h1 className="text-3xl md:text-4xl font-extrabold text-foreground">
+                      {(user?.user_metadata?.full_name?.split(' ')[0]) || 'Champion'} 👋
+                    </h1>
+                    {isTrialActive && (
+                      <p className="text-xs text-primary mt-1 font-medium">
+                        🎁 Free Trial - {formattedTime} remaining
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Predicted Score + Streak + Goal (matches design) */}
+                  <HomeSummary userEmail={userEmail} />
 
                   {/* Quick Actions */}
+                  <div className="flex items-center justify-between pt-1">
+                    <h2 className="text-lg font-bold text-foreground">Quick Actions</h2>
+                    <button
+                      onClick={() => setActiveTab('study')}
+                      className="text-sm font-medium text-primary hover:opacity-80"
+                    >
+                      See all
+                    </button>
+                  </div>
                   <div className="grid grid-cols-4 gap-3">
                     {(hasFeature('fullQuiz') || isTrialActive) ? (
                       <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-primary hover:bg-primary/5" onClick={() => handleStartQuiz('full')}>
@@ -1158,8 +1167,61 @@ const Index = () => {
                     </Button>
                   </div>
 
-                  {/* AI Tip */}
-                  <CourseTipsCard userEmail={userEmail} userSubjects={effectiveSubjects} />
+                  {/* Motivational card (matches design) */}
+                  <div className="rounded-2xl p-5 border border-primary/30 bg-gradient-to-r from-primary/15 to-primary/5 flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                      <Award className="w-7 h-7 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-primary">You're doing great!</h3>
+                      <p className="text-sm text-muted-foreground">Stay consistent and crush your target score.</p>
+                    </div>
+                    <Target className="w-10 h-10 text-primary/70 shrink-0" />
+                  </div>
+                </motion.div>
+              )}
+
+              {/* ================= STUDY TAB ================= */}
+              {activeTab === 'study' && (
+                <motion.div key="study" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+                  {/* Study Header */}
+                  <div>
+                    <p className="text-muted-foreground text-sm">Let's learn something new</p>
+                    <h1 className="text-2xl md:text-3xl font-extrabold text-foreground">Your Study Hub 📚</h1>
+                  </div>
+
+                  {/* Next Best Action */}
+                  {weakSubjectFromQuiz && (
+                    <div className="rounded-2xl p-4 border border-primary/30 bg-gradient-to-br from-primary/10 to-transparent">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                          <Target className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="font-semibold text-foreground">Your Next Best Action</p>
+                            <span className="text-[10px] uppercase tracking-wide bg-primary/20 px-2 py-0.5 rounded-full text-primary">
+                              Personalized
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Focus on <span className="capitalize font-semibold text-foreground">{weakSubjectFromQuiz.replace('_', ' ')}</span> — practice 20 questions today to strengthen it.
+                          </p>
+                          <Button
+                            size="sm"
+                            className="mt-3"
+                            onClick={() => {
+                              setPracticeSubjectOverride(weakSubjectFromQuiz);
+                              setQuizType('mini');
+                              startTransition(() => setCurrentStep('quiz'));
+                            }}
+                          >
+                            Practice now
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Subject tags */}
                   <div className="flex flex-wrap items-center gap-2">
@@ -1174,20 +1236,6 @@ const Index = () => {
                     </Button>
                   </div>
 
-                  {/* UTME Countdown */}
-                  <div className="bg-gradient-to-r from-primary/20 to-green-500/20 rounded-2xl p-5 text-center border border-primary/30">
-                    <Calendar className="w-8 h-8 text-primary mx-auto mb-2" />
-                    <h3 className="text-lg font-bold text-foreground mb-1">UTME {examYear} Countdown</h3>
-                    <CountdownTimer />
-                  </div>
-
-                  {!hasAccess && !effectiveAdmin && <BannerAd placement="dashboard-footer" />}
-                </motion.div>
-              )}
-
-              {/* ================= STUDY TAB ================= */}
-              {activeTab === 'study' && (
-                <motion.div key="study" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-green-500 hover:bg-green-500/5" onClick={handleGenerateStudyPlan}>
                       <Target className="w-6 h-6 text-green-500" />
@@ -1230,12 +1278,23 @@ const Index = () => {
                       <StudyMaterials subjects={effectiveSubjects} />
                     </FeatureGate>
                   )}
+
+                  {/* AI Tip */}
+                  <CourseTipsCard userEmail={userEmail} userSubjects={effectiveSubjects} />
                 </motion.div>
               )}
 
               {/* ================= AI TAB ================= */}
               {activeTab === 'ai' && (
                 <motion.div key="ai" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+                  {/* AI Header */}
+                  <div>
+                    <p className="text-muted-foreground text-sm">Your smart study partner</p>
+                    <h1 className="text-2xl md:text-3xl font-extrabold text-foreground flex items-center gap-2">
+                      AI Assistant <Brain className="w-6 h-6 text-primary" />
+                    </h1>
+                  </div>
+
                   <div className="rounded-2xl p-6 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border border-primary/30">
                     <div className="flex items-center gap-3 mb-2">
                       <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
@@ -1280,6 +1339,22 @@ const Index = () => {
               {/* ================= COMMUNITY TAB ================= */}
               {activeTab === 'community' && (
                 <motion.div key="community" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+                  {/* Community Header */}
+                  <div className="rounded-2xl p-5 border border-primary/30 bg-gradient-to-br from-primary/20 via-primary/5 to-transparent">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
+                        <Users className="w-6 h-6 text-primary" />
+                      </div>
+                      <div>
+                        <h1 className="text-2xl font-extrabold text-foreground">The Community 🏆</h1>
+                        <p className="text-xs text-muted-foreground">Learn, compete and grow together</p>
+                      </div>
+                    </div>
+                    <div className="mt-3">
+                      <LiveCounter />
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     <Button variant="outline" className="h-auto py-5 flex flex-col gap-1 hover:border-yellow-500 hover:bg-yellow-500/5" onClick={() => navigateStep('leaderboard')}>
                       <Trophy className="w-6 h-6 text-yellow-500" />
@@ -1315,6 +1390,9 @@ const Index = () => {
                       </div>
                     </div>
                   </div>
+
+                  {/* Refer & Earn */}
+                  {userEmail && <ReferralSystem userEmail={userEmail} />}
                 </motion.div>
               )}
 
