@@ -134,10 +134,10 @@ async function verifyAuth(req: Request): Promise<{ email: string } | null> {
   });
   
   const token = authHeader.replace('Bearer ', '');
-  const { data, error } = await authClient.auth.getClaims(token);
-  if (error || !data?.claims) return null;
+  const { data, error } = await authClient.auth.getUser(token);
+  if (error || !data?.user?.email) return null;
   
-  return { email: data.claims.email as string };
+  return { email: data.user.email };
 }
 
 // Helper to verify service role key for cron/internal calls
