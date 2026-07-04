@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { startTransition } from 'react';
 import { Home, BookOpen, Sparkles, Trophy, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -31,7 +32,7 @@ export const BottomNav = ({ active, onChange }: BottomNavProps) => {
             <button
               key={id}
               type="button"
-              onClick={() => onChange(id)}
+              onClick={() => startTransition(() => onChange(id))}
               className={cn(
                 'relative flex flex-col items-center justify-center gap-1 transition-colors',
                 isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
