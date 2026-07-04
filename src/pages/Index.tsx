@@ -1362,6 +1362,7 @@ const Index = () => {
               )}
             </div>
           </div>
+        </div>
           <BottomNav active={activeTab} onChange={setActiveTab} />
         <ChatBot />
       </PaywallGate>
