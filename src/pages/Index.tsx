@@ -161,6 +161,30 @@ const Index = () => {
   const { user, isLoading, hasAccess, isAdmin, isOwner, userRole, signOut, refreshAccess } = useAuth();
   const { year: examYear } = useExamDate();
   const navigate = useNavigate();
+
+  // PWA launch: when app is opened as installed (standalone) or via ?pwa=1
+  // shortcut, skip the marketing landing. Signed-out users go to /auth so
+  // they land in the app interface immediately.
+  useEffect(() => {
+    const isPwaLaunch =
+      searchParams.get('pwa') === '1' ||
+      (typeof window !== 'undefined' &&
+        window.matchMedia?.('(display-mode: standalone)').matches);
+    if (!isPwaLaunch) return;
+    // Strip the ?pwa=1 param so it doesn't linger in the URL
+    if (searchParams.get('pwa') === '1') {
+      searchParams.delete('pwa');
+      setSearchParams(searchParams, { replace: true });
+    }
+    const lastEmail = typeof window !== 'undefined' ? localStorage.getItem('jamb_last_email') : null;
+    // No cached session → send straight to auth (skip landing page)
+    if (!lastEmail) {
+      navigate('/auth', { replace: true });
+    }
+    // If a cached session exists, the existing effect below routes them to
+    // the dashboard once auth resolves — no extra work needed here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const { hasFeature } = useFeatureAccess();
   
   // Database-backed trial system
