@@ -1283,7 +1283,7 @@ const Index = () => {
                     </Button>
                     <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-rose-500 hover:bg-rose-500/5" onClick={() => navigateStep('novels')}>
                       <Library className="w-6 h-6 text-rose-500" />
-                      <span className="font-bold text-sm">JAMB Novels</span>
+                       <span className="font-bold text-sm">Library</span>
                     </Button>
                     <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-orange-500 hover:bg-orange-500/5" onClick={() => navigate('/repeated-questions')}>
                       <Flame className="w-6 h-6 text-orange-500" />
