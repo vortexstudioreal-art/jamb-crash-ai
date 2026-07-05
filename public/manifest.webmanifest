@@ -2,7 +2,7 @@
   "name": "Jamb Crash AI",
   "short_name": "Jamb Crash",
   "description": "Your AI-powered JAMB preparation companion - study offline, take quizzes, and ace your exams!",
-  "start_url": "/",
+  "start_url": "/?pwa=1",
   "scope": "/",
   "display": "fullscreen",
   "background_color": "#0a0a0a",

@@ -171,9 +171,9 @@ export const NovelBrowser = ({ userEmail, onBack, onSelectNovel }: NovelBrowserP
               <div>
                 <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
                   <Book className="w-5 h-5 text-primary" />
-                  JAMB Literary Texts
+                  Library
                 </h1>
-                <p className="text-sm text-muted-foreground">2025/2026 JAMB Literature-in-English Syllabus</p>
+                <p className="text-sm text-muted-foreground">Literature texts and study books across all subjects</p>
               </div>
             </div>
           </div>
@@ -256,7 +256,7 @@ export const NovelBrowser = ({ userEmail, onBack, onSelectNovel }: NovelBrowserP
               transition={{ delay: 0.2 }}
             >
               <h2 className="text-lg font-bold text-foreground mb-4">
-                {selectedCategory === 'all' ? '📖 All Literary Texts' : `📖 ${categories.find(c => c.value === selectedCategory)?.label}`}
+                {selectedCategory === 'all' ? '📖 All Books' : `📖 ${categories.find(c => c.value === selectedCategory)?.label}`}
                 <span className="text-sm font-normal text-muted-foreground ml-2">
                   ({filteredNovels.length} {filteredNovels.length === 1 ? 'book' : 'books'})
                 </span>
