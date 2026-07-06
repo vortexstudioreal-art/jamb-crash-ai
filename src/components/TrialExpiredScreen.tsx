@@ -13,13 +13,15 @@ const packages = [
   {
     name: 'Basic',
     price: '₦5,000',
-    features: ['30-question quiz', '3 PDF uploads', 'Basic study plan'],
+    period: '1 month',
+    features: ['60-question quizzes', 'Study materials & stats', 'Basic study plan'],
     color: 'border-border',
   },
   {
     name: 'Pro',
     price: '₦10,000',
-    features: ['60-question quiz', 'Unlimited PDFs', '72-hour study plan', 'WhatsApp reminders', 'Predicted score'],
+    period: '3 months',
+    features: ['Everything in Basic', 'Practice quiz + AI tips', 'Predicted JAMB score', 'Email reminders'],
     color: 'border-primary',
     popular: true,
   },
@@ -27,7 +29,7 @@ const packages = [
     name: 'Premium',
     price: '₦15,000',
     period: 'Lifetime',
-    features: ['Everything in Pro', 'Advanced prediction', '₦1,000 referral bonus', 'Priority support'],
+    features: ['Everything in Pro', 'WhatsApp daily reminders', 'Refer & earn bonus', 'Advanced predictions'],
     color: 'border-yellow-500',
   },
 ];
