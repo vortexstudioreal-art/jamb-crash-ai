@@ -1215,6 +1215,8 @@ const Index = () => {
                     <h1 className="text-2xl md:text-3xl font-extrabold text-foreground">Your Study Hub 📚</h1>
                   </div>
 
+                  <OfflineReadyCard userEmail={userEmail} subjects={effectiveSubjects} />
+
                   {/* Next Best Action */}
                   {weakSubjectFromQuiz && (
                     <div className="rounded-2xl p-4 border border-primary/30 bg-gradient-to-br from-primary/10 to-transparent">
