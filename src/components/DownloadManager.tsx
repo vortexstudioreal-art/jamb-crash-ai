@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Download, Trash2, RefreshCw, CheckCircle, 
-  HardDrive, Cloud, FileQuestion, BookOpen, Layers 
+  HardDrive, Cloud, FileQuestion, BookOpen, Layers, Book 
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,6 +26,8 @@ export const DownloadManager = ({ userEmail, subjects }: DownloadManagerProps) =
     flashcardsCount: number;
     syllabusCount: number;
     pendingSyncCount: number;
+    novelsCount: number;
+    novelChaptersCount: number;
     lastSync: number | null;
   } | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -103,7 +105,8 @@ export const DownloadManager = ({ userEmail, subjects }: DownloadManagerProps) =
   const hasData = storageInfo && (
     storageInfo.questionsCount > 0 || 
     storageInfo.flashcardsCount > 0 || 
-    storageInfo.syllabusCount > 0
+    storageInfo.syllabusCount > 0 ||
+    storageInfo.novelsCount > 0
   );
 
   return (
@@ -120,7 +123,7 @@ export const DownloadManager = ({ userEmail, subjects }: DownloadManagerProps) =
       <CardContent className="space-y-4">
         {/* Storage Stats */}
         {storageInfo && (
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div className="bg-muted/50 rounded-lg p-3 text-center">
               <FileQuestion className="w-5 h-5 mx-auto mb-1 text-primary" />
               <p className="text-lg font-bold">{storageInfo.questionsCount}</p>
@@ -135,6 +138,11 @@ export const DownloadManager = ({ userEmail, subjects }: DownloadManagerProps) =
               <BookOpen className="w-5 h-5 mx-auto mb-1 text-primary" />
               <p className="text-lg font-bold">{storageInfo.syllabusCount}</p>
               <p className="text-xs text-muted-foreground">Topics</p>
+            </div>
+            <div className="bg-muted/50 rounded-lg p-3 text-center">
+              <Book className="w-5 h-5 mx-auto mb-1 text-primary" />
+              <p className="text-lg font-bold">{storageInfo.novelsCount}</p>
+              <p className="text-xs text-muted-foreground">Books</p>
             </div>
           </div>
         )}

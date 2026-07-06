@@ -43,6 +43,7 @@ import { BottomNav, type DashboardTab } from '@/components/BottomNav';
 import { Sparkles, Settings as SettingsIcon, Crown, Bell, MessageCircle, Youtube } from 'lucide-react';
 import { HomeSummary } from '@/components/HomeSummary';
 import { ReferralSystem } from '@/components/ReferralSystem';
+import { OfflineReadyCard } from '@/components/OfflineReadyCard';
 import { LiveCounter } from '@/components/LiveCounter';
 import { Award, Users, Brain } from 'lucide-react';
 
@@ -1213,6 +1214,8 @@ const Index = () => {
                     <p className="text-muted-foreground text-sm">Let's learn something new</p>
                     <h1 className="text-2xl md:text-3xl font-extrabold text-foreground">Your Study Hub 📚</h1>
                   </div>
+
+                  <OfflineReadyCard userEmail={userEmail} subjects={effectiveSubjects} />
 
                   {/* Next Best Action */}
                   {weakSubjectFromQuiz && (
