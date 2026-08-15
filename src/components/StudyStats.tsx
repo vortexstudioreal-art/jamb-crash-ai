@@ -74,7 +74,7 @@ export const StudyStats = ({ userEmail, refreshTrigger, onPracticeSubject, allow
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       let streak = 0;
-      let currentDate = new Date(today);
+      const currentDate = new Date(today);
       const quizDates = new Set(quizData.map(q => new Date(q.created_at).toDateString()));
       while (quizDates.has(currentDate.toDateString())) {
         streak++;
@@ -127,7 +127,7 @@ export const StudyStats = ({ userEmail, refreshTrigger, onPracticeSubject, allow
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     let streak = 0;
-    let currentDate = new Date(today);
+    const currentDate = new Date(today);
     const quizDates = new Set(quizData.map(q => new Date(q.created_at).toDateString()));
     while (quizDates.has(currentDate.toDateString())) {
       streak++;
@@ -151,7 +151,6 @@ export const StudyStats = ({ userEmail, refreshTrigger, onPracticeSubject, allow
           filter: `email=eq.${userEmail}`
         },
         (payload) => {
-          console.log('New quiz detected, updating stats:', payload);
           setQuizzes(prev => [payload.new as QuizAttempt, ...prev.slice(0, 49)]);
           sessionStorage.removeItem(`ai_tip_v2_${userEmail}`);
         }
@@ -474,7 +473,9 @@ export const StudyStats = ({ userEmail, refreshTrigger, onPracticeSubject, allow
                         }}
                         formatter={(value) => [`${value}%`, 'Score']}
                         labelFormatter={(_label, payload) => {
-                          const item: any = Array.isArray(payload) ? payload[0]?.payload : null;
+                          const item = Array.isArray(payload)
+                            ? (payload[0]?.payload as { fullDate?: string } | undefined)
+                            : null;
                           return item?.fullDate || _label;
                         }}
                       />

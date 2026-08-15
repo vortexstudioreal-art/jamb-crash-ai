@@ -2,58 +2,46 @@ import { useState, useEffect, lazy, Suspense, startTransition, useCallback } fro
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { DashboardHeader } from '@/components/DashboardHeader';
-import { HeroSection } from '@/components/HeroSection';
-import { HowItWorksSection } from '@/components/HowItWorksSection';
-import { PricingSection } from '@/components/PricingSection';
 import { UploadSection } from '@/components/UploadSection';
-import { PersonalizationForm } from '@/components/PersonalizationForm';
-import { PaymentModal } from '@/components/PaymentModal';
 import { PlanSelectionModal } from '@/components/PlanSelectionModal';
 import { PaywallGate } from '@/components/PaywallGate';
 import { AdminBadge } from '@/components/AdminBadge';
-import { PremiumDashboard } from '@/components/PremiumDashboard';
-import { SubjectSelector } from '@/components/SubjectSelector';
 import { SubjectChanger } from '@/components/SubjectChanger';
-import { QuizResults } from '@/components/QuizResults';
-import { StudyStats } from '@/components/StudyStats';
-import { TopicMasteryTracker } from '@/components/TopicMasteryTracker';
-import { CourseRequirements } from '@/components/CourseRequirements';
-import { CourseTipsCard } from '@/components/CourseTipsCard';
+import type { QuizResultsProps } from '@/components/QuizResults';
 import { TrialExpiredScreen } from '@/components/TrialExpiredScreen';
-import { UsageLimitIndicator } from '@/components/UsageLimitIndicator';
 import { TrialTimerBadge } from '@/components/TrialTimerBadge';
-import { Footer } from '@/components/Footer';
 import { BackButton } from '@/components/BackButton';
 import { FeatureGate, useFeatureAccess } from '@/components/FeatureGate';
-import { ChatBot } from '@/components/ChatBot';
-import { CountdownTimer } from '@/components/CountdownTimer';
+import { useFeatureUsage } from '@/hooks/useFeatureUsage';
 import { useExamDate } from '@/hooks/useExamDate';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTrialSystem } from '@/hooks/useTrialSystem';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, Lock, RefreshCw, Layers, X, GraduationCap, Library, Newspaper, Trophy, Flame, StickyNote, Gamepad2, Download } from 'lucide-react';
-import { PaymentCancelledModal } from '@/components/PaymentCancelledModal';
-import { BannerAd } from '@/components/BannerAd';
 import { DashboardSkeleton } from '@/components/DashboardSkeleton';
-import { SocialFollowBanner } from '@/components/SocialFollowBanner';
+import { GoogleAdSense } from '@/components/GoogleAdSense';
 import { BottomNav, type DashboardTab } from '@/components/BottomNav';
+import { DesktopSidebar } from '@/components/DesktopSidebar';
 import { Sparkles, Settings as SettingsIcon, Crown, Bell, MessageCircle, Youtube } from 'lucide-react';
-import { HomeSummary } from '@/components/HomeSummary';
-import { ReferralSystem } from '@/components/ReferralSystem';
-import { OfflineReadyCard } from '@/components/OfflineReadyCard';
+import { StudyPlanTodayCard } from '@/components/StudyPlanTodayCard';
+import { RenewalNudge } from '@/components/RenewalNudge';
 import { LiveCounter } from '@/components/LiveCounter';
 import { Award, Users, Brain } from 'lucide-react';
 
 import { Skeleton } from '@/components/ui/skeleton';
-import { ApkDownloadCard } from '@/components/ApkDownloadCard';
+import { useSeo } from '@/hooks/useSeo';
+
 
 // Lazy-loaded heavy components
 const TimedQuiz = lazy(() => import('@/components/TimedQuiz').then(m => ({ default: m.TimedQuiz })));
+const MockExam = lazy(() => import('@/components/MockExam').then(m => ({ default: m.MockExam })));
 const Flashcards = lazy(() => import('@/components/Flashcards').then(m => ({ default: m.Flashcards })));
 const StudyPlanGenerator = lazy(() => import('@/components/StudyPlanGenerator').then(m => ({ default: m.StudyPlanGenerator })));
+const StudyPlanTracker = lazy(() => import('@/components/StudyPlanTracker').then(m => ({ default: m.StudyPlanTracker })));
 const SyllabusReader = lazy(() => import('@/components/SyllabusReader').then(m => ({ default: m.SyllabusReader })));
 const StudyMaterials = lazy(() => import('@/components/StudyMaterials').then(m => ({ default: m.StudyMaterials })));
 const NovelBrowser = lazy(() => import('@/components/novels/NovelBrowser').then(m => ({ default: m.NovelBrowser })));
@@ -63,7 +51,24 @@ const JambNewsPage = lazy(() => import('@/components/JambNewsPage').then(m => ({
 const ScholarshipPage = lazy(() => import('@/components/ScholarshipPage').then(m => ({ default: m.ScholarshipPage })));
 const Leaderboard = lazy(() => import('@/components/Leaderboard').then(m => ({ default: m.Leaderboard })));
 const StudyNotes = lazy(() => import('@/components/StudyNotes').then(m => ({ default: m.StudyNotes })));
-
+const StudyStats = lazy(() => import('@/components/StudyStats').then(m => ({ default: m.StudyStats })));
+const ChatBot = lazy(() => import('@/components/ChatBot').then(m => ({ default: m.ChatBot })));
+const HeroSection = lazy(() => import('@/components/HeroSection').then(m => ({ default: m.HeroSection })));
+const HowItWorksSection = lazy(() => import('@/components/HowItWorksSection').then(m => ({ default: m.HowItWorksSection })));
+const PricingSection = lazy(() => import('@/components/PricingSection').then(m => ({ default: m.PricingSection })));
+const PersonalizationForm = lazy(() => import('@/components/PersonalizationForm').then(m => ({ default: m.PersonalizationForm })));
+const PaymentModal = lazy(() => import('@/components/PaymentModal').then(m => ({ default: m.PaymentModal })));
+const PremiumDashboard = lazy(() => import('@/components/PremiumDashboard').then(m => ({ default: m.PremiumDashboard })));
+const SubjectSelector = lazy(() => import('@/components/SubjectSelector').then(m => ({ default: m.SubjectSelector })));
+const QuizResults = lazy(() => import('@/components/QuizResults').then(m => ({ default: m.QuizResults })));
+const TopicMasteryTracker = lazy(() => import('@/components/TopicMasteryTracker').then(m => ({ default: m.TopicMasteryTracker })));
+const CourseRequirements = lazy(() => import('@/components/CourseRequirements').then(m => ({ default: m.CourseRequirements })));
+const CourseTipsCard = lazy(() => import('@/components/CourseTipsCard').then(m => ({ default: m.CourseTipsCard })));
+const Footer = lazy(() => import('@/components/Footer').then(m => ({ default: m.Footer })));
+const FeatureLimitReached = lazy(() => import('@/components/FeatureLimitReached').then(m => ({ default: m.FeatureLimitReached })));
+const HomeSummary = lazy(() => import('@/components/HomeSummary').then(m => ({ default: m.HomeSummary })));
+const ReferralSystem = lazy(() => import('@/components/ReferralSystem').then(m => ({ default: m.ReferralSystem })));
+const OfflineReadyCard = lazy(() => import('@/components/OfflineReadyCard').then(m => ({ default: m.OfflineReadyCard })));
 const LazyFallback = () => (
   <div className="min-h-screen bg-background flex items-center justify-center">
     <div className="space-y-4 w-full max-w-md px-4">
@@ -74,7 +79,7 @@ const LazyFallback = () => (
   </div>
 );
 
-type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'study-plan' | 'study-materials' | 'syllabus' | 'flashcards' | 'course-requirements' | 'novels' | 'novel-detail' | 'novel-reader' | 'news' | 'scholarships' | 'leaderboard' | 'notes' | 'speed-round' | 'streak';
+type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'mock' | 'study-plan' | 'study-plan-tracker' | 'study-materials' | 'syllabus' | 'flashcards' | 'course-requirements' | 'novels' | 'novel-detail' | 'novel-reader' | 'news' | 'scholarships' | 'leaderboard' | 'notes' | 'speed-round' | 'streak';
 type QuizType = 'full' | 'mini' | 'subject' | 'timed-practice';
 
 interface FormData {
@@ -86,8 +91,8 @@ interface FormData {
 
 const plans = {
   basic: { name: 'Basic', price: 5000 },
-  pro: { name: 'Pro', price: 10000 },
-  premium: { name: 'Premium', price: 15000 },
+  pro: { name: 'ACE', price: 10000 },
+  premium: { name: 'SCHOLAR', price: 15000 },
 };
 
 const DASHBOARD_STATE_KEY = 'jamb_dashboard_state';
@@ -101,7 +106,29 @@ const saveDashboardState = (step: Step) => {
 
 const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [currentStep, setCurrentStep] = useState<Step>('landing');
+
+  useSeo({
+    title: 'Jamb Crash AI | AI-Powered JAMB & UTME Preparation',
+    description: 'Master JAMB with AI-powered study plans, past questions from 2000-2024, personalized timetables, flashcards, and daily WhatsApp reminders. Score 300+ guaranteed.',
+    path: '/',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: 'Jamb Crash AI',
+      description: 'AI-powered JAMB and UTME preparation platform with past questions, study plans, flashcards, and score prediction.',
+      url: 'https://jambcrash.ai/',
+      brand: { '@type': 'Brand', name: 'Jamb Crash AI' },
+      offers: {
+        '@type': 'AggregateOffer',
+        lowPrice: '5000',
+        highPrice: '15000',
+        priceCurrency: 'NGN',
+        availability: 'https://schema.org/InStock',
+      },
+    },
+  });
+
+  const [currentStep, setCurrentStep] = useState<Step>('loading');
   const [selectedPlan, setSelectedPlan] = useState<keyof typeof plans | null>(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isPlanSelectionOpen, setIsPlanSelectionOpen] = useState(false);
@@ -115,7 +142,9 @@ const Index = () => {
         try {
           const subjects = JSON.parse(cached);
           if (Array.isArray(subjects) && subjects.length > 0) return subjects;
-        } catch {}
+        } catch {
+          // corrupted cache — ignore and reload from server
+        }
       }
     }
     return [];
@@ -129,29 +158,30 @@ const Index = () => {
         try {
           const subjects = JSON.parse(cached);
           if (Array.isArray(subjects) && subjects.length > 0) return false;
-        } catch {}
+        } catch {
+          // corrupted cache — keep loading state
+        }
       }
     }
     return true;
   });
   const [quizType, setQuizType] = useState<QuizType>('full');
-  const [quizResults, setQuizResults] = useState<any>(null);
+  const [quizResults, setQuizResults] = useState<QuizResultsProps['results'] | null>(null);
   const [practiceSubjectOverride, setPracticeSubjectOverride] = useState<string | null>(null);
   const [highlightStandard, setHighlightStandard] = useState(false);
   const [weakSubjectFromQuiz, setWeakSubjectFromQuiz] = useState<string | null>(null);
   const [showSubjectChanger, setShowSubjectChanger] = useState(false);
+  const [syllabusTargetSubject, setSyllabusTargetSubject] = useState<string | null>(null);
+  const [flashcardsTargetSubject, setFlashcardsTargetSubject] = useState<string | null>(null);
+  const [syllabusTargetTopic, setSyllabusTargetTopic] = useState<string | null>(null);
   
-  const [showTrialBanner, setShowTrialBanner] = useState(true);
+
   const [selectedNovelId, setSelectedNovelId] = useState<string | null>(null);
   const [selectedChapterId, setSelectedChapterId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<DashboardTab>('home');
-  
-  // Track if user just paid successfully (to prevent showing trial expired screen)
-  const [justPaidForPlan, setJustPaidForPlan] = useState(false);
-  
-  // Track payment cancellation for choice modal
-  const [showPaymentCancelledModal, setShowPaymentCancelledModal] = useState(false);
-  const [paymentWasCancelled, setPaymentWasCancelled] = useState(false);
+  const [showQuizLimitModal, setShowQuizLimitModal] = useState(false);
+  const [pendingQuizType, setPendingQuizType] = useState<QuizType>('mini');
+  const [showSubjectChangeLimitModal, setShowSubjectChangeLimitModal] = useState(false);
   
   // Track if we're waiting for payment flow to initialize
   const [isPaymentFlowLoading, setIsPaymentFlowLoading] = useState(() => {
@@ -159,9 +189,10 @@ const Index = () => {
     return params.get('openPayment') === 'true';
   });
   
-  const { user, isLoading, hasAccess, isAdmin, isOwner, userRole, signOut, refreshAccess } = useAuth();
+  const { user, isLoading, hasAccess, isAdmin, isOwner, userRole, userPackage, signOut, refreshAccess } = useAuth();
   const { year: examYear } = useExamDate();
   const navigate = useNavigate();
+  const { canUseFeature, incrementUsage } = useFeatureUsage();
 
   // PWA launch: when app is opened as installed (standalone) or via ?pwa=1
   // shortcut, skip the marketing landing. Signed-out users go to /auth so
@@ -178,7 +209,7 @@ const Index = () => {
       setSearchParams(searchParams, { replace: true });
     }
     const lastEmail = typeof window !== 'undefined' ? localStorage.getItem('jamb_last_email') : null;
-    // No cached session → send straight to auth (skip landing page)
+    // No cached session —†’ send straight to auth (skip landing page)
     if (!lastEmail) {
       navigate('/auth', { replace: true });
     }
@@ -212,6 +243,13 @@ const Index = () => {
     });
   }, []);
 
+  // Same for tab switches (mounts lazy components like StudyStats)
+  const handleTabChange = useCallback((tab: DashboardTab) => {
+    startTransition(() => {
+      setActiveTab(tab);
+    });
+  }, []);
+
   const userEmail = user?.email?.toLowerCase() || null;
   const effectiveAccess = hasAccess || isOwner || isAdmin;
   const effectiveAdmin = isAdmin || isOwner;
@@ -224,83 +262,32 @@ const Index = () => {
   // Admins/owners can use dashboard normally - no auto-redirect
   // They access admin panel via the gear (Shield) icon in header
   
-  // Auto-redirect logic for all users
+  // Ensure we never stay on subject—€‘select when subjects are already loaded
   useEffect(() => {
-    // Wait for ALL loading to complete including subjects
-    if (isFullyLoading) return;
-    
-    // Skip auto-redirect if user is in payment flow
-    const openPayment = searchParams.get('openPayment');
-    if (openPayment === 'true' || isPaymentModalOpen || isPlanSelectionOpen) {
-      return; // Don't interfere with payment flow
-    }
-    
-    // Admins/owners have full access - treat them like paid users
-    const hasFullAccess = effectiveAccess || isAdmin || isOwner;
-
-    // OFFLINE FAST PATH: if there's a signed-in user with cached subjects but
-    // we couldn't verify access/trial from the server, still drop them into
-    // the dashboard so the wrapper / desktop browser isn't stuck on landing.
-    if (
-      !navigator.onLine &&
-      userEmail &&
-      userSubjects.length > 0 &&
-      currentStep === 'landing'
-    ) {
+    if (userSubjects.length > 0 && currentStep === 'subject-select') {
       startTransition(() => setCurrentStep('dashboard'));
       saveDashboardState('dashboard');
       window.scrollTo({ top: 0, behavior: 'instant' });
-      return;
     }
-    
-    // If user is signed in and has access (paid OR admin), go to dashboard
-    if (userEmail && hasFullAccess && currentStep === 'landing') {
-      // Check if user already has subjects saved - if so, go straight to dashboard
-      if (userSubjects.length > 0) {
-        startTransition(() => setCurrentStep('dashboard'));
-        saveDashboardState('dashboard');
-        window.scrollTo({ top: 0, behavior: 'instant' });
-        return;
-      }
-      // Only prompt for subjects if they don't have any (and not admin/owner)
-      if (!isAdmin && !isOwner) {
-        startTransition(() => setCurrentStep('subject-select'));
-      } else {
-        // Admins/owners go to dashboard even without subjects
-        startTransition(() => setCurrentStep('dashboard'));
-        saveDashboardState('dashboard');
-      }
-      window.scrollTo({ top: 0, behavior: 'instant' });
-      return;
-    }
-    
-    // Trial users: if logged in and has active trial → go to dashboard
-    if (userEmail && !hasFullAccess && isTrialActive && currentStep === 'landing') {
-      if (userSubjects.length > 0) {
-        startTransition(() => setCurrentStep('dashboard'));
-        saveDashboardState('dashboard');
-        window.scrollTo({ top: 0, behavior: 'instant' });
-        return;
-      }
-      // Need subjects first
-      startTransition(() => setCurrentStep('subject-select'));
-      window.scrollTo({ top: 0, behavior: 'instant' });
-      return;
-    }
-    
-    // New user (no trial used yet) - show subject selection to start trial
-    if (userEmail && !hasFullAccess && !hasTrialUsed && canStartTrial && currentStep === 'landing') {
-      startTransition(() => setCurrentStep('subject-select'));
-      window.scrollTo({ top: 0, behavior: 'instant' });
-      return;
-    }
+  }, [userSubjects, currentStep]);
 
-    // Catch-all: Any logged-in user without subjects should pick subjects first
-    if (userEmail && userSubjects.length === 0 && currentStep === 'landing' && !isAdmin && !isOwner) {
-      startTransition(() => setCurrentStep('subject-select'));
+  // Set initial step after auth and subjects are resolved to avoid landing flash
+  useEffect(() => {
+    if (isFullyLoading) return; // wait for loading to finish
+    if (userEmail) {
+      if (userSubjects.length === 0 && !effectiveAdmin) {
+        setCurrentStep('subject-select');
+      } else {
+        setCurrentStep('dashboard');
+        saveDashboardState('dashboard');
+      }
       window.scrollTo({ top: 0, behavior: 'instant' });
+    } else {
+      setCurrentStep('landing');
     }
-  }, [userEmail, effectiveAccess, isAdmin, isOwner, isFullyLoading, currentStep, isTrialActive, hasTrialUsed, canStartTrial, userSubjects.length, searchParams, isPaymentModalOpen, isPlanSelectionOpen]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userEmail, userSubjects.length, isFullyLoading]);
+
 
   // Load user subjects - use cache FIRST for instant redirect, then sync from server
   useEffect(() => {
@@ -319,9 +306,10 @@ const Index = () => {
           if (Array.isArray(cachedSubjects) && cachedSubjects.length > 0) {
             setUserSubjects(cachedSubjects);
             setSubjectsLoading(false); // Unblock UI immediately
-            console.log('[Cache] Restored subjects instantly:', cachedSubjects);
           }
-        } catch {}
+        } catch {
+          // corrupted cache — fall through to server load
+        }
       } else {
         setSubjectsLoading(true);
       }
@@ -404,13 +392,13 @@ const Index = () => {
         queue.forEach((q) => byEmail.set(q.email, q.subjects));
         for (const [email, subjects] of byEmail) {
           await supabase.from('user_subjects').upsert(
-            { email, subjects: subjects as any, updated_at: new Date().toISOString() },
+            { email, subjects: subjects as Database['public']['Enums']['jamb_subject'][], updated_at: new Date().toISOString() },
             { onConflict: 'email' },
           );
         }
         localStorage.removeItem('jamb_pending_subjects');
-      } catch (e) {
-        console.warn('Failed to flush pending subjects:', e);
+      } catch {
+        // ignore flush errors
       }
     };
     flushPendingSubjects();
@@ -488,23 +476,6 @@ const Index = () => {
     section?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleStartFreeTrial = () => {
-    // Always require authentication first
-    if (!user) {
-      navigate('/auth', { state: { flow: 'trial' } });
-      return;
-    }
-    
-    // If user can start trial, go to subject selection
-    if (canStartTrial) {
-      startTransition(() => setCurrentStep('subject-select'));
-      window.scrollTo({ top: 0, behavior: 'instant' });
-    } else if (hasTrialUsed) {
-      toast.error('You have already used your free trial. Please upgrade to continue.');
-      handleUpgradeClick();
-    }
-  };
-
   const handleSelectPlan = (plan: string) => {
     const planKey = plan as keyof typeof plans;
     setSelectedPlan(planKey);
@@ -526,17 +497,6 @@ const Index = () => {
     setIsPlanSelectionOpen(true);
   };
 
-  const handleTrialFromPlanModal = () => {
-    setIsPlanSelectionOpen(false);
-    // If not logged in, redirect to auth with trial flow
-    if (!user) {
-      navigate('/auth', { state: { flow: 'trial' } });
-      return;
-    }
-    startTransition(() => setCurrentStep('subject-select'));
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  };
-
   const handlePaymentFromPlanModal = () => {
     setIsPlanSelectionOpen(false);
     // If not logged in, redirect to signup first with plan info
@@ -549,35 +509,10 @@ const Index = () => {
 
   const handlePaymentModalClose = () => {
     setIsPaymentModalOpen(false);
-    // If user is logged in and eligible for trial, show choice modal
-    if (user && canStartTrial && !hasAccess && !effectiveAdmin) {
-      setPaymentWasCancelled(true);
-      setShowPaymentCancelledModal(true);
-    }
-  };
-
-  const handlePaymentCancelledTrial = async () => {
-    setShowPaymentCancelledModal(false);
-    setPaymentWasCancelled(false);
-    // Start trial flow
-    if (canStartTrial) {
-      startTransition(() => setCurrentStep('subject-select'));
-      window.scrollTo({ top: 0, behavior: 'instant' });
-    }
-  };
-
-  const handlePaymentCancelledRetry = () => {
-    setShowPaymentCancelledModal(false);
-    setPaymentWasCancelled(false);
-    // Reopen payment modal
-    if (selectedPlan) {
-      setIsPaymentModalOpen(true);
-    }
   };
 
   const handlePaymentSuccess = async (reference: string, email: string) => {
     setIsPaymentModalOpen(false);
-    setJustPaidForPlan(true); // Immediately mark as paid to bypass trial expired check
     await refreshAccess();
     
     // If user already has subjects (e.g. trial-expired user upgrading), go straight to dashboard
@@ -593,6 +528,19 @@ const Index = () => {
   };
 
   const handleSubjectsSelected = async (subjects: string[]) => {
+    // Enforce subject_change limit for returning users (not initial setup)
+    if (userSubjects.length > 0 && userPackage === 'basic' && !canUseFeature('subject_change')) {
+      setShowSubjectChangeLimitModal(true);
+      return;
+    }
+    if (userSubjects.length > 0 && userPackage === 'basic') {
+      const ok = await incrementUsage('subject_change');
+      if (!ok) {
+        setShowSubjectChangeLimitModal(true);
+        return;
+      }
+    }
+
     setUserSubjects(subjects);
     
     // Refresh access to get latest payment status
@@ -610,8 +558,6 @@ const Index = () => {
     
     // If there's a pending payment, wait a bit and retry access check
     if (pendingPayment) {
-      console.log('[Payment] Found pending payment, waiting for verification...');
-      // Wait 2 seconds for webhook/verification to complete
       await new Promise(resolve => setTimeout(resolve, 2000));
       await refreshAccess();
     }
@@ -623,13 +569,7 @@ const Index = () => {
     
     const currentAccess = accessData?.[0]?.has_access || false;
     
-    // Only start trial if user truly has no access AND no pending payment
-    if (!currentAccess && !effectiveAdmin && canStartTrial && !pendingPayment) {
-      const success = await startTrial();
-      if (success) {
-        toast.success('🎉 30-minute Premium trial started! Enjoy full access!');
-      }
-    } else if (currentAccess && !effectiveAdmin) {
+    if (currentAccess && !effectiveAdmin) {
       toast.success('🎉 Payment confirmed! Enjoy your subscription!');
     } else if (pendingPayment) {
       // Payment is being processed
@@ -642,14 +582,24 @@ const Index = () => {
   };
 
   const handleUploadComplete = (files: File[]) => {
-    toast.success(`${files.length} file(s) processed! Questions extracted. ✨`);
+    toast.success(`${files.length} file(s) processed! Questions extracted. ✅`);
     // Stay on the upload page to show results - don't redirect
   };
 
   const handleFormSubmit = (data: unknown) => {
     setPersonalizationData(data as FormData);
-    toast.success('Creating your personalized study plan... 🚀');
+    toast.success('Creating your personalized study plan... 👋');
     navigateStep('study-plan');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
+  const requireAccess = (step: Step) => {
+    if (!effectiveAccess && !isTrialActive) {
+      setIsPlanSelectionOpen(true);
+      setSelectedPlan('pro');
+      return;
+    }
+    navigateStep(step);
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
@@ -658,39 +608,26 @@ const Index = () => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
-  const handleStartQuiz = (type: QuizType) => {
+  const handleOpenStudyCalendar = () => {
+    navigateStep('study-plan-tracker');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
+  const handleStartQuiz = async (type: QuizType) => {
     setQuizType(type);
     navigateStep('quiz');
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
-  const handleQuizComplete = (results: any) => {
+  const handleQuizComplete = (results: QuizResultsProps['results']) => {
     setQuizResults(results);
     navigateStep('quiz-results');
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   const handleUpgradeClick = (plan?: string) => {
-    // If a specific plan is passed, open payment modal directly
-    if (plan && plans[plan as keyof typeof plans]) {
-      setSelectedPlan(plan as keyof typeof plans);
-      setIsPaymentModalOpen(true);
-      return;
-    }
-    
-    // Otherwise scroll to pricing
-    localStorage.removeItem(DASHBOARD_STATE_KEY);
-    startTransition(() => setCurrentStep('landing'));
-    setHighlightStandard(true);
-    setTimeout(() => {
-      const pricingSection = document.getElementById('pricing');
-      if (pricingSection) {
-        const headerOffset = 80;
-        const elementPosition = pricingSection.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-        window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-      }
-    }, 100);
+    setSelectedPlan((plan && plans[plan as keyof typeof plans] ? plan : 'pro') as keyof typeof plans);
+    setIsPlanSelectionOpen(true);
   };
 
   const handleSignOut = async () => {
@@ -705,7 +642,38 @@ const Index = () => {
 
   const handleBackToDashboard = () => {
     setPracticeSubjectOverride(null);
+    setSyllabusTargetSubject(null);
+    setSyllabusTargetTopic(null);
+    setFlashcardsTargetSubject(null);
     startTransition(() => setCurrentStep('dashboard'));
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
+  const handleGoToSyllabusTopic = (subject: string, topic: string) => {
+    setSyllabusTargetSubject(subject);
+    setSyllabusTargetTopic(topic);
+    navigateStep('syllabus');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
+  // Study plan calendar -> learning section links
+  const handleStudyPlanPractice = (subject: string) => {
+    setPracticeSubjectOverride(subject);
+    setQuizType('subject');
+    navigateStep('quiz');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
+  const handleStudyPlanSyllabus = (subject: string) => {
+    setSyllabusTargetSubject(subject);
+    setSyllabusTargetTopic(null);
+    navigateStep('syllabus');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
+  const handleStudyPlanFlashcards = (subject: string) => {
+    setFlashcardsTargetSubject(subject);
+    navigateStep('flashcards');
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
@@ -717,45 +685,9 @@ const Index = () => {
     toast.success('Subjects updated! App data refreshed. 🎉');
   };
 
-  // Payment flow loading - show loading screen while waiting for payment modal
-  if (isPaymentFlowLoading && (isLoading || !user)) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center space-y-4"
-        >
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-lg text-muted-foreground">Preparing your payment...</p>
-        </motion.div>
-      </div>
-    );
-  }
-
-  // Loading screen for authenticated users - show skeleton for better perceived performance
-  if (isFullyLoading && userEmail && currentStep === 'landing') {
+  // Skip rendering while step is loading to prevent flash
+  if (currentStep === 'loading') {
     return <DashboardSkeleton />;
-  }
-
-  // Trial expired - show upgrade screen with payment modal
-  if (isTrialExpired && !effectiveAccess && !effectiveAdmin && !justPaidForPlan) {
-    return (
-      <>
-        <TrialExpiredScreen onUpgrade={handleUpgradeClick} />
-        
-        {/* Payment Modal - must be included here for expired trial users */}
-        {selectedPlan && (
-          <PaymentModal
-            isOpen={isPaymentModalOpen}
-            onClose={handlePaymentModalClose}
-            plan={plans[selectedPlan]}
-            onSuccess={handlePaymentSuccess}
-            initialEmail={userEmail || undefined}
-          />
-        )}
-      </>
-    );
   }
 
   // Quiz step
@@ -788,6 +720,33 @@ const Index = () => {
     );
   }
 
+  // Mock CBT step
+  if (currentStep === 'mock' && userEmail) {
+    return (
+      <div className="min-h-screen bg-background">
+        {isTrialActive && formattedTime && (
+          <TrialTimerBadge formattedTime={formattedTime} isLow={parseInt(formattedTime.split(':')[0]) < 5} />
+        )}
+        <DashboardHeader
+          userEmail={userEmail}
+          isOwner={effectiveOwner}
+          isCollaborator={isAdmin && !isOwner}
+          userRole={userRole}
+          onSignOut={handleSignOut}
+        />
+        <div className="pt-16">
+          <Suspense fallback={<LazyFallback />}>
+            <MockExam
+              userEmail={userEmail}
+              subjects={effectiveSubjects}
+              onExit={handleBackToDashboard}
+            />
+          </Suspense>
+        </div>
+      </div>
+    );
+  }
+
   // Quiz results step
   if (currentStep === 'quiz-results' && quizResults) {
     return (
@@ -801,12 +760,15 @@ const Index = () => {
         />
         <div className="pt-16">
           <BackButton onClick={handleBackToDashboard} />
+          <Suspense fallback={<LazyFallback />}>
           <QuizResults
             results={quizResults}
             quizType={quizType}
+            userEmail={userEmail || ''}
             onRetry={handleBackToDashboard}
             onHome={handleBackToDashboard}
           />
+          </Suspense>
         </div>
       </div>
     );
@@ -827,15 +789,17 @@ const Index = () => {
         {!isTrialEntry && (
           <BackButton onClick={() => setCurrentStep('landing')} />
         )}
+        <Suspense fallback={<LazyFallback />}>
         <SubjectSelector
           userEmail={userEmail}
           onComplete={handleSubjectsSelected}
           isBypassUser={effectiveAdmin}
         />
+        </Suspense>
         {isTrialEntry && (
           <div className="fixed bottom-4 left-0 right-0 text-center">
             <p className="text-sm text-muted-foreground">
-              🎁 Pick your subjects to start your 30-minute Premium trial!
+              👋 Pick your subjects to start your 30-minute SCHOLAR trial!
             </p>
           </div>
         )}
@@ -864,6 +828,33 @@ const Index = () => {
             weakestSubject={weakSubjectFromQuiz || personalizationData?.weakestSubject}
             examDate={personalizationData?.examDate}
             onBack={handleBackToDashboard}
+            onViewCalendar={() => navigateStep('study-plan-tracker')}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Study plan tracker step (calendar + check-off + reminders)
+  if (currentStep === 'study-plan-tracker' && userEmail) {
+    return (
+      <div className="min-h-screen bg-background">
+        <DashboardHeader 
+          userEmail={userEmail}
+          isOwner={effectiveOwner}
+          isCollaborator={isAdmin && !isOwner}
+          userRole={userRole}
+          onSignOut={handleSignOut}
+        />
+        <div className="pt-16">
+          <BackButton onClick={handleBackToDashboard} />
+          <StudyPlanTracker
+            userEmail={userEmail}
+            onBack={handleBackToDashboard}
+            onGenerateNew={handleGenerateStudyPlan}
+            onStartPractice={handleStudyPlanPractice}
+            onOpenSyllabus={handleStudyPlanSyllabus}
+            onOpenFlashcards={handleStudyPlanFlashcards}
           />
         </div>
       </div>
@@ -882,11 +873,15 @@ const Index = () => {
           onSignOut={handleSignOut}
         />
         <div className="pt-16">
-          <SyllabusReader
-            userEmail={userEmail}
-            subjects={effectiveSubjects}
-            onBack={handleBackToDashboard}
-          />
+          <Suspense fallback={<LazyFallback />}>
+            <SyllabusReader
+              userEmail={userEmail}
+              subjects={effectiveSubjects}
+              onBack={handleBackToDashboard}
+              initialSubject={syllabusTargetSubject || undefined}
+              initialTopic={syllabusTargetTopic || undefined}
+            />
+          </Suspense>
         </div>
       </div>
     );
@@ -908,6 +903,7 @@ const Index = () => {
             userEmail={userEmail}
             subjects={effectiveSubjects}
             onBack={handleBackToDashboard}
+            initialSubject={flashcardsTargetSubject || undefined}
           />
         </div>
       </div>
@@ -926,10 +922,12 @@ const Index = () => {
           onSignOut={handleSignOut}
         />
         <div className="pt-16">
+          <Suspense fallback={<LazyFallback />}>
           <CourseRequirements
             userSubjects={effectiveSubjects}
             onBack={handleBackToDashboard}
           />
+          </Suspense>
         </div>
       </div>
     );
@@ -1062,7 +1060,9 @@ const Index = () => {
           <BackButton onClick={handleBackToDashboard} />
           <UploadSection onUploadComplete={handleUploadComplete} />
         </div>
+        <Suspense fallback={null}>
         <Footer />
+        </Suspense>
       </div>
     );
   }
@@ -1080,9 +1080,13 @@ const Index = () => {
         />
         <div className="pt-16">
           <BackButton onClick={handleBackToDashboard} />
+          <Suspense fallback={<LazyFallback />}>
           <PersonalizationForm onSubmit={handleFormSubmit} />
+          </Suspense>
         </div>
+        <Suspense fallback={null}>
         <Footer />
+        </Suspense>
       </div>
     );
   }
@@ -1090,8 +1094,26 @@ const Index = () => {
   // Dashboard step
   if (currentStep === 'dashboard' && userEmail) {
     return (
-      <PaywallGate hasAccess={effectiveAccess || isTrialActive} isLoading={isFullyLoading} onUpgrade={handleUpgradeClick}>
+      <PaywallGate hasAccess={true} isLoading={isFullyLoading} onUpgrade={handleUpgradeClick}>
         <div className="min-h-screen bg-background">
+          {/* Desktop Sidebar */}
+          <DesktopSidebar
+            active={activeTab}
+            onChange={handleTabChange}
+            userName={user?.user_metadata?.full_name}
+            userEmail={userEmail}
+            isOwner={effectiveOwner}
+            isAdmin={effectiveAdmin}
+            userRole={userRole}
+            onSignOut={handleSignOut}
+            onNavigate={(path) => navigate(path)}
+            onQuickStart={(step) => {
+              handleTabChange('home');
+              navigateStep(step);
+            }}
+            hasAccess={effectiveAccess}
+          />
+          
           {/* Trial Timer Badge */}
           {isTrialActive && formattedTime && (
             <TrialTimerBadge formattedTime={formattedTime} isLow={parseInt(formattedTime.split(':')[0]) < 5} />
@@ -1115,7 +1137,7 @@ const Index = () => {
             userRole={userRole}
             onSignOut={handleSignOut}
           />
-          <div className="pt-20 pb-24 px-4">
+          <div className="pt-20 pb-24 px-4 md:pb-8 md:pl-[276px] lg:pl-[296px]">
             <div className="max-w-6xl mx-auto">
               {/* ================= HOME TAB ================= */}
               {activeTab === 'home' && (
@@ -1131,21 +1153,33 @@ const Index = () => {
                     <h1 className="text-3xl md:text-4xl font-extrabold text-foreground">
                       {(user?.user_metadata?.full_name?.split(' ')[0]) || 'Champion'} 👋
                     </h1>
-                    {isTrialActive && (
-                      <p className="text-xs text-primary mt-1 font-medium">
-                        🎁 Free Trial - {formattedTime} remaining
-                      </p>
-                    )}
                   </div>
 
+                  {/* Renewal nudge — expiring subscriptions */}
+                  <RenewalNudge
+                    userEmail={userEmail || ''}
+                    isAdmin={effectiveAdmin}
+                    hasAccess={effectiveAccess}
+                    onUpgrade={handleUpgradeClick}
+                  />
+
                   {/* Predicted Score + Streak + Goal (matches design) */}
+                  <Suspense fallback={<Skeleton className="h-24 w-full rounded-xl" />}>
                   <HomeSummary userEmail={userEmail} />
+                  </Suspense>
+
+                  {/* Study plan follow-up — today's sessions + calendar */}
+                  <StudyPlanTodayCard
+                    userEmail={userEmail || ''}
+                    onOpenCalendar={handleOpenStudyCalendar}
+                    onGenerate={handleGenerateStudyPlan}
+                  />
 
                   {/* Quick Actions */}
                   <div className="flex items-center justify-between pt-1">
                     <h2 className="text-lg font-bold text-foreground">Quick Actions</h2>
                     <button
-                      onClick={() => setActiveTab('study')}
+                      onClick={() => handleTabChange('study')}
                       className="text-sm font-medium text-primary hover:opacity-80"
                     >
                       See all
@@ -1163,7 +1197,7 @@ const Index = () => {
                         <Lock className="w-3 h-3 absolute top-1 right-1 text-muted-foreground" />
                         <Play className="w-5 h-5 text-muted-foreground" />
                         <span className="font-bold text-xs">Full Quiz</span>
-                        <span className="text-[10px] text-primary">Pro+</span>
+                        <span className="text-[10px] text-primary">ACE</span>
                       </Button>
                     )}
                     <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-yellow-500 hover:bg-yellow-500/5" onClick={() => handleStartQuiz('mini')}>
@@ -1182,13 +1216,18 @@ const Index = () => {
                         <Lock className="w-3 h-3 absolute top-1 right-1 text-muted-foreground" />
                         <BookOpen className="w-5 h-5 text-muted-foreground" />
                         <span className="font-bold text-xs">Practice</span>
-                        <span className="text-[10px] text-primary">Pro+</span>
+                        <span className="text-[10px] text-primary">ACE</span>
                       </Button>
                     )}
-                    <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-primary hover:bg-primary/5" onClick={() => setActiveTab('ai')}>
+                    <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-primary hover:bg-primary/5" onClick={() => handleTabChange('ai')}>
                       <Sparkles className="w-5 h-5 text-primary" />
                       <span className="font-bold text-xs">Ask AI</span>
                       <span className="text-[10px] text-muted-foreground">Get Help</span>
+                    </Button>
+                    <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-amber-500 hover:bg-amber-500/5" onClick={() => navigateStep('mock')}>
+                      <Trophy className="w-5 h-5 text-amber-500" />
+                      <span className="font-bold text-xs">Mock CBT</span>
+                      <span className="text-[10px] text-muted-foreground">180 Qs</span>
                     </Button>
                   </div>
 
@@ -1203,7 +1242,11 @@ const Index = () => {
                     </div>
                     <Target className="w-10 h-10 text-primary/70 shrink-0" />
                   </div>
-                </motion.div>
+
+                  {/* AdSense — Dashboard */}
+                  <GoogleAdSense className="my-4" />
+
+                  </motion.div>
               )}
 
               {/* ================= STUDY TAB ================= */}
@@ -1212,10 +1255,12 @@ const Index = () => {
                   {/* Study Header */}
                   <div>
                     <p className="text-muted-foreground text-sm">Let's learn something new</p>
-                    <h1 className="text-2xl md:text-3xl font-extrabold text-foreground">Your Study Hub 📚</h1>
+                    <h1 className="text-2xl md:text-3xl font-extrabold text-foreground">Your Study Hub 👋</h1>
                   </div>
 
+                  <Suspense fallback={null}>
                   <OfflineReadyCard userEmail={userEmail} subjects={effectiveSubjects} />
+                  </Suspense>
 
                   {/* Next Best Action */}
                   {weakSubjectFromQuiz && (
@@ -1268,15 +1313,15 @@ const Index = () => {
                       <Target className="w-6 h-6 text-green-500" />
                       <span className="font-bold text-sm">Study Plan</span>
                     </Button>
-                    <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-orange-500 hover:bg-orange-500/5" onClick={() => navigateStep('flashcards')}>
+                    <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-orange-500 hover:bg-orange-500/5" onClick={() => requireAccess('flashcards')}>
                       <Layers className="w-6 h-6 text-orange-500" />
                       <span className="font-bold text-sm">Flashcards</span>
                     </Button>
-                    <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-teal-500 hover:bg-teal-500/5" onClick={() => navigateStep('notes')}>
+                    <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-teal-500 hover:bg-teal-500/5" onClick={() => requireAccess('notes')}>
                       <StickyNote className="w-6 h-6 text-teal-500" />
                       <span className="font-bold text-sm">Notes</span>
                     </Button>
-                    <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-blue-500 hover:bg-blue-500/5" onClick={() => startTransition(() => setCurrentStep('upload'))}>
+                    <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-blue-500 hover:bg-blue-500/5" onClick={() => requireAccess('upload')}>
                       <FileText className="w-6 h-6 text-blue-500" />
                       <span className="font-bold text-sm">Upload PDF</span>
                     </Button>
@@ -1296,6 +1341,10 @@ const Index = () => {
                       <GraduationCap className="w-6 h-6 text-primary" />
                       <span className="font-bold text-sm">Course Reqs</span>
                     </Button>
+                    <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-amber-500 hover:bg-amber-500/5" onClick={() => navigateStep('mock')}>
+                      <Trophy className="w-6 h-6 text-amber-500" />
+                      <span className="font-bold text-sm">Mock CBT</span>
+                    </Button>
                   </div>
 
                   {(hasFeature('studyMaterials') || isTrialActive) ? (
@@ -1306,8 +1355,13 @@ const Index = () => {
                     </FeatureGate>
                   )}
 
+                  {/* AdSense — Study */}
+                  <GoogleAdSense className="my-4" />
+
                   {/* AI Tip */}
+                  <Suspense fallback={<Skeleton className="h-32 w-full rounded-xl" />}>
                   <CourseTipsCard userEmail={userEmail} userSubjects={effectiveSubjects} />
+                  </Suspense>
                 </motion.div>
               )}
 
@@ -1338,6 +1392,7 @@ const Index = () => {
                   </div>
 
                   {/* Score Prediction + weakness + AI features live inside PremiumDashboard */}
+                  <Suspense fallback={<Skeleton className="h-48 w-full rounded-xl" />}>
                   <PremiumDashboard
                     userEmail={userEmail}
                     isAdmin={effectiveAdmin}
@@ -1346,16 +1401,34 @@ const Index = () => {
                     weakSubject={weakSubjectFromQuiz || personalizationData?.weakestSubject}
                     onUpgrade={handleUpgradeClick}
                   />
+                  </Suspense>
 
                   <div>
-                    <h2 className="text-lg font-bold text-foreground mb-3">Weakness Analysis</h2>
-                    <TopicMasteryTracker userEmail={userEmail} allowedSubjects={effectiveSubjects} />
+                    <h2 className="text-lg font-bold text-foreground mb-3">Weakness & Topic Analysis</h2>
+                    <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
+                    <TopicMasteryTracker 
+                      userEmail={userEmail} 
+                      allowedSubjects={effectiveSubjects}
+                      onStartPracticeTopic={(subject, topic) => {
+                        if (subject && subject !== 'all') {
+                          setPracticeSubjectOverride(subject);
+                          setQuizType('subject');
+                        } else {
+                          setPracticeSubjectOverride(null);
+                          setQuizType('mini');
+                        }
+                        startTransition(() => setCurrentStep('quiz'));
+                        window.scrollTo({ top: 0, behavior: 'instant' });
+                      }}
+                      onGoToSyllabusTopic={handleGoToSyllabusTopic}
+                    />
+                    </Suspense>
                   </div>
 
                   {weakSubjectFromQuiz && (
                     <div className="p-4 rounded-xl bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/30">
                       <p className="text-sm text-foreground">
-                        💡 <span className="font-semibold">AI Recommendation:</span> Focus on{' '}
+                        👋 <span className="font-semibold">AI Recommendation:</span> Focus on{' '}
                         <span className="font-bold text-primary capitalize">{weakSubjectFromQuiz.replace('_', ' ')}</span>. Try 20 extra questions today.
                       </p>
                     </div>
@@ -1373,7 +1446,7 @@ const Index = () => {
                         <Users className="w-6 h-6 text-primary" />
                       </div>
                       <div>
-                        <h1 className="text-2xl font-extrabold text-foreground">The Community 🏆</h1>
+                        <h1 className="text-2xl font-extrabold text-foreground">The Community 👋</h1>
                         <p className="text-xs text-muted-foreground">Learn, compete and grow together</p>
                       </div>
                     </div>
@@ -1419,7 +1492,11 @@ const Index = () => {
                   </div>
 
                   {/* Refer & Earn */}
-                  {userEmail && <ReferralSystem userEmail={userEmail} />}
+                  {userEmail && (
+                    <Suspense fallback={null}>
+                    <ReferralSystem userEmail={userEmail} />
+                    </Suspense>
+                  )}
                 </motion.div>
               )}
 
@@ -1431,31 +1508,33 @@ const Index = () => {
                     <p className="font-semibold text-foreground truncate">{userEmail}</p>
                   </div>
 
-                  <h2 className="text-lg font-bold text-foreground">Your Study Stats 📊</h2>
-                  <StudyStats
-                    userEmail={userEmail}
-                    allowedSubjects={effectiveSubjects}
-                    onPracticeSubject={(subject) => {
-                      if (!effectiveSubjects.includes(subject)) return;
-                      setPracticeSubjectOverride(subject);
-                      setQuizType('mini');
-                      startTransition(() => setCurrentStep('quiz'));
-                    }}
-                  />
+                  <h2 className="text-lg font-bold text-foreground">Your Study Stats 👋</h2>
+                  <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
+                    <StudyStats
+                      userEmail={userEmail}
+                      allowedSubjects={effectiveSubjects}
+                      onPracticeSubject={(subject) => {
+                        if (!effectiveSubjects.includes(subject)) return;
+                        setPracticeSubjectOverride(subject);
+                        setQuizType('mini');
+                        startTransition(() => setCurrentStep('quiz'));
+                      }}
+                    />
+                  </Suspense>
 
                   <div className="grid grid-cols-2 gap-3">
                     <Button variant="outline" className="h-auto py-4 flex flex-col gap-1" onClick={() => navigate('/settings')}>
                       <SettingsIcon className="w-5 h-5 text-primary" />
                       <span className="font-bold text-sm">Settings</span>
                     </Button>
-                    <Button variant="outline" className="h-auto py-4 flex flex-col gap-1" onClick={() => setActiveTab('home')}>
+                    <Button variant="outline" className="h-auto py-4 flex flex-col gap-1" onClick={() => handleTabChange('home')}>
                       <Bell className="w-5 h-5 text-primary" />
                       <span className="font-bold text-sm">Notifications</span>
                     </Button>
                     {!effectiveAccess && !effectiveAdmin && (
                       <Button className="h-auto py-4 flex flex-col gap-1 col-span-2 gradient-primary text-primary-foreground" onClick={() => handleUpgradeClick()}>
                         <Crown className="w-5 h-5" />
-                        <span className="font-bold text-sm">Upgrade to Premium</span>
+                        <span className="font-bold text-sm">Upgrade to SCHOLAR</span>
                       </Button>
                     )}
                     <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 col-span-2 text-destructive hover:text-destructive" onClick={handleSignOut}>
@@ -1468,8 +1547,61 @@ const Index = () => {
             </div>
           </div>
         </div>
-          <BottomNav active={activeTab} onChange={setActiveTab} />
-        <ChatBot />
+          <BottomNav active={activeTab} onChange={handleTabChange} />
+        <Suspense fallback={null}>
+          <ChatBot />
+        </Suspense>
+
+        {/* Plan Selection Modal - must be inside dashboard return */}
+        {selectedPlan && (
+          <PlanSelectionModal
+            isOpen={isPlanSelectionOpen}
+            onClose={() => setIsPlanSelectionOpen(false)}
+            planName={plans[selectedPlan].name}
+            planPrice={plans[selectedPlan].price}
+            onContinuePayment={handlePaymentFromPlanModal}
+          />
+        )}
+
+        {/* Payment Modal - must be inside dashboard return */}
+        {selectedPlan && user && (
+          <PaymentModal
+            isOpen={isPaymentModalOpen}
+            onClose={handlePaymentModalClose}
+            plan={plans[selectedPlan]}
+            onSuccess={handlePaymentSuccess}
+            initialEmail={userEmail || undefined}
+          />
+        )}
+
+        {/* Subject Change Limit Modal */}
+        {showSubjectChangeLimitModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+            <FeatureLimitReached
+              featureType="subject_change"
+              onBonusEarned={() => {
+                setShowSubjectChangeLimitModal(false);
+              }}
+              className="max-w-md w-full"
+            />
+          </div>
+        )}
+
+        {/* Quiz Daily Limit Modal */}
+        {showQuizLimitModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+            <FeatureLimitReached
+              featureType="quick_quiz"
+              onBonusEarned={() => {
+                setShowQuizLimitModal(false);
+                if (canUseFeature('quick_quiz')) {
+                  handleStartQuiz(pendingQuizType);
+                }
+              }}
+              className="max-w-md w-full"
+            />
+          </div>
+        )}
       </PaywallGate>
     );
   }
@@ -1525,85 +1657,20 @@ const Index = () => {
             </Button>
           </div>
         )}
+        <Suspense fallback={<LazyFallback />}>
         <HeroSection 
           onGetStarted={handleGetStarted} 
           hasAccess={effectiveAccess}
           onSeeHowItWorks={handleSeeHowItWorks}
         />
-        <HowItWorksSection onStartTrial={handleStartFreeTrial} />
+        <HowItWorksSection onStartTrial={startTrial} />
         <PricingSection onSelectPlan={handleSelectPlan} highlightStandard={highlightStandard} />
+        </Suspense>
         
-        {/* APK Download Card on Landing Page */}
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <ApkDownloadCard />
-        </div>
       </div>
+      <Suspense fallback={null}>
       <Footer />
-
-      {/* Free Trial Banner - only for non-logged-in users, with close button */}
-      {!user && !effectiveAccess && !isFullyLoading && showTrialBanner && (
-        <motion.div
-          initial={{ y: 100, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-r from-primary/90 to-green-600/90 backdrop-blur-sm z-50"
-        >
-          <button
-            onClick={() => setShowTrialBanner(false)}
-            className="absolute top-2 right-2 text-white/70 hover:text-white p-1"
-            aria-label="Close banner"
-          >
-            <X className="w-5 h-5" />
-          </button>
-          <div className="max-w-4xl mx-auto flex items-center justify-between gap-4 flex-wrap pr-8">
-            <div className="text-primary-foreground">
-              <p className="font-bold">🎁 Free Trial Available!</p>
-              <p className="text-sm opacity-90">Get 30 minutes of Premium access - No payment required</p>
-            </div>
-            <Button
-              onClick={handleStartFreeTrial}
-              className="bg-white text-primary hover:bg-white/90 font-bold"
-            >
-              Start Free Trial
-            </Button>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Plan Selection Modal - Trial vs Payment choice */}
-      {selectedPlan && (
-        <PlanSelectionModal
-          isOpen={isPlanSelectionOpen}
-          onClose={() => setIsPlanSelectionOpen(false)}
-          planName={plans[selectedPlan].name}
-          planPrice={plans[selectedPlan].price}
-          onStartTrial={handleTrialFromPlanModal}
-          onContinuePayment={handlePaymentFromPlanModal}
-          canStartTrial={!user ? true : canStartTrial}
-          hasTrialUsed={!user ? false : hasTrialUsed}
-        />
-      )}
-
-      {/* Payment Modal */}
-      {selectedPlan && user && (
-        <PaymentModal
-          isOpen={isPaymentModalOpen}
-          onClose={handlePaymentModalClose}
-          plan={plans[selectedPlan]}
-          onSuccess={handlePaymentSuccess}
-          initialEmail={userEmail || undefined}
-        />
-      )}
-
-      {/* Payment Cancelled Choice Modal */}
-      <PaymentCancelledModal
-        isOpen={showPaymentCancelledModal}
-        onClose={() => setShowPaymentCancelledModal(false)}
-        onStartTrial={handlePaymentCancelledTrial}
-        onRetryPayment={handlePaymentCancelledRetry}
-        canStartTrial={canStartTrial}
-      />
-
-
+      </Suspense>
 
     </div>
   );

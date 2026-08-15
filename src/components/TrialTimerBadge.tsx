@@ -26,7 +26,7 @@ export const TrialTimerBadge = ({ formattedTime, isLow = false }: TrialTimerBadg
         {formattedTime}
       </span>
       <span className="text-xs opacity-90 font-medium">
-        Pro Trial 🔥
+        ACE Trial 🔥
       </span>
     </motion.div>
   );

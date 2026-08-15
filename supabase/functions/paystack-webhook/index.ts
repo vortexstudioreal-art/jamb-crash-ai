@@ -71,11 +71,11 @@ serve(async (req) => {
       const supabase = createClient(supabaseUrl, supabaseKey);
 
       // Determine access duration based on package
+      // NOTE: Must match paystack-verify/index.ts durations
       const packageName = metadata?.package || "basic";
-      // Premium/ultimate gets lifetime (100 years), pro gets 1 year, basic gets 30 days
-      let accessDays = 30; // Default for basic
+      let accessDays = 365; // 1 year for basic
       if (packageName === "pro") {
-        accessDays = 365;
+        accessDays = 365; // 1 year
       } else if (packageName === "premium" || packageName === "ultimate") {
         accessDays = 36500; // ~100 years = forever
       }

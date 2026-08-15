@@ -84,17 +84,16 @@ Requirements:
 
 Provide only the tip, nothing else.`;
 
-    // Call Lovable AI (using Google Gemini)
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    // Call Groq AI
+    const GROQ_API_KEY = Deno.env.get('GROQ_API_KEY');
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${Deno.env.get('OPENROUTER_API_KEY')}`,
-        'HTTP-Referer': 'https://lovable.dev',
-        'X-Title': 'JAMB Crash AI',
+        'Authorization': `Bearer ${GROQ_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'llama-3.3-70b-versatile',
         messages: [
           { role: 'user', content: prompt }
         ],
@@ -111,7 +110,7 @@ Provide only the tip, nothing else.`;
     const tip = data.choices?.[0]?.message?.content?.trim() || getFallbackTip(studyData);
 
     // Calculate a more nuanced predicted score
-    let predictedScoreRange = {
+    const predictedScoreRange = {
       min: Math.round((studyData.avgScore / 100) * 400 * 0.9),
       max: Math.round((studyData.avgScore / 100) * 400 * 1.1),
       likely: studyData.predictedJAMB

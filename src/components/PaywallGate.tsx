@@ -35,7 +35,7 @@ export const PaywallGate = ({ hasAccess, isLoading, onUpgrade, children }: Paywa
           </div>
           <h2 className="text-2xl font-bold text-foreground mb-2">Access Required</h2>
           <p className="text-muted-foreground mb-6">
-            Upgrade to access your personalized study plan and all premium features.
+            Upgrade to access your personalized study plan and all SCHOLAR features.
           </p>
           <Button
             variant="default"

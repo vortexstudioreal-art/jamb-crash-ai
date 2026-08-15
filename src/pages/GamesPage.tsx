@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft, Zap, Flame, Gamepad2, Lock } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useEffect } from 'react';
+import { useSeo } from '@/hooks/useSeo';
 
 const SpeedRound = lazy(() => import('@/components/SpeedRound').then(m => ({ default: m.SpeedRound })));
 const StreakChallenge = lazy(() => import('@/components/StreakChallenge').then(m => ({ default: m.StreakChallenge })));
@@ -26,6 +27,13 @@ type GameMode = 'menu' | 'speed-round' | 'streak';
 const GamesPage = () => {
   const { user, isAdmin, isOwner } = useAuth();
   const navigate = useNavigate();
+
+  useSeo({
+    title: 'Quiz Games | Jamb Crash AI',
+    description: 'Play Speed Round and Streak Challenge quiz games to make your JAMB practice fun and fast.',
+    path: '/games',
+  });
+
   const [gameMode, setGameMode] = useState<GameMode>('menu');
   const [userSubjects, setUserSubjects] = useState<string[]>([]);
   const [userRole, setUserRole] = useState<string | null>(null);

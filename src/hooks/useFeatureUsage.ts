@@ -146,9 +146,8 @@ export const useFeatureUsage = () => {
     // Trial users get Pro limits (unlimited)
     if (isTrialActive) return FEATURE_LIMITS.pro[feature];
     
-    // Package-based limits
-    if (!userPackage) return 0;
-    return FEATURE_LIMITS[userPackage][feature];
+    // Package-based limits (default to basic for unauthenticated)
+    return FEATURE_LIMITS[userPackage || 'basic'][feature];
   }, [userPackage, isAdmin, isOwner, isTrialActive]);
 
   // Check if user can use a feature (including bonus uses)
@@ -226,13 +225,13 @@ export const useFeatureUsage = () => {
   }, [getLimit, usageData, bonusData]);
 
   // Add bonus use after watching ad
-  const addBonusUse = useCallback(async (feature: FeatureType): Promise<boolean> => {
+  const addBonusUse = useCallback(async (feature: FeatureType, amount: number = 1): Promise<boolean> => {
     if (!userEmail) return false;
 
     const today = new Date().toISOString().split('T')[0];
     
     try {
-      const newBonus = bonusData[feature] + 1;
+      const newBonus = bonusData[feature] + amount;
       
       const { error } = await supabase
         .from('feature_usage')
@@ -257,7 +256,7 @@ export const useFeatureUsage = () => {
       // Update local state
       setBonusData(prev => ({
         ...prev,
-        [feature]: prev[feature] + 1,
+        [feature]: prev[feature] + amount,
       }));
 
       return true;

@@ -27,7 +27,7 @@ const PLAN_DETAILS = {
     borderColor: 'border-blue-500/30',
   },
   pro: {
-    name: 'Pro',
+    name: 'ACE',
     price: '₦10,000',
     icon: Crown,
     color: 'text-primary',
@@ -35,7 +35,7 @@ const PLAN_DETAILS = {
     borderColor: 'border-primary/30',
   },
   premium: {
-    name: 'Premium',
+    name: 'SCHOLAR',
     price: '₦15,000',
     icon: Star,
     color: 'text-yellow-500',
@@ -64,7 +64,7 @@ const PLAN_FEATURES = {
     'AI Study Tips',
   ],
   premium: [
-    'Everything in Pro',
+    'Everything in ACE',
     'WhatsApp Reminders',
     'Refer & Earn system',
     'Advanced AI Prediction',

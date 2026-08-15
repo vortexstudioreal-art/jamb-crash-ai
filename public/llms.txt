@@ -1,0 +1,30 @@
+# Jamb Crash AI
+
+> Nigeria's AI-powered JAMB & UTME preparation platform. Master JAMB with past questions from 2000-2024, personalized AI study plans, score prediction, and daily WhatsApp reminders.
+
+## What this site is
+
+Jamb Crash AI helps Nigerian secondary school students prepare for the Joint Admissions and Matriculation Board (JAMB/UTME) exam. The platform provides:
+
+- Complete JAMB past questions from 2000-2024 across all 14 subjects (English, Mathematics, Physics, Chemistry, Biology, Literature, Government, Economics, CRS, IRS, Geography, Accounting, Commerce, Agricultural Science)
+- AI-powered score prediction and personalized study plans
+- Flashcards, study notes, and topic mastery tracking
+- JAMB Literature-in-English novels with chapter summaries and likely questions
+- Real-time leaderboard and quiz games (Speed Round, Streak Challenge)
+- Offline mode for studying without internet
+- Daily WhatsApp study reminders
+- Scholarships and JAMB news updates
+
+## Key pages
+
+- [Home](https://jambcrash.ai/): App overview, features, and pricing
+- [Does JAMB repeat past questions?](https://jambcrash.ai/jamb-repeats-past-questions): Guide explaining how JAMB reuses past questions and how to study them
+- [Repeated JAMB Questions](https://jambcrash.ai/repeated-questions): High-yield questions that appear frequently in JAMB
+- [Privacy Policy](https://jambcrash.ai/privacy): How user data is collected and used
+
+## Key facts
+
+- JAMB is Nigeria's university entrance examination (UTME)
+- JAMB scores range from 0 to 400 across four subjects
+- JAMB has repeated questions from past years, especially from 2000-2020 exams
+- The platform is optimized for mobile use in Nigeria

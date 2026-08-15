@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { 
   getSyncQueue, 
   removeSyncItem, 
@@ -44,13 +45,15 @@ export const syncPendingItems = async (): Promise<{ synced: number; failed: numb
 const processSyncItem = async (item: SyncItem): Promise<void> => {
   switch (item.type) {
     case 'quiz_attempt':
-      await supabase.from('quiz_attempts').insert(item.data);
+      await supabase.from('quiz_attempts').insert(item.data as Database['public']['Tables']['quiz_attempts']['Insert']);
       break;
-    case 'flashcard_update':
-      await supabase.from('flashcards').update(item.data.updates).eq('id', item.data.id);
+    case 'flashcard_update': {
+      const data = item.data as { updates: Database['public']['Tables']['flashcards']['Update']; id: string };
+      await supabase.from('flashcards').update(data.updates).eq('id', data.id);
       break;
+    }
     case 'reading_progress':
-      await supabase.from('reading_progress').upsert(item.data, { onConflict: 'email,syllabus_id' });
+      await supabase.from('reading_progress').upsert(item.data as Database['public']['Tables']['reading_progress']['Insert'], { onConflict: 'email,syllabus_id' });
       break;
   }
 };
@@ -68,7 +71,7 @@ export const downloadAllForOffline = async (
     const { data: questions, error: questionsError } = await supabase
       .from('jamb_questions')
       .select('*')
-      .in('subject', subjects as any)
+      .in('subject', subjects as Database['public']['Enums']['jamb_subject'][])
       .limit(2000);
 
     if (questionsError) throw questionsError;
@@ -146,7 +149,7 @@ export const downloadAllForOffline = async (
 
 // Check if offline data needs refresh
 export const shouldRefreshOfflineData = async (): Promise<boolean> => {
-  const lastDownload = await getMetadata('offline_download_complete');
+  const lastDownload = await getMetadata<number | null>('offline_download_complete');
   if (!lastDownload) return true;
   
   // Refresh if data is older than 7 days
@@ -156,5 +159,47 @@ export const shouldRefreshOfflineData = async (): Promise<boolean> => {
 
 // Get cached subjects
 export const getCachedSubjects = async (): Promise<string[] | null> => {
-  return getMetadata('offline_subjects');
+  return getMetadata<string[] | null>('offline_subjects');
+};
+
+// Periodic sync management
+let syncIntervalId: number | null = null;
+
+/**
+ * Start periodic sync
+ * @param intervalMs - Interval in milliseconds (default 5 minutes)
+ */
+export const startPeriodicSync = (
+  intervalMs: number = 5 * 60 * 1000,
+  onSyncComplete?: (result: { synced: number; failed: number }) => void
+): void => {
+  // Clear existing interval if any
+  if (syncIntervalId !== null) {
+    clearInterval(syncIntervalId);
+  }
+
+  // Run initial sync immediately
+  syncPendingItems().then(onSyncComplete).catch(console.error);
+
+  // Set up periodic sync
+  syncIntervalId = window.setInterval(async () => {
+    try {
+      if (navigator.onLine) {
+        const result = await syncPendingItems();
+        onSyncComplete?.(result);
+      }
+    } catch (error) {
+      console.error('Periodic sync failed:', error);
+    }
+  }, intervalMs);
+};
+
+/**
+ * Stop periodic sync
+ */
+export const stopPeriodicSync = (): void => {
+  if (syncIntervalId !== null) {
+    clearInterval(syncIntervalId);
+    syncIntervalId = null;
+  }
 };

@@ -15,7 +15,7 @@ export const useExamDate = () => {
         .eq('key', 'jamb_exam_date')
         .maybeSingle();
       if (!cancelled && data?.value) {
-        const raw = typeof data.value === 'string' ? data.value : (data.value as any);
+        const raw = String(data.value);
         const parsed = new Date(raw);
         if (!isNaN(parsed.getTime())) setExamDate(parsed);
       }

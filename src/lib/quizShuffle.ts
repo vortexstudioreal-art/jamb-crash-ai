@@ -8,7 +8,7 @@ export interface ShuffleableQuestion {
   option_c: string;
   option_d: string;
   correct_answer: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // Mulberry32 — stable PRNG seeded from the question id so the same question

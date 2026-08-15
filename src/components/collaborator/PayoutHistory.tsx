@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Clock, CheckCircle, XCircle, RefreshCw, Banknote, Check
@@ -27,9 +27,9 @@ export const PayoutHistory = ({ userEmail }: PayoutHistoryProps) => {
 
   useEffect(() => {
     fetchPayoutHistory();
-  }, [userEmail]);
+  }, [userEmail, fetchPayoutHistory]);
 
-  const fetchPayoutHistory = async () => {
+  const fetchPayoutHistory = useCallback(async () => {
     if (!userEmail) return;
 
     setLoading(true);
@@ -47,7 +47,7 @@ export const PayoutHistory = ({ userEmail }: PayoutHistoryProps) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userEmail]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {

@@ -1,0 +1,81 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.5/MicrosoftTeams.Widgets.json",
+  "widgets": [
+    {
+      "name": "Quick Quiz",
+      "displayName": "Quick Quiz",
+      "description": "Start a practice quiz!",
+      "msAcTemplate": "widget_quick_quiz",
+      "sizes": ["small", "medium"],
+      "icons": [
+        {
+          "type": "png",
+          "src": "/favicon.png"
+        }
+      ],
+      "dataSource": {
+        "type": "polling",
+        "url": "/widgets/data/quick-quiz.json",
+        "frequency": "PT30M"
+      },
+      "views": [
+        {
+          "type": "medium",
+          "template": {
+            "type": "AdaptiveCard",
+            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+            "version": "1.5",
+            "body": [
+              {
+                "type": "TextBlock",
+                "text": "JAMB CRASH AI",
+                "size": "Large",
+                "weight": "Bolder",
+                "color": "Accent"
+              },
+              {
+                "type": "TextBlock",
+                "text": "Tap to start your practice quiz!",
+                "size": "Medium"
+              },
+              {
+                "type": "ActionSet",
+                "actions": [
+                  {
+                    "type": "Action.OpenUrl",
+                    "title": "Start Quiz",
+                    "url": "/?step=dashboard"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "type": "small",
+          "template": {
+            "type": "AdaptiveCard",
+            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+            "version": "1.5",
+            "body": [
+              {
+                "type": "TextBlock",
+                "text": "QUIZ",
+                "size": "ExtraLarge",
+                "weight": "Bolder",
+                "color": "Accent"
+              }
+            ],
+            "actions": [
+              {
+                "type": "Action.OpenUrl",
+                "title": "Start",
+                "url": "/?step=dashboard"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

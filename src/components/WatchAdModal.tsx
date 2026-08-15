@@ -1,73 +1,51 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Play, CheckCircle, Clock, Gift } from 'lucide-react';
+import { X, Gift, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { FEATURE_NAMES, FeatureType } from '@/hooks/useFeatureUsage';
 import { getAdUnitForFeature, isMobileApp } from '@/config/admob';
 import { useAdAnalytics } from '@/hooks/useAdAnalytics';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
 
 interface WatchAdModalProps {
   isOpen: boolean;
   onClose: () => void;
   onComplete: () => void;
   featureType: FeatureType;
+  bonusAmount?: number;
 }
 
-const AD_DURATION = 15; // seconds to watch (for web simulation)
 const IS_MOBILE = isMobileApp();
 
-export const WatchAdModal = ({ isOpen, onClose, onComplete, featureType }: WatchAdModalProps) => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [timeWatched, setTimeWatched] = useState(0);
-  const [isCompleted, setIsCompleted] = useState(false);
-  const [adError, setAdError] = useState<string | null>(null);
+export const WatchAdModal = ({ isOpen, onClose, onComplete, featureType, bonusAmount = 1 }: WatchAdModalProps) => {
   const [isLoadingAd, setIsLoadingAd] = useState(false);
-  const [adSource, setAdSource] = useState<'admob' | 'simulation'>('simulation');
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  
+  const [adError, setAdError] = useState<string | null>(null);
+  const [isRewarded, setIsRewarded] = useState(false);
+
   const { user } = useAuth();
   const { trackAdStarted, trackAdCompleted, trackAdFailed, trackRewardClaimed } = useAdAnalytics();
   const userEmail = user?.email || null;
+  const rewardListenerRef = useRef<{ remove: () => void } | null>(null);
+  const dismissListenerRef = useRef<{ remove: () => void } | null>(null);
+  const failedListenerRef = useRef<{ remove: () => void } | null>(null);
+  const rewardedRef = useRef(false);
 
-  const progress = Math.min((timeWatched / AD_DURATION) * 100, 100);
-  const canClaim = timeWatched >= AD_DURATION;
-
+  // Cleanup listeners on unmount
   useEffect(() => {
-    if (isPlaying && !canClaim) {
-      intervalRef.current = setInterval(() => {
-        setTimeWatched(prev => {
-          if (prev >= AD_DURATION) {
-            if (intervalRef.current) clearInterval(intervalRef.current);
-            return AD_DURATION;
-          }
-          return prev + 1;
-        });
-      }, 1000);
-    }
-
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      rewardListenerRef.current?.remove();
+      dismissListenerRef.current?.remove();
+      failedListenerRef.current?.remove();
     };
-  }, [isPlaying, canClaim]);
+  }, []);
 
-  // Track ad completion when simulation finishes
-  useEffect(() => {
-    if (canClaim && isPlaying && adSource === 'simulation') {
-      trackAdCompleted(userEmail, featureType, 'simulation', AD_DURATION);
-    }
-  }, [canClaim, isPlaying, adSource, userEmail, featureType, trackAdCompleted]);
-
+  // Reset state when modal opens/closes
   useEffect(() => {
     if (!isOpen) {
-      setIsPlaying(false);
-      setTimeWatched(0);
-      setIsCompleted(false);
-      setAdError(null);
       setIsLoadingAd(false);
-      setAdSource('simulation');
+      setAdError(null);
+      setIsRewarded(false);
+      rewardedRef.current = false;
     }
   }, [isOpen]);
 
@@ -83,86 +61,88 @@ export const WatchAdModal = ({ isOpen, onClose, onComplete, featureType }: Watch
     };
   }, [isOpen]);
 
-  const handleStartWatching = async () => {
-    setAdError(null);
-    const currentAdUnitId = getAdUnitForFeature(featureType);
-    
-    // If running in Capacitor mobile app, try to show real AdMob ad
-    if (IS_MOBILE) {
-      setIsLoadingAd(true);
-      setAdSource('admob');
-      trackAdStarted(userEmail, featureType, 'admob');
-      
-      try {
-        // Dynamically import AdMob to avoid issues on web
-        const { AdMob, RewardAdPluginEvents } = await import('@capacitor-community/admob');
-        
-        // Initialize AdMob if not already done
-        await AdMob.initialize({
-          initializeForTesting: import.meta.env.DEV, // Use test ads in dev mode
-        });
-        
-        // Listen for reward event
-        const rewardListener = await AdMob.addListener(RewardAdPluginEvents.Rewarded, () => {
-          // User completed the ad and earned reward
-          trackAdCompleted(userEmail, featureType, 'admob', AD_DURATION);
-          handleClaimReward('admob');
-          rewardListener.remove();
-        });
-        
-        const dismissListener = await AdMob.addListener(RewardAdPluginEvents.Dismissed, () => {
-          setIsLoadingAd(false);
-          dismissListener.remove();
-        });
-        
-        const failedListener = await AdMob.addListener(RewardAdPluginEvents.FailedToLoad, (error) => {
-          console.error('Ad failed to load:', error);
-          trackAdFailed(userEmail, featureType, 'admob', String(error));
-          setAdError('Ad not available. Using simulation instead.');
-          setIsLoadingAd(false);
-          setAdSource('simulation');
-          // Fallback to web simulation
-          trackAdStarted(userEmail, featureType, 'simulation');
-          setIsPlaying(true);
-          failedListener.remove();
-        });
-        
-        // Prepare and show the rewarded video ad
-        await AdMob.prepareRewardVideoAd({
-          adId: currentAdUnitId,
-        });
-        
-        await AdMob.showRewardVideoAd();
-        setIsLoadingAd(false);
-        
-      } catch (error) {
-        console.error('AdMob error:', error);
-        trackAdFailed(userEmail, featureType, 'admob', String(error));
-        setIsLoadingAd(false);
-        setAdSource('simulation');
-        // Fallback to web simulation if AdMob fails
-        toast.info('Using video simulation...');
-        trackAdStarted(userEmail, featureType, 'simulation');
-        setIsPlaying(true);
-      }
-    } else {
-      // Web simulation - just start the timer
-      setAdSource('simulation');
-      trackAdStarted(userEmail, featureType, 'simulation');
-      setIsPlaying(true);
-    }
-  };
-
-  const handleClaimReward = (source: 'admob' | 'simulation' = adSource) => {
-    trackRewardClaimed(userEmail, featureType, source, timeWatched || AD_DURATION);
-    setIsCompleted(true);
+  const handleClaimReward = () => {
+    rewardedRef.current = true;
+    trackRewardClaimed(userEmail, featureType, 'admob', 0);
+    setIsRewarded(true);
     setTimeout(() => {
       onComplete();
       onClose();
     }, 1500);
   };
 
-  if (!isOpen) return null;
+  const handleStartWatching = async () => {
+    setAdError(null);
+
+    // Rewarded ads only work in native mobile app via AdMob
+    if (!IS_MOBILE) {
+      setAdError('No ad is available right now. Please try again later.');
+      trackAdFailed(userEmail, featureType, 'simulation', 'Rewarded ads require the native mobile app.');
+      return;
+    }
+
+    setIsLoadingAd(true);
+    trackAdStarted(userEmail, featureType, 'admob');
+
+    try {
+      const { AdMob, RewardAdPluginEvents } = await import('@capacitor-community/admob');
+
+      await AdMob.initialize({
+        initializeForTesting: import.meta.env.DEV,
+      });
+
+      // Listen for reward event — ONLY this callback grants the reward
+      const rewardListener = await AdMob.addListener(RewardAdPluginEvents.Rewarded, () => {
+        trackAdCompleted(userEmail, featureType, 'admob', 0);
+        handleClaimReward();
+        rewardListener.remove();
+        dismissListenerRef.current?.remove();
+        failedListenerRef.current?.remove();
+      });
+      rewardListenerRef.current = rewardListener;
+
+      // Dismissed — no reward granted unless already rewarded
+      const dismissListener = await AdMob.addListener(RewardAdPluginEvents.Dismissed, () => {
+        setIsLoadingAd(false);
+        if (!rewardedRef.current) {
+          setAdError('No ad is available right now. Please try again later.');
+          trackAdFailed(userEmail, featureType, 'admob', 'User dismissed ad without completing');
+        }
+        dismissListener.remove();
+      });
+      dismissListenerRef.current = dismissListener;
+
+      // Failed to load — no reward granted
+      const failedListener = await AdMob.addListener(RewardAdPluginEvents.FailedToLoad, (error: unknown) => {
+        setIsLoadingAd(false);
+        setAdError('No ad is available right now. Please try again later.');
+        trackAdFailed(userEmail, featureType, 'admob', String(error));
+        failedListener.remove();
+      });
+      failedListenerRef.current = failedListener;
+
+      // Prepare and show the rewarded video ad
+      await AdMob.prepareRewardVideoAd({
+        adId: getAdUnitForFeature(featureType),
+      });
+
+      await AdMob.showRewardVideoAd();
+      setIsLoadingAd(false);
+
+    } catch (error) {
+      console.error('AdMob error:', error);
+      trackAdFailed(userEmail, featureType, 'admob', String(error));
+      setIsLoadingAd(false);
+      setAdError('No ad is available right now. Please try again later.');
+    }
+  };
+
+  const handleTryAgain = () => {
+    setAdError(null);
+    handleStartWatching();
+  };
+
+  if (!isOpen || !IS_MOBILE) return null;
 
   const featureName = FEATURE_NAMES[featureType];
 
@@ -195,31 +175,66 @@ export const WatchAdModal = ({ isOpen, onClose, onComplete, featureType }: Watch
             <Gift className="w-12 h-12 mx-auto text-primary mb-3" />
             <h2 className="text-xl font-bold text-foreground">Watch & Earn</h2>
             <p className="text-sm text-muted-foreground mt-1">
-              Get +1 bonus {featureName} use
+              Get +{bonusAmount} {featureName} {bonusAmount > 1 ? 'uses' : 'use'}
             </p>
           </div>
 
           {/* Content */}
           <div className="p-6">
-            {isCompleted ? (
+            {isRewarded ? (
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 className="text-center py-8"
               >
-                <CheckCircle className="w-16 h-16 mx-auto text-primary mb-4" />
+                <Gift className="w-16 h-16 mx-auto text-primary mb-4" />
                 <h3 className="text-lg font-bold text-foreground">Reward Claimed!</h3>
-                <p className="text-muted-foreground">+1 {featureName} use added</p>
+                <p className="text-muted-foreground">
+                  +{bonusAmount} {featureName} {bonusAmount > 1 ? 'uses' : 'use'} added
+                </p>
               </motion.div>
-            ) : !isPlaying ? (
+            ) : adError ? (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-destructive/10 flex items-center justify-center">
+                  <AlertCircle className="w-8 h-8 text-destructive" />
+                </div>
+                <p className="text-foreground font-medium mb-2">
+                  {adError}
+                </p>
+                <p className="text-sm text-muted-foreground mb-6">
+                  Rewards are available on the mobile app.
+                </p>
+                <div className="flex gap-3 justify-center">
+                  <Button variant="outline" onClick={onClose}>
+                    Close
+                  </Button>
+                  <Button onClick={handleTryAgain}>
+                    Try Again
+                  </Button>
+                </div>
+              </div>
+            ) : isLoadingAd ? (
+              <div className="text-center py-8">
+                <motion.div
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                  className="w-16 h-16 mx-auto mb-4"
+                >
+                  <Gift className="w-16 h-16 text-primary" />
+                </motion.div>
+                <p className="text-foreground font-medium">Loading ad...</p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Please wait while we prepare your ad
+                </p>
+              </div>
+            ) : (
               <div className="text-center">
-                {/* Video placeholder */}
                 <div className="relative aspect-video bg-muted rounded-lg mb-4 flex items-center justify-center overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-primary/10" />
                   <div className="relative z-10 text-center">
-                    <Play className="w-16 h-16 mx-auto text-primary/70 mb-2" />
+                    <Gift className="w-16 h-16 mx-auto text-primary/70 mb-2" />
                     <p className="text-sm text-muted-foreground">
-                      {AD_DURATION} second video
+                      {IS_MOBILE ? 'A short video ad will play' : 'Available on the mobile app'}
                     </p>
                   </div>
                 </div>
@@ -227,64 +242,17 @@ export const WatchAdModal = ({ isOpen, onClose, onComplete, featureType }: Watch
                 <Button
                   onClick={handleStartWatching}
                   className="w-full bg-primary hover:bg-primary/90"
+                  disabled={!IS_MOBILE}
                 >
-                  <Play className="w-4 h-4 mr-2" />
-                  Start Watching
+                  <Gift className="w-4 h-4 mr-2" />
+                  Watch Ad
                 </Button>
 
-                <p className="text-xs text-muted-foreground mt-3">
-                  Watch the full video to unlock your bonus use
-                </p>
-              </div>
-            ) : (
-              <div>
-                {/* Video playing state */}
-                <div className="relative aspect-video bg-muted rounded-lg mb-4 flex items-center justify-center overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-primary/10 animate-pulse" />
-                  <div className="relative z-10 text-center">
-                    <motion.div
-                      animate={{ scale: [1, 1.1, 1] }}
-                      transition={{ repeat: Infinity, duration: 2 }}
-                    >
-                      <Gift className="w-12 h-12 mx-auto text-primary mb-2" />
-                    </motion.div>
-                    <p className="text-foreground font-medium">
-                      Watching ad...
-                    </p>
-                  </div>
-                </div>
-
-                {/* Progress */}
-                <div className="mb-4">
-                  <div className="flex items-center justify-between text-sm mb-2">
-                    <span className="text-muted-foreground flex items-center gap-1">
-                      <Clock className="w-4 h-4" />
-                      {timeWatched}s / {AD_DURATION}s
-                    </span>
-                    <span className="text-primary font-medium">
-                      {Math.round(progress)}%
-                    </span>
-                  </div>
-                  <Progress value={progress} className="h-2" />
-                </div>
-
-                <Button
-                  onClick={() => handleClaimReward()}
-                  disabled={!canClaim}
-                  className="w-full bg-primary hover:bg-primary/90 disabled:opacity-50"
-                >
-                  {canClaim ? (
-                    <>
-                      <Gift className="w-4 h-4 mr-2" />
-                      Claim +1 {featureName} Use
-                    </>
-                  ) : (
-                    <>
-                      <Clock className="w-4 h-4 mr-2" />
-                      Keep Watching...
-                    </>
-                  )}
-                </Button>
+                {!IS_MOBILE && (
+                  <p className="text-xs text-muted-foreground mt-3">
+                    Download our mobile app to earn bonus uses by watching ads
+                  </p>
+                )}
               </div>
             )}
           </div>

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { BookOpen, User } from 'lucide-react';
+import { BookOpen, User, Key } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
@@ -39,6 +39,10 @@ export const Header = ({ onGetStarted, hasAccess }: HeaderProps) => {
         </nav>
 
         <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm" onClick={() => navigate('/redeem-pin')} className="gap-1">
+            <Key className="w-4 h-4" />
+            <span className="hidden sm:inline">Redeem PIN</span>
+          </Button>
           <Button variant="outline" size="sm" onClick={handleLogin}>
             <User className="w-4 h-4 mr-1" />
             Login

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { 
   TrendingUp, Play, CheckCircle, XCircle, Gift, RefreshCw, 
@@ -54,7 +54,7 @@ export const AdAnalyticsDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState<'7d' | '30d' | '90d'>('7d');
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     setLoading(true);
     
     const daysAgo = dateRange === '7d' ? 7 : dateRange === '30d' ? 30 : 90;
@@ -174,11 +174,11 @@ export const AdAnalyticsDashboard = () => {
     }
 
     setLoading(false);
-  };
+  }, [dateRange]);
 
   useEffect(() => {
     fetchAnalytics();
-  }, [dateRange]);
+  }, [dateRange, fetchAnalytics]);
 
   if (loading) {
     return (

@@ -205,4 +205,35 @@
     content: '';
     @apply w-2 h-2 rounded-full bg-primary animate-pulse;
   }
+
+  /* Desktop sidebar scrollbar styling */
+  @media (min-width: 768px) {
+    .sidebar-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+    .sidebar-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .sidebar-scroll::-webkit-scrollbar-thumb {
+      background: hsl(var(--border));
+      border-radius: 2px;
+    }
+    .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+      background: hsl(var(--muted-foreground));
+    }
+  }
+
+  /* Desktop layout adjustments */
+  @media (min-width: 768px) {
+    .desktop-content {
+      margin-left: 280px;
+      min-height: 100vh;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .desktop-content {
+      margin-left: 280px;
+    }
+  }
 }

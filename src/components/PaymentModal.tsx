@@ -149,7 +149,6 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
             errorCode === 'pgrst301';
           
           if (isAuthError) {
-            console.log('Auth-related error detected, retrying after session reset...');
             paymentError = await attemptFreePayment(true);
           }
         }

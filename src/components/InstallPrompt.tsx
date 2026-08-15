@@ -30,8 +30,7 @@ export const InstallPrompt = () => {
     const isWrapper =
       ua.includes('appbuilder24') ||
       ua.includes('wv') || // Android WebView token
-      // @ts-ignore - non-standard Capacitor global
-      typeof (window as any).Capacitor !== 'undefined';
+      typeof (window as unknown as { Capacitor?: unknown }).Capacitor !== 'undefined';
     if (isWrapper) {
       setIsInstalled(true);
       return;

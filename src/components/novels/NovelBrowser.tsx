@@ -87,8 +87,6 @@ export const NovelBrowser = ({ userEmail, onBack, onSelectNovel }: NovelBrowserP
           setUserProgress(progressMap);
         }
       } catch {
-        // Fallback to cached data
-        console.log('[Offline] Loading novels from cache');
         setIsOffline(true);
         const cachedNovels = await getCachedNovels();
         if (cachedNovels.length > 0) {
@@ -118,7 +116,6 @@ export const NovelBrowser = ({ userEmail, onBack, onSelectNovel }: NovelBrowserP
       
       if (chapters && chapters.length > 0) {
         await saveNovelChapters(chapters);
-        console.log(`[Offline] Cached ${chapters.length} novel chapters`);
       }
     } catch (err) {
       console.error('Failed to cache novel chapters:', err);

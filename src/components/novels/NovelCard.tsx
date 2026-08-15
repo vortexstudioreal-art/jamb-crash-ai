@@ -87,7 +87,7 @@ export const NovelCard = ({
           )}
           {isPremium && (
             <Badge variant="secondary" className="text-xs">
-              <Star className="w-3 h-3 mr-1" /> Premium
+              <Star className="w-3 h-3 mr-1" /> SCHOLAR
             </Badge>
           )}
         </div>

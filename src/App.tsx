@@ -1,5 +1,4 @@
-import { useEffect } from "react";
-import { Toaster } from "@/components/ui/toaster";
+import { lazy, Suspense, useEffect } from "react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -11,16 +10,21 @@ import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { OfflineReadyChecklist } from "@/components/OfflineReadyChecklist";
 
-import Index from "./pages/Index";
-import Auth from "./pages/Auth";
-import PaymentSuccess from "./pages/PaymentSuccess";
-import AdminPanel from "./pages/AdminPanel";
-import Settings from "./pages/Settings";
-import CollaboratorDashboard from "./pages/CollaboratorDashboard";
-import RepeatedQuestionsPage from "./pages/RepeatedQuestionsPage";
-import GamesPage from "./pages/GamesPage";
-import NotFound from "./pages/NotFound";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+
+const Index = lazy(() => import("./pages/Index"));
+const Auth = lazy(() => import("./pages/Auth"));
+const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
+const AdminPanel = lazy(() => import("./pages/AdminPanel"));
+const Settings = lazy(() => import("./pages/Settings"));
+const CollaboratorDashboard = lazy(() => import("./pages/CollaboratorDashboard"));
+const RepeatedQuestionsPage = lazy(() => import("./pages/RepeatedQuestionsPage"));
+const GamesPage = lazy(() => import("./pages/GamesPage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const JambRepeatsPastQuestions = lazy(() => import("./pages/JambRepeatsPastQuestions"));
+const ResellerDashboard = lazy(() => import("./pages/ResellerDashboard"));
+const PinRedeemPage = lazy(() => import("./pages/PinRedeemPage"));
 
 const queryClient = new QueryClient();
 
@@ -50,11 +54,12 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
+            <ErrorBoundary>
             <PasswordRecoveryHandler>
+              <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
@@ -71,15 +76,20 @@ const App = () => {
                 <Route path="/collaborator-dashboard" element={<CollaboratorDashboard />} />
                 <Route path="/repeated-questions" element={<RepeatedQuestionsPage />} />
                 <Route path="/games" element={<ProtectedRoute><GamesPage /></ProtectedRoute>} />
+                <Route path="/jamb-repeats-past-questions" element={<JambRepeatsPastQuestions />} />
+                <Route path="/reseller" element={<ProtectedRoute><ResellerDashboard /></ProtectedRoute>} />
+                <Route path="/redeem-pin" element={<PinRedeemPage />} />
                 <Route path="/privacy" element={<PrivacyPolicy />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              </Suspense>
               {/* Global Components */}
               <OfflineIndicator variant="minimal" />
               <InstallPrompt />
               <OfflineReadyChecklist />
             </PasswordRecoveryHandler>
+            </ErrorBoundary>
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>

@@ -21,6 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 import { getCachedChapter, getCachedChaptersByNovel, getCachedNovel } from '@/services/offlineStorage';
 
@@ -46,9 +47,9 @@ export const NovelReader = ({
   onNextChapter,
   onPrevChapter 
 }: NovelReaderProps) => {
-  const [chapter, setChapter] = useState<any>(null);
-  const [novel, setNovel] = useState<any>(null);
-  const [allChapters, setAllChapters] = useState<any[]>([]);
+  const [chapter, setChapter] = useState<(Database['public']['Tables']['novel_chapters']['Row'] & { novel?: Database['public']['Tables']['novels']['Row'] | null }) | null>(null);
+  const [novel, setNovel] = useState<Database['public']['Tables']['novels']['Row'] | null>(null);
+  const [allChapters, setAllChapters] = useState<Database['public']['Tables']['novel_chapters']['Row'][]>([]);
   const [loading, setLoading] = useState(true);
   const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large'>('medium');
   const [isDarkReading, setIsDarkReading] = useState(false);
@@ -57,7 +58,6 @@ export const NovelReader = ({
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({});
   const [showResults, setShowResults] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
-  const saveProgressRef = useRef<ReturnType<typeof setTimeout>>();
   const startTimeRef = useRef<number>(Date.now());
   const accumulatedTimeRef = useRef<number>(0);
 
@@ -108,9 +108,6 @@ export const NovelReader = ({
           await updateProgress(chapterData.novel_id, chapterId, chapterData.chapter_number, chaptersData?.length || 1, 0);
         }
       } catch {
-        // Fallback to cached data
-        console.log('[Offline] Loading chapter from cache');
-        
         const cachedChapter = await getCachedChapter(chapterId);
         if (cachedChapter) {
           setChapter(cachedChapter);
@@ -131,34 +128,9 @@ export const NovelReader = ({
     };
     
     loadChapter();
-    
-    return () => {
-      if (saveProgressRef.current) {
-        clearTimeout(saveProgressRef.current);
-      }
-      const timeSpent = Math.round((Date.now() - startTimeRef.current) / 1000);
-      if (chapter && novel && timeSpent > 5) {
-        saveReadingTime(novel.id, timeSpent);
-      }
-    };
-  }, [chapterId, userEmail]);
+  }, [chapterId, userEmail, updateProgress]);
 
-  // Auto-save reading time every 30 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (novel) {
-        const timeSpent = Math.round((Date.now() - startTimeRef.current) / 1000);
-        if (timeSpent > 10) {
-          saveReadingTime(novel.id, timeSpent);
-          startTimeRef.current = Date.now(); // Reset timer
-        }
-      }
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, [novel]);
-
-  const saveReadingTime = async (novelId: string, seconds: number) => {
+  const saveReadingTime = useCallback(async (novelId: string, seconds: number) => {
     const { data: existingProgress } = await supabase
       .from('user_novel_progress')
       .select('total_time_spent_seconds')
@@ -176,9 +148,49 @@ export const NovelReader = ({
       })
       .eq('email', userEmail)
       .eq('novel_id', novelId);
-  };
+  }, [userEmail]);
 
-  const updateProgress = async (novelId: string, currentChapterId: string, chapterNumber: number, totalChapters: number, additionalTime: number = 0) => {
+  // Flush reading time on unmount — reads latest values via refs so this
+  // effect never needs chapter/novel/saveReadingTime in its deps
+  const chapterRef = useRef(chapter);
+  useEffect(() => {
+    chapterRef.current = chapter;
+  }, [chapter]);
+  const novelRef = useRef(novel);
+  useEffect(() => {
+    novelRef.current = novel;
+  }, [novel]);
+  const saveReadingTimeRef = useRef(saveReadingTime);
+  useEffect(() => {
+    saveReadingTimeRef.current = saveReadingTime;
+  }, [saveReadingTime]);
+  useEffect(() => {
+    return () => {
+      const timeSpent = Math.round((Date.now() - startTimeRef.current) / 1000);
+      const currentChapter = chapterRef.current;
+      const currentNovel = novelRef.current;
+      if (currentChapter && currentNovel && timeSpent > 5) {
+        saveReadingTimeRef.current(currentNovel.id, timeSpent);
+      }
+    };
+  }, []);
+
+  // Auto-save reading time every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (novel) {
+        const timeSpent = Math.round((Date.now() - startTimeRef.current) / 1000);
+        if (timeSpent > 10) {
+          saveReadingTime(novel.id, timeSpent);
+          startTimeRef.current = Date.now(); // Reset timer
+        }
+      }
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [novel, saveReadingTime]);
+
+  const updateProgress = useCallback(async (novelId: string, currentChapterId: string, chapterNumber: number, totalChapters: number, additionalTime: number = 0) => {
     const progressPercent = Math.round((chapterNumber / totalChapters) * 100);
     const isCompleted = chapterNumber >= totalChapters;
     
@@ -206,7 +218,7 @@ export const NovelReader = ({
       });
     
     if (error) console.error('Error updating progress:', error);
-  };
+  }, [userEmail]);
 
   const handleBookmark = async () => {
     if (isBookmarked) {
@@ -252,7 +264,7 @@ export const NovelReader = ({
   const hasPrev = currentIndex > 0;
   const hasNext = currentIndex < allChapters.length - 1;
 
-  const likelyQuestions: LikelyQuestion[] = chapter?.likely_questions || [];
+  const likelyQuestions: LikelyQuestion[] = (chapter?.likely_questions as LikelyQuestion[] | null) || [];
 
   const handleAnswerSelect = (questionIndex: number, answerIndex: number) => {
     setSelectedAnswers(prev => ({ ...prev, [questionIndex]: answerIndex }));

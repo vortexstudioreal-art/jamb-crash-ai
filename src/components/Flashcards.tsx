@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, RotateCcw, Check, X, Sparkles, 
@@ -37,10 +37,27 @@ interface Flashcard {
   mastery_level: string;
 }
 
+interface QuizQuestionData {
+  userAnswer?: string;
+  user_answer?: string;
+  selected?: string;
+  correctAnswer?: string;
+  correct_answer?: string;
+  correct?: string;
+  question?: string;
+  text?: string;
+  explanation?: string;
+  reason?: string;
+  subject?: string;
+  topic?: string;
+  id?: string;
+}
+
 interface FlashcardsProps {
   userEmail: string;
   subjects: string[];
   onBack: () => void;
+  initialSubject?: string | null;
 }
 
 const MASTERY_COLORS: Record<string, string> = {
@@ -50,13 +67,13 @@ const MASTERY_COLORS: Record<string, string> = {
   mastered: 'bg-green-500/20 text-green-700 dark:text-green-400',
 };
 
-export const Flashcards = ({ userEmail, subjects, onBack }: FlashcardsProps) => {
+export const Flashcards = ({ userEmail, subjects, onBack, initialSubject }: FlashcardsProps) => {
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
-  const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
+  const [selectedSubject, setSelectedSubject] = useState<string | null>(initialSubject ?? null);
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'study' | 'browse'>('browse');
   const [sessionStats, setSessionStats] = useState({ correct: 0, incorrect: 0 });
@@ -65,12 +82,7 @@ export const Flashcards = ({ userEmail, subjects, onBack }: FlashcardsProps) => 
   // Feature usage limits
   const { canUseFeature, incrementUsage, getRemainingUses, refreshUsage } = useFeatureUsage();
 
-  // Load flashcards
-  useEffect(() => {
-    loadFlashcards();
-  }, [userEmail, subjects, selectedSubject, selectedTopic]);
-
-  const loadFlashcards = async () => {
+  const loadFlashcards = useCallback(async () => {
     setLoading(true);
     
     let query = supabase
@@ -98,7 +110,12 @@ export const Flashcards = ({ userEmail, subjects, onBack }: FlashcardsProps) => 
     }
     
     setLoading(false);
-  };
+  }, [userEmail, selectedSubject, selectedTopic, subjects]);
+
+  // Load flashcards
+  useEffect(() => {
+    loadFlashcards();
+  }, [userEmail, subjects, selectedSubject, selectedTopic, loadFlashcards]);
 
   // Group flashcards by topic for browse mode
   const flashcardsByTopic = flashcards.reduce((acc, card) => {
@@ -168,7 +185,7 @@ export const Flashcards = ({ userEmail, subjects, onBack }: FlashcardsProps) => 
       const newFlashcards: Omit<Flashcard, 'id'>[] = [];
       
       quizData.forEach(attempt => {
-        const questions = attempt.questions_data as any[];
+        const questions = attempt.questions_data as QuizQuestionData[] | null;
         if (!questions || !Array.isArray(questions)) return;
 
         questions.forEach(q => {
@@ -211,7 +228,7 @@ export const Flashcards = ({ userEmail, subjects, onBack }: FlashcardsProps) => 
       // Insert flashcards
       const { error } = await supabase
         .from('flashcards')
-        .insert(newFlashcards.slice(0, 20) as any);
+        .insert(newFlashcards.slice(0, 20));
 
       if (error) throw error;
 

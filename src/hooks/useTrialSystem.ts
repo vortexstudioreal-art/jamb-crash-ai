@@ -22,7 +22,9 @@ const readCachedTrial = (email: string): CachedTrial | null => {
 const writeCachedTrial = (email: string, data: CachedTrial) => {
   try {
     localStorage.setItem(TRIAL_CACHE_PREFIX + email, JSON.stringify(data));
-  } catch {}
+  } catch {
+    // localStorage unavailable (e.g. private browsing) — trial cache is optional
+  }
 };
 
 interface UseTrialSystemProps {
@@ -149,8 +151,6 @@ export const useTrialSystem = ({ userEmail, isAdmin, hasAccess }: UseTrialSystem
 
       if (error) {
         if (error.code === '23505') {
-          // Unique constraint violation - trial already used
-          console.log('Trial already used for this email');
           setHasTrialUsed(true);
           return false;
         }
@@ -165,7 +165,6 @@ export const useTrialSystem = ({ userEmail, isAdmin, hasAccess }: UseTrialSystem
       setTimeRemaining(TRIAL_DURATION_MS);
       setIsTrialExpired(false);
       
-      console.log('[Trial] Started for', userEmail, 'expires at', expiresAt.toISOString());
       return true;
     } catch (err) {
       console.error('Start trial error:', err);

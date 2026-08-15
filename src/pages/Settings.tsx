@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { AdminCouponDashboard } from '@/components/AdminCouponDashboard';
 import { ChangePasswordModal } from '@/components/ChangePasswordModal';
 import { DownloadManager } from '@/components/DownloadManager';
+import { useSeo } from '@/hooks/useSeo';
 const THEME_STORAGE_KEY = 'jamb_theme';
 const SETTINGS_STORAGE_KEY = 'jamb_user_settings';
 
@@ -40,10 +41,18 @@ const saveSettings = (email: string, settings: UserSettings) => {
 export default function Settings() {
   const { user, signOut, hasAccess, isOwner, isAdmin, userRole } = useAuth();
   const navigate = useNavigate();
+
+  useSeo({
+    title: 'Settings | Jamb Crash AI',
+    description: 'Manage your Jamb Crash AI account, study subjects, notifications, and WhatsApp reminders.',
+    path: '/settings',
+    noindex: true,
+  });
+
   const [fullName, setFullName] = useState('');
   const [isEditingName, setIsEditingName] = useState(false);
   const [userSubjects, setUserSubjects] = useState<string[]>([]);
-  const [paymentInfo, setPaymentInfo] = useState<any>(null);
+  const [paymentInfo, setPaymentInfo] = useState<{ access_expires_at: string | null; package: string; created_at: string; amount: number } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [whatsappNumber, setWhatsappNumber] = useState('');
@@ -285,7 +294,7 @@ export default function Settings() {
     }
     if (effectiveAccess && paymentInfo?.access_expires_at) {
       return {
-        planName: paymentInfo.package || 'Premium',
+        planName: paymentInfo.package === 'premium' ? 'SCHOLAR' : paymentInfo.package === 'pro' ? 'ACE' : paymentInfo.package || 'SCHOLAR',
         status: 'Active',
         color: 'bg-primary',
         textColor: 'text-primary-foreground'
@@ -369,17 +378,17 @@ export default function Settings() {
                       placeholder="Enter your name"
                       className="flex-1"
                     />
-                    <Button size="icon" variant="ghost" onClick={handleSaveName}>
+                    <Button size="icon" variant="ghost" onClick={handleSaveName} aria-label="Save name">
                       <Check className="w-4 h-4 text-primary" />
                     </Button>
-                    <Button size="icon" variant="ghost" onClick={() => setIsEditingName(false)}>
+                    <Button size="icon" variant="ghost" onClick={() => setIsEditingName(false)} aria-label="Cancel editing name">
                       <X className="w-4 h-4 text-muted-foreground" />
                     </Button>
                   </div>
                 ) : (
                   <div className="flex items-center justify-between">
                     <p className="text-foreground">{fullName || 'Not set'}</p>
-                    <Button size="icon" variant="ghost" onClick={() => setIsEditingName(true)}>
+                    <Button size="icon" variant="ghost" onClick={() => setIsEditingName(true)} aria-label="Edit name">
                       <Edit2 className="w-4 h-4 text-muted-foreground" />
                     </Button>
                   </div>
@@ -642,8 +651,8 @@ export default function Settings() {
                 </div>
               </a>
               <Separator />
-              <a 
-                href="#" 
+              <a
+                href="#"
                 className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
               >
                 <FileText className="w-5 h-5 text-muted-foreground" />
@@ -653,8 +662,8 @@ export default function Settings() {
                 </div>
               </a>
               <Separator />
-              <a 
-                href="#" 
+              <a
+                href="/privacy"
                 className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
               >
                 <Shield className="w-5 h-5 text-muted-foreground" />

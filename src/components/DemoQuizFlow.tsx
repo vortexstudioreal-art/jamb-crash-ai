@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Zap, BookOpen, Calculator, Atom, FlaskConical, Leaf, BookText, Building2, TrendingUp, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TimedQuiz } from './TimedQuiz';
-import { QuizResults } from './QuizResults';
+import { QuizResults, type QuizResultsProps } from './QuizResults';
 
 interface DemoQuizFlowProps {
   onComplete: () => void;
@@ -26,7 +26,7 @@ type FlowStep = 'select' | 'quiz' | 'results';
 export const DemoQuizFlow = ({ onComplete, onUpgrade }: DemoQuizFlowProps) => {
   const [step, setStep] = useState<FlowStep>('select');
   const [selectedSubject, setSelectedSubject] = useState<string>('');
-  const [quizResults, setQuizResults] = useState<any>(null);
+  const [quizResults, setQuizResults] = useState<QuizResultsProps['results'] | null>(null);
 
   const handleStartQuiz = () => {
     if (selectedSubject) {
@@ -34,7 +34,7 @@ export const DemoQuizFlow = ({ onComplete, onUpgrade }: DemoQuizFlowProps) => {
     }
   };
 
-  const handleQuizComplete = (results: any) => {
+  const handleQuizComplete = (results: QuizResultsProps['results']) => {
     setQuizResults(results);
     setStep('results');
   };

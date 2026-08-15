@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { 
   CheckCircle, XCircle, RefreshCw, Copy, Loader2,
@@ -18,12 +18,7 @@ interface HealthCheckResult {
   details?: string;
 }
 
-export const AppHealthCheck = () => {
-  const [results, setResults] = useState<HealthCheckResult[]>([]);
-  const [isRunning, setIsRunning] = useState(false);
-  const [lastChecked, setLastChecked] = useState<Date | null>(null);
-
-  const healthChecks: Omit<HealthCheckResult, 'status'>[] = [
+const healthChecks: Omit<HealthCheckResult, 'status'>[] = [
     {
       name: 'Free Demo (20 questions)',
       icon: <Zap className="w-5 h-5" />,
@@ -96,36 +91,12 @@ export const AppHealthCheck = () => {
     },
   ];
 
-  const runHealthCheck = async () => {
-    setIsRunning(true);
-    const newResults: HealthCheckResult[] = healthChecks.map(check => ({
-      ...check,
-      status: 'checking' as const,
-    }));
-    setResults(newResults);
+export const AppHealthCheck = () => {
+  const [results, setResults] = useState<HealthCheckResult[]>([]);
+  const [isRunning, setIsRunning] = useState(false);
+  const [lastChecked, setLastChecked] = useState<Date | null>(null);
 
-    // Run all checks
-    const updatedResults = await Promise.all(
-      healthChecks.map(async (check, index) => {
-        await new Promise(resolve => setTimeout(resolve, index * 200)); // Stagger checks
-        const result = await runSingleCheck(check.name);
-        return {
-          ...check,
-          status: result.working ? 'working' as const : 'not_working' as const,
-          details: result.details,
-        };
-      })
-    );
-
-    setResults(updatedResults);
-    setLastChecked(new Date());
-    setIsRunning(false);
-    
-    const workingCount = updatedResults.filter(r => r.status === 'working').length;
-    toast.success(`Health check complete: ${workingCount}/${updatedResults.length} features working`);
-  };
-
-  const runSingleCheck = async (featureName: string): Promise<{ working: boolean; details?: string }> => {
+  const runSingleCheck = useCallback(async (featureName: string): Promise<{ working: boolean; details?: string }> => {
     try {
       switch (featureName) {
         case 'Free Demo (20 questions)': {
@@ -280,7 +251,36 @@ export const AppHealthCheck = () => {
       console.error(`Health check failed for ${featureName}:`, error);
       return { working: false, details: 'Check failed with error' };
     }
-  };
+  }, []);
+
+  const runHealthCheck = useCallback(async () => {
+    setIsRunning(true);
+    const newResults: HealthCheckResult[] = healthChecks.map(check => ({
+      ...check,
+      status: 'checking' as const,
+    }));
+    setResults(newResults);
+
+    // Run all checks
+    const updatedResults = await Promise.all(
+      healthChecks.map(async (check, index) => {
+        await new Promise(resolve => setTimeout(resolve, index * 200)); // Stagger checks
+        const result = await runSingleCheck(check.name);
+        return {
+          ...check,
+          status: result.working ? 'working' as const : 'not_working' as const,
+          details: result.details,
+        };
+      })
+    );
+
+    setResults(updatedResults);
+    setLastChecked(new Date());
+    setIsRunning(false);
+    
+    const workingCount = updatedResults.filter(r => r.status === 'working').length;
+    toast.success(`Health check complete: ${workingCount}/${updatedResults.length} features working`);
+  }, [runSingleCheck]);
 
   const copyPrompt = (prompt: string) => {
     navigator.clipboard.writeText(prompt);
@@ -289,7 +289,7 @@ export const AppHealthCheck = () => {
 
   useEffect(() => {
     runHealthCheck();
-  }, []);
+  }, [runHealthCheck]);
 
   const workingCount = results.filter(r => r.status === 'working').length;
   const notWorkingCount = results.filter(r => r.status === 'not_working').length;

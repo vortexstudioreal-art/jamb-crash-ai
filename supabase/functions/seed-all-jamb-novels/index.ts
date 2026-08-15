@@ -184,8 +184,16 @@ const novelData = [
   },
 ]
 
+interface SeedChapter {
+  chapter_number: number;
+  title: string;
+  content: string;
+  word_count?: number;
+  likely_questions?: string;
+}
+
 // Comprehensive chapters data for key novels
-const chaptersData: Record<string, any[]> = {
+const chaptersData: Record<string, SeedChapter[]> = {
   'The Lekki Headmaster': [
     {
       chapter_number: 1,

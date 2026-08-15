@@ -14,6 +14,10 @@ interface FeatureLimitReachedProps {
   compact?: boolean;
 }
 
+const BONUS_AMOUNTS: Partial<Record<FeatureType, number>> = {
+  quick_quiz: 20,
+};
+
 export const FeatureLimitReached = ({
   featureType,
   onBonusEarned,
@@ -24,12 +28,13 @@ export const FeatureLimitReached = ({
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const { addBonusUse } = useFeatureUsage();
 
+  const bonusAmount = BONUS_AMOUNTS[featureType] ?? 1;
   const featureName = FEATURE_NAMES[featureType];
 
   const handleAdComplete = async () => {
-    const success = await addBonusUse(featureType);
+    const success = await addBonusUse(featureType, bonusAmount);
     if (success) {
-      toast.success(`+1 ${featureName} use added!`);
+      toast.success(`+${bonusAmount} ${featureName} ${bonusAmount > 1 ? 'uses' : 'use'} added!`);
       onBonusEarned();
     } else {
       toast.error('Failed to add bonus use');
@@ -39,7 +44,6 @@ export const FeatureLimitReached = ({
 
   const handleUpgrade = (plan: string) => {
     setShowUpgradeModal(false);
-    // Navigate to pricing or payment - for now just close
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -63,7 +67,7 @@ export const FeatureLimitReached = ({
               className="text-xs h-7 px-2"
             >
               <Play className="w-3 h-3 mr-1" />
-              +1 Free
+              +{bonusAmount} Free
             </Button>
             <Button
               size="sm"
@@ -80,6 +84,7 @@ export const FeatureLimitReached = ({
           onClose={() => setShowAdModal(false)}
           onComplete={handleAdComplete}
           featureType={featureType}
+          bonusAmount={bonusAmount}
         />
         <UpgradeModal
           isOpen={showUpgradeModal}
@@ -107,7 +112,7 @@ export const FeatureLimitReached = ({
           Daily Limit Reached
         </h3>
         <p className="text-muted-foreground text-sm mb-6">
-          You've used all your {featureName} allowance for today.
+          You've used all your {featureName.toLowerCase()} allowance for today.
           <br />
           Get more access now!
         </p>
@@ -119,19 +124,19 @@ export const FeatureLimitReached = ({
             className="flex items-center gap-2"
           >
             <Play className="w-4 h-4" />
-            Watch Ad for +1 Use
+            Watch Ad for +{bonusAmount} {bonusAmount > 1 ? 'Uses' : 'Use'}
           </Button>
           <Button
             onClick={() => setShowUpgradeModal(true)}
             className="flex items-center gap-2 bg-primary hover:bg-primary/90"
           >
             <Sparkles className="w-4 h-4" />
-            Upgrade to Pro
+            Upgrade to ACE
           </Button>
         </div>
 
         <p className="text-xs text-muted-foreground mt-4">
-          Pro users get unlimited {featureName.toLowerCase()} access
+          ACE users get unlimited {featureName.toLowerCase()} access
         </p>
       </motion.div>
 
@@ -140,6 +145,7 @@ export const FeatureLimitReached = ({
         onClose={() => setShowAdModal(false)}
         onComplete={handleAdComplete}
         featureType={featureType}
+        bonusAmount={bonusAmount}
       />
       <UpgradeModal
         isOpen={showUpgradeModal}

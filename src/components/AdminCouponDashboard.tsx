@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -56,9 +56,9 @@ export const AdminCouponDashboard = () => {
     if (user?.email && isContentCreator) {
       fetchMyCoupons();
     }
-  }, [user?.email, isContentCreator]);
+  }, [user?.email, isContentCreator, fetchMyCoupons]);
 
-  const fetchMyCoupons = async () => {
+  const fetchMyCoupons = useCallback(async () => {
     if (!user?.email) return;
     
     setIsLoading(true);
@@ -87,11 +87,12 @@ export const AdminCouponDashboard = () => {
       }
     } catch (error) {
       console.error('Error fetching coupon data:', error);
-      toast.error('Failed to load coupon data');
+      setCoupons([]);
+      setUsageData([]);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user?.email]);
 
   const copyCode = (code: string) => {
     navigator.clipboard.writeText(code);

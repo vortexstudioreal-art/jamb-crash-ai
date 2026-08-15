@@ -16,74 +16,6 @@ export const JambCalculator = ({ isOpen, onClose }: JambCalculatorProps) => {
   const [expression, setExpression] = useState<string[]>([]);
   const calculatorRef = useRef<HTMLDivElement>(null);
 
-  // Handle keyboard input
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isOpen) return;
-      
-      // Escape to close
-      if (e.key === 'Escape') {
-        onClose();
-        return;
-      }
-
-      // Prevent default for calculator keys
-      e.preventDefault();
-
-      // Number keys
-      if (/^[0-9]$/.test(e.key)) {
-        inputDigit(e.key);
-        return;
-      }
-
-      // Decimal
-      if (e.key === '.' || e.key === ',') {
-        inputDecimal();
-        return;
-      }
-
-      // Operations
-      switch (e.key) {
-        case '+':
-          performOperation('+');
-          break;
-        case '-':
-          performOperation('-');
-          break;
-        case '*':
-          performOperation('×');
-          break;
-        case '/':
-          performOperation('÷');
-          break;
-        case 'Enter':
-        case '=':
-          calculate();
-          break;
-        case 'Backspace':
-          backspace();
-          break;
-        case 'Delete':
-        case 'c':
-        case 'C':
-          clear();
-          break;
-        case '(':
-          inputOpenBracket();
-          break;
-        case ')':
-          inputCloseBracket();
-          break;
-        case '%':
-          inputPercent();
-          break;
-      }
-    };
-    
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, display, previousValue, operation, waitingForOperand]);
-
   const inputDigit = useCallback((digit: string) => {
     if (waitingForOperand) {
       setDisplay(digit);
@@ -217,6 +149,74 @@ export const JambCalculator = ({ isOpen, onClose }: JambCalculatorProps) => {
       setDisplay(String(Math.sqrt(value)));
     }
   }, [display]);
+
+  // Handle keyboard input
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isOpen) return;
+      
+      // Escape to close
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+
+      // Prevent default for calculator keys
+      e.preventDefault();
+
+      // Number keys
+      if (/^[0-9]$/.test(e.key)) {
+        inputDigit(e.key);
+        return;
+      }
+
+      // Decimal
+      if (e.key === '.' || e.key === ',') {
+        inputDecimal();
+        return;
+      }
+
+      // Operations
+      switch (e.key) {
+        case '+':
+          performOperation('+');
+          break;
+        case '-':
+          performOperation('-');
+          break;
+        case '*':
+          performOperation('×');
+          break;
+        case '/':
+          performOperation('÷');
+          break;
+        case 'Enter':
+        case '=':
+          calculate();
+          break;
+        case 'Backspace':
+          backspace();
+          break;
+        case 'Delete':
+        case 'c':
+        case 'C':
+          clear();
+          break;
+        case '(':
+          inputOpenBracket();
+          break;
+        case ')':
+          inputCloseBracket();
+          break;
+        case '%':
+          inputPercent();
+          break;
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, display, previousValue, operation, waitingForOperand, onClose, inputDigit, inputDecimal, performOperation, calculate, backspace, clear, inputOpenBracket, inputCloseBracket, inputPercent]);
 
   const buttonClass = "h-10 md:h-12 text-base md:text-lg font-semibold rounded-xl transition-all duration-150 active:scale-95";
   const numberClass = `${buttonClass} bg-muted hover:bg-muted/80 text-foreground`;

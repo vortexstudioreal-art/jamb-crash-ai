@@ -75,9 +75,8 @@ export const ChatBot = () => {
         });
 
         // Set initial greeting with user context
-        const greeting = profileRes.data?.full_name || user.user_metadata?.full_name 
-          ? `Hi ${(profileRes.data?.full_name || user.user_metadata?.full_name).split(' ')[0]}! 👋`
-          : "Hi there! 👋";
+        const firstName = (profileRes.data?.full_name || user.user_metadata?.full_name)?.trim().split(' ')[0];
+        const greeting = firstName ? `Hi ${firstName}! 👋` : "Hi there! 👋";
         
         setMessages([{ 
           role: 'assistant', 
@@ -93,7 +92,7 @@ export const ChatBot = () => {
     };
 
     fetchUserContext();
-  }, [user?.email, userPackage]);
+  }, [user?.email, userPackage, user?.user_metadata?.full_name]);
 
   useEffect(() => {
     if (scrollRef.current) {

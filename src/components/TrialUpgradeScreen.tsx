@@ -17,7 +17,7 @@ const packages = [
     borderColor: 'border-blue-500/30',
   },
   {
-    name: 'Pro',
+    name: 'ACE',
     price: 10000,
     duration: '1 year',
     features: ['60-question quizzes', 'Unlimited PDFs', 'WhatsApp reminders', 'Score prediction'],
@@ -26,10 +26,10 @@ const packages = [
     popular: true,
   },
   {
-    name: 'Premium',
+    name: 'SCHOLAR',
     price: 15000,
     duration: 'Lifetime',
-    features: ['All Pro features', 'Lifetime access', 'Priority support', 'Advanced analytics'],
+    features: ['All ACE features', 'Lifetime access', 'Priority support', 'Advanced analytics'],
     color: 'from-yellow-500/20 to-amber-500/20',
     borderColor: 'border-yellow-500/30',
   },
@@ -82,9 +82,9 @@ export const TrialUpgradeScreen = ({ onUpgrade }: TrialUpgradeScreenProps) => {
                 )}
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 mb-2">
-                    {pkg.name === 'Premium' ? (
+                    {pkg.name === 'SCHOLAR' ? (
                       <Crown className="w-5 h-5 text-yellow-500" />
-                    ) : pkg.name === 'Pro' ? (
+                    ) : pkg.name === 'ACE' ? (
                       <Zap className="w-5 h-5 text-primary" />
                     ) : (
                       <BookOpen className="w-5 h-5 text-blue-500" />

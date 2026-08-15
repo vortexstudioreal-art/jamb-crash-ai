@@ -1,10 +1,38 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+interface NovelLike {
+  id: string;
+  title: string;
+  author: string;
+  category?: string | null;
+  total_chapters?: number | null;
+}
+
+interface ChapterLike {
+  id: string;
+  novel_id: string;
+  chapter_number: number;
+  title: string;
+  content: string;
+}
+
+interface ExtractedQuestion {
+  question: string;
+  options: Record<string, string>;
+  correct_answer?: string;
+}
+
+interface PoetryResult {
+  title: string;
+  status: string;
+  chaptersCreated: number;
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -12,8 +40,8 @@ serve(async (req) => {
   }
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
+    if (!GROQ_API_KEY) throw new Error("GROQ_API_KEY not configured");
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -23,8 +51,8 @@ serve(async (req) => {
 
     // Mode 1: Enrich poetry by splitting into multiple chapters (background)
     if (enrich_all_poetry) {
-      // @ts-ignore EdgeRuntime is available in Deno deploy
-      EdgeRuntime.waitUntil(enrichAllPoetry(supabase, LOVABLE_API_KEY, poem_title));
+      // @ts-expect-error EdgeRuntime is available in Deno deploy
+      EdgeRuntime.waitUntil(enrichAllPoetry(supabase, GROQ_API_KEY, poem_title));
       return new Response(JSON.stringify({ status: "started", mode: "poetry", poem_title: poem_title || "all" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -65,8 +93,8 @@ serve(async (req) => {
     }
 
     // Background prose/drama enrichment
-    // @ts-ignore
-    EdgeRuntime.waitUntil(enrichProseChapters(supabase, LOVABLE_API_KEY, novel, chapters));
+    // @ts-expect-error EdgeRuntime is available in Deno deploy
+    EdgeRuntime.waitUntil(enrichProseChapters(supabase, GROQ_API_KEY, novel, chapters));
     return new Response(JSON.stringify({
       status: "started",
       novel: novel.title,
@@ -83,7 +111,7 @@ serve(async (req) => {
   }
 });
 
-async function enrichProseChapters(supabase: any, apiKey: string, novel: any, chapters: any[]) {
+async function enrichProseChapters(supabase: SupabaseClient, apiKey: string, novel: NovelLike, chapters: ChapterLike[]) {
   for (const chapter of chapters) {
     try {
       console.log(`Enriching: ${novel.title} - Ch ${chapter.chapter_number}`);
@@ -110,7 +138,7 @@ async function enrichProseChapters(supabase: any, apiKey: string, novel: any, ch
 }
 
 // Split poetry into multiple analysis chapters
-async function enrichAllPoetry(supabase: any, apiKey: string, onlyTitle?: string) {
+async function enrichAllPoetry(supabase: SupabaseClient, apiKey: string, onlyTitle?: string) {
   let q = supabase
     .from("novels")
     .select("id, title, author, total_chapters, category")
@@ -124,7 +152,7 @@ async function enrichAllPoetry(supabase: any, apiKey: string, onlyTitle?: string
     });
   }
 
-  const results: any[] = [];
+  const results: PoetryResult[] = [];
 
   for (const poem of poems) {
     // Only process poems with 1 chapter (not yet enriched)
@@ -211,17 +239,17 @@ IMPORTANT: Be factually accurate about this poem. This is a JAMB 2025 prescribed
   });
 }
 
-async function callAI(apiKey: string, prompt: string, novel: any): Promise<string | null> {
+async function callAI(apiKey: string, prompt: string, novel: NovelLike): Promise<string | null> {
   const maxAttempts = 6;
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "llama-3.3-70b-versatile",
         messages: [
           { role: "system", content: "You are an expert literature teacher specializing in JAMB exam preparation for Nigerian students." },
           { role: "user", content: prompt },
@@ -248,7 +276,7 @@ async function callAI(apiKey: string, prompt: string, novel: any): Promise<strin
   return null;
 }
 
-function buildProsePrompt(novel: any, chapter: any): string {
+function buildProsePrompt(novel: NovelLike, chapter: ChapterLike): string {
   return `Create a comprehensive study guide for Chapter ${chapter.chapter_number} ("${chapter.title}") of "${novel.title}" by ${novel.author}.
 
 Current content: "${chapter.content.substring(0, 300)}"
@@ -266,7 +294,7 @@ Generate 2000-3000 words with:
 Be factually accurate. JAMB 2025 prescribed text.`;
 }
 
-function buildPoetryPrompt(novel: any, chapter: any): string {
+function buildPoetryPrompt(novel: NovelLike, chapter: ChapterLike): string {
   return `Create a comprehensive study guide for "${novel.title}" by ${novel.author} - ${chapter.title}.
 
 Current content: "${chapter.content.substring(0, 300)}"
@@ -274,10 +302,10 @@ Current content: "${chapter.content.substring(0, 300)}"
 Generate 2000-3000 words covering summary, line analysis, themes, literary devices, and 5 JAMB MCQs.`;
 }
 
-function extractQuestions(content: string): any[] {
-  const questions: any[] = [];
+function extractQuestions(content: string): ExtractedQuestion[] {
+  const questions: ExtractedQuestion[] = [];
   const lines = content.split("\n");
-  let currentQ: any = null;
+  let currentQ: ExtractedQuestion | null = null;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();

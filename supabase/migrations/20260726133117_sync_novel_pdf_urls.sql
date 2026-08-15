@@ -1,0 +1,1 @@
+UPDATE public.novels SET full_book_pdf_url = download_url WHERE download_url IS NOT NULL;

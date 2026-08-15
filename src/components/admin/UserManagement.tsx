@@ -504,11 +504,11 @@ export const UserManagement = ({ isOwner }: UserManagementProps) => {
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => updateUserPlan(user.email, 'pro')}>
                               <Check className="w-4 h-4 mr-2" />
-                              Pro (1 year)
+                              ACE (1 year)
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => updateUserPlan(user.email, 'premium')}>
                               <Crown className="w-4 h-4 mr-2" />
-                              Premium (Forever)
+                              SCHOLAR (Forever)
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

@@ -29,7 +29,6 @@ export const useAdAnalytics = () => {
     event: AdAnalyticsEvent
   ): Promise<void> => {
     if (!email) {
-      console.log('[AdAnalytics] No email, skipping tracking');
       return;
     }
 
@@ -46,8 +45,6 @@ export const useAdAnalytics = () => {
 
       if (error) {
         console.error('[AdAnalytics] Failed to track event:', error);
-      } else {
-        console.log('[AdAnalytics] Tracked:', event.eventType, event.featureType);
       }
     } catch (err) {
       console.error('[AdAnalytics] Error tracking event:', err);

@@ -1,10 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, CheckCircle, XCircle, Pause, Play, Flag, ChevronLeft, ChevronRight, Sparkles, Volume2, VolumeX, Timer, Settings2, Calculator, WifiOff } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, Pause, Play, Flag, ChevronLeft, ChevronRight, Sparkles, Volume2, VolumeX, Timer, Settings2, Calculator, WifiOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import type { Database } from '@/integrations/supabase/types';
+import ReactMarkdown from 'react-markdown';
+import { useAiExplanation } from '@/hooks/useAiExplanation';
+import { toast } from 'sonner';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -14,6 +17,10 @@ import { Input } from '@/components/ui/input';
 import { JambCalculator } from '@/components/JambCalculator';
 import { getQuestions, saveQuestions, addToSyncQueue } from '@/services/offlineStorage';
 import { shuffleQuestionList } from '@/lib/quizShuffle';
+import { useFeatureUsage } from '@/hooks/useFeatureUsage';
+import { FeatureLimitReached } from '@/components/FeatureLimitReached';
+import { ReportQuestionButton } from '@/components/ReportQuestionButton';
+import { pickAdaptive, collectWeakQuestionCounts } from '@/lib/adaptive';
 
 interface Question {
   id: string;
@@ -26,6 +33,7 @@ interface Question {
   explanation?: string;
   subject: string;
   year?: number;
+  image_url?: string | null;
 }
 
 interface TimedQuizProps {
@@ -149,6 +157,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
   
   // Previously answered question IDs to avoid repetition
   const [previouslyAnsweredIds, setPreviouslyAnsweredIds] = useState<Set<string>>(new Set());
+  const [weakQuestionCounts, setWeakQuestionCounts] = useState<Map<string, number>>(new Map());
   
   // Quiz state
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -162,6 +171,22 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
   const [selectedSubjectFilter, setSelectedSubjectFilter] = useState<string>('all');
   const [showAnswerFeedback, setShowAnswerFeedback] = useState<string | null>(null);
   const [showCalculator, setShowCalculator] = useState(false);
+  const [showQuizLimitModal, setShowQuizLimitModal] = useState(false);
+  const [pendingQuizMode, setPendingQuizMode] = useState<QuizMode | null>(null);
+  const { canUseFeature, incrementUsage } = useFeatureUsage();
+
+  const { 
+    explanation: aiExplanation, 
+    isLoading: isAiLoading, 
+    error: aiError, 
+    getExplanation: fetchAiExplanation, 
+    cancel: cancelAiExplanation 
+  } = useAiExplanation();
+
+  // Cancel AI explanation when moving to another question
+  useEffect(() => {
+    cancelAiExplanation();
+  }, [currentIndex, cancelAiExplanation]);
   
   // Audio state - muted by default
   const [isSoundPlaying, setIsSoundPlaying] = useState(false);
@@ -182,7 +207,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
         const ids = new Set<string>();
         data.forEach(attempt => {
           if (attempt.questions_data && Array.isArray(attempt.questions_data)) {
-            attempt.questions_data.forEach((q: any) => {
+            (attempt.questions_data as Array<{ id?: string; userAnswer?: string; correct_answer?: string }>).forEach((q) => {
               if (q.id && q.userAnswer === q.correct_answer) {
                 // Only exclude questions user got right
                 ids.add(q.id);
@@ -191,6 +216,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
           }
         });
         setPreviouslyAnsweredIds(ids);
+        setWeakQuestionCounts(collectWeakQuestionCounts(data.map(d => d.questions_data)));
       }
     };
     loadPreviousQuestions();
@@ -210,18 +236,14 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
     
     const handleCanPlay = () => {
       if (isSoundPlaying && audioRef.current) {
-        audioRef.current.play().catch((err) => {
-          console.log('Audio play failed:', err.message);
-        });
+        audioRef.current.play().catch(() => {});
       }
     };
     
     audio.addEventListener('canplaythrough', handleCanPlay);
     
     if (isSoundPlaying) {
-      audio.play().catch((err) => {
-        console.log('Initial audio play failed:', err.message);
-      });
+      audio.play().catch(() => {});
     }
     
     return () => {
@@ -230,13 +252,14 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
       audio.src = '';
       audioRef.current = null;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentSound, showSetup]);
 
   useEffect(() => {
     if (!audioRef.current || showSetup) return;
     
     if (isSoundPlaying) {
-      audioRef.current.play().catch(console.log);
+      audioRef.current.play().catch(() => {});
     } else {
       audioRef.current.pause();
     }
@@ -294,13 +317,22 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
   };
 
   // Start quiz
-  const startQuiz = (mode: QuizMode) => {
+  const startQuiz = async (mode: QuizMode) => {
     if ((quizType === 'subject' || quizType === 'timed-practice') && selectedSubjects.length === 0) {
-      toast({
-        title: "Select at least one subject",
-        description: "Please choose subjects to practice",
-        variant: "destructive"
-      });
+      toast.error("Select at least one subject", { description: "Please choose subjects to practice" });
+      return;
+    }
+
+    // Check quick_quiz daily limit for timed practice
+    if (!canUseFeature('quick_quiz')) {
+      setPendingQuizMode(mode);
+      setShowQuizLimitModal(true);
+      return;
+    }
+    const ok = await incrementUsage('quick_quiz');
+    if (!ok) {
+      setPendingQuizMode(mode);
+      setShowQuizLimitModal(true);
       return;
     }
     
@@ -338,7 +370,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
               const { data, error } = await supabase
                 .from('jamb_questions')
                 .select('*')
-                .eq('subject', subject as any)
+                .eq('subject', subject as Database['public']['Enums']['jamb_subject'])
                 .gte('year', yearConfig.start)
                 .lte('year', yearConfig.end)
                 .limit(200);
@@ -352,7 +384,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
             const { data, error } = await supabase
               .from('jamb_questions')
               .select('*')
-              .in('subject', subjectsToUse as any)
+              .in('subject', subjectsToUse as Database['public']['Enums']['jamb_subject'][])
               .limit(500);
             
             if (!error && data) {
@@ -369,16 +401,13 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
           if (cachedQuestions.length > 0) {
             allQuestions = cachedQuestions;
             if (!isOnline) {
-              toast({
-                title: "Offline Mode",
-                description: "Using cached questions",
-              });
+              toast("Offline Mode", { description: "Using cached questions" });
             }
           }
         }
 
         // Filter out previously answered questions (unless not enough remain)
-        let filteredQuestions = allQuestions.filter(q => !previouslyAnsweredIds.has(q.id));
+        const filteredQuestions = allQuestions.filter(q => !previouslyAnsweredIds.has(q.id));
         
         // If not enough questions after filtering, include some previously answered
         if (filteredQuestions.length < totalQuestions) {
@@ -389,27 +418,16 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
         }
 
         if (filteredQuestions.length >= totalQuestions) {
-          // Fisher-Yates shuffle for true randomness
-          const shuffled = [...filteredQuestions];
-          for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-          }
-          setQuestions(shuffleQuestionList(shuffled.slice(0, totalQuestions)));
+          // Adaptive difficulty: prioritize questions answered wrongly in past attempts
+          const adaptive = pickAdaptive(filteredQuestions, weakQuestionCounts, totalQuestions);
+          setQuestions(shuffleQuestionList(adaptive));
         } else if (filteredQuestions.length > 0) {
           const shuffled = [...filteredQuestions].sort(() => Math.random() - 0.5);
           setQuestions(shuffleQuestionList(shuffled));
           setTotalQuestions(shuffled.length);
-          toast({
-            title: `Only ${shuffled.length} questions available`,
-            description: "Continuing with available questions",
-          });
+          toast(`Only ${shuffled.length} questions available`, { description: "Continuing with available questions" });
         } else {
-          toast({
-            title: "No questions found",
-            description: "Try different subjects or year range",
-            variant: "destructive"
-          });
+          toast.error("No questions found", { description: "Try different subjects or year range" });
         }
       } catch (error) {
         console.error('Error loading questions:', error);
@@ -419,7 +437,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
     };
 
     loadQuestions();
-  }, [subjects, totalQuestions, quizMode, quizType, selectedSubjects, subjectYears, previouslyAnsweredIds]);
+  }, [subjects, totalQuestions, quizMode, quizType, selectedSubjects, subjectYears, previouslyAnsweredIds, weakQuestionCounts]);
 
   // Timer
   useEffect(() => {
@@ -437,6 +455,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
     }, 1000);
 
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quizMode, isPaused, isLoading, timeLeft, isUntimed]);
 
   // Motivation at milestones
@@ -466,12 +485,22 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
     if (quizMode === 'practice') {
       setShowAnswerFeedback(currentQuestion.correct_answer);
       
-      setTimeout(() => {
-        setShowAnswerFeedback(null);
-        if (currentIndex < questions.length - 1) {
-          setCurrentIndex(prev => prev + 1);
-        }
-      }, 2000);
+      // Auto-fetch AI explanation if no static explanation exists
+      if (!currentQuestion.explanation) {
+        setTimeout(() => {
+          fetchAiExplanation({
+            question: currentQuestion.question,
+            option_a: currentQuestion.option_a,
+            option_b: currentQuestion.option_b,
+            option_c: currentQuestion.option_c,
+            option_d: currentQuestion.option_d,
+            correct_answer: currentQuestion.correct_answer,
+            subject: currentQuestion.subject
+          });
+        }, 300);
+      }
+      
+      // Don't auto-advance in practice mode - let user read explanation and click Next
     }
   };
 
@@ -491,7 +520,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
 
     const subjectsUsed = ((quizType === 'subject' || quizType === 'timed-practice') && selectedSubjects.length > 0 
       ? selectedSubjects 
-      : subjects) as any;
+      : subjects) as Database['public']['Enums']['jamb_subject'][];
 
     try {
       const quizData = {
@@ -528,21 +557,14 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
           })
         }).then(res => res.json()).then(data => {
           if (data.pointsEarned > 0) {
-            toast({
-              title: `+${data.pointsEarned} leaderboard points earned!`,
-              description: `${correctCount}/${questions.length} correct answers`
-            });
+            toast(`+${data.pointsEarned} leaderboard points earned!`, { description: `${correctCount}/${questions.length} correct answers` });
           }
         }).catch(err => {
-          console.log('Leaderboard update queued for later:', err);
         });
       } else {
         // Queue for sync when back online
         await addToSyncQueue('quiz_attempt', quizData);
-        toast({
-          title: "Saved Offline",
-          description: "Your quiz will sync when you're back online",
-        });
+        toast("Saved Offline", { description: "Your quiz will sync when you're back online" });
       }
     } catch (error) {
       console.error('Error saving quiz:', error);
@@ -924,12 +946,25 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
                 <Badge variant="outline">{currentQuestion.year}</Badge>
               )}
               {quizMode === 'practice' && (
-                <Badge className="bg-green-500/10 text-green-600 ml-auto">Learn mode</Badge>
+                <Badge className="bg-green-500/10 text-green-600">Learn mode</Badge>
               )}
+              <div className="ml-auto">
+                <ReportQuestionButton questionId={currentQuestion.id} userEmail={userEmail} compact />
+              </div>
             </div>
             <p className="text-lg font-medium text-foreground leading-relaxed">
               {currentQuestion.question}
             </p>
+            {currentQuestion.image_url && (
+              <div className="mt-4 flex justify-center">
+                <img
+                  src={currentQuestion.image_url}
+                  alt="Question diagram"
+                  className="max-w-full h-auto rounded-lg border border-border"
+                  style={{ maxHeight: 300 }}
+                />
+              </div>
+            )}
           </motion.div>
 
           {/* Answer Options */}
@@ -937,19 +972,35 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
             {['A', 'B', 'C', 'D'].map((letter) => {
               const optionKey = `option_${letter.toLowerCase()}` as keyof Question;
               const isSelected = answers[currentQuestion.id] === letter;
-              const isCorrect = showAnswerFeedback === letter;
-              const isWrong = showAnswerFeedback && isSelected && !isCorrect;
+              const userAnswer = answers[currentQuestion.id];
+              const isAnswered = !!userAnswer;
+              const isPracticeMode = quizMode === 'practice';
+              
+              let isCorrect = false;
+              let isWrong = false;
+              
+              if (isPracticeMode) {
+                if (showAnswerFeedback) {
+                  isCorrect = showAnswerFeedback === letter;
+                  isWrong = showAnswerFeedback && isSelected && !isCorrect;
+                } else if (isAnswered) {
+                  isCorrect = currentQuestion.correct_answer === letter;
+                  isWrong = isSelected && userAnswer !== currentQuestion.correct_answer;
+                }
+              }
+              
+              const isFeedbackActive = !!showAnswerFeedback || (isPracticeMode && isAnswered);
               
               return (
                 <motion.button
                   key={letter}
                   whileTap={{ scale: 0.99 }}
-                  onClick={() => !showAnswerFeedback && handleAnswer(letter)}
-                  disabled={!!showAnswerFeedback}
+                  onClick={() => !isFeedbackActive && handleAnswer(letter)}
+                  disabled={isFeedbackActive}
                   className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
-                    isCorrect && showAnswerFeedback
+                    isCorrect && isFeedbackActive
                       ? 'border-green-500 bg-green-500/10'
-                      : isWrong
+                      : isWrong && isFeedbackActive
                       ? 'border-red-500 bg-red-500/10'
                       : isSelected
                       ? 'border-primary bg-primary/5'
@@ -958,16 +1009,16 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
                 >
                   <div className="flex items-center gap-3">
                     <span className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${
-                      isCorrect && showAnswerFeedback
+                      isCorrect && isFeedbackActive
                         ? 'bg-green-500 text-white'
-                        : isWrong
+                        : isWrong && isFeedbackActive
                         ? 'bg-red-500 text-white'
                         : isSelected 
                         ? 'bg-primary text-primary-foreground' 
                         : 'bg-muted text-muted-foreground'
                     }`}>
-                      {isCorrect && showAnswerFeedback ? <CheckCircle className="w-4 h-4" /> : 
-                       isWrong ? <XCircle className="w-4 h-4" /> : letter}
+                      {isCorrect && isFeedbackActive ? <CheckCircle className="w-4 h-4" /> : 
+                       isWrong && isFeedbackActive ? <XCircle className="w-4 h-4" /> : letter}
                     </span>
                     <span className="text-foreground text-sm leading-relaxed">
                       {currentQuestion[optionKey] as string}
@@ -979,18 +1030,88 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
           </div>
 
           {/* Practice mode explanation */}
-          {showAnswerFeedback && quizMode === 'practice' && (
+          {(showAnswerFeedback || (quizMode === 'practice' && answers[currentQuestion.id])) && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-4 p-4 bg-green-500/10 border border-green-500/30 rounded-xl"
+              className="mt-4 p-4 bg-green-500/10 border border-green-500/30 rounded-xl space-y-3"
             >
-              <p className="text-green-600 font-medium text-sm mb-1">
-                ✓ Correct: {showAnswerFeedback}
-              </p>
-              {currentQuestion.explanation && (
-                <p className="text-muted-foreground text-sm">{currentQuestion.explanation}</p>
-              )}
+              <div>
+                <p className="text-green-600 font-medium text-sm mb-1">
+                  ✓ Correct Answer: {showAnswerFeedback || currentQuestion.correct_answer}
+                </p>
+                {currentQuestion.explanation && (
+                  <p className="text-muted-foreground text-sm">{currentQuestion.explanation}</p>
+                )}
+              </div>
+
+              {/* AI Explanation Section */}
+              <div className="border-t border-green-500/20 pt-3">
+                {aiExplanation ? (
+                  <div className="space-y-2">
+                    <p className="text-sm font-semibold text-primary flex items-center gap-1">
+                      <Sparkles className="w-4 h-4 text-yellow-500" />
+                      AI Detailed Explanation
+                    </p>
+                    <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap">
+                      <ReactMarkdown>{aiExplanation}</ReactMarkdown>
+                    </div>
+                  </div>
+                ) : isAiLoading ? (
+                  <div className="flex items-center gap-2 text-primary text-sm py-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Generating AI explanation...</span>
+                  </div>
+                ) : aiError ? (
+                  <div className="text-destructive text-xs py-1">
+                    Failed to load AI explanation.
+                    <Button 
+                      variant="link" 
+                      size="sm" 
+                      onClick={() => fetchAiExplanation({
+                        question: currentQuestion.question,
+                        option_a: currentQuestion.option_a,
+                        option_b: currentQuestion.option_b,
+                        option_c: currentQuestion.option_c,
+                        option_d: currentQuestion.option_d,
+                        correct_answer: currentQuestion.correct_answer,
+                        subject: currentQuestion.subject
+                      })}
+                      className="text-primary text-xs h-auto p-0 ml-2 animate-pulse"
+                    >
+                      Retry
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs bg-transparent border-green-500/30 hover:bg-green-500/10 text-green-700 dark:text-green-400 gap-1.5"
+                    disabled={isAiLoading}
+                    onClick={() => fetchAiExplanation({
+                      question: currentQuestion.question,
+                      option_a: currentQuestion.option_a,
+                      option_b: currentQuestion.option_b,
+                      option_c: currentQuestion.option_c,
+                      option_d: currentQuestion.option_d,
+                      correct_answer: currentQuestion.correct_answer,
+                      subject: currentQuestion.subject
+                    })}
+                  >
+                    {isAiLoading ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        Generating AI Explanation...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-3.5 h-3.5 text-yellow-500" />
+                        Explain with AI
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
             </motion.div>
           )}
         </div>
@@ -1002,8 +1123,11 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setCurrentIndex(prev => Math.max(0, prev - 1))}
-            disabled={currentIndex === 0 || !!showAnswerFeedback}
+            onClick={() => {
+              setShowAnswerFeedback(null);
+              setCurrentIndex(prev => Math.max(0, prev - 1));
+            }}
+            disabled={currentIndex === 0}
           >
             <ChevronLeft className="w-4 h-4" /> Prev
           </Button>
@@ -1018,8 +1142,10 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
               return (
                 <button
                   key={q.id}
-                  onClick={() => !showAnswerFeedback && setCurrentIndex(actualIndex)}
-                  disabled={!!showAnswerFeedback}
+                  onClick={() => {
+                    setShowAnswerFeedback(null);
+                    setCurrentIndex(actualIndex);
+                  }}
                   className={`w-7 h-7 rounded-full text-xs font-medium transition-all ${
                     isCurrent
                       ? 'bg-primary text-primary-foreground'
@@ -1035,20 +1161,33 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
           </div>
 
           {currentIndex === questions.length - 1 ? (
-            <Button size="sm" onClick={handleSubmit} disabled={!!showAnswerFeedback} className="bg-primary">
+            <Button size="sm" onClick={handleSubmit} className="bg-primary">
               <Flag className="w-4 h-4 mr-1" /> Submit
             </Button>
           ) : (
             <Button
               size="sm"
-              onClick={() => setCurrentIndex(prev => Math.min(questions.length - 1, prev + 1))}
-              disabled={!!showAnswerFeedback}
+              onClick={() => {
+                setShowAnswerFeedback(null);
+                setCurrentIndex(prev => Math.min(questions.length - 1, prev + 1));
+              }}
             >
               Next <ChevronRight className="w-4 h-4" />
             </Button>
           )}
         </div>
       </div>
+      {showQuizLimitModal && (
+        <FeatureLimitReached
+          featureType="quick_quiz"
+          onBonusEarned={() => {
+            setShowQuizLimitModal(false);
+            if (canUseFeature('quick_quiz')) {
+              startQuiz(pendingQuizMode!);
+            }
+          }}
+        />
+      )}
     </div>
   );
 };

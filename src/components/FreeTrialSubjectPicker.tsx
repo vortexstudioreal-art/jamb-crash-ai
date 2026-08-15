@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Check, BookOpen, Calculator, Atom, FlaskConical, Leaf, BookText, Building2, TrendingUp, Church, Globe, Receipt, ShoppingCart, Wheat, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 interface FreeTrialSubjectPickerProps {
   onComplete: (subjects: string[]) => void;
@@ -37,11 +37,7 @@ export const FreeTrialSubjectPicker = ({ onComplete, onCancel }: FreeTrialSubjec
         return prev.filter(s => s !== id);
       }
       if (prev.length >= 4) {
-        toast({
-          title: "Maximum 4 subjects! 📚",
-          description: "You can only select English + 3 other subjects",
-          variant: "destructive"
-        });
+        toast.error("Maximum 4 subjects! 📚", { description: "You can only select English + 3 other subjects" });
         return prev;
       }
       return [...prev, id];
@@ -50,11 +46,7 @@ export const FreeTrialSubjectPicker = ({ onComplete, onCancel }: FreeTrialSubjec
 
   const handleContinue = () => {
     if (selected.length !== 4) {
-      toast({
-        title: "Select 4 subjects! 🎯",
-        description: `Choose ${4 - selected.length} more subject(s) to continue`,
-        variant: "destructive"
-      });
+      toast.error("Select 4 subjects! 🎯", { description: `Choose ${4 - selected.length} more subject(s) to continue` });
       return;
     }
     onComplete(selected);

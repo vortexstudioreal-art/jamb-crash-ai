@@ -683,7 +683,18 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const syllabusEntries: any[] = [];
+    interface SyllabusEntry {
+      subject: string;
+      topic: string;
+      subtopic: string | null;
+      objectives: string[] | null;
+      recommended_content: string | null;
+      difficulty_level: string;
+      estimated_reading_time: number;
+      order_index: number;
+    }
+
+    const syllabusEntries: SyllabusEntry[] = [];
     let orderIndex = 0;
 
     for (const [subject, data] of Object.entries(syllabusData)) {

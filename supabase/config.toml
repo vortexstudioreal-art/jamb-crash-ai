@@ -1,4 +1,4 @@
-project_id = "jznmcpddqxyuvjjweydw"
+project_id = "pjdgzqnyyobtiwplatni"
 
 [functions.seed-jamb-questions]
 verify_jwt = false
@@ -73,4 +73,43 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.process-upload]
+verify_jwt = false
+
+[functions.seed-10000-questions]
+verify_jwt = false
+
+[functions.auto-confirm]
+verify_jwt = false
+
+[functions.b2b-register-buyer]
+verify_jwt = false
+
+[functions.b2b-initialize-order]
+verify_jwt = false
+
+[functions.b2b-verify-order]
+verify_jwt = false
+
+[functions.b2b-get-pins]
+verify_jwt = false
+
+[functions.b2b-redeem-pin]
+verify_jwt = false
+
+[functions.b2b-admin-manage]
+verify_jwt = false
+
+[functions.seed-coulomb-lesson]
+verify_jwt = false
+
+[functions.seed-physics-lessons]
+verify_jwt = false
+
+[functions.seed-physics-batch2]
+verify_jwt = false
+
+[functions.seed-physics-batch3]
+verify_jwt = false
+
+[functions.seed-english-lessons]
 verify_jwt = false

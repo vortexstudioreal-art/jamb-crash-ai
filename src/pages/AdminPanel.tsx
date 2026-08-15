@@ -13,13 +13,9 @@ import { AdminBadge } from '@/components/AdminBadge';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { AppHealthCheck } from '@/components/AppHealthCheck';
-import { CouponManager } from '@/components/CouponManager';
-import { UserManagement } from '@/components/admin/UserManagement';
-import { NotificationManager } from '@/components/admin/NotificationManager';
-import { PayoutManagement } from '@/components/admin/PayoutManagement';
-import { AdAnalyticsDashboard } from '@/components/admin/AdAnalyticsDashboard';
-import { BookPdfManager } from '@/components/admin/BookPdfManager';
+import { lazy, Suspense } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useSeo } from '@/hooks/useSeo';
 
 interface Payment {
   id: string;
@@ -56,11 +52,28 @@ interface Stats {
 
 
 
+const AdAnalyticsDashboard = lazy(() => import('@/components/admin/AdAnalyticsDashboard').then(m => ({ default: m.AdAnalyticsDashboard })));
+const AppHealthCheck = lazy(() => import('@/components/AppHealthCheck').then(m => ({ default: m.AppHealthCheck })));
+const CouponManager = lazy(() => import('@/components/CouponManager').then(m => ({ default: m.CouponManager })));
+const UserManagement = lazy(() => import('@/components/admin/UserManagement').then(m => ({ default: m.UserManagement })));
+const NotificationManager = lazy(() => import('@/components/admin/NotificationManager').then(m => ({ default: m.NotificationManager })));
+const PayoutManagement = lazy(() => import('@/components/admin/PayoutManagement').then(m => ({ default: m.PayoutManagement })));
+const BookPdfManager = lazy(() => import('@/components/admin/BookPdfManager').then(m => ({ default: m.BookPdfManager })));
+const QuestionReportsManager = lazy(() => import('@/components/admin/QuestionReportsManager').then(m => ({ default: m.QuestionReportsManager })));
+const B2BManagement = lazy(() => import('@/components/admin/B2BManagement').then(m => ({ default: m.B2BManagement })));
+
 const AdminPanel = () => {
   const navigate = useNavigate();
   const { user, isLoading, isAdmin, isOwner: authIsOwner, userRole, hasAccess } = useAuth();
   const userEmail = user?.email || null;
   const adminRole = userRole;
+
+  useSeo({
+    title: 'Admin Panel | Jamb Crash AI',
+    description: 'Jamb Crash AI administration dashboard.',
+    path: '/admin',
+    noindex: true,
+  });
   const [payments, setPayments] = useState<Payment[]>([]);
   const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [features, setFeatures] = useState<FeatureStatus[]>([]);
@@ -90,6 +103,7 @@ const AdminPanel = () => {
     
     // No access - redirect home
     navigate('/');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin, authIsOwner, isLoading, navigate]);
 
   const fetchData = async () => {
@@ -123,7 +137,6 @@ const AdminPanel = () => {
       const { data, error } = await supabase.functions.invoke('send-whatsapp-reminder', {
         body: { test_mode: true }
       });
-      console.log('WhatsApp config check:', data);
       setWhatsappConfigured(data?.configured || false);
     } catch (err) {
       console.error('WhatsApp config check failed:', err);
@@ -215,7 +228,7 @@ const AdminPanel = () => {
       // Group by subject and calculate stats
       const subjectMap: Record<string, { count: number; years: Set<number> }> = {};
       
-      data.forEach((q: any) => {
+      data.forEach((q) => {
         if (!subjectMap[q.subject]) {
           subjectMap[q.subject] = { count: 0, years: new Set() };
         }
@@ -265,8 +278,6 @@ const AdminPanel = () => {
           test_mode: false
         }
       });
-      
-      console.log('WhatsApp test response:', data, error);
       
       if (error) {
         console.error('WhatsApp test error:', error);
@@ -483,6 +494,10 @@ const AdminPanel = () => {
               <Database className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="hidden xs:inline">Questions</span>
             </TabsTrigger>
+            <TabsTrigger value="reports" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
+              <AlertCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden xs:inline">Reports</span>
+            </TabsTrigger>
             <TabsTrigger value="ads" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
               <BarChart3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="hidden xs:inline">Ads</span>
@@ -490,6 +505,10 @@ const AdminPanel = () => {
             <TabsTrigger value="books" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
               <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="hidden xs:inline">Books</span>
+            </TabsTrigger>
+            <TabsTrigger value="b2b" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
+              <Key className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden xs:inline">B2B Pins</span>
             </TabsTrigger>
             <TabsTrigger value="overview" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
               <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -507,7 +526,9 @@ const AdminPanel = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <AppHealthCheck />
+              <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
+                <AppHealthCheck />
+              </Suspense>
             </motion.div>
           </TabsContent>
 
@@ -517,7 +538,21 @@ const AdminPanel = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <BookPdfManager />
+              <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
+                <BookPdfManager />
+              </Suspense>
+            </motion.div>
+          </TabsContent>
+
+          {/* B2B Pins Tab */}
+          <TabsContent value="b2b">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
+                <B2BManagement />
+              </Suspense>
             </motion.div>
           </TabsContent>
 
@@ -527,7 +562,9 @@ const AdminPanel = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <UserManagement isOwner={isOwner} />
+              <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
+                <UserManagement isOwner={isOwner} />
+              </Suspense>
             </motion.div>
           </TabsContent>
 
@@ -537,7 +574,9 @@ const AdminPanel = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <PayoutManagement isOwner={isOwner} userEmail={userEmail || ''} />
+              <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
+                <PayoutManagement isOwner={isOwner} userEmail={userEmail || ''} />
+              </Suspense>
             </motion.div>
           </TabsContent>
 
@@ -547,7 +586,9 @@ const AdminPanel = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <NotificationManager />
+              <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
+                <NotificationManager />
+              </Suspense>
             </motion.div>
           </TabsContent>
 
@@ -557,7 +598,9 @@ const AdminPanel = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <CouponManager />
+              <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
+                <CouponManager />
+              </Suspense>
             </motion.div>
           </TabsContent>
 
@@ -589,8 +632,8 @@ const AdminPanel = () => {
                                 toast.success(`Added ${data?.inserted || 0} questions! Total: ${data?.totalInDatabase || 0}`, { id: 'seed' });
                               }
                               fetchData();
-                            } catch (err: any) {
-                              toast.error('Seed failed: ' + err.message, { id: 'seed' });
+                            } catch (err: unknown) {
+                              toast.error('Seed failed: ' + (err instanceof Error ? err.message : 'Unknown error'), { id: 'seed' });
                             }
                           }}
                           size="sm"
@@ -612,8 +655,8 @@ const AdminPanel = () => {
                                 toast.success(`Added ${data?.inserted || 0} new questions!`, { id: 'seed-more' });
                               }
                               fetchData();
-                            } catch (err: any) {
-                              toast.error('Seed failed: ' + err.message, { id: 'seed-more' });
+                            } catch (err: unknown) {
+                              toast.error('Seed failed: ' + (err instanceof Error ? err.message : 'Unknown error'), { id: 'seed-more' });
                             }
                           }}
                           size="sm"
@@ -635,8 +678,8 @@ const AdminPanel = () => {
                                 toast.success(`Added ${data?.inserted || 0} questions for underrepresented subjects!`, { id: 'seed-low' });
                               }
                               fetchData();
-                            } catch (err: any) {
-                              toast.error('Seed failed: ' + err.message, { id: 'seed-low' });
+                            } catch (err: unknown) {
+                              toast.error('Seed failed: ' + (err instanceof Error ? err.message : 'Unknown error'), { id: 'seed-low' });
                             }
                           }}
                           size="sm"
@@ -658,8 +701,8 @@ const AdminPanel = () => {
                                 toast.success(`Added ${data?.inserted || 0} questions! Total: ${data?.totalInDatabase || 0}`, { id: 'seed-all' });
                               }
                               fetchData();
-                            } catch (err: any) {
-                              toast.error('Seed failed: ' + err.message, { id: 'seed-all' });
+                            } catch (err: unknown) {
+                              toast.error('Seed failed: ' + (err instanceof Error ? err.message : 'Unknown error'), { id: 'seed-all' });
                             }
                           }}
                           size="sm"
@@ -680,8 +723,8 @@ const AdminPanel = () => {
                                 toast.success(`🎉 Added ${data?.inserted || 0} NEW questions! Total: ${data?.total_in_database || 0}`, { id: 'seed-extra' });
                               }
                               fetchData();
-                            } catch (err: any) {
-                              toast.error('Seed failed: ' + err.message, { id: 'seed-extra' });
+                            } catch (err: unknown) {
+                              toast.error('Seed failed: ' + (err instanceof Error ? err.message : 'Unknown error'), { id: 'seed-extra' });
                             }
                           }}
                           size="sm"
@@ -795,13 +838,27 @@ const AdminPanel = () => {
             </motion.div>
           </TabsContent>
 
+          {/* Reported Questions Tab */}
+          <TabsContent value="reports">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
+                <QuestionReportsManager />
+              </Suspense>
+            </motion.div>
+          </TabsContent>
+
           {/* Ad Analytics Tab */}
           <TabsContent value="ads">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <AdAnalyticsDashboard />
+              <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
+                <AdAnalyticsDashboard />
+              </Suspense>
             </motion.div>
           </TabsContent>
 

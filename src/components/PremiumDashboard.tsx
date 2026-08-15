@@ -27,7 +27,7 @@ export const PremiumDashboard = ({ userEmail, isAdmin, adminRole, targetScore, w
   };
 
   // Get package display name
-  const packageName = userPackage === 'admin' ? 'Premium' : 
+  const packageName = userPackage === 'admin' ? 'SCHOLAR' : 
                       userPackage ? userPackage.charAt(0).toUpperCase() + userPackage.slice(1) : 
                       'Free';
 
@@ -43,7 +43,7 @@ export const PremiumDashboard = ({ userEmail, isAdmin, adminRole, targetScore, w
           <div>
             <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-yellow-500" />
-              Premium Features ✨
+              SCHOLAR Features ✨
             </h2>
             <p className="text-sm text-muted-foreground">
               Unlock your full potential with these tools

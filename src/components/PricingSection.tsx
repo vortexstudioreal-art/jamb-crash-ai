@@ -10,6 +10,7 @@ interface PricingSectionProps {
 
 const plans = [
   {
+    key: 'basic',
     name: 'Basic',
     price: 5000,
     features: [
@@ -22,7 +23,8 @@ const plans = [
     ],
   },
   {
-    name: 'Pro',
+    key: 'pro',
+    name: 'ACE',
     price: 10000,
     popular: true,
     features: [
@@ -38,10 +40,11 @@ const plans = [
     ],
   },
   {
-    name: 'Premium',
+    key: 'premium',
+    name: 'SCHOLAR',
     price: 15000,
     features: [
-      'Everything in Pro',
+      'Everything in ACE',
       'WhatsApp Reminders',
       'Refer & Earn (₦1,000 bonus)',
       'Advanced AI Prediction',
@@ -83,9 +86,9 @@ export const PricingSection = ({ onSelectPlan, highlightStandard }: PricingSecti
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto">
           {plans.map((plan, index) => (
             <div
-              key={plan.name}
+              key={plan.key}
               className={`transition-all duration-500 ${
-                plan.name === 'Pro' && isHighlighted
+                plan.key === 'pro' && isHighlighted
                   ? 'ring-4 ring-primary ring-offset-4 ring-offset-background animate-pulse rounded-2xl scale-105'
                   : ''
               }`}
@@ -93,7 +96,7 @@ export const PricingSection = ({ onSelectPlan, highlightStandard }: PricingSecti
               <PricingCard
                 {...plan}
                 delay={index * 0.1}
-                onSelect={() => onSelectPlan(plan.name.toLowerCase())}
+                onSelect={() => onSelectPlan(plan.key)}
               />
             </div>
           ))}

@@ -50,27 +50,26 @@ export const CourseSelector = ({
 
   const userSubjectsNormalized = userSubjects.map(normalizeSubject);
 
-  // Check if course matches user's subjects
-  const checkCourseMatch = (course: CourseRequirement) => {
-    const requiredNormalized = course.subjects.map(normalizeSubject);
-    const matchingCount = requiredNormalized.filter(req => 
-      userSubjectsNormalized.some(user => user.includes(req) || req.includes(user))
-    ).length;
-    const missingSubjects = course.subjects.filter(req => 
-      !userSubjectsNormalized.some(user => {
-        const norm = normalizeSubject(req);
-        return user.includes(norm) || norm.includes(user);
-      })
-    );
-    return {
-      isFullMatch: matchingCount === 4,
-      matchingCount,
-      missingSubjects
-    };
-  };
-
   // Filter and sort courses
   const filteredCourses = useMemo(() => {
+    const checkCourseMatch = (course: CourseRequirement) => {
+      const requiredNormalized = course.subjects.map(normalizeSubject);
+      const matchingCount = requiredNormalized.filter(req => 
+        userSubjectsNormalized.some(user => user.includes(req) || req.includes(user))
+      ).length;
+      const missingSubjects = course.subjects.filter(req => 
+        !userSubjectsNormalized.some(user => {
+          const norm = normalizeSubject(req);
+          return user.includes(norm) || norm.includes(user);
+        })
+      );
+      return {
+        isFullMatch: matchingCount === 4,
+        matchingCount,
+        missingSubjects
+      };
+    };
+
     let courses = JAMB_COURSE_REQUIREMENTS;
 
     // Filter by search

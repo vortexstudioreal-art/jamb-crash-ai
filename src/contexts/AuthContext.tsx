@@ -1,6 +1,8 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, supabaseUrl } from '@/integrations/supabase/client';
+import { startPeriodicSync, stopPeriodicSync } from '@/services/syncService';
 
 // Package feature limits
 export type UserPackage = 'basic' | 'pro' | 'premium' | 'admin' | null;
@@ -183,8 +185,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setIsAdmin(false);
         setUserRole(null);
         setIsOwner(false);
-        setUserPackage(data.userPackage || null);
-        console.log('[Offline] Restored cached access for', email, '(admin/owner not cached)');
+        setUserPackage(data.userPackage || 'basic');
         return true;
       }
     } catch (e) {
@@ -215,8 +216,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       if (error) {
         console.error('Error checking access:', error);
-        // Fallback to cached data when offline/error
-        if (!navigator.onLine) {
+        if (navigator.onLine) {
+          setUserPackage('basic');
+        } else {
           restoreCachedAccess(email.toLowerCase());
         }
         return;
@@ -251,16 +253,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         // Cache for offline use
         cacheAccessState(email.toLowerCase(), accessState);
       } else {
+        // No payment/role record found — treat as free basic user
         setHasAccess(false);
         setIsAdmin(false);
         setUserRole(null);
         setIsOwner(false);
-        setUserPackage(null);
+        setUserPackage('basic');
       }
     } catch (err) {
       console.error('Access check failed:', err);
-      // Fallback to cached data when offline
-      if (!navigator.onLine) {
+      if (navigator.onLine) {
+        setUserPackage('basic');
+      } else {
         restoreCachedAccess(email.toLowerCase());
       }
     }
@@ -279,6 +283,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setSession(session);
         setUser(session?.user ?? null);
         
+        // Cache session for offline use
+        if (session) {
+          try {
+            localStorage.setItem('jamb_supabase_session', JSON.stringify(session));
+          } catch (e) {
+            console.error('Failed to cache session:', e);
+          }
+        } else {
+          try {
+            localStorage.removeItem('jamb_supabase_session');
+          } catch (e) {
+            // ignore
+          }
+        }
+        
         // Defer access check to avoid deadlock
         if (session?.user?.email) {
           setTimeout(() => {
@@ -296,6 +315,25 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
     );
 
+    // Offline fast-path: restore cached session immediately
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      try {
+        const cachedSession = localStorage.getItem('jamb_supabase_session');
+        if (cachedSession) {
+          const parsed = JSON.parse(cachedSession);
+          setSession(parsed);
+          setUser(parsed?.user ?? null);
+          if (parsed?.user?.email) {
+            restoreCachedAccess(parsed.user.email.toLowerCase());
+          }
+        }
+      } catch (e) {
+        console.error('Failed to restore cached session:', e);
+      }
+      setIsLoading(false);
+      return;
+    }
+
     // THEN check for existing session (and clear invalid tokens)
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       // Clear stale/invalid sessions automatically
@@ -306,7 +344,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           errorMsg.includes('invalid') ||
           errorMsg.includes('not found')
         ) {
-          console.log('Invalid session detected, signing out...');
           supabase.auth.signOut();
           setIsLoading(false);
           return;
@@ -316,6 +353,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setSession(session);
       setUser(session?.user ?? null);
       
+      // Cache session for offline use
+      if (session) {
+        try {
+          localStorage.setItem('jamb_supabase_session', JSON.stringify(session));
+        } catch (e) {
+          console.error('Failed to cache session:', e);
+        }
+      }
+      
       if (session?.user?.email) {
         checkUserAccess(session.user.email);
       }
@@ -324,21 +370,57 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     });
 
     return () => subscription.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Start/stop periodic sync based on user session
+  useEffect(() => {
+    if (user) {
+      startPeriodicSync(5 * 60 * 1000, (result) => {
+      });
+    } else {
+      stopPeriodicSync();
+    }
+
+    return () => stopPeriodicSync();
+  }, [user]);
+
   const signUp = async (email: string, password: string, fullName?: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-    
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: redirectUrl,
         data: {
           full_name: fullName,
         },
       },
     });
+    
+    if (!error && data?.user) {
+      // Auto-confirm via edge function (best effort)
+      try {
+        await fetch(`${supabaseUrl}/functions/v1/auto-confirm`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+      } catch {
+        // Edge function not deployed yet
+      }
+
+      // Also try RPC directly (in case migration is applied)
+      try {
+        await supabase.rpc('confirm_user_email', { user_email: email });
+      } catch {
+        // RPC not available yet
+      }
+
+      // Try signing in — if it fails, email confirmation is still on
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInError) {
+        return { error: new Error('email_not_confirmed') };
+      }
+    }
     
     return { error: error as Error | null };
   };
@@ -369,6 +451,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     localStorage.removeItem('jamb_trial_start');
     localStorage.removeItem('jamb_trial_subjects');
     localStorage.removeItem('jamb_user_email');
+    localStorage.removeItem('jamb_supabase_session');
     if (email) {
       localStorage.removeItem(`jamb_access_${email}`);
       localStorage.removeItem(`jamb_subjects_${email}`);

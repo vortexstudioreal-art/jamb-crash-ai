@@ -71,7 +71,7 @@ export const PaymentCancelledModal = ({
                   <Gift className="w-5 h-5" />
                   <div className="text-left">
                     <div className="font-semibold">Start Free Trial</div>
-                    <div className="text-xs opacity-80">30 minutes of Premium access</div>
+                    <div className="text-xs opacity-80">30 minutes of SCHOLAR access</div>
                   </div>
                 </Button>
               )}

@@ -94,7 +94,7 @@ export const UploadSection = ({ onUploadComplete, userSubjects = [] }: UploadSec
         setShowLimitReached(true);
         return;
       }
-      toast.error(`You can only upload ${remaining} more file(s) today. Upgrade to Pro for unlimited!`);
+      toast.error(`You can only upload ${remaining} more file(s) today. Upgrade to ACE for unlimited!`);
       return;
     }
     

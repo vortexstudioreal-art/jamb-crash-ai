@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { ReactNode, useState } from 'react';
 import { useAuth, PACKAGE_FEATURES, UserPackage } from '@/contexts/AuthContext';
 import { useTrialSystem } from '@/hooks/useTrialSystem';
@@ -79,6 +80,12 @@ const requiredPackage: Record<PlanFeature, 'basic' | 'pro' | 'premium'> = {
   advancedPrediction: 'premium',
 };
 
+const packageNameDisplay: Record<string, string> = {
+  basic: 'Free',
+  pro: 'ACE',
+  premium: 'SCHOLAR',
+};
+
 // Pro features available during trial
 const TRIAL_FEATURES: PlanFeature[] = [
   'fullQuiz',
@@ -151,11 +158,11 @@ export const FeatureGate = ({ children, feature, fallback, onUpgrade }: FeatureG
             {featureNames[feature]} Locked
           </h3>
           <p className="text-sm text-muted-foreground mb-4">
-            Upgrade to {requiredPackage[feature].charAt(0).toUpperCase() + requiredPackage[feature].slice(1)} to unlock this feature
+            Upgrade to {packageNameDisplay[requiredPackage[feature]] || requiredPackage[feature]} to unlock this feature
           </p>
           <Button onClick={handleUpgradeClick} className="gradient-primary">
             <Crown className="w-4 h-4 mr-2" />
-            Upgrade to {requiredPackage[feature].charAt(0).toUpperCase() + requiredPackage[feature].slice(1)}
+            Upgrade to {packageNameDisplay[requiredPackage[feature]] || requiredPackage[feature]}
           </Button>
         </div>
       </motion.div>

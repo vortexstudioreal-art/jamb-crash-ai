@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { Bell, Check, CheckCheck, ExternalLink, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatDistanceToNow } from 'date-fns';
 
 interface Notification {
@@ -51,7 +50,7 @@ export const NotificationDropdown = ({
         initial={{ opacity: 0, y: -10, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: -10, scale: 0.95 }}
-        className="fixed sm:absolute right-2 sm:right-0 top-16 sm:top-full sm:mt-2 w-[calc(100vw-1rem)] sm:w-96 max-w-md bg-background border border-border rounded-lg shadow-lg z-50 overflow-hidden transform-none"
+        className="fixed sm:absolute right-2 sm:right-0 top-16 sm:top-full sm:mt-2 w-[calc(100vw-1rem)] sm:w-96 max-w-md bg-background border border-border rounded-lg shadow-lg z-50"
         style={{ transform: 'none' }}
       >
         {/* Header */}
@@ -84,7 +83,7 @@ export const NotificationDropdown = ({
         </div>
 
         {/* Notifications List */}
-        <ScrollArea className="max-h-[400px]">
+        <div className="overflow-y-auto" style={{ maxHeight: '60vh' }}>
           {notifications.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground">
               <Bell className="w-10 h-10 mx-auto mb-2 opacity-50" />
@@ -103,7 +102,7 @@ export const NotificationDropdown = ({
                     <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${getTypeColor(notification.type)}`} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
-                        <h4 className={`font-medium text-sm truncate ${!notification.is_read ? 'text-foreground' : 'text-muted-foreground'}`}>
+                        <h4 className={`font-medium text-sm ${!notification.is_read ? 'text-foreground' : 'text-muted-foreground'}`}>
                           {notification.title}
                         </h4>
                         {!notification.is_read && (
@@ -117,7 +116,7 @@ export const NotificationDropdown = ({
                           </Button>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                      <p className="text-sm text-muted-foreground mt-1 whitespace-pre-line">
                         {notification.message}
                       </p>
                       <div className="flex items-center justify-between mt-2">
@@ -141,7 +140,7 @@ export const NotificationDropdown = ({
               ))}
             </div>
           )}
-        </ScrollArea>
+        </div>
       </motion.div>
     </>
   );

@@ -4,7 +4,8 @@ import { Check, BookOpen, Calculator, Atom, FlaskConical, Leaf, BookText, Buildi
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import type { Database } from '@/integrations/supabase/types';
+import { toast } from 'sonner';
 import { getMatchingCourses, getPartiallyMatchingCourses, SUBJECT_DISPLAY_NAMES } from '@/data/jambCourseRequirements';
 
 interface SubjectSelectorProps {
@@ -56,11 +57,7 @@ export const SubjectSelector = ({
         return prev.filter(s => s !== id);
       }
       if (prev.length >= 4) {
-        toast({
-          title: "Maximum 4 subjects! 📚",
-          description: "Remove one subject to add another",
-          variant: "destructive"
-        });
+        toast.error("Maximum 4 subjects! 📚", { description: "Remove one subject to add another" });
         return prev;
       }
       return [...prev, id];
@@ -69,11 +66,7 @@ export const SubjectSelector = ({
 
   const handleSubmit = async () => {
     if (selected.length !== 4) {
-      toast({
-        title: "Select 4 subjects! 🎯",
-        description: `You've selected ${selected.length}/4 subjects`,
-        variant: "destructive"
-      });
+      toast.error("Select 4 subjects! 🎯", { description: `You've selected ${selected.length}/4 subjects` });
       return;
     }
 
@@ -81,10 +74,7 @@ export const SubjectSelector = ({
     
     // BYPASS USERS: Skip database save, just proceed
     if (isBypassUser) {
-      toast({
-        title: "Awesome choice! 🎉",
-        description: "Your subjects are saved. Let's crush JAMB together!"
-      });
+      toast("Awesome choice! 🎉", { description: "Your subjects are saved. Let's crush JAMB together!" });
       onComplete(selected);
       setSaving(false);
       return;
@@ -102,11 +92,10 @@ export const SubjectSelector = ({
           const queue = JSON.parse(queueRaw);
           queue.push({ email: userEmail, subjects: selected, ts: Date.now() });
           localStorage.setItem("jamb_pending_subjects", JSON.stringify(queue));
-        } catch {}
-        toast({
-          title: "Saved offline 📴",
-          description: "We'll sync your subjects when you're back online.",
-        });
+        } catch {
+          // localStorage unavailable — subjects saved on next sync
+        }
+        toast("Saved offline 📴", { description: "We'll sync your subjects when you're back online." });
         onComplete(selected);
         setSaving(false);
         return;
@@ -116,22 +105,21 @@ export const SubjectSelector = ({
         .from('user_subjects')
         .upsert({
           email: userEmail,
-          subjects: selected as any,
+          subjects: selected as Database['public']['Enums']['jamb_subject'][],
           updated_at: new Date().toISOString()
         }, { onConflict: 'email' });
 
       if (error) throw error;
 
-      toast({
-        title: "Awesome choice! 🎉",
-        description: "Your subjects are saved. Let's crush JAMB together!"
-      });
+      toast("Awesome choice! 🎉", { description: "Your subjects are saved. Let's crush JAMB together!" });
       try {
         localStorage.setItem(
           `jamb_subjects_${userEmail}`,
           JSON.stringify(selected),
         );
-      } catch {}
+      } catch {
+        // localStorage unavailable — server copy is authoritative
+      }
       onComplete(selected);
     } catch (error) {
       console.error('Error saving subjects:', error);
@@ -146,20 +134,15 @@ export const SubjectSelector = ({
           const queue = JSON.parse(queueRaw);
           queue.push({ email: userEmail, subjects: selected, ts: Date.now() });
           localStorage.setItem("jamb_pending_subjects", JSON.stringify(queue));
-        } catch {}
-        toast({
-          title: "Saved offline 📴",
-          description: "We'll sync your subjects when you're back online.",
-        });
+        } catch {
+          // localStorage unavailable — offline queue skipped
+        }
+        toast("Saved offline 📴", { description: "We'll sync your subjects when you're back online." });
         onComplete(selected);
         setSaving(false);
         return;
       }
-      toast({
-        title: "Oops! Something went wrong",
-        description: "Please try again",
-        variant: "destructive"
-      });
+      toast.error("Oops! Something went wrong", { description: "Please try again" });
     } finally {
       setSaving(false);
     }

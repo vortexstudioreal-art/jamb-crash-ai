@@ -1,7 +1,13 @@
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Shield } from 'lucide-react';
+import { useSeo } from '@/hooks/useSeo';
 
 const PrivacyPolicy = () => {
+  useSeo({
+    title: 'Privacy Policy | Jamb Crash AI',
+    description: 'How Jamb Crash AI collects, uses, and protects your personal data while you prepare for JAMB with our AI-powered study platform.',
+    path: '/privacy',
+  });
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="container max-w-3xl py-10 px-4">

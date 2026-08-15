@@ -86,7 +86,8 @@ serve(async (req) => {
 
     const packageName = paystackData.data.metadata?.package || "basic";
     // Access duration: basic & pro = 1 year, premium/ultimate = forever (100 years)
-    let accessDays = 365; // Default 1 year for basic
+    // NOTE: Must match paystack-webhook/index.ts durations
+    let accessDays = 365; // 1 year for basic
     if (packageName === "pro") {
       accessDays = 365; // 1 year
     } else if (packageName === "premium" || packageName === "ultimate") {

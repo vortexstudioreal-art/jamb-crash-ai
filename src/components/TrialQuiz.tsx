@@ -4,7 +4,8 @@ import { Clock, CheckCircle, XCircle, ChevronRight, Loader2 } from 'lucide-react
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import type { Database } from '@/integrations/supabase/types';
+import { toast } from 'sonner';
 
 interface Question {
   id: string;
@@ -16,6 +17,8 @@ interface Question {
   correct_answer: string;
   explanation?: string;
   subject: string;
+  year?: number;
+  image_url?: string | null;
 }
 
 interface TrialQuizProps {
@@ -53,7 +56,7 @@ export const TrialQuiz = ({ subjects, onComplete, onExit }: TrialQuizProps) => {
           const { data, error } = await supabase
             .from('jamb_questions')
             .select('*')
-            .eq('subject', subject as any)
+            .eq('subject', subject as Database['public']['Enums']['jamb_subject'])
             .limit(100);
           
           if (!error && data && data.length > 0) {
@@ -68,19 +71,11 @@ export const TrialQuiz = ({ subjects, onComplete, onExit }: TrialQuizProps) => {
           const shuffled = allQuestions.sort(() => Math.random() - 0.5);
           setQuestions(shuffled.slice(0, 20));
         } else {
-          toast({
-            title: "No questions available",
-            description: "Please try again later",
-            variant: "destructive"
-          });
+          toast.error("No questions available", { description: "Please try again later" });
         }
       } catch (error) {
         console.error('Error loading questions:', error);
-        toast({
-          title: "Error loading quiz",
-          description: "Please try again",
-          variant: "destructive"
-        });
+        toast.error("Error loading quiz", { description: "Please try again" });
       } finally {
         setIsLoading(false);
       }
@@ -104,6 +99,7 @@ export const TrialQuiz = ({ subjects, onComplete, onExit }: TrialQuizProps) => {
     }, 1000);
 
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, timeLeft]);
 
   const formatTime = (seconds: number) => {
@@ -221,6 +217,11 @@ export const TrialQuiz = ({ subjects, onComplete, onExit }: TrialQuizProps) => {
                 <p className="text-xl font-medium text-foreground leading-relaxed">
                   {currentQuestion.question}
                 </p>
+                {currentQuestion.image_url && (
+                  <div className="mt-4 flex justify-center">
+                    <img src={currentQuestion.image_url} alt="Question diagram" className="max-w-full h-auto rounded-lg border border-border" style={{ maxHeight: 300 }} />
+                  </div>
+                )}
               </div>
 
               <div className="space-y-3">

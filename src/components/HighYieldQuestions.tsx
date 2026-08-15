@@ -1,18 +1,21 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { TrendingUp, Target, BookOpen, Flame, ChevronRight, Lightbulb, AlertCircle, Play, ArrowLeft, CheckCircle, XCircle } from 'lucide-react';
+import { TrendingUp, Target, BookOpen, Flame, ChevronRight, Lightbulb, AlertCircle, Play, ArrowLeft, CheckCircle, XCircle, Loader2, Sparkles } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { shuffleQuestionList } from '@/lib/quizShuffle';
+import ReactMarkdown from 'react-markdown';
+import { useAiExplanation } from '@/hooks/useAiExplanation';
 
 interface Question {
   id: string;
@@ -22,9 +25,10 @@ interface Question {
   option_c: string;
   option_d: string;
   correct_answer: string;
-  explanation: string | null;
+  explanation?: string;
   subject: string;
-  year: number | null;
+  year?: number;
+  image_url?: string | null;
 }
 
 interface TopicGroup {
@@ -321,6 +325,20 @@ const TopicQuiz = ({ questions, topicLabel, subject, onExit }: TopicQuizProps) =
 
   const currentQuestion = shuffledQuestions[currentIndex];
   const progress = ((currentIndex + 1) / shuffledQuestions.length) * 100;
+
+  // AI explanation hook
+  const {
+    explanation: aiExplanation,
+    isLoading: isAiLoading,
+    error: aiError,
+    getExplanation: fetchAiExplanation,
+    cancel: cancelAi,
+  } = useAiExplanation();
+
+  // Reset AI explanation when moving to a new question
+  useEffect(() => {
+    cancelAi();
+  }, [currentQuestion, cancelAi]);
   const answeredCount = Object.keys(answers).length;
 
   const handleAnswer = (answer: string) => {
@@ -347,7 +365,7 @@ const TopicQuiz = ({ questions, topicLabel, subject, onExit }: TopicQuizProps) =
         await supabase.from('quiz_attempts').insert({
           email: user.email,
           quiz_type: 'topic-practice',
-          subjects: [subject] as any,
+          subjects: [subject] as Database['public']['Enums']['jamb_subject'][],
           total_questions: shuffledQuestions.length,
           correct_answers: correctCount,
           time_taken_seconds: 0,
@@ -437,7 +455,14 @@ const TopicQuiz = ({ questions, topicLabel, subject, onExit }: TopicQuizProps) =
                   {currentQuestion.year && (
                     <Badge variant="outline" className="shrink-0">{currentQuestion.year}</Badge>
                   )}
-                  <p className="text-base font-medium">{currentQuestion.question}</p>
+                  <div className="flex-1">
+                    <p className="text-base font-medium">{currentQuestion.question}</p>
+                    {currentQuestion.image_url && (
+                      <div className="mt-3 flex justify-center">
+                        <img src={currentQuestion.image_url} alt="Question diagram" className="max-w-full h-auto rounded-lg border border-border" style={{ maxHeight: 250 }} />
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -479,7 +504,72 @@ const TopicQuiz = ({ questions, topicLabel, subject, onExit }: TopicQuizProps) =
                     <p className="text-sm">{currentQuestion.explanation}</p>
                   </motion.div>
                 )}
-              </CardContent>
+                {/* AI Explanation Section */}
+                <div className="border-t border-primary/20 pt-3 mt-4">
+                  {aiExplanation ? (
+                    <div className="space-y-2">
+                      <p className="text-sm font-semibold text-primary flex items-center gap-1">
+                        <Sparkles className="w-4 h-4 text-yellow-500 animate-pulse" />
+                        AI Detailed Explanation
+                      </p>
+                      <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap">
+                        <ReactMarkdown>{aiExplanation}</ReactMarkdown>
+                      </div>
+                    </div>
+                  ) : aiError ? (
+                    <div className="text-destructive text-xs py-1">
+                      Failed to load AI explanation. {aiError}
+                      <Button
+                        variant="link"
+                        size="sm"
+                        onClick={() =>
+                          fetchAiExplanation({
+                            question: currentQuestion.question,
+                            option_a: currentQuestion.option_a,
+                            option_b: currentQuestion.option_b,
+                            option_c: currentQuestion.option_c,
+                            option_d: currentQuestion.option_d,
+                            correct_answer: currentQuestion.correct_answer,
+                            subject: currentQuestion.subject,
+                          })
+                        }
+                        className="text-primary text-xs h-auto p-0 ml-2 animate-pulse"
+                      >
+                        Retry
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-xs bg-transparent border-primary/30 hover:bg-primary/10 text-primary dark:text-primary-foreground gap-1.5"
+                      disabled={isAiLoading}
+                      onClick={() =>
+                        fetchAiExplanation({
+                          question: currentQuestion.question,
+                          option_a: currentQuestion.option_a,
+                          option_b: currentQuestion.option_b,
+                          option_c: currentQuestion.option_c,
+                          option_d: currentQuestion.option_d,
+                          correct_answer: currentQuestion.correct_answer,
+                          subject: currentQuestion.subject,
+                        })
+                      }
+                    >
+                      {isAiLoading ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          Generating AI Explanation...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-3.5 h-3.5 text-yellow-500" />
+                          Explain with AI
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>              </CardContent>
             </Card>
           </motion.div>
         </AnimatePresence>

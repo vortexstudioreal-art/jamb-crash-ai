@@ -2,7 +2,7 @@ import { useFeatureUsage, FeatureType, FEATURE_NAMES } from '@/hooks/useFeatureU
 import { useAuth } from '@/contexts/AuthContext';
 import { useTrialSystem } from '@/hooks/useTrialSystem';
 import { Progress } from '@/components/ui/progress';
-import { FileText, Layers } from 'lucide-react';
+import { FileText, Layers, Zap, Sparkles, Calendar, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface UsageItemProps {
@@ -92,6 +92,26 @@ export const UsageLimitIndicator = () => {
           feature="flashcard_generation" 
           icon={<Layers className="w-4 h-4 text-orange-500" />}
           colorClass="bg-orange-500/10"
+        />
+        <UsageItem 
+          feature="quick_quiz" 
+          icon={<Zap className="w-4 h-4 text-purple-500" />}
+          colorClass="bg-purple-500/10"
+        />
+        <UsageItem 
+          feature="syllabus_ai_explanation" 
+          icon={<Sparkles className="w-4 h-4 text-cyan-500" />}
+          colorClass="bg-cyan-500/10"
+        />
+        <UsageItem 
+          feature="study_plan_days" 
+          icon={<Calendar className="w-4 h-4 text-green-500" />}
+          colorClass="bg-green-500/10"
+        />
+        <UsageItem 
+          feature="subject_change" 
+          icon={<RefreshCw className="w-4 h-4 text-rose-500" />}
+          colorClass="bg-rose-500/10"
         />
       </div>
     </motion.div>

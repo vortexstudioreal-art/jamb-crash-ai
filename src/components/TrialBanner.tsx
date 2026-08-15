@@ -30,7 +30,7 @@ export const TrialBanner = ({ userEmail, isAdmin, hasAccess, onTrialStart }: Tri
     setStarting(false);
     
     if (success) {
-      toast.success('🎉 Your 30-minute Premium trial has started!');
+      toast.success('🎉 Your 30-minute SCHOLAR trial has started!');
       onTrialStart();
     } else if (hasTrialUsed) {
       toast.error('You have already used your free trial');
@@ -67,10 +67,10 @@ export const TrialBanner = ({ userEmail, isAdmin, hasAccess, onTrialStart }: Tri
         </motion.div>
         <div className="flex-1">
           <h3 className="text-white font-bold text-lg mb-1">
-            Try Premium FREE! ⚡
+            Try SCHOLAR FREE! ⚡
           </h3>
           <p className="text-white/80 text-sm mb-3">
-            Get 30 minutes of full Premium access. No payment required!
+            Get 30 minutes of full SCHOLAR access. No payment required!
           </p>
           <div className="flex items-center gap-2 text-white/70 text-xs mb-3">
             <Clock className="w-3 h-3" />

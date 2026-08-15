@@ -6,6 +6,8 @@ import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
+import { useFeatureUsage } from '@/hooks/useFeatureUsage';
+import { FeatureLimitReached } from '@/components/FeatureLimitReached';
 
 interface StudyPlanGeneratorProps {
   userEmail: string;
@@ -15,11 +17,13 @@ interface StudyPlanGeneratorProps {
   weakestSubject?: string;
   examDate?: string;
   onBack: () => void;
+  onViewCalendar?: () => void;
 }
 
 interface DayPlan {
   day: number;
   date: string;
+  isoDate: string;
   dayName: string;
   subjects: {
     name: string;
@@ -58,6 +62,26 @@ const SUBJECT_TOPICS: Record<string, string[]> = {
 
 const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
+interface AiPlanSubject {
+  name: string;
+  topics?: string[];
+  duration?: string;
+  priority?: string;
+  quizGoal?: number;
+}
+
+interface AiPlanDay {
+  day: number;
+  focusArea?: string;
+  subjects?: AiPlanSubject[];
+}
+
+const toLocalIsoDate = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+const formatDisplayDate = (iso: string) =>
+  new Date(`${iso}T00:00:00`).toLocaleDateString('en-NG', { month: 'short', day: 'numeric' });
+
 export const StudyPlanGenerator = ({
   userEmail,
   subjects,
@@ -66,11 +90,15 @@ export const StudyPlanGenerator = ({
   weakestSubject,
   examDate,
   onBack,
+  onViewCalendar,
 }: StudyPlanGeneratorProps) => {
   const [step, setStep] = useState<'configure' | 'generating' | 'display'>('configure');
   const [progress, setProgress] = useState(0);
   const [plan, setPlan] = useState<DayPlan[]>([]);
   const [currentDay, setCurrentDay] = useState(0);
+  const [isSaving, setIsSaving] = useState(false);
+  const [savedPlanId, setSavedPlanId] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState(false);
   
   // User configuration
   const [selectedDays, setSelectedDays] = useState<string[]>(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']);
@@ -80,6 +108,9 @@ export const StudyPlanGenerator = ({
   // Quiz performance data
   const [quizPerformance, setQuizPerformance] = useState<QuizPerformance[]>([]);
   const [isLoadingPerformance, setIsLoadingPerformance] = useState(true);
+
+  const [showStudyPlanLimitModal, setShowStudyPlanLimitModal] = useState(false);
+  const { canUseFeature, incrementUsage } = useFeatureUsage();
 
   // Load quiz performance data
   useEffect(() => {
@@ -103,7 +134,7 @@ export const StudyPlanGenerator = ({
           
           // Try to get detailed question data if available
           if (attempt.questions_data && Array.isArray(attempt.questions_data)) {
-            attempt.questions_data.forEach((q: any) => {
+            (attempt.questions_data as Array<{ subject: string; userAnswer?: string; correct_answer?: string }>).forEach((q) => {
               const subject = q.subject;
               if (!subjectStats[subject]) {
                 subjectStats[subject] = { correct: 0, total: 0, recentCorrect: 0, recentTotal: 0 };
@@ -180,13 +211,61 @@ export const StudyPlanGenerator = ({
   const generatePlan = async () => {
     if (selectedDays.length === 0 || selectedSubjects.length === 0) return;
     
-    setStep('generating');
-    
-    // Simulate AI generation with progress
-    for (let i = 0; i <= 100; i += 5) {
-      await new Promise(r => setTimeout(r, 80));
-      setProgress(i);
+    // Check daily limit for FREE users
+    if (!canUseFeature('study_plan_days')) {
+      setShowStudyPlanLimitModal(true);
+      return;
     }
+    const ok = await incrementUsage('study_plan_days');
+    if (!ok) {
+      setShowStudyPlanLimitModal(true);
+      return;
+    }
+    
+    setStep('generating');
+
+    // Build the date skeleton for the selected study days
+    const today = new Date();
+    const daySlots: { day: number; isoDate: string; dayName: string }[] = [];
+    for (let i = 0; i < 14 && daySlots.length < selectedDays.length; i++) {
+      const checkDate = new Date(today);
+      checkDate.setDate(today.getDate() + i);
+      const dayName = DAYS_OF_WEEK[checkDate.getDay()];
+      if (selectedDays.includes(dayName)) {
+        daySlots.push({
+          day: daySlots.length + 1,
+          isoDate: toLocalIsoDate(checkDate),
+          dayName,
+        });
+      }
+    }
+
+    // Run the progress animation while the AI builds the plan
+    const progressPromise = (async () => {
+      for (let i = 5; i <= 95; i += 5) {
+        await new Promise((r) => setTimeout(r, 100));
+        setProgress(i);
+      }
+    })();
+
+    // Ask the AI for a personalized plan (falls back to local logic if unavailable)
+    const { data: aiData } = await supabase.functions.invoke('generate-study-plan', {
+      body: {
+        subjects: selectedSubjects,
+        selectedDays,
+        hoursPerSession,
+        targetScore,
+        examDate: examDate ?? null,
+        quizPerformance,
+        daySlots,
+      },
+    });
+    setProgress(100);
+    await progressPromise;
+
+    const aiDays: AiPlanDay[] = aiData && !aiData.fallback && Array.isArray(aiData.days)
+      ? (aiData.days as AiPlanDay[])
+      : [];
 
     // Sort subjects by weakness (lowest accuracy first)
     const sortedSubjects = [...selectedSubjects].sort((a, b) => {
@@ -194,84 +273,152 @@ export const StudyPlanGenerator = ({
       const perfB = quizPerformance.find(p => p.subject === b);
       return (perfA?.accuracy || 50) - (perfB?.accuracy || 50);
     });
-    
+
     // Identify weak subjects (below 60% or no data)
     const weakSubjects = sortedSubjects.filter(s => {
       const perf = quizPerformance.find(p => p.subject === s);
       return !perf || perf.accuracy < 60;
     });
-    
-    // Generate plan for selected days
-    const generatedPlan: DayPlan[] = [];
-    const today = new Date();
-    let dayIndex = 0;
-    
-    // Find next occurrence of each selected day
-    for (let i = 0; i < 14 && generatedPlan.length < selectedDays.length; i++) {
-      const checkDate = new Date(today);
-      checkDate.setDate(today.getDate() + i);
-      const dayName = DAYS_OF_WEEK[checkDate.getDay()];
-      
-      if (selectedDays.includes(dayName)) {
-        const subjectsForDay: DayPlan['subjects'] = [];
-        const hoursPerSubject = hoursPerSession / Math.min(selectedSubjects.length, 3);
-        
-        // Rotate through subjects, prioritizing weak ones
-        const daySubjects = [...sortedSubjects];
-        // Always include weak subjects
-        const prioritySubjects = daySubjects.filter(s => weakSubjects.includes(s)).slice(0, 2);
-        const otherSubjects = daySubjects.filter(s => !weakSubjects.includes(s));
-        
-        // Take up to 3 subjects per day
-        const todaySubjects = [...prioritySubjects, ...otherSubjects].slice(0, 3);
-        
-        todaySubjects.forEach((subject, idx) => {
-          const perf = quizPerformance.find(p => p.subject === subject);
-          const isWeak = weakSubjects.includes(subject);
-          const topics = SUBJECT_TOPICS[subject] || ['General Topics'];
-          
-          // Select topics based on day rotation
-          const startIdx = (dayIndex * 2) % topics.length;
-          const selectedTopics = topics.slice(startIdx, startIdx + 3);
-          if (selectedTopics.length < 3) {
-            selectedTopics.push(...topics.slice(0, 3 - selectedTopics.length));
-          }
-          
-          // Calculate quiz goal based on performance
-          let quizGoal = 15;
-          if (isWeak) quizGoal = 25;
-          else if (perf && perf.accuracy >= 80) quizGoal = 10;
-          
-          subjectsForDay.push({
-            name: subject,
-            topics: selectedTopics,
-            duration: `${Math.round(hoursPerSubject * (isWeak ? 1.3 : 1))} hour${hoursPerSubject >= 1 ? 's' : ''}`,
-            priority: isWeak ? 'high' : idx === 0 ? 'medium' : 'low',
-            quizGoal
-          });
+
+    // Local fallback: rotate subjects, prioritizing weak ones
+    const buildFallbackSubjects = (dayIndex: number): DayPlan['subjects'] => {
+      const subjectsForDay: DayPlan['subjects'] = [];
+      const hoursPerSubject = hoursPerSession / Math.min(selectedSubjects.length, 3);
+
+      const daySubjects = [...sortedSubjects];
+      const prioritySubjects = daySubjects.filter(s => weakSubjects.includes(s)).slice(0, 2);
+      const otherSubjects = daySubjects.filter(s => !weakSubjects.includes(s));
+      const todaySubjects = [...prioritySubjects, ...otherSubjects].slice(0, 3);
+
+      todaySubjects.forEach((subject, idx) => {
+        const perf = quizPerformance.find(p => p.subject === subject);
+        const isWeak = weakSubjects.includes(subject);
+        const topics = SUBJECT_TOPICS[subject] || ['General Topics'];
+
+        const startIdx = (dayIndex * 2) % topics.length;
+        const selectedTopics = topics.slice(startIdx, startIdx + 3);
+        if (selectedTopics.length < 3) {
+          selectedTopics.push(...topics.slice(0, 3 - selectedTopics.length));
+        }
+
+        let quizGoal = 15;
+        if (isWeak) quizGoal = 25;
+        else if (perf && perf.accuracy >= 80) quizGoal = 10;
+
+        subjectsForDay.push({
+          name: subject,
+          topics: selectedTopics,
+          duration: `${Math.round(hoursPerSubject * (isWeak ? 1.3 : 1))} hour${hoursPerSubject >= 1 ? 's' : ''}`,
+          priority: isWeak ? 'high' : idx === 0 ? 'medium' : 'low',
+          quizGoal
         });
-        
-        // Determine focus area based on weakest subject for the day
-        const weakestToday = subjectsForDay.find(s => s.priority === 'high');
-        const focusArea = weakestToday 
+      });
+
+      return subjectsForDay;
+    };
+
+    // Merge the AI plan (or fallback) into the date skeleton
+    const generatedPlan: DayPlan[] = daySlots.map((slot) => {
+      const dayIdx = slot.day - 1;
+      const aiDay = aiDays.find(d => d.day === slot.day) || aiDays[dayIdx];
+
+      const subjectsForDay: DayPlan['subjects'] = aiDay?.subjects && aiDay.subjects.length > 0
+        ? aiDay.subjects
+            .filter(s => s && typeof s.name === 'string' && selectedSubjects.includes(s.name))
+            .slice(0, 3)
+            .map(s => ({
+              name: s.name,
+              topics: s.topics && s.topics.length > 0
+                ? s.topics
+                : (SUBJECT_TOPICS[s.name] || ['General Topics']).slice(0, 3),
+              duration: typeof s.duration === 'string' && s.duration ? s.duration : '1 hour',
+              priority: s.priority === 'high' || s.priority === 'low' ? s.priority : 'medium',
+              quizGoal: typeof s.quizGoal === 'number' && s.quizGoal > 0 ? s.quizGoal : 15
+            }))
+        : buildFallbackSubjects(dayIdx);
+
+      const weakestToday = subjectsForDay.find(s => s.priority === 'high');
+      const focusArea = aiDay?.focusArea && typeof aiDay.focusArea === 'string'
+        ? aiDay.focusArea
+        : weakestToday
           ? `Focus on ${weakestToday.name.replace('_', ' ')} improvement`
           : 'Balanced practice day';
-        
-        generatedPlan.push({
-          day: dayIndex + 1,
-          date: checkDate.toLocaleDateString('en-NG', { month: 'short', day: 'numeric' }),
-          dayName,
-          subjects: subjectsForDay,
-          totalHours: hoursPerSession,
-          focusArea
-        });
-        
-        dayIndex++;
-      }
-    }
+
+      return {
+        day: slot.day,
+        date: formatDisplayDate(slot.isoDate),
+        isoDate: slot.isoDate,
+        dayName: slot.dayName,
+        subjects: subjectsForDay,
+        totalHours: hoursPerSession,
+        focusArea
+      };
+    });
 
     setPlan(generatedPlan);
     setStep('display');
+    void savePlanToDb(generatedPlan);
+  };
+
+  // Persist the plan so users can follow it (calendar + task tracking)
+  const savePlanToDb = async (planToSave: DayPlan[]) => {
+    if (!userEmail) return;
+    setIsSaving(true);
+    setSaveError(false);
+    try {
+      // Archive any previous active plan
+      await supabase
+        .from('study_plans')
+        .update({ status: 'archived', updated_at: new Date().toISOString() })
+        .eq('email', userEmail)
+        .eq('status', 'active');
+
+      const { data: planRow, error: planError } = await supabase
+        .from('study_plans')
+        .insert({
+          email: userEmail,
+          plan_data: planToSave,
+          target_score: targetScore,
+          hours_per_day: hoursPerSession,
+        })
+        .select('id')
+        .single();
+
+      if (planError || !planRow) {
+        setSaveError(true);
+        return;
+      }
+
+      const tasks = planToSave.flatMap((day) =>
+        day.subjects.map((subject) => ({
+          plan_id: planRow.id,
+          day: day.day,
+          date: day.isoDate,
+          day_name: day.dayName,
+          subject: subject.name,
+          topics: subject.topics,
+          duration: subject.duration,
+          priority: subject.priority,
+          quiz_goal: subject.quizGoal,
+        }))
+      );
+
+      const { error: tasksError } = await supabase
+        .from('study_plan_tasks')
+        .insert(tasks);
+
+      if (tasksError) {
+        setSaveError(true);
+        return;
+      }
+
+      setSavedPlanId(planRow.id);
+    } catch (error) {
+      console.error('Failed to save study plan:', error);
+      setSaveError(true);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleDownloadPDF = () => {
@@ -425,6 +572,7 @@ ${quizPerformance.filter(p => p.accuracy < 60).length > 0 ? `
   // Configuration Step
   if (step === 'configure') {
     return (
+      <>
       <div className="min-h-screen bg-background py-8 px-4">
         <div className="max-w-2xl mx-auto">
           <motion.div
@@ -624,12 +772,20 @@ ${quizPerformance.filter(p => p.accuracy < 60).length > 0 ? `
           </motion.div>
         </div>
       </div>
+      {showStudyPlanLimitModal && (
+        <FeatureLimitReached
+          featureType="study_plan_days"
+          onBonusEarned={() => setShowStudyPlanLimitModal(false)}
+        />
+      )}
+    </>
     );
   }
 
   // Generating Step
   if (step === 'generating') {
     return (
+      <>
       <div className="fixed inset-0 bg-background z-50 flex items-center justify-center p-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -664,11 +820,19 @@ ${quizPerformance.filter(p => p.accuracy < 60).length > 0 ? `
           </div>
         </motion.div>
       </div>
+      {showStudyPlanLimitModal && (
+        <FeatureLimitReached
+          featureType="study_plan_days"
+          onBonusEarned={() => setShowStudyPlanLimitModal(false)}
+        />
+      )}
+    </>
     );
   }
 
   // Display Step
   return (
+    <>
     <div className="min-h-screen bg-background py-8 px-4">
       <div className="max-w-4xl mx-auto">
         {/* Success Header */}
@@ -694,21 +858,60 @@ ${quizPerformance.filter(p => p.accuracy < 60).length > 0 ? `
           </p>
         </motion.div>
 
-        {/* Download Button */}
+        {/* Save status + Follow / Download */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="flex justify-center mb-8"
+          className="mb-8"
         >
-          <Button
-            onClick={handleDownloadPDF}
-            size="lg"
-            className="bg-gradient-to-r from-primary to-green-500 hover:opacity-90 text-white px-8 py-6 text-lg rounded-2xl shadow-lg"
-          >
-            <Download className="w-6 h-6 mr-2" />
-            Download Study Plan
-          </Button>
+          {savedPlanId && !saveError ? (
+            <div className="mb-4 flex items-center justify-center gap-2 text-green-600 text-sm">
+              <CheckCircle className="w-4 h-4" />
+              <span>Plan saved! You can now follow it in your study calendar.</span>
+            </div>
+          ) : saveError ? (
+            <div className="mb-4 flex items-center justify-center gap-2 text-red-500 text-sm">
+              <span>Plan couldn't be saved.</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => void savePlanToDb(plan)}
+                disabled={isSaving}
+              >
+                Retry
+              </Button>
+            </div>
+          ) : (
+            <div className="mb-4 flex items-center justify-center gap-2 text-muted-foreground text-sm">
+              <span>{isSaving ? 'Saving your plan...' : 'Saving your plan for calendar tracking...'}</span>
+            </div>
+          )}
+          <div className="flex flex-col sm:flex-row justify-center gap-3">
+            {savedPlanId && !saveError && onViewCalendar && (
+              <Button
+                onClick={onViewCalendar}
+                size="lg"
+                className="bg-gradient-to-r from-primary to-green-500 hover:opacity-90 text-white px-8 py-6 text-lg rounded-2xl shadow-lg"
+              >
+                <Calendar className="w-6 h-6 mr-2" />
+                Follow Plan & Open Calendar
+              </Button>
+            )}
+            <Button
+              onClick={handleDownloadPDF}
+              size="lg"
+              variant={savedPlanId && !saveError ? 'outline' : 'default'}
+              className={`${
+                savedPlanId && !saveError
+                  ? ''
+                  : 'bg-gradient-to-r from-primary to-green-500 hover:opacity-90 text-white'
+              } px-8 py-6 text-lg rounded-2xl shadow-lg`}
+            >
+              <Download className="w-6 h-6 mr-2" />
+              Download Study Plan
+            </Button>
+          </div>
         </motion.div>
 
         {/* Plan Overview */}
@@ -919,5 +1122,12 @@ ${quizPerformance.filter(p => p.accuracy < 60).length > 0 ? `
         </motion.p>
       </div>
     </div>
+    {showStudyPlanLimitModal && (
+      <FeatureLimitReached
+        featureType="study_plan_days"
+        onBonusEarned={() => setShowStudyPlanLimitModal(false)}
+      />
+      )}
+  </>
   );
 };

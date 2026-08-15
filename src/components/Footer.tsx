@@ -55,6 +55,14 @@ export const Footer = () => {
                 <li><Link to="/privacy#refund" className="hover:text-background transition-colors">Refund Policy</Link></li>
               </ul>
             </div>
+
+            <div>
+              <h4 className="font-semibold mb-4">For Schools & Resellers</h4>
+              <ul className="space-y-2 text-sm text-background/70">
+                <li><Link to="/reseller" className="hover:text-background transition-colors">Reseller Dashboard</Link></li>
+                <li><Link to="/redeem-pin" className="hover:text-background transition-colors">Redeem PIN</Link></li>
+              </ul>
+            </div>
           </div>
         </div>
 

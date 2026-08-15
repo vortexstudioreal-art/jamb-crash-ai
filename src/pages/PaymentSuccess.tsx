@@ -5,6 +5,7 @@ import { CheckCircle, Loader2, Mail, ArrowRight, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePaystack } from '@/hooks/usePaystack';
 import { useAccessControl } from '@/hooks/useAccessControl';
+import { useSeo } from '@/hooks/useSeo';
 
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
@@ -17,6 +18,13 @@ const PaymentSuccess = () => {
     amount: number;
     package: string;
   } | null>(null);
+
+  useSeo({
+    title: 'Payment Status | Jamb Crash AI',
+    description: 'Payment confirmation for your Jamb Crash AI subscription.',
+    path: '/payment-success',
+    noindex: true,
+  });
 
   useEffect(() => {
     const reference = searchParams.get('reference');
@@ -42,7 +50,7 @@ const PaymentSuccess = () => {
     };
 
     verify();
-  }, [searchParams, verifyPayment]);
+  }, [searchParams, verifyPayment, setUserEmail]);
 
   const handleContinue = () => {
     // Store payment info in sessionStorage for the upload step
@@ -61,7 +69,7 @@ const PaymentSuccess = () => {
           className="text-center"
         >
           <Loader2 className="w-16 h-16 text-primary animate-spin mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-foreground mb-2">Verifying Payment</h2>
+          <h1 className="text-2xl font-bold text-foreground mb-2">Verifying Payment</h1>
           <p className="text-muted-foreground">Please wait while we confirm your payment...</p>
         </motion.div>
       </div>
@@ -79,7 +87,7 @@ const PaymentSuccess = () => {
           <div className="w-20 h-20 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-6">
             <XCircle className="w-10 h-10 text-destructive" />
           </div>
-          <h2 className="text-2xl font-bold text-foreground mb-2">Payment Failed</h2>
+          <h1 className="text-2xl font-bold text-foreground mb-2">Payment Failed</h1>
           <p className="text-muted-foreground mb-6">
             We couldn't verify your payment. Please try again or contact support.
           </p>
@@ -122,7 +130,7 @@ const PaymentSuccess = () => {
           <CheckCircle className="w-10 h-10 text-primary-foreground" />
         </motion.div>
 
-        <h2 className="text-2xl font-bold text-foreground mb-2">Payment Successful!</h2>
+        <h1 className="text-2xl font-bold text-foreground mb-2">Payment Successful!</h1>
         <p className="text-muted-foreground mb-6">
           Thank you for your purchase. Your study plan is being prepared.
         </p>

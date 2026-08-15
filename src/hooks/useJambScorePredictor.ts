@@ -6,7 +6,12 @@ interface QuizAttempt {
   total_questions: number;
   correct_answers: number;
   created_at: string;
-  questions_data?: any;
+  questions_data?: Array<{
+    subject?: string;
+    userAnswer?: string;
+    correct_answer?: string;
+    isCorrect?: boolean;
+  }>;
 }
 
 interface PredictionResult {

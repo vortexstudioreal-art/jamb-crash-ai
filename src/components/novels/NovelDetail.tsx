@@ -7,6 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { getCachedNovel, getCachedChaptersByNovel } from '@/services/offlineStorage';
 
 interface Chapter {
@@ -24,9 +25,9 @@ interface NovelDetailProps {
 }
 
 export const NovelDetail = ({ novelId, userEmail, onBack, onStartReading }: NovelDetailProps) => {
-  const [novel, setNovel] = useState<any>(null);
+  const [novel, setNovel] = useState<Database['public']['Tables']['novels']['Row'] | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
-  const [progress, setProgress] = useState<any>(null);
+  const [progress, setProgress] = useState<(Database['public']['Tables']['user_novel_progress']['Row'] & { current_chapter?: { chapter_number?: number } | null }) | null>(null);
   const [loading, setLoading] = useState(true);
   const [isOffline, setIsOffline] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
@@ -112,8 +113,6 @@ export const NovelDetail = ({ novelId, userEmail, onBack, onStartReading }: Nove
         
         if (progressData) setProgress(progressData);
       } catch {
-        // Fallback to cache
-        console.log('[Offline] Loading novel detail from cache');
         setIsOffline(true);
         
         const cachedNovel = await getCachedNovel(novelId);
@@ -224,7 +223,7 @@ export const NovelDetail = ({ novelId, userEmail, onBack, onStartReading }: Nove
             )}
             {novel.is_premium && (
               <Badge variant="secondary">
-                <Star className="w-3 h-3 mr-1" /> Premium
+                <Star className="w-3 h-3 mr-1" /> SCHOLAR
               </Badge>
             )}
           </div>
@@ -372,7 +371,7 @@ export const NovelDetail = ({ novelId, userEmail, onBack, onStartReading }: Nove
             ) : !hasAccess ? (
               <div className="rounded-lg border bg-card p-8 text-center">
                 <Lock className="w-12 h-12 mx-auto text-primary mb-3" />
-                <p className="text-foreground font-medium mb-1">Premium content</p>
+                <p className="text-foreground font-medium mb-1">SCHOLAR content</p>
                 <p className="text-sm text-muted-foreground mb-4">
                   Upgrade to read the full book PDF.
                 </p>

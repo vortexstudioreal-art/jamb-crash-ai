@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -79,7 +79,7 @@ interface JambQuestion {
 }
 
 // deno-lint-ignore no-explicit-any
-async function getPersonalizedQuestions(email: string, supabaseClient: any): Promise<string> {
+async function getPersonalizedQuestions(email: string, supabaseClient: SupabaseClient): Promise<string> {
   try {
     const { data: userSubjects } = await supabaseClient.from('user_subjects').select('subjects').eq('email', email).maybeSingle();
     const subjects = (userSubjects?.subjects || []) as string[];
@@ -198,7 +198,37 @@ serve(async (req) => {
 
       const results: { sent: number; failed: number; errors: string[] } = { sent: 0, failed: 0, errors: [] };
 
+      // Renewal nudges: users whose subscription expires within 7 days
+      const expiryWindow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      const { data: expiringPayments } = await supabase
+        .from('payments')
+        .select('email, access_expires_at, package')
+        .eq('status', 'success')
+        .gte('access_expires_at', new Date().toISOString())
+        .lte('access_expires_at', expiryWindow)
+        .neq('access_expires_at', null);
+
+      const expiringEmails = new Set((expiringPayments || []).map((p) => p.email));
+      for (const payment of expiringPayments || []) {
+        expiringEmails.delete(payment.email);
+        const { data: reminderRec } = await supabase
+          .from('whatsapp_reminders')
+          .select('phone_number')
+          .eq('email', payment.email)
+          .eq('is_active', true)
+          .maybeSingle();
+        if (!reminderRec) continue;
+        const validation = validatePhoneNumber(reminderRec.phone_number);
+        if (!validation.valid) { results.failed++; results.errors.push(`${payment.email}: ${validation.error}`); continue; }
+        const expiryDate = payment.access_expires_at ? new Date(payment.access_expires_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' }) : 'soon';
+        const message = `⏰ *Jamb Crash AI - Subscription Reminder*\n\nYour ${payment.package || ''} subscription expires on ${expiryDate}.\n\nRenew now to keep unlimited quizzes, mocks and study tools!\n\n📱 Renew here → ${APP_LINK}`;
+        const result = await sendWhatsAppMessage(validation.formatted, message);
+        if (result.success) { results.sent++; } else { results.failed++; results.errors.push(`${payment.email}: ${result.error}`); }
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
       for (const reminder of reminders || []) {
+        if (expiringEmails.has(reminder.email)) continue;
         const validation = validatePhoneNumber(reminder.phone_number);
         if (!validation.valid) { results.failed++; results.errors.push(`${reminder.phone_number}: ${validation.error}`); continue; }
         const greeting = getDailyGreeting();

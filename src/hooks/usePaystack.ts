@@ -61,6 +61,34 @@ export const usePaystack = () => {
     return data.publicKey;
   }, []);
 
+  const verifyPayment = useCallback(async (reference: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('paystack-verify', {
+        body: { reference },
+      });
+
+      if (error || !data?.success) {
+        throw new Error(data?.error || 'Verification failed');
+      }
+
+      return data as {
+        success: boolean;
+        status?: string;
+        message?: string;
+        data?: {
+          email: string;
+          amount: number;
+          package: string;
+          reference: string;
+          access_expires_at: string;
+        };
+      };
+    } catch (error) {
+      console.error('[Payment] Verification error:', error);
+      throw error;
+    }
+  }, []);
+
   const initializePayment = useCallback(
     async (
       config: PaystackConfig,
@@ -107,15 +135,12 @@ export const usePaystack = () => {
           onClose();
         },
         callback: (response) => {
-          console.log('[Payment] Paystack callback received, reference:', response.reference);
           setIsLoading(false);
 
           // Verify payment and update database, then call onSuccess
           verifyPayment(response.reference)
             .then((result) => {
-              console.log('[Payment] Verification result:', result);
               if (result?.success) {
-                console.log('[Payment] Payment verified successfully!');
                 toast.success('Payment verified successfully!');
                 onSuccess(response.reference);
               } else {
@@ -140,40 +165,8 @@ export const usePaystack = () => {
         toast.error(error instanceof Error ? error.message : 'Payment failed. Please try again.');
       }
     },
-    [loadPaystackScript, getPublicKey]
+    [loadPaystackScript, getPublicKey, verifyPayment]
   );
-
-  const verifyPayment = useCallback(async (reference: string) => {
-    console.log('[Payment] Calling paystack-verify for reference:', reference);
-    try {
-      const { data, error } = await supabase.functions.invoke('paystack-verify', {
-        body: { reference },
-      });
-
-      console.log('[Payment] Verify response:', { data, error });
-
-      if (error || !data?.success) {
-        throw new Error(data?.error || 'Verification failed');
-      }
-
-      console.log('[Payment] Database updated successfully, access granted');
-      return data as {
-        success: boolean;
-        status?: string;
-        message?: string;
-        data?: {
-          email: string;
-          amount: number;
-          package: string;
-          reference: string;
-          access_expires_at: string;
-        };
-      };
-    } catch (error) {
-      console.error('[Payment] Verification error:', error);
-      throw error;
-    }
-  }, []);
 
   return {
     isLoading,

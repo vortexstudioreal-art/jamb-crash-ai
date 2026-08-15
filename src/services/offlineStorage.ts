@@ -2,6 +2,7 @@ import { openDB, DBSchema, IDBPDatabase } from 'idb';
 
 interface Question {
   id: string;
+  subject: string;
   question: string;
   option_a: string;
   option_b: string;
@@ -9,8 +10,8 @@ interface Question {
   option_d: string;
   correct_answer: string;
   explanation?: string;
-  subject: string;
   year?: number;
+  image_url?: string | null;
 }
 
 interface Flashcard {
@@ -40,7 +41,7 @@ interface SyllabusItem {
 interface SyncItem {
   id: string;
   type: 'quiz_attempt' | 'flashcard_update' | 'reading_progress';
-  data: any;
+  data: unknown;
   timestamp: number;
   retries: number;
 }
@@ -67,7 +68,7 @@ interface CachedChapter {
   content: string;
   estimated_reading_time: number | null;
   word_count: number | null;
-  likely_questions: any;
+  likely_questions: unknown;
 }
 
 interface JambOfflineDB extends DBSchema {
@@ -93,7 +94,7 @@ interface JambOfflineDB extends DBSchema {
   };
   metadata: {
     key: string;
-    value: { key: string; value: any; updatedAt: number };
+    value: { key: string; value: unknown; updatedAt: number };
   };
   novels: {
     key: string;
@@ -301,7 +302,7 @@ export const getNovelChaptersCount = async (): Promise<number> => {
 };
 
 // Sync Queue
-export const addToSyncQueue = async (type: SyncItem['type'], data: any): Promise<void> => {
+export const addToSyncQueue = async (type: SyncItem['type'], data: unknown): Promise<void> => {
   const db = await getDB();
   const item: SyncItem = {
     id: `${type}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -338,12 +339,12 @@ export const getSyncQueueCount = async (): Promise<number> => {
 };
 
 // Metadata
-export const setMetadata = async (key: string, value: any): Promise<void> => {
+export const setMetadata = async (key: string, value: unknown): Promise<void> => {
   const db = await getDB();
   await db.put('metadata', { key, value, updatedAt: Date.now() });
 };
 
-export const getMetadata = async (key: string): Promise<any> => {
+export const getMetadata = async <T = unknown>(key: string): Promise<T> => {
   const db = await getDB();
   const item = await db.get('metadata', key);
   return item?.value;
@@ -396,7 +397,7 @@ export const getStorageInfo = async (): Promise<{
 
 // Check if data is stale (older than 24 hours)
 export const isDataStale = async (): Promise<boolean> => {
-  const lastSync = await getMetadata('questions_last_sync');
+  const lastSync = await getMetadata<number | null>('questions_last_sync');
   if (!lastSync) return true;
   
   const staleThreshold = 24 * 60 * 60 * 1000; // 24 hours

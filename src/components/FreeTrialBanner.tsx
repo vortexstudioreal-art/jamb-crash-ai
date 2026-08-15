@@ -49,10 +49,9 @@ export const FreeTrialBanner = ({ onStartTrial, userEmail }: FreeTrialBannerProp
           const newDeviceId = `device_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
           localStorage.setItem('jamb_device_id', newDeviceId);
         }
-      } catch (error) {
-        // No record found means trial is available
-        console.log('Trial check:', error);
-      } finally {
+        } catch {
+          // ignore
+        } finally {
         setChecking(false);
       }
     };

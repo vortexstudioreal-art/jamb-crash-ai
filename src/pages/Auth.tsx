@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, User, Eye, EyeOff, Sparkles, ArrowRight, Loader2, ArrowLeft, Gift, CheckCircle } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, Sparkles, ArrowRight, Loader2, ArrowLeft, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
+import { useSeo } from '@/hooks/useSeo';
 
 // Stricter email validation - blocks disposable/fake emails
 const emailSchema = z.string()
@@ -31,11 +32,9 @@ const emailSchema = z.string()
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
 
 type AuthView = 'login' | 'signup' | 'forgot-password' | 'reset-password' | 'verify-email';
-type SignupFlow = 'normal' | 'trial';
 
 export default function Auth() {
   const [view, setView] = useState<AuthView>('login');
-  const [signupFlow, setSignupFlow] = useState<SignupFlow>('normal');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -45,7 +44,13 @@ export default function Auth() {
   const [errors, setErrors] = useState<{ email?: string; password?: string; fullName?: string; confirmPassword?: string }>({});
   const [searchParams] = useSearchParams();
   const location = useLocation();
-  
+
+  useSeo({
+    title: 'Login or Sign Up | Jamb Crash AI',
+    description: 'Create your free account to start practicing JAMB past questions, get AI study plans, and track your score prediction.',
+    path: '/auth',
+  });
+
   const { signIn, signUp, user, isLoading, isOwner, isAdmin, hasAccess } = useAuth();
   const navigate = useNavigate();
 
@@ -57,7 +62,6 @@ export default function Auth() {
         if (error?.message?.includes('Refresh Token Not Found') || 
             error?.message?.includes('Invalid Refresh Token') ||
             error?.message?.includes('refresh_token_not_found')) {
-          console.log('Clearing invalid session...');
           await supabase.auth.signOut();
         }
       } catch (err) {
@@ -67,15 +71,11 @@ export default function Auth() {
     clearInvalidSession();
   }, []);
 
-  // Check for trial or payment signup flow from state
+  // Check for payment signup flow from state
   useEffect(() => {
     const state = location.state as { flow?: string; plan?: string; returnToPayment?: boolean } | null;
-    if (state?.flow === 'trial') {
+    if (state?.flow === 'signup' || state?.returnToPayment) {
       setView('signup');
-      setSignupFlow('trial');
-    } else if (state?.flow === 'signup' || state?.returnToPayment) {
-      setView('signup');
-      setSignupFlow('normal');
     }
   }, [location.state]);
 
@@ -291,16 +291,17 @@ export default function Auth() {
       } else {
         const { error } = await signUp(email, password, fullName);
         if (error) {
-          if (error.message.includes('already registered')) {
+          if (error.message === 'email_not_confirmed') {
+            setView('verify-email');
+            toast.success('Check your email to verify your account! 📧');
+          } else if (error.message.includes('already registered')) {
             toast.error('This email is already registered. Please sign in instead.');
             setView('login');
           } else {
             toast.error(error.message);
           }
         } else {
-          // Show email verification screen
-          setView('verify-email');
-          toast.success('Check your email to verify your account! 📧');
+          toast.success('Account created! Welcome! 🎉');
         }
       }
     } catch (err) {
@@ -311,9 +312,6 @@ export default function Auth() {
   };
 
   const getTitle = () => {
-    if (view === 'signup' && signupFlow === 'trial') {
-      return 'Start Your Free Trial';
-    }
     switch (view) {
       case 'forgot-password':
         return 'Reset Password';
@@ -329,9 +327,6 @@ export default function Auth() {
   };
 
   const getSubtitle = () => {
-    if (view === 'signup' && signupFlow === 'trial') {
-      return 'Create an account to get 30 minutes of Premium access FREE';
-    }
     switch (view) {
       case 'forgot-password':
         return "Enter your email and we'll send you a reset link";
@@ -368,17 +363,8 @@ export default function Auth() {
             animate={{ scale: 1 }}
             className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full mb-4"
           >
-            {signupFlow === 'trial' && view === 'signup' ? (
-              <>
-                <Gift className="w-5 h-5 text-primary" />
-                <span className="text-sm font-semibold text-primary">30-Min Free Trial</span>
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-5 h-5 text-primary" />
-                <span className="text-sm font-semibold text-primary">Jamb Crash AI</span>
-              </>
-            )}
+            <Sparkles className="w-5 h-5 text-primary" />
+            <span className="text-sm font-semibold text-primary">Jamb Crash AI</span>
           </motion.div>
           <h1 className="text-3xl font-bold text-foreground mb-2">
             {getTitle()}
@@ -429,26 +415,6 @@ export default function Auth() {
           </motion.div>
         )}
 
-        {/* Trial Benefits Banner */}
-        {view === 'signup' && signupFlow === 'trial' && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="mb-6 p-4 rounded-xl bg-gradient-to-r from-primary/20 to-green-500/20 border border-primary/30"
-          >
-            <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
-              <Gift className="w-5 h-5 text-primary" />
-              What you get FREE:
-            </h3>
-            <ul className="text-sm text-muted-foreground space-y-1">
-              <li>✓ Full Premium access for 30 minutes</li>
-              <li>✓ All quiz modes and study materials</li>
-              <li>✓ AI-powered explanations & flashcards</li>
-              <li>✓ No payment required to start</li>
-            </ul>
-          </motion.div>
-        )}
-
         {/* Email Verification Screen */}
         {view === 'verify-email' && (
           <motion.div
@@ -485,7 +451,7 @@ export default function Auth() {
                     } else {
                       toast.success('Verification email resent! Check your inbox.');
                     }
-                  } catch (err) {
+                  } catch {
                     toast.error('Failed to resend email. Please try again.');
                   }
                 }}
@@ -630,7 +596,7 @@ export default function Auth() {
                   {view === 'forgot-password' ? 'Send Reset Link' : 
                    view === 'reset-password' ? 'Update Password' :
                    view === 'login' ? 'Sign In' : 
-                   signupFlow === 'trial' ? 'Start Free Trial' : 'Create Account'}
+                   'Create Account'}
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </>
               )}
@@ -661,7 +627,6 @@ export default function Auth() {
                 type="button"
                 onClick={() => {
                   setView(view === 'login' ? 'signup' : 'login');
-                  setSignupFlow('normal');
                   setErrors({});
                 }}
                 className="text-primary font-semibold hover:underline"

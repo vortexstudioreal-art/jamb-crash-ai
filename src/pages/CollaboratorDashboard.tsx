@@ -12,6 +12,7 @@ import { BankDetailsForm } from '@/components/collaborator/BankDetailsForm';
 import { PayoutHistory } from '@/components/collaborator/PayoutHistory';
 import { ProfileSettings } from '@/components/collaborator/ProfileSettings';
 import { toast } from 'sonner';
+import { useSeo } from '@/hooks/useSeo';
 interface CollaboratorStats {
   totalEarnings: number;
   pendingPayouts: number;
@@ -30,6 +31,13 @@ const MINIMUM_PAYOUT = 5000; // ₦5,000 minimum
 const CollaboratorDashboard = () => {
   const navigate = useNavigate();
   const { user, userRole } = useAuth();
+
+  useSeo({
+    title: 'Collaborator Dashboard | Jamb Crash AI',
+    description: 'Jamb Crash AI collaborator referral dashboard.',
+    path: '/collaborator-dashboard',
+    noindex: true,
+  });
   const [stats, setStats] = useState<CollaboratorStats>({
     totalEarnings: 0,
     pendingPayouts: 0,
@@ -53,6 +61,7 @@ const CollaboratorDashboard = () => {
     if (userEmail) {
       fetchData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, userRole, navigate, userEmail]);
 
   const fetchData = async () => {

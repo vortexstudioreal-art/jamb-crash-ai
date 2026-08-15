@@ -62,10 +62,10 @@ Be thorough - extract EVERY question visible. If text is unclear, make your best
 Always be encouraging and motivational in the message!`;
 }
 
-function parseAIResponse(content: string) {
+function parseAIResponse(content: string): { questions: ExtractedQuestion[]; total_found: number; message?: string } {
   try {
     const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (jsonMatch) return JSON.parse(jsonMatch[0]);
+    if (jsonMatch) return JSON.parse(jsonMatch[0]) as { questions: ExtractedQuestion[]; total_found: number };
     throw new Error('No JSON found');
   } catch {
     return {
@@ -76,12 +76,23 @@ function parseAIResponse(content: string) {
   }
 }
 
-async function saveQuestions(questions: any[], subject: string) {
+interface ExtractedQuestion {
+  question: string;
+  option_a: string;
+  option_b: string;
+  option_c: string;
+  option_d: string;
+  correct_answer: string;
+  explanation?: string;
+  year?: number;
+}
+
+async function saveQuestions(questions: ExtractedQuestion[], subject: string) {
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
   const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
   const supabase = createClient(supabaseUrl, supabaseKey);
 
-  const questionsToInsert = questions.map((q: any) => ({
+  const questionsToInsert = questions.map((q) => ({
     question: q.question,
     option_a: q.option_a,
     option_b: q.option_b,
@@ -124,15 +135,15 @@ serve(async (req) => {
       );
     }
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY is not configured');
+    const GROQ_API_KEY = Deno.env.get('GROQ_API_KEY');
+    if (!GROQ_API_KEY) throw new Error('GROQ_API_KEY is not configured');
 
     console.log('Processing upload for subject:', subject, 'file type:', fileType, 'user:', userIdentifier);
 
     const systemPrompt = buildSystemPrompt(subject);
 
     // Build the content array based on file type
-    const userContent: any[] = [
+    const userContent: Array<{ type: 'text'; text: string } | { type: 'image_url'; image_url: { url: string } }> = [
       {
         type: 'text',
         text: `Extract all JAMB ${subject} questions from this ${fileType}. Be thorough and extract every question you can see.`
@@ -161,14 +172,14 @@ serve(async (req) => {
       });
     }
 
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Authorization': `Bearer ${GROQ_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'llama-3.3-70b-versatile',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userContent }

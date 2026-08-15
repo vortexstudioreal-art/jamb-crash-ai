@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.5"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -410,6 +410,7 @@ export type Database = {
           created_at: string | null
           explanation: string | null
           id: string
+          image_url: string | null
           option_a: string
           option_b: string
           option_c: string
@@ -424,6 +425,7 @@ export type Database = {
           created_at?: string | null
           explanation?: string | null
           id?: string
+          image_url?: string | null
           option_a: string
           option_b: string
           option_c: string
@@ -438,6 +440,7 @@ export type Database = {
           created_at?: string | null
           explanation?: string | null
           id?: string
+          image_url?: string | null
           option_a?: string
           option_b?: string
           option_c?: string
@@ -455,9 +458,11 @@ export type Database = {
           difficulty_level: string | null
           estimated_reading_time: number | null
           id: string
+          image_url: string | null
           objectives: string[] | null
           order_index: number | null
           recommended_content: string | null
+          reference_materials: Json | null
           subject: string
           subtopic: string | null
           topic: string
@@ -468,9 +473,11 @@ export type Database = {
           difficulty_level?: string | null
           estimated_reading_time?: number | null
           id?: string
+          image_url?: string | null
           objectives?: string[] | null
           order_index?: number | null
           recommended_content?: string | null
+          reference_materials?: Json | null
           subject: string
           subtopic?: string | null
           topic: string
@@ -481,9 +488,11 @@ export type Database = {
           difficulty_level?: string | null
           estimated_reading_time?: number | null
           id?: string
+          image_url?: string | null
           objectives?: string[] | null
           order_index?: number | null
           recommended_content?: string | null
+          reference_materials?: Json | null
           subject?: string
           subtopic?: string | null
           topic?: string
@@ -533,6 +542,48 @@ export type Database = {
           total_score?: number
           updated_at?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      mock_attempts: {
+        Row: {
+          created_at: string
+          email: string
+          english_score: number
+          english_total: number
+          id: string
+          max_score: number
+          mock_name: string
+          questions_data: Json
+          section_scores: Json
+          time_taken_seconds: number
+          total_score: number
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          english_score?: number
+          english_total?: number
+          id?: string
+          max_score?: number
+          mock_name?: string
+          questions_data?: Json
+          section_scores?: Json
+          time_taken_seconds?: number
+          total_score?: number
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          english_score?: number
+          english_total?: number
+          id?: string
+          max_score?: number
+          mock_name?: string
+          questions_data?: Json
+          section_scores?: Json
+          time_taken_seconds?: number
+          total_score?: number
         }
         Relationships: []
       }
@@ -627,6 +678,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           difficulty_level: string | null
+          download_url: string | null
           full_book_pdf_path: string | null
           full_book_pdf_url: string | null
           id: string
@@ -644,6 +696,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           difficulty_level?: string | null
+          download_url?: string | null
           full_book_pdf_path?: string | null
           full_book_pdf_url?: string | null
           id?: string
@@ -661,6 +714,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           difficulty_level?: string | null
+          download_url?: string | null
           full_book_pdf_path?: string | null
           full_book_pdf_url?: string | null
           id?: string
@@ -786,6 +840,39 @@ export type Database = {
           full_name?: string | null
           id?: string
           referral_credits?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      question_reports: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          notes: string | null
+          question_id: string
+          reason: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          notes?: string | null
+          question_id: string
+          reason: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          notes?: string | null
+          question_id?: string
+          reason?: string
+          status?: string
           updated_at?: string | null
         }
         Relationships: []
@@ -950,6 +1037,95 @@ export type Database = {
           referral_code?: string
           referred_email?: string | null
           referrer_email?: string
+        }
+        Relationships: []
+      }
+      study_plan_tasks: {
+        Row: {
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          date: string
+          day: number
+          day_name: string
+          duration: string | null
+          id: string
+          plan_id: string
+          priority: string
+          quiz_goal: number
+          subject: string
+          topics: Json
+        }
+        Insert: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          date: string
+          day: number
+          day_name: string
+          duration?: string | null
+          id?: string
+          plan_id: string
+          priority?: string
+          quiz_goal?: number
+          subject: string
+          topics?: Json
+        }
+        Update: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          date?: string
+          day?: number
+          day_name?: string
+          duration?: string | null
+          id?: string
+          plan_id?: string
+          priority?: string
+          quiz_goal?: number
+          subject?: string
+          topics?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_plan_tasks_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "study_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      study_plans: {
+        Row: {
+          created_at: string
+          email: string
+          hours_per_day: number
+          id: string
+          plan_data: Json
+          status: string
+          target_score: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          hours_per_day?: number
+          id?: string
+          plan_data?: Json
+          status?: string
+          target_score?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          hours_per_day?: number
+          id?: string
+          plan_data?: Json
+          status?: string
+          target_score?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1376,6 +1552,7 @@ export type Database = {
           package: string
         }[]
       }
+      confirm_user_email: { Args: { user_email: string }; Returns: boolean }
       generate_referral_code: { Args: { user_email: string }; Returns: string }
       get_auth_email: { Args: never; Returns: string }
       has_role: {

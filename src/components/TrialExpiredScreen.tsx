@@ -11,6 +11,7 @@ interface TrialExpiredScreenProps {
 
 const packages = [
   {
+    key: 'basic',
     name: 'Basic',
     price: '₦5,000',
     period: '1 month',
@@ -18,7 +19,8 @@ const packages = [
     color: 'border-border',
   },
   {
-    name: 'Pro',
+    key: 'pro',
+    name: 'ACE',
     price: '₦10,000',
     period: '3 months',
     features: ['Everything in Basic', 'Practice quiz + AI tips', 'Predicted JAMB score', 'Email reminders'],
@@ -26,10 +28,11 @@ const packages = [
     popular: true,
   },
   {
-    name: 'Premium',
+    key: 'premium',
+    name: 'SCHOLAR',
     price: '₦15,000',
     period: 'Lifetime',
-    features: ['Everything in Pro', 'WhatsApp daily reminders', 'Refer & earn bonus', 'Advanced predictions'],
+    features: ['Everything in ACE', 'WhatsApp daily reminders', 'Refer & earn bonus', 'Advanced predictions'],
     color: 'border-yellow-500',
   },
 ];
@@ -115,7 +118,7 @@ export const TrialExpiredScreen = ({ onUpgrade }: TrialExpiredScreenProps) => {
                 ))}
               </ul>
               <Button
-                onClick={() => onUpgrade(pkg.name.toLowerCase())}
+                onClick={() => onUpgrade(pkg.key)}
                 className={`w-full ${pkg.popular ? 'gradient-primary' : ''}`}
                 variant={pkg.popular ? 'default' : 'outline'}
               >

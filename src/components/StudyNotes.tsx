@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Trash2, Edit2, Save, X, StickyNote, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -40,11 +40,7 @@ export const StudyNotes = ({ userEmail, subjects, isOwner, isAdmin, userRole, on
   const [newSubject, setNewSubject] = useState<string>('');
   const [filterSubject, setFilterSubject] = useState<string>('all');
 
-  useEffect(() => {
-    loadNotes();
-  }, [userEmail]);
-
-  const loadNotes = async () => {
+  const loadNotes = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from('user_notes')
@@ -54,7 +50,11 @@ export const StudyNotes = ({ userEmail, subjects, isOwner, isAdmin, userRole, on
 
     if (!error && data) setNotes(data as Note[]);
     setLoading(false);
-  };
+  }, [userEmail]);
+
+  useEffect(() => {
+    loadNotes();
+  }, [userEmail, loadNotes]);
 
   const createNote = async () => {
     if (!newTitle.trim() && !newContent.trim()) {
@@ -117,7 +117,7 @@ export const StudyNotes = ({ userEmail, subjects, isOwner, isAdmin, userRole, on
         userEmail={userEmail}
         isOwner={isOwner || false}
         isCollaborator={(isAdmin && !isOwner) || false}
-        userRole={(userRole as any) || null}
+        userRole={(userRole as 'owner' | 'admin' | 'collaborator' | null) || null}
         onSignOut={onSignOut}
       />
       <div className="pt-16">

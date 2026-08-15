@@ -20,7 +20,7 @@ const packages = [
     bgColor: 'bg-muted/20',
   },
   {
-    name: 'Pro',
+    name: 'ACE',
     price: '₦10,000',
     duration: '1 year',
     features: [
@@ -37,11 +37,11 @@ const packages = [
     popular: true,
   },
   {
-    name: 'Premium',
+    name: 'SCHOLAR',
     price: '₦15,000',
     duration: 'Lifetime',
     features: [
-      'Everything in Pro',
+      'Everything in ACE',
       'Lifetime access',
       'Advanced prediction',
       'Priority support',

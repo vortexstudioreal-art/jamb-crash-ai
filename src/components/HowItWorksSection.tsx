@@ -158,20 +158,18 @@ export const HowItWorksSection = ({ onStartTrial }: HowItWorksSectionProps) => {
               Ready to Score 300+?
             </h3>
             <p className="text-muted-foreground max-w-md">
-              Get 30 minutes of full Premium access. No payment needed!
+              Choose a plan that fits your goals and start preparing today!
             </p>
-            <Button 
-              variant="hero" 
-              size="xl" 
+            <Button
               onClick={onStartTrial}
-              className="mt-2"
+              variant="hero"
+              size="xl"
+              className="mt-2 opacity-60 cursor-not-allowed"
+              disabled
             >
-              Start Free Trial Now
+              Coming Soon
               <ArrowRight className="w-5 h-5" />
             </Button>
-            <p className="text-xs text-muted-foreground">
-              ✓ Full Premium access ✓ 30 minutes free ✓ No payment required
-            </p>
           </div>
         </motion.div>
       </div>

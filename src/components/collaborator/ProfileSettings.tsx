@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -20,9 +20,9 @@ export const ProfileSettings = ({ userId, userEmail }: ProfileSettingsProps) => 
 
   useEffect(() => {
     fetchDisplayTitle();
-  }, [userId]);
+  }, [userId, fetchDisplayTitle]);
 
-  const fetchDisplayTitle = async () => {
+  const fetchDisplayTitle = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('user_roles')
@@ -37,7 +37,7 @@ export const ProfileSettings = ({ userId, userEmail }: ProfileSettingsProps) => 
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
 
   const saveDisplayTitle = async () => {
     setSaving(true);

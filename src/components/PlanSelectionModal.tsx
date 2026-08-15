@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Zap, CreditCard, Gift, Clock } from 'lucide-react';
+import { X, Zap, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface PlanSelectionModalProps {
@@ -7,10 +7,7 @@ interface PlanSelectionModalProps {
   onClose: () => void;
   planName: string;
   planPrice: number;
-  onStartTrial: () => void;
   onContinuePayment: () => void;
-  canStartTrial: boolean;
-  hasTrialUsed: boolean;
 }
 
 export const PlanSelectionModal = ({
@@ -18,10 +15,7 @@ export const PlanSelectionModal = ({
   onClose,
   planName,
   planPrice,
-  onStartTrial,
   onContinuePayment,
-  canStartTrial,
-  hasTrialUsed,
 }: PlanSelectionModalProps) => {
   if (!isOpen) return null;
 
@@ -66,71 +60,28 @@ export const PlanSelectionModal = ({
                   <p className="text-2xl lg:text-3xl font-bold text-primary mt-1">₦{planPrice.toLocaleString()}</p>
                 </div>
 
-                {/* Options Grid - Side by side on desktop */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {/* Free Trial Option */}
-                  {canStartTrial && !hasTrialUsed && (
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={onStartTrial}
-                      className="w-full p-4 lg:p-6 rounded-xl border-2 border-primary bg-primary/5 hover:bg-primary/10 transition-all text-left h-full"
-                    >
-                      <div className="flex flex-col items-center text-center lg:items-start lg:text-left gap-3">
-                        <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                          <Gift className="w-6 h-6 lg:w-7 lg:h-7 text-primary" />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-bold text-foreground text-lg flex items-center justify-center lg:justify-start gap-2">
-                            Start Free Trial
-                            <span className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
-                              FREE
-                            </span>
-                          </h3>
-                          <p className="text-sm text-muted-foreground mt-2">
-                            Get 30 minutes of full Premium access. No payment required!
-                          </p>
-                          <div className="flex items-center justify-center lg:justify-start gap-1 text-xs text-primary mt-3">
-                            <Clock className="w-3 h-3" />
-                            <span>One-time only • No credit card needed</span>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.button>
-                  )}
-
-                  {hasTrialUsed && (
-                    <div className="p-4 rounded-lg bg-muted flex items-center justify-center">
-                      <p className="text-sm text-muted-foreground">
-                        ⏰ You've already used your free trial
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={onContinuePayment}
+                  className="w-full p-4 lg:p-6 rounded-xl border-2 border-border hover:border-primary/50 bg-card hover:bg-muted/50 transition-all text-left h-full"
+                >
+                  <div className="flex flex-col items-center text-center lg:items-start lg:text-left gap-3">
+                    <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                      <CreditCard className="w-6 h-6 lg:w-7 lg:h-7 text-green-500" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-foreground text-lg">Continue to Payment</h3>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Pay ₦{planPrice.toLocaleString()} and get instant access
                       </p>
-                    </div>
-                  )}
-
-                  {/* Payment Option */}
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={onContinuePayment}
-                    className="w-full p-4 lg:p-6 rounded-xl border-2 border-border hover:border-primary/50 bg-card hover:bg-muted/50 transition-all text-left h-full"
-                  >
-                    <div className="flex flex-col items-center text-center lg:items-start lg:text-left gap-3">
-                      <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
-                        <CreditCard className="w-6 h-6 lg:w-7 lg:h-7 text-green-500" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-bold text-foreground text-lg">Continue to Payment</h3>
-                        <p className="text-sm text-muted-foreground mt-2">
-                          Pay ₦{planPrice.toLocaleString()} and get instant access
-                        </p>
-                        <div className="flex items-center justify-center lg:justify-start gap-1 text-xs text-green-500 mt-3">
-                          <Zap className="w-3 h-3" />
-                          <span>Secure payment • Instant activation</span>
-                        </div>
+                      <div className="flex items-center justify-center lg:justify-start gap-1 text-xs text-green-500 mt-3">
+                        <Zap className="w-3 h-3" />
+                        <span>Secure payment • Instant activation</span>
                       </div>
                     </div>
-                  </motion.button>
-                </div>
+                  </div>
+                </motion.button>
               </div>
 
               {/* Footer */}

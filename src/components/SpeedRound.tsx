@@ -7,8 +7,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { BackButton } from '@/components/BackButton';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 import { shuffleQuestionList } from '@/lib/quizShuffle';
+import { useFeatureUsage } from '@/hooks/useFeatureUsage';
+import { FeatureLimitReached } from '@/components/FeatureLimitReached';
 
 interface SpeedRoundProps {
   userEmail: string;
@@ -28,7 +31,10 @@ interface Question {
   option_c: string;
   option_d: string;
   correct_answer: string;
+  explanation?: string;
   subject: string;
+  year?: number;
+  image_url?: string | null;
 }
 
 type GameState = 'ready' | 'playing' | 'finished';
@@ -44,12 +50,14 @@ export const SpeedRound = ({ userEmail, subjects, isOwner, isAdmin, userRole, on
   const [answered, setAnswered] = useState(0);
   const [lastAnswer, setLastAnswer] = useState<'correct' | 'wrong' | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval>>();
+  const [showQuizLimitModal, setShowQuizLimitModal] = useState(false);
+  const { canUseFeature, incrementUsage } = useFeatureUsage();
 
   const loadQuestions = useCallback(async () => {
     const { data } = await supabase
       .from('jamb_questions')
       .select('id, question, option_a, option_b, option_c, option_d, correct_answer, subject')
-      .in('subject', subjects as any)
+      .in('subject', subjects as Database['public']['Enums']['jamb_subject'][])
       .limit(100);
 
     if (data) {
@@ -63,7 +71,17 @@ export const SpeedRound = ({ userEmail, subjects, isOwner, isAdmin, userRole, on
     loadQuestions();
   }, [loadQuestions]);
 
-  const startGame = () => {
+  const startGame = async () => {
+    if (!canUseFeature('quick_quiz')) {
+      setShowQuizLimitModal(true);
+      return;
+    }
+    const ok = await incrementUsage('quick_quiz');
+    if (!ok) {
+      setShowQuizLimitModal(true);
+      return;
+    }
+
     setGameState('playing');
     setCurrentIndex(0);
     setScore(0);
@@ -126,7 +144,7 @@ export const SpeedRound = ({ userEmail, subjects, isOwner, isAdmin, userRole, on
 
   return (
     <div className="min-h-screen bg-background">
-      <DashboardHeader userEmail={userEmail} isOwner={isOwner || false} isCollaborator={(isAdmin && !isOwner) || false} userRole={(userRole as any) || null} onSignOut={onSignOut} />
+      <DashboardHeader userEmail={userEmail} isOwner={isOwner || false} isCollaborator={(isAdmin && !isOwner) || false} userRole={(userRole as 'owner' | 'admin' | 'collaborator' | null) || null} onSignOut={onSignOut} />
       <div className="pt-16">
         <BackButton onClick={onBack} />
         <div className="max-w-2xl mx-auto px-4 py-6">
@@ -174,6 +192,11 @@ export const SpeedRound = ({ userEmail, subjects, isOwner, isAdmin, userRole, on
                     <CardContent className="pt-4">
                       <Badge variant="secondary" className="mb-3 capitalize text-xs">{currentQ.subject.replace('_', ' ')}</Badge>
                       <p className="text-foreground font-medium mb-4 text-sm leading-relaxed">{currentQ.question}</p>
+                      {currentQ.image_url && (
+                        <div className="mb-4 flex justify-center">
+                          <img src={currentQ.image_url} alt="Question diagram" className="max-w-full h-auto rounded-lg border border-border" style={{ maxHeight: 200 }} />
+                        </div>
+                      )}
                       <div className="grid grid-cols-1 gap-2">
                         {['A', 'B', 'C', 'D'].map(opt => (
                           <Button
@@ -215,6 +238,12 @@ export const SpeedRound = ({ userEmail, subjects, isOwner, isAdmin, userRole, on
           )}
         </div>
       </div>
+      {showQuizLimitModal && (
+        <FeatureLimitReached
+          featureType="quick_quiz"
+          onBonusEarned={() => setShowQuizLimitModal(false)}
+        />
+      )}
     </div>
   );
 };

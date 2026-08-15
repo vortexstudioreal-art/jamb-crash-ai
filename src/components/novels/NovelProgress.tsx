@@ -4,6 +4,7 @@ import { Book, BookOpen, Clock, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 
 interface NovelProgressProps {
   userEmail: string;
@@ -16,7 +17,7 @@ export const NovelProgress = ({ userEmail }: NovelProgressProps) => {
     completed: 0,
     totalReadingTime: 0,
   });
-  const [recentlyRead, setRecentlyRead] = useState<any[]>([]);
+  const [recentlyRead, setRecentlyRead] = useState<(Database['public']['Tables']['user_novel_progress']['Row'] & { novel?: { title?: string | null; author?: string | null; total_chapters?: number | null } | null })[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

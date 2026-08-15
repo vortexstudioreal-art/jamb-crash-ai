@@ -7,7 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { BackButton } from '@/components/BackButton';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { shuffleQuestionList } from '@/lib/quizShuffle';
+import { useFeatureUsage } from '@/hooks/useFeatureUsage';
+import { FeatureLimitReached } from '@/components/FeatureLimitReached';
 
 interface StreakChallengeProps {
   userEmail: string;
@@ -27,8 +30,10 @@ interface Question {
   option_c: string;
   option_d: string;
   correct_answer: string;
-  subject: string;
   explanation?: string;
+  subject: string;
+  year?: number;
+  image_url?: string | null;
 }
 
 type GameState = 'ready' | 'playing' | 'gameover';
@@ -47,12 +52,14 @@ export const StreakChallenge = ({ userEmail, subjects, isOwner, isAdmin, userRol
   const [lives, setLives] = useState(3);
   const [showExplanation, setShowExplanation] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [showQuizLimitModal, setShowQuizLimitModal] = useState(false);
+  const { canUseFeature, incrementUsage } = useFeatureUsage();
 
   const loadQuestions = useCallback(async () => {
     const { data } = await supabase
       .from('jamb_questions')
       .select('id, question, option_a, option_b, option_c, option_d, correct_answer, subject, explanation')
-      .in('subject', subjects as any)
+      .in('subject', subjects as Database['public']['Enums']['jamb_subject'][])
       .limit(200);
 
     if (data) {
@@ -69,7 +76,17 @@ export const StreakChallenge = ({ userEmail, subjects, isOwner, isAdmin, userRol
     setShowExplanation(false);
   }, [currentIndex]);
 
-  const startGame = () => {
+  const startGame = async () => {
+    if (!canUseFeature('quick_quiz')) {
+      setShowQuizLimitModal(true);
+      return;
+    }
+    const ok = await incrementUsage('quick_quiz');
+    if (!ok) {
+      setShowQuizLimitModal(true);
+      return;
+    }
+
     setGameState('playing');
     setCurrentIndex(0);
     setStreak(0);
@@ -132,7 +149,7 @@ export const StreakChallenge = ({ userEmail, subjects, isOwner, isAdmin, userRol
 
   return (
     <div className="min-h-screen bg-background">
-      <DashboardHeader userEmail={userEmail} isOwner={isOwner || false} isCollaborator={(isAdmin && !isOwner) || false} userRole={(userRole as any) || null} onSignOut={onSignOut} />
+      <DashboardHeader userEmail={userEmail} isOwner={isOwner || false} isCollaborator={(isAdmin && !isOwner) || false} userRole={(userRole as 'owner' | 'admin' | 'collaborator' | null) || null} onSignOut={onSignOut} />
       <div className="pt-16">
         <BackButton onClick={onBack} />
         <div className="max-w-2xl mx-auto px-4 py-6">
@@ -177,6 +194,11 @@ export const StreakChallenge = ({ userEmail, subjects, isOwner, isAdmin, userRol
                     <CardContent className="pt-4">
                       <Badge variant="secondary" className="mb-3 capitalize text-xs">{currentQ.subject.replace('_', ' ')}</Badge>
                       <p className="text-foreground font-medium mb-4 text-sm leading-relaxed">{currentQ.question}</p>
+                      {currentQ.image_url && (
+                        <div className="mb-4 flex justify-center">
+                          <img src={currentQ.image_url} alt="Question diagram" className="max-w-full h-auto rounded-lg border border-border" style={{ maxHeight: 200 }} />
+                        </div>
+                      )}
                       <div className="grid grid-cols-1 gap-2">
                         {['A', 'B', 'C', 'D'].map(opt => {
                           const isSelected = selectedAnswer === opt;
@@ -242,6 +264,12 @@ export const StreakChallenge = ({ userEmail, subjects, isOwner, isAdmin, userRol
           )}
         </div>
       </div>
+      {showQuizLimitModal && (
+        <FeatureLimitReached
+          featureType="quick_quiz"
+          onBonusEarned={() => setShowQuizLimitModal(false)}
+        />
+      )}
     </div>
   );
 };
