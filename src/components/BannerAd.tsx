@@ -11,11 +11,11 @@ interface BannerAdProps {
   className?: string;
 }
 
-// Banner Ad unit IDs - you would add these to your AdMob config
+// Banner Ad unit IDs - configured via environment variables
 const BANNER_AD_UNITS = {
-  'dashboard-footer': 'ca-app-pub-3175040135445213/XXXXXXXXXX', // Add your banner ad unit
-  'quiz-footer': 'ca-app-pub-3175040135445213/XXXXXXXXXX',
-  'syllabus-footer': 'ca-app-pub-3175040135445213/XXXXXXXXXX',
+  'dashboard-footer': import.meta.env.VITE_ADMOB_BANNER_DASHBOARD || '',
+  'quiz-footer': import.meta.env.VITE_ADMOB_BANNER_QUIZ || '',
+  'syllabus-footer': import.meta.env.VITE_ADMOB_BANNER_SYLLABUS || '',
 };
 
 const PROMO_ADS = [
