@@ -8,10 +8,8 @@ import { PaywallGate } from '@/components/PaywallGate';
 import { AdminBadge } from '@/components/AdminBadge';
 import { SubjectChanger } from '@/components/SubjectChanger';
 import type { QuizResultsProps } from '@/components/QuizResults';
-import { TrialExpiredScreen } from '@/components/TrialExpiredScreen';
 import { TrialTimerBadge } from '@/components/TrialTimerBadge';
 import { BackButton } from '@/components/BackButton';
-import { FeatureGate, useFeatureAccess } from '@/components/FeatureGate';
 import { useFeatureUsage } from '@/hooks/useFeatureUsage';
 import { useExamDate } from '@/hooks/useExamDate';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,21 +17,18 @@ import { useTrialSystem } from '@/hooks/useTrialSystem';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
-import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Play, FileText, Target, Calendar, BookOpen, Zap, LogOut, Lock, RefreshCw, Layers, X, GraduationCap, Library, Newspaper, Trophy, Flame, StickyNote, Gamepad2, Download } from 'lucide-react';
+import { BookOpen, LogOut } from 'lucide-react';
 import { DashboardSkeleton } from '@/components/DashboardSkeleton';
-import { GoogleAdSense } from '@/components/GoogleAdSense';
 import { BottomNav, type DashboardTab } from '@/components/BottomNav';
 import { DesktopSidebar } from '@/components/DesktopSidebar';
-import { Sparkles, Settings as SettingsIcon, Crown, Bell, MessageCircle, Youtube } from 'lucide-react';
-import { StudyPlanTodayCard } from '@/components/StudyPlanTodayCard';
-import { RenewalNudge } from '@/components/RenewalNudge';
-import { LiveCounter } from '@/components/LiveCounter';
-import { Award, Users, Brain } from 'lucide-react';
-
-import { Skeleton } from '@/components/ui/skeleton';
 import { useSeo } from '@/hooks/useSeo';
+import { useFeatureAccess } from '@/components/FeatureGate';
+import { HomeTab } from '@/components/dashboard/HomeTab';
+import { StudyTab } from '@/components/dashboard/StudyTab';
+import { AiTab } from '@/components/dashboard/AiTab';
+import { CommunityTab } from '@/components/dashboard/CommunityTab';
+import { ProfileTab } from '@/components/dashboard/ProfileTab';
 
 
 // Lazy-loaded heavy components
@@ -1141,408 +1136,151 @@ const Index = () => {
             <div className="max-w-6xl mx-auto">
               {/* ================= HOME TAB ================= */}
               {activeTab === 'home' && (
-                <motion.div
-                  key="home"
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="space-y-5"
-                >
-                  {/* Greeting — home only */}
-                  <div>
-                    <p className="text-muted-foreground text-base">Good Morning,</p>
-                    <h1 className="text-3xl md:text-4xl font-extrabold text-foreground">
-                      {(user?.user_metadata?.full_name?.split(' ')[0]) || 'Champion'} 👋
-                    </h1>
-                  </div>
-
-                  {/* Renewal nudge — expiring subscriptions */}
-                  <RenewalNudge
-                    userEmail={userEmail || ''}
-                    isAdmin={effectiveAdmin}
-                    hasAccess={effectiveAccess}
-                    onUpgrade={handleUpgradeClick}
-                  />
-
-                  {/* Predicted Score + Streak + Goal (matches design) */}
-                  <Suspense fallback={<Skeleton className="h-24 w-full rounded-xl" />}>
-                  <HomeSummary userEmail={userEmail} />
-                  </Suspense>
-
-                  {/* Study plan follow-up — today's sessions + calendar */}
-                  <StudyPlanTodayCard
-                    userEmail={userEmail || ''}
-                    onOpenCalendar={handleOpenStudyCalendar}
-                    onGenerate={handleGenerateStudyPlan}
-                  />
-
-                  {/* Quick Actions */}
-                  <div className="flex items-center justify-between pt-1">
-                    <h2 className="text-lg font-bold text-foreground">Quick Actions</h2>
-                    <button
-                      onClick={() => handleTabChange('study')}
-                      className="text-sm font-medium text-primary hover:opacity-80"
-                    >
-                      See all
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-4 gap-3">
-                    {(hasFeature('fullQuiz') || isTrialActive) ? (
-                      <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-primary hover:bg-primary/5" onClick={() => handleStartQuiz('full')}>
-                        <Play className="w-5 h-5 text-primary" />
-                        <span className="font-bold text-xs">Full Quiz</span>
-                        <span className="text-[10px] text-muted-foreground">60 Qs</span>
-                      </Button>
-                    ) : (
-                      <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 opacity-60 relative" onClick={() => handleUpgradeClick()}>
-                        <Lock className="w-3 h-3 absolute top-1 right-1 text-muted-foreground" />
-                        <Play className="w-5 h-5 text-muted-foreground" />
-                        <span className="font-bold text-xs">Full Quiz</span>
-                        <span className="text-[10px] text-primary">ACE</span>
-                      </Button>
-                    )}
-                    <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-yellow-500 hover:bg-yellow-500/5" onClick={() => handleStartQuiz('mini')}>
-                      <Zap className="w-5 h-5 text-yellow-500" />
-                      <span className="font-bold text-xs">Mini Quiz</span>
-                      <span className="text-[10px] text-muted-foreground">20 Qs</span>
-                    </Button>
-                    {(hasFeature('practiceQuiz') || isTrialActive) ? (
-                      <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-purple-500 hover:bg-purple-500/5" onClick={() => handleStartQuiz('subject')}>
-                        <BookOpen className="w-5 h-5 text-purple-500" />
-                        <span className="font-bold text-xs">Practice</span>
-                        <span className="text-[10px] text-muted-foreground">Subject</span>
-                      </Button>
-                    ) : (
-                      <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 opacity-60 relative" onClick={() => handleUpgradeClick()}>
-                        <Lock className="w-3 h-3 absolute top-1 right-1 text-muted-foreground" />
-                        <BookOpen className="w-5 h-5 text-muted-foreground" />
-                        <span className="font-bold text-xs">Practice</span>
-                        <span className="text-[10px] text-primary">ACE</span>
-                      </Button>
-                    )}
-                    <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-primary hover:bg-primary/5" onClick={() => handleTabChange('ai')}>
-                      <Sparkles className="w-5 h-5 text-primary" />
-                      <span className="font-bold text-xs">Ask AI</span>
-                      <span className="text-[10px] text-muted-foreground">Get Help</span>
-                    </Button>
-                    <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-amber-500 hover:bg-amber-500/5" onClick={() => navigateStep('mock')}>
-                      <Trophy className="w-5 h-5 text-amber-500" />
-                      <span className="font-bold text-xs">Mock CBT</span>
-                      <span className="text-[10px] text-muted-foreground">180 Qs</span>
-                    </Button>
-                  </div>
-
-                  {/* Motivational card (matches design) */}
-                  <div className="rounded-2xl p-5 border border-primary/30 bg-gradient-to-r from-primary/15 to-primary/5 flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-                      <Award className="w-7 h-7 text-primary" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-bold text-primary">You're doing great!</h3>
-                      <p className="text-sm text-muted-foreground">Stay consistent and crush your target score.</p>
-                    </div>
-                    <Target className="w-10 h-10 text-primary/70 shrink-0" />
-                  </div>
-
-                  {/* AdSense — Dashboard */}
-                  <GoogleAdSense className="my-4" />
-
-                  </motion.div>
+                <HomeTab
+                  userEmail={userEmail}
+                  user={user}
+                  effectiveAdmin={effectiveAdmin}
+                  effectiveOwner={effectiveOwner}
+                  effectiveAccess={effectiveAccess}
+                  effectiveSubjects={effectiveSubjects}
+                  userRole={userRole}
+                  isTrialActive={isTrialActive}
+                  formattedTime={formattedTime}
+                  weakSubjectFromQuiz={weakSubjectFromQuiz}
+                  personalizationData={personalizationData}
+                  hasFeature={hasFeature}
+                  navigateStep={navigateStep}
+                  navigate={navigate}
+                  handleUpgradeClick={handleUpgradeClick}
+                  handleSignOut={handleSignOut}
+                  handleTabChange={handleTabChange}
+                  setPracticeSubjectOverride={setPracticeSubjectOverride}
+                  setQuizType={setQuizType}
+                  setSyllabusTargetSubject={setSyllabusTargetSubject}
+                  setSyllabusTargetTopic={setSyllabusTargetTopic}
+                  setFlashcardsTargetSubject={setFlashcardsTargetSubject}
+                  setShowSubjectChanger={setShowSubjectChanger}
+                  handleOpenStudyCalendar={handleOpenStudyCalendar}
+                  handleGenerateStudyPlan={handleGenerateStudyPlan}
+                  handleStartQuiz={handleStartQuiz}
+                />
               )}
 
               {/* ================= STUDY TAB ================= */}
               {activeTab === 'study' && (
-                <motion.div key="study" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
-                  {/* Study Header */}
-                  <div>
-                    <p className="text-muted-foreground text-sm">Let's learn something new</p>
-                    <h1 className="text-2xl md:text-3xl font-extrabold text-foreground">Your Study Hub 👋</h1>
-                  </div>
-
-                  <Suspense fallback={null}>
-                  <OfflineReadyCard userEmail={userEmail} subjects={effectiveSubjects} />
-                  </Suspense>
-
-                  {/* Next Best Action */}
-                  {weakSubjectFromQuiz && (
-                    <div className="rounded-2xl p-4 border border-primary/30 bg-gradient-to-br from-primary/10 to-transparent">
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-                          <Target className="w-5 h-5 text-primary" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <p className="font-semibold text-foreground">Your Next Best Action</p>
-                            <span className="text-[10px] uppercase tracking-wide bg-primary/20 px-2 py-0.5 rounded-full text-primary">
-                              Personalized
-                            </span>
-                          </div>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            Focus on <span className="capitalize font-semibold text-foreground">{weakSubjectFromQuiz.replace('_', ' ')}</span> — practice 20 questions today to strengthen it.
-                          </p>
-                          <Button
-                            size="sm"
-                            className="mt-3"
-                            onClick={() => {
-                              setPracticeSubjectOverride(weakSubjectFromQuiz);
-                              setQuizType('mini');
-                              startTransition(() => setCurrentStep('quiz'));
-                            }}
-                          >
-                            Practice now
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Subject tags */}
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs text-muted-foreground">Your subjects:</span>
-                    {effectiveSubjects.map(subject => (
-                      <span key={subject} className="px-2.5 py-0.5 bg-primary/10 text-primary rounded-full text-xs font-medium capitalize">
-                        {subject.replace('_', ' ')}
-                      </span>
-                    ))}
-                    <Button variant="ghost" size="sm" onClick={() => setShowSubjectChanger(true)} className="text-muted-foreground hover:text-primary h-7 px-2">
-                      <RefreshCw className="w-3 h-3 mr-1" />Change
-                    </Button>
-                  </div>
-
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-green-500 hover:bg-green-500/5" onClick={handleGenerateStudyPlan}>
-                      <Target className="w-6 h-6 text-green-500" />
-                      <span className="font-bold text-sm">Study Plan</span>
-                    </Button>
-                    <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-orange-500 hover:bg-orange-500/5" onClick={() => requireAccess('flashcards')}>
-                      <Layers className="w-6 h-6 text-orange-500" />
-                      <span className="font-bold text-sm">Flashcards</span>
-                    </Button>
-                    <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-teal-500 hover:bg-teal-500/5" onClick={() => requireAccess('notes')}>
-                      <StickyNote className="w-6 h-6 text-teal-500" />
-                      <span className="font-bold text-sm">Notes</span>
-                    </Button>
-                    <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-blue-500 hover:bg-blue-500/5" onClick={() => requireAccess('upload')}>
-                      <FileText className="w-6 h-6 text-blue-500" />
-                      <span className="font-bold text-sm">Upload PDF</span>
-                    </Button>
-                    <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-purple-500 hover:bg-purple-500/5" onClick={() => navigateStep('syllabus')}>
-                      <BookOpen className="w-6 h-6 text-purple-500" />
-                      <span className="font-bold text-sm">Syllabus</span>
-                    </Button>
-                    <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-rose-500 hover:bg-rose-500/5" onClick={() => navigateStep('novels')}>
-                      <Library className="w-6 h-6 text-rose-500" />
-                       <span className="font-bold text-sm">Library</span>
-                    </Button>
-                    <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-orange-500 hover:bg-orange-500/5" onClick={() => navigate('/repeated-questions')}>
-                      <Flame className="w-6 h-6 text-orange-500" />
-                      <span className="font-bold text-sm">High-Yield Qs</span>
-                    </Button>
-                    <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-primary hover:bg-primary/5" onClick={() => navigateStep('course-requirements')}>
-                      <GraduationCap className="w-6 h-6 text-primary" />
-                      <span className="font-bold text-sm">Course Reqs</span>
-                    </Button>
-                    <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-amber-500 hover:bg-amber-500/5" onClick={() => navigateStep('mock')}>
-                      <Trophy className="w-6 h-6 text-amber-500" />
-                      <span className="font-bold text-sm">Mock CBT</span>
-                    </Button>
-                  </div>
-
-                  {(hasFeature('studyMaterials') || isTrialActive) ? (
-                    <StudyMaterials subjects={effectiveSubjects} />
-                  ) : (
-                    <FeatureGate feature="studyMaterials" onUpgrade={handleUpgradeClick}>
-                      <StudyMaterials subjects={effectiveSubjects} />
-                    </FeatureGate>
-                  )}
-
-                  {/* AdSense — Study */}
-                  <GoogleAdSense className="my-4" />
-
-                  {/* AI Tip */}
-                  <Suspense fallback={<Skeleton className="h-32 w-full rounded-xl" />}>
-                  <CourseTipsCard userEmail={userEmail} userSubjects={effectiveSubjects} />
-                  </Suspense>
-                </motion.div>
+                <StudyTab
+                  userEmail={userEmail}
+                  user={user}
+                  effectiveAdmin={effectiveAdmin}
+                  effectiveOwner={effectiveOwner}
+                  effectiveAccess={effectiveAccess}
+                  effectiveSubjects={effectiveSubjects}
+                  userRole={userRole}
+                  isTrialActive={isTrialActive}
+                  formattedTime={formattedTime}
+                  weakSubjectFromQuiz={weakSubjectFromQuiz}
+                  personalizationData={personalizationData}
+                  hasFeature={hasFeature}
+                  navigateStep={navigateStep}
+                  navigate={navigate}
+                  handleUpgradeClick={handleUpgradeClick}
+                  handleSignOut={handleSignOut}
+                  handleTabChange={handleTabChange}
+                  setPracticeSubjectOverride={setPracticeSubjectOverride}
+                  setQuizType={setQuizType}
+                  setSyllabusTargetSubject={setSyllabusTargetSubject}
+                  setSyllabusTargetTopic={setSyllabusTargetTopic}
+                  setFlashcardsTargetSubject={setFlashcardsTargetSubject}
+                  setShowSubjectChanger={setShowSubjectChanger}
+                  handleGenerateStudyPlan={handleGenerateStudyPlan}
+                />
               )}
 
               {/* ================= AI TAB ================= */}
               {activeTab === 'ai' && (
-                <motion.div key="ai" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
-                  {/* AI Header */}
-                  <div>
-                    <p className="text-muted-foreground text-sm">Your smart study partner</p>
-                    <h1 className="text-2xl md:text-3xl font-extrabold text-foreground flex items-center gap-2">
-                      AI Assistant <Brain className="w-6 h-6 text-primary" />
-                    </h1>
-                  </div>
-
-                  <div className="rounded-2xl p-6 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border border-primary/30">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
-                        <Sparkles className="w-6 h-6 text-primary" />
-                      </div>
-                      <div>
-                        <h2 className="text-xl font-bold text-foreground">AI Study Assistant</h2>
-                        <p className="text-xs text-muted-foreground">Ask anything about JAMB, get instant help</p>
-                      </div>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Tap the sparkle button (bottom-right) to open the AI chat and ask any JAMB question.
-                    </p>
-                  </div>
-
-                  {/* Score Prediction + weakness + AI features live inside PremiumDashboard */}
-                  <Suspense fallback={<Skeleton className="h-48 w-full rounded-xl" />}>
-                  <PremiumDashboard
-                    userEmail={userEmail}
-                    isAdmin={effectiveAdmin}
-                    adminRole={userRole}
-                    targetScore={personalizationData?.targetScore ? parseInt(personalizationData.targetScore) : undefined}
-                    weakSubject={weakSubjectFromQuiz || personalizationData?.weakestSubject}
-                    onUpgrade={handleUpgradeClick}
-                  />
-                  </Suspense>
-
-                  <div>
-                    <h2 className="text-lg font-bold text-foreground mb-3">Weakness & Topic Analysis</h2>
-                    <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
-                    <TopicMasteryTracker 
-                      userEmail={userEmail} 
-                      allowedSubjects={effectiveSubjects}
-                      onStartPracticeTopic={(subject, topic) => {
-                        if (subject && subject !== 'all') {
-                          setPracticeSubjectOverride(subject);
-                          setQuizType('subject');
-                        } else {
-                          setPracticeSubjectOverride(null);
-                          setQuizType('mini');
-                        }
-                        startTransition(() => setCurrentStep('quiz'));
-                        window.scrollTo({ top: 0, behavior: 'instant' });
-                      }}
-                      onGoToSyllabusTopic={handleGoToSyllabusTopic}
-                    />
-                    </Suspense>
-                  </div>
-
-                  {weakSubjectFromQuiz && (
-                    <div className="p-4 rounded-xl bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/30">
-                      <p className="text-sm text-foreground">
-                        👋 <span className="font-semibold">AI Recommendation:</span> Focus on{' '}
-                        <span className="font-bold text-primary capitalize">{weakSubjectFromQuiz.replace('_', ' ')}</span>. Try 20 extra questions today.
-                      </p>
-                    </div>
-                  )}
-                </motion.div>
+                <AiTab
+                  userEmail={userEmail}
+                  user={user}
+                  effectiveAdmin={effectiveAdmin}
+                  effectiveOwner={effectiveOwner}
+                  effectiveAccess={effectiveAccess}
+                  effectiveSubjects={effectiveSubjects}
+                  userRole={userRole}
+                  isTrialActive={isTrialActive}
+                  formattedTime={formattedTime}
+                  weakSubjectFromQuiz={weakSubjectFromQuiz}
+                  personalizationData={personalizationData}
+                  hasFeature={hasFeature}
+                  navigateStep={navigateStep}
+                  navigate={navigate}
+                  handleUpgradeClick={handleUpgradeClick}
+                  handleSignOut={handleSignOut}
+                  handleTabChange={handleTabChange}
+                  setPracticeSubjectOverride={setPracticeSubjectOverride}
+                  setQuizType={setQuizType}
+                  setSyllabusTargetSubject={setSyllabusTargetSubject}
+                  setSyllabusTargetTopic={setSyllabusTargetTopic}
+                  setFlashcardsTargetSubject={setFlashcardsTargetSubject}
+                  setShowSubjectChanger={setShowSubjectChanger}
+                />
               )}
 
               {/* ================= COMMUNITY TAB ================= */}
               {activeTab === 'community' && (
-                <motion.div key="community" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
-                  {/* Community Header */}
-                  <div className="rounded-2xl p-5 border border-primary/30 bg-gradient-to-br from-primary/20 via-primary/5 to-transparent">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
-                        <Users className="w-6 h-6 text-primary" />
-                      </div>
-                      <div>
-                        <h1 className="text-2xl font-extrabold text-foreground">The Community 👋</h1>
-                        <p className="text-xs text-muted-foreground">Learn, compete and grow together</p>
-                      </div>
-                    </div>
-                    <div className="mt-3">
-                      <LiveCounter />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    <Button variant="outline" className="h-auto py-5 flex flex-col gap-1 hover:border-yellow-500 hover:bg-yellow-500/5" onClick={() => navigateStep('leaderboard')}>
-                      <Trophy className="w-6 h-6 text-yellow-500" />
-                      <span className="font-bold text-sm">Leaderboard</span>
-                    </Button>
-                    <Button variant="outline" className="h-auto py-5 flex flex-col gap-1 hover:border-amber-500 hover:bg-amber-500/5" onClick={() => navigateStep('scholarships')}>
-                      <GraduationCap className="w-6 h-6 text-amber-500" />
-                      <span className="font-bold text-sm">Scholarships</span>
-                    </Button>
-                    <Button variant="outline" className="h-auto py-5 flex flex-col gap-1 hover:border-cyan-500 hover:bg-cyan-500/5" onClick={() => navigateStep('news')}>
-                      <Newspaper className="w-6 h-6 text-cyan-500" />
-                      <span className="font-bold text-sm">JAMB News</span>
-                    </Button>
-                    <Button variant="outline" className="h-auto py-5 flex flex-col gap-1 hover:border-primary hover:bg-primary/5" onClick={() => navigate('/games')}>
-                      <Gamepad2 className="w-6 h-6 text-primary" />
-                      <span className="font-bold text-sm">Challenges</span>
-                    </Button>
-                    <Button variant="outline" className="h-auto py-5 flex flex-col gap-1 hover:border-green-500 hover:bg-green-500/5" onClick={() => window.open('https://whatsapp.com/channel/0029VbAqCkeGehEHAIYD1s2y', '_blank')}>
-                      <MessageCircle className="w-6 h-6 text-green-500" />
-                      <span className="font-bold text-sm">WhatsApp</span>
-                    </Button>
-                    <Button variant="outline" className="h-auto py-5 flex flex-col gap-1 hover:border-pink-500 hover:bg-pink-500/5" onClick={() => window.open('https://www.tiktok.com/@jambcrashai', '_blank')}>
-                      <Youtube className="w-6 h-6 text-pink-500" />
-                      <span className="font-bold text-sm">TikTok</span>
-                    </Button>
-                  </div>
-                  <div className="rounded-2xl p-5 bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/30">
-                    <div className="flex items-center gap-3">
-                      <Flame className="w-8 h-8 text-orange-500" />
-                      <div>
-                        <h3 className="font-bold text-foreground">Daily Streak Challenge</h3>
-                        <p className="text-xs text-muted-foreground">Keep your streak alive — practice daily for bonus rewards.</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Refer & Earn */}
-                  {userEmail && (
-                    <Suspense fallback={null}>
-                    <ReferralSystem userEmail={userEmail} />
-                    </Suspense>
-                  )}
-                </motion.div>
+                <CommunityTab
+                  userEmail={userEmail}
+                  user={user}
+                  effectiveAdmin={effectiveAdmin}
+                  effectiveOwner={effectiveOwner}
+                  effectiveAccess={effectiveAccess}
+                  effectiveSubjects={effectiveSubjects}
+                  userRole={userRole}
+                  isTrialActive={isTrialActive}
+                  formattedTime={formattedTime}
+                  weakSubjectFromQuiz={weakSubjectFromQuiz}
+                  personalizationData={personalizationData}
+                  hasFeature={hasFeature}
+                  navigateStep={navigateStep}
+                  navigate={navigate}
+                  handleUpgradeClick={handleUpgradeClick}
+                  handleSignOut={handleSignOut}
+                  handleTabChange={handleTabChange}
+                  setPracticeSubjectOverride={setPracticeSubjectOverride}
+                  setQuizType={setQuizType}
+                  setSyllabusTargetSubject={setSyllabusTargetSubject}
+                  setSyllabusTargetTopic={setSyllabusTargetTopic}
+                  setFlashcardsTargetSubject={setFlashcardsTargetSubject}
+                  setShowSubjectChanger={setShowSubjectChanger}
+                />
               )}
 
               {/* ================= PROFILE TAB ================= */}
               {activeTab === 'profile' && (
-                <motion.div key="profile" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
-                  <div className="rounded-2xl p-5 border border-border bg-card">
-                    <p className="text-xs text-muted-foreground">Signed in as</p>
-                    <p className="font-semibold text-foreground truncate">{userEmail}</p>
-                  </div>
-
-                  <h2 className="text-lg font-bold text-foreground">Your Study Stats 👋</h2>
-                  <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
-                    <StudyStats
-                      userEmail={userEmail}
-                      allowedSubjects={effectiveSubjects}
-                      onPracticeSubject={(subject) => {
-                        if (!effectiveSubjects.includes(subject)) return;
-                        setPracticeSubjectOverride(subject);
-                        setQuizType('mini');
-                        startTransition(() => setCurrentStep('quiz'));
-                      }}
-                    />
-                  </Suspense>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <Button variant="outline" className="h-auto py-4 flex flex-col gap-1" onClick={() => navigate('/settings')}>
-                      <SettingsIcon className="w-5 h-5 text-primary" />
-                      <span className="font-bold text-sm">Settings</span>
-                    </Button>
-                    <Button variant="outline" className="h-auto py-4 flex flex-col gap-1" onClick={() => handleTabChange('home')}>
-                      <Bell className="w-5 h-5 text-primary" />
-                      <span className="font-bold text-sm">Notifications</span>
-                    </Button>
-                    {!effectiveAccess && !effectiveAdmin && (
-                      <Button className="h-auto py-4 flex flex-col gap-1 col-span-2 gradient-primary text-primary-foreground" onClick={() => handleUpgradeClick()}>
-                        <Crown className="w-5 h-5" />
-                        <span className="font-bold text-sm">Upgrade to SCHOLAR</span>
-                      </Button>
-                    )}
-                    <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 col-span-2 text-destructive hover:text-destructive" onClick={handleSignOut}>
-                      <LogOut className="w-5 h-5" />
-                      <span className="font-bold text-sm">Sign Out</span>
-                    </Button>
-                  </div>
-                </motion.div>
+                <ProfileTab
+                  userEmail={userEmail}
+                  user={user}
+                  effectiveAdmin={effectiveAdmin}
+                  effectiveOwner={effectiveOwner}
+                  effectiveAccess={effectiveAccess}
+                  effectiveSubjects={effectiveSubjects}
+                  userRole={userRole}
+                  isTrialActive={isTrialActive}
+                  formattedTime={formattedTime}
+                  weakSubjectFromQuiz={weakSubjectFromQuiz}
+                  personalizationData={personalizationData}
+                  hasFeature={hasFeature}
+                  navigateStep={navigateStep}
+                  navigate={navigate}
+                  handleUpgradeClick={handleUpgradeClick}
+                  handleSignOut={handleSignOut}
+                  handleTabChange={handleTabChange}
+                  setPracticeSubjectOverride={setPracticeSubjectOverride}
+                  setQuizType={setQuizType}
+                  setSyllabusTargetSubject={setSyllabusTargetSubject}
+                  setSyllabusTargetTopic={setSyllabusTargetTopic}
+                  setFlashcardsTargetSubject={setFlashcardsTargetSubject}
+                  setShowSubjectChanger={setShowSubjectChanger}
+                />
               )}
             </div>
           </div>
