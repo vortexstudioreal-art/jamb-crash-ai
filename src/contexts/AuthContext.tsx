@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { User, Session } from '@supabase/supabase-js';
 import { supabase, supabaseUrl } from '@/integrations/supabase/client';
 import { startPeriodicSync, stopPeriodicSync } from '@/services/syncService';
+import { errorLogger } from '@/services/errorLogger';
 
 // Package feature limits
 export type UserPackage = 'basic' | 'pro' | 'premium' | 'admin' | null;
@@ -189,7 +190,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         return true;
       }
     } catch (e) {
-      console.error('Failed to restore cached access:', e);
+      errorLogger.error(e, { component: 'AuthContext', action: 'restoreCachedAccess' });
     }
     return false;
   };
@@ -198,7 +199,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       localStorage.setItem(`jamb_access_${email}`, JSON.stringify(accessData));
     } catch (e) {
-      console.error('Failed to cache access state:', e);
+      errorLogger.error(e, { component: 'AuthContext', action: 'cacheAccessState' });
     }
   };
 
@@ -215,7 +216,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       });
 
       if (error) {
-        console.error('Error checking access:', error);
+        errorLogger.error(error, { component: 'AuthContext', action: 'checkUserAccess' });
         if (navigator.onLine) {
           setUserPackage('basic');
         } else {
@@ -261,7 +262,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setUserPackage('basic');
       }
     } catch (err) {
-      console.error('Access check failed:', err);
+      errorLogger.error(err, { component: 'AuthContext', action: 'checkUserAccess' });
       if (navigator.onLine) {
         setUserPackage('basic');
       } else {
@@ -288,7 +289,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           try {
             localStorage.setItem('jamb_supabase_session', JSON.stringify(session));
           } catch (e) {
-            console.error('Failed to cache session:', e);
+            errorLogger.error(e, { component: 'AuthContext', action: 'cacheSessionOnAuthChange' });
           }
         } else {
           try {
@@ -328,7 +329,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           }
         }
       } catch (e) {
-        console.error('Failed to restore cached session:', e);
+        errorLogger.error(e, { component: 'AuthContext', action: 'restoreCachedSession' });
       }
       setIsLoading(false);
       return;
@@ -358,7 +359,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         try {
           localStorage.setItem('jamb_supabase_session', JSON.stringify(session));
         } catch (e) {
-          console.error('Failed to cache session:', e);
+          errorLogger.error(e, { component: 'AuthContext', action: 'cacheSessionOnGetSession' });
         }
       }
       

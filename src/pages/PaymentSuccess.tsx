@@ -4,14 +4,14 @@ import { motion } from 'framer-motion';
 import { CheckCircle, Loader2, Mail, ArrowRight, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePaystack } from '@/hooks/usePaystack';
-import { useAccessControl } from '@/hooks/useAccessControl';
+import { useAuth } from '@/contexts/AuthContext';
 import { useSeo } from '@/hooks/useSeo';
 
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { verifyPayment } = usePaystack();
-  const { setUserEmail } = useAccessControl();
+  const { refreshAccess } = useAuth();
   const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying');
   const [paymentData, setPaymentData] = useState<{
     email: string;
@@ -39,9 +39,9 @@ const PaymentSuccess = () => {
         const data = result?.data || null;
         setPaymentData(data);
         setStatus(result?.success ? 'success' : 'error');
-        // Store user email for access control
+        // Refresh access to get latest payment status
         if (data?.email) {
-          setUserEmail(data.email);
+          await refreshAccess();
         }
       } catch (error) {
         console.error('Verification failed:', error);
@@ -50,7 +50,7 @@ const PaymentSuccess = () => {
     };
 
     verify();
-  }, [searchParams, verifyPayment, setUserEmail]);
+  }, [searchParams, verifyPayment, refreshAccess]);
 
   const handleContinue = () => {
     // Store payment info in sessionStorage for the upload step

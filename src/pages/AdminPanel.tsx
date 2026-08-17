@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 import { lazy, Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSeo } from '@/hooks/useSeo';
+import { errorLogger } from '@/services/errorLogger';
 
 interface Payment {
   id: string;
@@ -139,7 +140,7 @@ const AdminPanel = () => {
       });
       setWhatsappConfigured(data?.configured || false);
     } catch (err) {
-      console.error('WhatsApp config check failed:', err);
+      errorLogger.error(err, { component: 'AdminPanel', action: 'checkWhatsAppConfig' });
       setWhatsappConfigured(false);
     }
   };
@@ -151,7 +152,7 @@ const AdminPanel = () => {
       .order('created_at', { ascending: false });
     
     if (error) {
-      console.error('Error fetching payments:', error);
+      errorLogger.error(error, { component: 'AdminPanel', action: 'fetchPayments' });
       return;
     }
     
@@ -177,7 +178,7 @@ const AdminPanel = () => {
       .order('created_at', { ascending: true });
     
     if (error) {
-      console.error('Error fetching admins:', error);
+      errorLogger.error(error, { component: 'AdminPanel', action: 'fetchAdmins' });
       return;
     }
     
@@ -191,7 +192,7 @@ const AdminPanel = () => {
       .select('*');
     
     if (error) {
-      console.error('Error fetching features:', error);
+      errorLogger.error(error, { component: 'AdminPanel', action: 'fetchFeatures' });
       return;
     }
     
@@ -280,7 +281,7 @@ const AdminPanel = () => {
       });
       
       if (error) {
-        console.error('WhatsApp test error:', error);
+        errorLogger.error(error, { component: 'AdminPanel', action: 'testWhatsAppReminder' });
         toast.error('Failed to send: ' + error.message, { id: 'whatsapp-test' });
         return;
       }
@@ -295,7 +296,7 @@ const AdminPanel = () => {
         }
       }
     } catch (error) {
-      console.error('WhatsApp test error:', error);
+      errorLogger.error(error, { component: 'AdminPanel', action: 'testWhatsAppReminder' });
       toast.error('Network error - check console', { id: 'whatsapp-test' });
     } finally {
       setTestingWhatsApp(false);
@@ -317,7 +318,7 @@ const AdminPanel = () => {
       });
       
       if (error) {
-        console.error('Email test error:', error);
+        errorLogger.error(error, { component: 'AdminPanel', action: 'testEmailSend' });
         toast.error('Failed to send email: ' + error.message);
         return;
       }
@@ -329,7 +330,7 @@ const AdminPanel = () => {
         toast.error(data?.error || 'Failed to send email');
       }
     } catch (error) {
-      console.error('Email test error:', error);
+      errorLogger.error(error, { component: 'AdminPanel', action: 'testEmailSend' });
       toast.error('Failed to send test email');
     } finally {
       setTestingEmail(false);
@@ -364,7 +365,7 @@ const AdminPanel = () => {
     
     if (error) {
       toast.error('Failed to add collaborator');
-      console.error(error);
+      errorLogger.error(error, { component: 'AdminPanel', action: 'addCollaborator' });
       return;
     }
 
@@ -390,7 +391,7 @@ const AdminPanel = () => {
     
     if (error) {
       toast.error('Failed to remove admin');
-      console.error(error);
+      errorLogger.error(error, { component: 'AdminPanel', action: 'removeAdmin' });
       return;
     }
 

@@ -1,6 +1,6 @@
 import { useFeatureUsage, FeatureType, FEATURE_NAMES } from '@/hooks/useFeatureUsage';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTrialSystem } from '@/hooks/useTrialSystem';
+import { useTrialContext } from '@/contexts/TrialContext';
 import { Progress } from '@/components/ui/progress';
 import { FileText, Layers, Zap, Sparkles, Calendar, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -55,12 +55,8 @@ export const UsageLimitIndicator = () => {
   const { userPackage, isAdmin, isOwner, hasAccess, user } = useAuth();
   const { isLoading } = useFeatureUsage();
   
-  // Check trial status using database-backed trial system
-  const { isTrialActive } = useTrialSystem({
-    userEmail: user?.email || null,
-    isAdmin: isAdmin || isOwner,
-    hasAccess,
-  });
+  // Check trial status using shared context
+  const { isTrialActive } = useTrialContext();
   
   // Don't show for Pro/Premium/Admin/Trial users (they have unlimited)
   if (isAdmin || isOwner || userPackage === 'pro' || userPackage === 'premium' || isTrialActive) {

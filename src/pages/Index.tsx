@@ -13,7 +13,7 @@ import { BackButton } from '@/components/BackButton';
 import { useFeatureUsage } from '@/hooks/useFeatureUsage';
 import { useExamDate } from '@/hooks/useExamDate';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTrialSystem } from '@/hooks/useTrialSystem';
+import { useTrialContext } from '@/contexts/TrialContext';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
@@ -214,13 +214,7 @@ const Index = () => {
   }, []);
   const { hasFeature } = useFeatureAccess();
   
-  // Database-backed trial system
-  const trialSystem = useTrialSystem({
-    userEmail: user?.email || null,
-    isAdmin: isAdmin || isOwner,
-    hasAccess,
-  });
-  
+  // Database-backed trial system (shared via context)
   const { 
     formattedTime, 
     isTrialExpired, 
@@ -229,7 +223,7 @@ const Index = () => {
     canStartTrial,
     startTrial,
     loading: trialLoading,
-  } = trialSystem;
+  } = useTrialContext();
 
   // Wrap step changes in startTransition to prevent suspense errors with lazy-loaded components
   const navigateStep = useCallback((step: Step) => {

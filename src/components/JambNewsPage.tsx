@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useAccessControl } from '@/hooks/useAccessControl';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface NewsItem {
   title: string;
@@ -33,9 +33,9 @@ export const JambNewsPage = ({ onBack }: JambNewsPageProps) => {
   const [error, setError] = useState<string | null>(null);
   const [lastFetched, setLastFetched] = useState<Date | null>(null);
   const [sendingNotification, setSendingNotification] = useState<number | null>(null);
-  const { isAdmin, adminRole } = useAccessControl();
+  const { isAdmin, isOwner } = useAuth();
 
-  const canSendNotifications = isAdmin && adminRole === 'owner';
+  const canSendNotifications = isAdmin && isOwner;
 
   const sendNotificationFromNews = async (newsItem: NewsItem, index: number) => {
     setSendingNotification(index);

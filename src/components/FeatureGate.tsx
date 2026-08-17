@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { ReactNode, useState } from 'react';
 import { useAuth, PACKAGE_FEATURES, UserPackage } from '@/contexts/AuthContext';
-import { useTrialSystem } from '@/hooks/useTrialSystem';
+import { useTrialContext } from '@/contexts/TrialContext';
 import { useFeatureUsage, FeatureType, FEATURE_NAMES } from '@/hooks/useFeatureUsage';
 import { Lock, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -104,12 +104,8 @@ export const FeatureGate = ({ children, feature, fallback, onUpgrade }: FeatureG
   const { userPackage, isAdmin, isOwner, hasAccess, user, packageFeatures } = useAuth();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   
-  // Check if user is in trial using database-backed trial system
-  const { isTrialActive } = useTrialSystem({
-    userEmail: user?.email || null,
-    isAdmin: isAdmin || isOwner,
-    hasAccess,
-  });
+  // Check if user is in trial using shared context
+  const { isTrialActive } = useTrialContext();
 
   // Admins and owners have access to everything
   if (isAdmin || isOwner) {
@@ -186,12 +182,8 @@ export const useFeatureAccess = () => {
   const { userPackage, packageFeatures, isAdmin, isOwner, hasAccess, user } = useAuth();
   const featureUsage = useFeatureUsage();
   
-  // Check if user is in trial using database-backed trial system
-  const { isTrialActive } = useTrialSystem({
-    userEmail: user?.email || null,
-    isAdmin: isAdmin || isOwner,
-    hasAccess,
-  });
+  // Check if user is in trial using shared context
+  const { isTrialActive } = useTrialContext();
 
   const hasFeature = (feature: PlanFeature): boolean => {
     // Admins and owners have all features

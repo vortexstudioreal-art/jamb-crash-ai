@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, Zap, X, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useTrialSystem } from '@/hooks/useTrialSystem';
+import { useTrialContext } from '@/contexts/TrialContext';
 import { toast } from 'sonner';
 
 interface TrialBannerProps {
@@ -22,7 +22,7 @@ export const TrialBanner = ({ userEmail, isAdmin, hasAccess, onTrialStart }: Tri
     isTrialActive,
     loading,
     startTrial 
-  } = useTrialSystem({ userEmail, isAdmin, hasAccess });
+  } = useTrialContext();
 
   const handleStartTrial = async () => {
     setStarting(true);

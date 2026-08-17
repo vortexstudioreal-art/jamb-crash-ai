@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { errorLogger } from '@/services/errorLogger';
+import { useAuth } from '@/contexts/AuthContext';
 
 const TRIAL_DURATION_MS = 30 * 60 * 1000; // 30 minutes
 const TRIAL_CACHE_PREFIX = 'jamb_trial_cache_';
@@ -24,17 +24,11 @@ const writeCachedTrial = (email: string, data: CachedTrial) => {
   try {
     localStorage.setItem(TRIAL_CACHE_PREFIX + email, JSON.stringify(data));
   } catch {
-    // localStorage unavailable (e.g. private browsing) — trial cache is optional
+    // localStorage unavailable
   }
 };
 
-interface UseTrialSystemProps {
-  userEmail: string | null;
-  isAdmin: boolean;
-  hasAccess: boolean;
-}
-
-export interface TrialState {
+interface TrialContextValue {
   timeRemaining: number | null;
   formattedTime: string | null;
   isTrialExpired: boolean;
@@ -43,9 +37,16 @@ export interface TrialState {
   canStartTrial: boolean;
   subscriptionPlan: string | null;
   loading: boolean;
+  startTrial: () => Promise<boolean>;
+  refreshTrialStatus: () => Promise<void>;
 }
 
-export const useTrialSystem = ({ userEmail, isAdmin, hasAccess }: UseTrialSystemProps) => {
+const TrialContext = createContext<TrialContextValue | null>(null);
+
+export const TrialProvider = ({ children }: { children: ReactNode }) => {
+  const { user, isAdmin, hasAccess } = useAuth();
+  const userEmail = user?.email?.toLowerCase() || null;
+
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [isTrialExpired, setIsTrialExpired] = useState(false);
   const [isTrialActive, setIsTrialActive] = useState(false);
@@ -54,14 +55,12 @@ export const useTrialSystem = ({ userEmail, isAdmin, hasAccess }: UseTrialSystem
   const [trialExpiresAt, setTrialExpiresAt] = useState<Date | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Check trial status from database
   const checkTrialStatus = useCallback(async () => {
     if (!userEmail) {
       setLoading(false);
       return;
     }
 
-    // Offline: restore from cache so the dashboard isn't blocked.
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
       const cached = readCachedTrial(userEmail);
       if (cached) {
@@ -92,7 +91,7 @@ export const useTrialSystem = ({ userEmail, isAdmin, hasAccess }: UseTrialSystem
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
-        errorLogger.error(error, { component: 'useTrialSystem', action: 'checkTrialStatus' });
+        console.error('Error checking trial:', error);
         setLoading(false);
         return;
       }
@@ -119,19 +118,17 @@ export const useTrialSystem = ({ userEmail, isAdmin, hasAccess }: UseTrialSystem
           setTimeRemaining(0);
         }
       } else {
-        // No trial record - user can start trial
         setHasTrialUsed(false);
         setIsTrialActive(false);
         setIsTrialExpired(false);
       }
     } catch (err) {
-      errorLogger.error(err, { component: 'useTrialSystem', action: 'checkTrialStatus' });
+      console.error('Trial check error:', err);
     } finally {
       setLoading(false);
     }
   }, [userEmail]);
 
-  // Start the 30-minute trial
   const startTrial = useCallback(async (): Promise<boolean> => {
     if (!userEmail || hasTrialUsed || isAdmin || hasAccess) {
       return false;
@@ -147,7 +144,7 @@ export const useTrialSystem = ({ userEmail, isAdmin, hasAccess }: UseTrialSystem
           trial_started_at: new Date().toISOString(),
           trial_expires_at: expiresAt.toISOString(),
           trial_used: true,
-          subscription_plan: 'premium', // Full premium access during trial
+          subscription_plan: 'premium',
         });
 
       if (error) {
@@ -155,7 +152,7 @@ export const useTrialSystem = ({ userEmail, isAdmin, hasAccess }: UseTrialSystem
           setHasTrialUsed(true);
           return false;
         }
-        errorLogger.error(error, { component: 'useTrialSystem', action: 'startTrial' });
+        console.error('Error starting trial:', error);
         return false;
       }
 
@@ -168,17 +165,15 @@ export const useTrialSystem = ({ userEmail, isAdmin, hasAccess }: UseTrialSystem
       
       return true;
     } catch (err) {
-      errorLogger.error(err, { component: 'useTrialSystem', action: 'startTrial' });
+      console.error('Start trial error:', err);
       return false;
     }
   }, [userEmail, hasTrialUsed, isAdmin, hasAccess]);
 
-  // Load trial status on mount
   useEffect(() => {
     checkTrialStatus();
   }, [checkTrialStatus]);
 
-  // Timer effect
   useEffect(() => {
     if (isAdmin || hasAccess) {
       setIsTrialActive(false);
@@ -207,7 +202,6 @@ export const useTrialSystem = ({ userEmail, isAdmin, hasAccess }: UseTrialSystem
     return () => clearInterval(interval);
   }, [isAdmin, hasAccess, isTrialActive, trialExpiresAt]);
 
-  // Format time as MM:SS
   const formatTime = (ms: number): string => {
     const totalSeconds = Math.floor(ms / 1000);
     const minutes = Math.floor(totalSeconds / 60);
@@ -216,12 +210,10 @@ export const useTrialSystem = ({ userEmail, isAdmin, hasAccess }: UseTrialSystem
   };
 
   const canStartTrial = Boolean(userEmail && !hasTrialUsed && !isAdmin && !hasAccess);
-
-  // Effective trial state - admins and paid users bypass trial
   const effectiveTrialActive = !isAdmin && !hasAccess && isTrialActive;
   const effectiveTrialExpired = !isAdmin && !hasAccess && isTrialExpired && hasTrialUsed;
 
-  return {
+  const value: TrialContextValue = {
     timeRemaining,
     formattedTime: timeRemaining !== null ? formatTime(timeRemaining) : null,
     isTrialExpired: effectiveTrialExpired,
@@ -233,4 +225,18 @@ export const useTrialSystem = ({ userEmail, isAdmin, hasAccess }: UseTrialSystem
     startTrial,
     refreshTrialStatus: checkTrialStatus,
   };
+
+  return (
+    <TrialContext.Provider value={value}>
+      {children}
+    </TrialContext.Provider>
+  );
+};
+
+export const useTrialContext = (): TrialContextValue => {
+  const context = useContext(TrialContext);
+  if (!context) {
+    throw new Error('useTrialContext must be used within a TrialProvider');
+  }
+  return context;
 };

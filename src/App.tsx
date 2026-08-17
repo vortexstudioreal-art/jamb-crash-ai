@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { TrialProvider } from "@/contexts/TrialContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PasswordRecoveryHandler } from "@/components/PasswordRecoveryHandler";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
@@ -57,39 +58,41 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
-            <ErrorBoundary>
-            <PasswordRecoveryHandler>
-              <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/payment-success" element={<PaymentSuccess />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route 
-                  path="/admin" 
-                  element={
-                    <ProtectedRoute requireAdmin>
-                      <AdminPanel />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route path="/collaborator-dashboard" element={<CollaboratorDashboard />} />
-                <Route path="/repeated-questions" element={<RepeatedQuestionsPage />} />
-                <Route path="/games" element={<ProtectedRoute><GamesPage /></ProtectedRoute>} />
-                <Route path="/jamb-repeats-past-questions" element={<JambRepeatsPastQuestions />} />
-                <Route path="/reseller" element={<ProtectedRoute><ResellerDashboard /></ProtectedRoute>} />
-                <Route path="/redeem-pin" element={<PinRedeemPage />} />
-                <Route path="/privacy" element={<PrivacyPolicy />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-              </Suspense>
-              {/* Global Components */}
-              <OfflineIndicator variant="minimal" />
-              <InstallPrompt />
-              <OfflineReadyChecklist />
-            </PasswordRecoveryHandler>
-            </ErrorBoundary>
+            <TrialProvider>
+              <ErrorBoundary>
+              <PasswordRecoveryHandler>
+                <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/payment-success" element={<PaymentSuccess />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route 
+                    path="/admin" 
+                    element={
+                      <ProtectedRoute requireAdmin>
+                        <AdminPanel />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route path="/collaborator-dashboard" element={<CollaboratorDashboard />} />
+                  <Route path="/repeated-questions" element={<RepeatedQuestionsPage />} />
+                  <Route path="/games" element={<ProtectedRoute><GamesPage /></ProtectedRoute>} />
+                  <Route path="/jamb-repeats-past-questions" element={<JambRepeatsPastQuestions />} />
+                  <Route path="/reseller" element={<ProtectedRoute><ResellerDashboard /></ProtectedRoute>} />
+                  <Route path="/redeem-pin" element={<PinRedeemPage />} />
+                  <Route path="/privacy" element={<PrivacyPolicy />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+                </Suspense>
+                {/* Global Components */}
+                <OfflineIndicator variant="minimal" />
+                <InstallPrompt />
+                <OfflineReadyChecklist />
+              </PasswordRecoveryHandler>
+              </ErrorBoundary>
+            </TrialProvider>
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>

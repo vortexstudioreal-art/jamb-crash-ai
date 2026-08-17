@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth, UserPackage } from '@/contexts/AuthContext';
-import { useTrialSystem } from '@/hooks/useTrialSystem';
+import { useTrialContext } from '@/contexts/TrialContext';
+import { errorLogger } from '@/services/errorLogger';
 
 export type FeatureType = 
   | 'pdf_upload'
@@ -73,12 +74,8 @@ export const useFeatureUsage = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
 
-  // Use database-backed trial system instead of local storage one
-  const { isTrialActive } = useTrialSystem({
-    userEmail: user?.email || null,
-    isAdmin: isAdmin || isOwner,
-    hasAccess,
-  });
+  // Use shared trial state from context
+  const { isTrialActive } = useTrialContext();
 
   const userEmail = user?.email?.toLowerCase();
 
@@ -98,7 +95,7 @@ export const useFeatureUsage = () => {
         .eq('usage_date', today);
 
       if (error) {
-        console.error('Error fetching feature usage:', error);
+        errorLogger.error(error, { component: 'useFeatureUsage', action: 'fetchUsage' });
         return;
       }
 
@@ -193,7 +190,7 @@ export const useFeatureUsage = () => {
         );
 
       if (error) {
-        console.error('Error incrementing usage:', error);
+        errorLogger.error(error, { component: 'useFeatureUsage', action: 'incrementUsage' });
         return false;
       }
 
@@ -205,7 +202,7 @@ export const useFeatureUsage = () => {
 
       return true;
     } catch (err) {
-      console.error('Failed to increment usage:', err);
+      errorLogger.error(err, { component: 'useFeatureUsage', action: 'incrementUsage' });
       return false;
     }
   }, [userEmail, usageData, canUseFeature]);
@@ -249,7 +246,7 @@ export const useFeatureUsage = () => {
         );
 
       if (error) {
-        console.error('Error adding bonus use:', error);
+        errorLogger.error(error, { component: 'useFeatureUsage', action: 'addBonusUse' });
         return false;
       }
 
@@ -261,7 +258,7 @@ export const useFeatureUsage = () => {
 
       return true;
     } catch (err) {
-      console.error('Failed to add bonus use:', err);
+      errorLogger.error(err, { component: 'useFeatureUsage', action: 'addBonusUse' });
       return false;
     }
   }, [userEmail, usageData, bonusData]);
