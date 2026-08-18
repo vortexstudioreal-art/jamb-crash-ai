@@ -82,7 +82,7 @@ const healthChecks: Omit<HealthCheckResult, 'status'>[] = [
     {
       name: 'Owner bypass (never sees paywall)',
       icon: <Shield className="w-5 h-5" />,
-      fixPrompt: 'Fix Owner Access: The owner should always have full access to all features without seeing any paywall. Check useAccessControl hook and check_user_access database function to ensure owner role grants permanent access.',
+      fixPrompt: 'Fix Owner Access: The owner should always have full access to all features without seeing any paywall. Check AuthContext and check_user_access database function to ensure owner role grants permanent access.',
     },
     {
       name: 'Paystack test payment',

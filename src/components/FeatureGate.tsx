@@ -101,7 +101,7 @@ const TRIAL_FEATURES: PlanFeature[] = [
 ];
 
 export const FeatureGate = ({ children, feature, fallback, onUpgrade }: FeatureGateProps) => {
-  const { userPackage, isAdmin, isOwner, hasAccess, user, packageFeatures } = useAuth();
+  const { isAdmin, isOwner, packageFeatures } = useAuth();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   
   // Check if user is in trial using shared context
@@ -179,7 +179,7 @@ export const FeatureGate = ({ children, feature, fallback, onUpgrade }: FeatureG
 
 // Hook to check feature access without rendering
 export const useFeatureAccess = () => {
-  const { userPackage, packageFeatures, isAdmin, isOwner, hasAccess, user } = useAuth();
+  const { userPackage, packageFeatures, isAdmin, isOwner } = useAuth();
   const featureUsage = useFeatureUsage();
   
   // Check if user is in trial using shared context

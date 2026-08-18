@@ -83,7 +83,7 @@ export const BannerAd = ({ placement, className = '' }: BannerAdProps) => {
         trackAdStarted(userEmail, `banner_${placement}`, 'admob');
 
         await AdMob.showBanner({
-          adId: BANNER_AD_UNITS[placement] || ADMOB_CONFIG.testAdUnits.rewardedVideo,
+          adId: BANNER_AD_UNITS[placement] || ADMOB_CONFIG.testAdUnits.banner,
           adSize: BannerAdSize.ADAPTIVE_BANNER,
           position: BannerAdPosition.BOTTOM_CENTER,
           margin: 0,

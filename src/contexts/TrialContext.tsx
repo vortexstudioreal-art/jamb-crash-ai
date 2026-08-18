@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { errorLogger } from '@/services/errorLogger';
 
 const TRIAL_DURATION_MS = 30 * 60 * 1000; // 30 minutes
 const TRIAL_CACHE_PREFIX = 'jamb_trial_cache_';
@@ -91,7 +92,7 @@ export const TrialProvider = ({ children }: { children: ReactNode }) => {
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
-        console.error('Error checking trial:', error);
+        errorLogger.error(error, { component: 'TrialContext', action: 'checkTrialStatus' });
         setLoading(false);
         return;
       }
@@ -123,7 +124,7 @@ export const TrialProvider = ({ children }: { children: ReactNode }) => {
         setIsTrialExpired(false);
       }
     } catch (err) {
-      console.error('Trial check error:', err);
+      errorLogger.error(err instanceof Error ? err : new Error(String(err)), { component: 'TrialContext', action: 'checkTrialStatus' });
     } finally {
       setLoading(false);
     }
@@ -152,7 +153,7 @@ export const TrialProvider = ({ children }: { children: ReactNode }) => {
           setHasTrialUsed(true);
           return false;
         }
-        console.error('Error starting trial:', error);
+        errorLogger.error(error, { component: 'TrialContext', action: 'startTrial' });
         return false;
       }
 
@@ -165,7 +166,7 @@ export const TrialProvider = ({ children }: { children: ReactNode }) => {
       
       return true;
     } catch (err) {
-      console.error('Start trial error:', err);
+      errorLogger.error(err instanceof Error ? err : new Error(String(err)), { component: 'TrialContext', action: 'startTrial' });
       return false;
     }
   }, [userEmail, hasTrialUsed, isAdmin, hasAccess]);
