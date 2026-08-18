@@ -20,6 +20,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { BookOpen, LogOut } from 'lucide-react';
 import { DashboardSkeleton } from '@/components/DashboardSkeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import { BottomNav, type DashboardTab } from '@/components/BottomNav';
 import { DesktopSidebar } from '@/components/DesktopSidebar';
 import { useSeo } from '@/hooks/useSeo';
