@@ -27,6 +27,19 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     errorLogger.error(error, { component: 'ErrorBoundary', action: 'catch error' });
   }
 
+  handleReload = async (): Promise<void> => {
+    // Clear all service worker caches then hard-reload
+    if ('caches' in window) {
+      const names = await caches.keys();
+      await Promise.all(names.map((n) => caches.delete(n)));
+    }
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map((r) => r.unregister()));
+    }
+    window.location.reload();
+  };
+
   handleRetry = (): void => {
     this.setState({ hasError: false, error: null });
   };
@@ -59,7 +72,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               </Button>
               <Button
                 variant="outline"
-                onClick={() => window.location.reload()}
+                onClick={this.handleReload}
               >
                 Reload App
               </Button>

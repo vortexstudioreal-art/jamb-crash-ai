@@ -53,16 +53,19 @@ export default defineConfig(({ mode }) => ({
             },
           },
           // Same-origin hashed JS/CSS chunks loaded at runtime (lazy routes)
+          // Use NetworkFirst so fresh chunks are always fetched when available;
+          // stale cache is only used as a fallback when offline.
           {
             urlPattern: ({ request, sameOrigin }: { request: Request; sameOrigin: boolean }) =>
               sameOrigin &&
               (request.destination === "script" || request.destination === "style"),
-            handler: "CacheFirst",
+            handler: "NetworkFirst",
             options: {
               cacheName: "static-assets-cache",
+              networkTimeoutSeconds: 3,
               expiration: {
                 maxEntries: 200,
-                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
               },
               cacheableResponse: { statuses: [0, 200] },
             },
