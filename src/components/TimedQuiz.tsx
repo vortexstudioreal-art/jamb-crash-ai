@@ -193,6 +193,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
   const [isSoundPlaying, setIsSoundPlaying] = useState(false);
   const [currentSound, setCurrentSound] = useState<AmbientSound>('rain');
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const hasSubmittedRef = useRef(false);
 
   // Load previously answered questions to avoid repetition
   useEffect(() => {
@@ -345,6 +346,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
     }
     
     setQuizMode(mode);
+    hasSubmittedRef.current = false;
     setShowSetup(false);
   };
 
@@ -448,7 +450,6 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
     const interval = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
-          handleSubmit();
           return 0;
         }
         return prev - 1;
@@ -457,7 +458,15 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
 
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [quizMode, isPaused, isLoading, timeLeft, isUntimed]);
+  }, [quizMode, isPaused, isLoading, isUntimed]);
+
+  // Submit when timer reaches zero
+  useEffect(() => {
+    if (timeLeft === 0 && !isUntimed && quizMode && !isPaused && !isLoading) {
+      handleSubmit();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeLeft]);
 
   // Motivation at milestones
   useEffect(() => {
@@ -506,6 +515,9 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
   };
 
   const handleSubmit = useCallback(async () => {
+    if (hasSubmittedRef.current) return;
+    hasSubmittedRef.current = true;
+
     if (audioRef.current) {
       audioRef.current.pause();
     }

@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense, startTransition, useCallback } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense, startTransition, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { DashboardHeader } from '@/components/DashboardHeader';
@@ -263,8 +263,11 @@ const Index = () => {
   }, [userSubjects, currentStep]);
 
   // Set initial step after auth and subjects are resolved to avoid landing flash
+  const initialStepDoneRef = useRef(false);
   useEffect(() => {
     if (isFullyLoading) return; // wait for loading to finish
+    if (initialStepDoneRef.current) return; // only set step once
+    initialStepDoneRef.current = true;
     if (userEmail) {
       if (userSubjects.length === 0 && !effectiveAdmin) {
         setCurrentStep('subject-select');

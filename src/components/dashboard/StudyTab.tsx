@@ -68,6 +68,7 @@ export const StudyTab = ({
                 onClick={() => {
                   setPracticeSubjectOverride(weakSubjectFromQuiz);
                   setQuizType('mini');
+                  navigateStep('quiz');
                 }}
               >
                 Practice now
