@@ -4,6 +4,7 @@ import { TrendingUp, TrendingDown, Target, Clock, Flame, BookOpen, AlertCircle, 
 import { supabase } from '@/integrations/supabase/client';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { useJambScorePredictor } from '@/hooks/useJambScorePredictor';
+import { errorLogger } from '@/services/errorLogger';
 
 interface StudyStatsProps {
   userEmail: string;
@@ -45,7 +46,7 @@ export const StudyStats = ({ userEmail, refreshTrigger, onPracticeSubject, allow
       if (error) throw error;
       setQuizzes(data || []);
     } catch (error) {
-      console.error('Error fetching stats:', error);
+      errorLogger.error(error, { component: 'StudyStats', action: 'fetch stats' });
     } finally {
       setLoading(false);
     }
@@ -115,7 +116,7 @@ export const StudyStats = ({ userEmail, refreshTrigger, onPracticeSubject, allow
         }));
       }
     } catch (error) {
-      console.error('Error fetching AI tip:', error);
+      errorLogger.error(error, { component: 'StudyStats', action: 'fetch AI tip' });
     } finally {
       setLoadingTip(false);
     }

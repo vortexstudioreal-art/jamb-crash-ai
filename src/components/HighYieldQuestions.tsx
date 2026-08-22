@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 import { shuffleQuestionList } from '@/lib/quizShuffle';
 import ReactMarkdown from 'react-markdown';
 import { useAiExplanation } from '@/hooks/useAiExplanation';
+import { errorLogger } from '@/services/errorLogger';
 
 interface Question {
   id: string;
@@ -375,7 +376,7 @@ const TopicQuiz = ({ questions, topicLabel, subject, onExit }: TopicQuizProps) =
           }))
         });
       } catch (err) {
-        console.error('Failed to save quiz:', err);
+        errorLogger.error(err, { component: 'HighYieldQuestions', action: 'save quiz' });
       }
     }
 

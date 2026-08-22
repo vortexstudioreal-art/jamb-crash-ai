@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import ReactMarkdown from 'react-markdown';
+import { errorLogger } from '@/services/errorLogger';
 import { useLocation } from 'react-router-dom';
 
 interface Message {
@@ -83,7 +84,7 @@ export const ChatBot = () => {
           content: `${greeting} I'm your JAMB AI study assistant. I know you're studying ${subjects.length > 0 ? subjects.join(', ') : 'for JAMB'}. Ask me anything about your subjects, study tips, or let me quiz you!` 
         }]);
       } catch (error) {
-        console.error('Error fetching user context:', error);
+        errorLogger.error(error, { component: 'ChatBot', action: 'fetch user context' });
         setMessages([{ 
           role: 'assistant', 
           content: "Hi! 👋 I'm your JAMB AI study assistant. Ask me anything about your subjects, study tips, or practice questions!" 
@@ -186,7 +187,7 @@ export const ChatBot = () => {
     try {
       await streamChat(newMessages.filter(m => m.role === 'user' || (m.role === 'assistant' && messages.indexOf(m) > 0)));
     } catch (error) {
-      console.error('Chat error:', error);
+      errorLogger.error(error, { component: 'ChatBot', action: 'send chat message' });
       setMessages(prev => [...prev, { 
         role: 'assistant', 
         content: "Sorry, I'm having trouble connecting. Please try again in a moment." 

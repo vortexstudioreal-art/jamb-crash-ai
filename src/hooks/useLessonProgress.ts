@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { errorLogger } from '@/services/errorLogger';
 import type { LessonProgress } from '@/types/lesson';
 
 interface UseLessonProgressReturn {
@@ -59,7 +60,7 @@ export function useLessonProgress(
         setProgress(data as LessonProgress);
       }
     } catch (err) {
-      console.error('Error fetching lesson progress:', err);
+      errorLogger.error(err, { component: 'useLessonProgress', action: 'fetch lesson progress' });
     } finally {
       setLoading(false);
     }
@@ -89,7 +90,7 @@ export function useLessonProgress(
       if (error) throw error;
       setProgress((prev) => prev ? { ...prev, sections_viewed: updated } : prev);
     } catch (err) {
-      console.error('Error marking section viewed:', err);
+      errorLogger.error(err, { component: 'useLessonProgress', action: 'mark section viewed' });
     }
   }, [progress, userEmail]);
 
@@ -119,7 +120,7 @@ export function useLessonProgress(
       if (error) throw error;
       setProgress((prev) => prev ? { ...prev, predictions } : prev);
     } catch (err) {
-      console.error('Error submitting prediction:', err);
+      errorLogger.error(err, { component: 'useLessonProgress', action: 'submit prediction' });
     }
   }, [progress]);
 
@@ -162,7 +163,7 @@ export function useLessonProgress(
         practice_score: practiceScore,
       } : prev);
     } catch (err) {
-      console.error('Error submitting practice attempt:', err);
+      errorLogger.error(err, { component: 'useLessonProgress', action: 'submit practice attempt' });
     }
   }, [progress]);
 

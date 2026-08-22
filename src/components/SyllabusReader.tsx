@@ -15,6 +15,7 @@ import { StudyContentRenderer } from '@/components/StudyContentRenderer';
 import { InteractiveLesson } from '@/components/InteractiveLesson';
 import { useLessonProgress } from '@/hooks/useLessonProgress';
 import type { Lesson } from '@/types/lesson';
+import { errorLogger } from '@/services/errorLogger';
 
 interface SyllabusItem {
   id: string;
@@ -264,7 +265,7 @@ export const SyllabusReader = ({ userEmail, subjects, onBack, initialSubject, on
             .eq('id', topic.id);
         }
       } catch (err) {
-        console.error('Auto-generation error:', err);
+        errorLogger.error(err, { component: 'SyllabusReader', action: 'auto-generation' });
       } finally {
         setAutoGenerating(false);
       }
@@ -491,7 +492,7 @@ export const SyllabusReader = ({ userEmail, subjects, onBack, initialSubject, on
         }
       }
     } catch (error: unknown) {
-      console.error('Error generating content:', error);
+      errorLogger.error(error, { component: 'SyllabusReader', action: 'generate content' });
       if (type === 'explanation') {
         if (selectedTopic.recommended_content) {
           setAiExplanation(selectedTopic.recommended_content);

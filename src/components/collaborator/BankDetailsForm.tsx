@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { errorLogger } from '@/services/errorLogger';
 
 const NIGERIAN_BANKS = [
   'Access Bank',
@@ -78,7 +79,7 @@ export const BankDetailsForm = ({ userEmail, onSave }: BankDetailsFormProps) => 
         setAccountName(data.account_name || '');
       }
     } catch (error) {
-      console.error('Error fetching bank details:', error);
+      errorLogger.error(error, { component: 'BankDetailsForm', action: 'fetch bank details' });
     } finally {
       setLoading(false);
     }
@@ -112,7 +113,7 @@ export const BankDetailsForm = ({ userEmail, onSave }: BankDetailsFormProps) => 
       toast.success('Bank details saved! 🏦');
       onSave?.();
     } catch (error) {
-      console.error('Error saving bank details:', error);
+      errorLogger.error(error, { component: 'BankDetailsForm', action: 'save bank details' });
       toast.error('Failed to save bank details');
     } finally {
       setSaving(false);

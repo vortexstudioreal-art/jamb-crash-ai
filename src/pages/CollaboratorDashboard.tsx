@@ -13,6 +13,7 @@ import { PayoutHistory } from '@/components/collaborator/PayoutHistory';
 import { ProfileSettings } from '@/components/collaborator/ProfileSettings';
 import { toast } from 'sonner';
 import { useSeo } from '@/hooks/useSeo';
+import { errorLogger } from '@/services/errorLogger';
 interface CollaboratorStats {
   totalEarnings: number;
   pendingPayouts: number;
@@ -112,7 +113,7 @@ const CollaboratorDashboard = () => {
         activeCoupons
       });
     } catch (error) {
-      console.error('Error fetching collaborator stats:', error);
+      errorLogger.error(error, { component: 'CollaboratorDashboard', action: 'fetch collaborator stats' });
     }
   };
 
@@ -128,7 +129,7 @@ const CollaboratorDashboard = () => {
 
       setBankDetails(data);
     } catch (error) {
-      console.error('Error fetching bank details:', error);
+      errorLogger.error(error, { component: 'CollaboratorDashboard', action: 'fetch bank details' });
     }
   };
 
@@ -145,7 +146,7 @@ const CollaboratorDashboard = () => {
 
       setHasPendingRequest(!!data);
     } catch (error) {
-      console.error('Error checking pending request:', error);
+      errorLogger.error(error, { component: 'CollaboratorDashboard', action: 'check pending request' });
     }
   };
 
@@ -182,7 +183,7 @@ const CollaboratorDashboard = () => {
       toast.success('Payout request submitted! 🎉');
       setHasPendingRequest(true);
     } catch (error) {
-      console.error('Error requesting payout:', error);
+      errorLogger.error(error, { component: 'CollaboratorDashboard', action: 'request payout' });
       toast.error('Failed to submit payout request');
     } finally {
       setRequestingPayout(false);

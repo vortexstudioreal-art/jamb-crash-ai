@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { errorLogger } from '@/services/errorLogger';
 
 export interface UseAiExplanationProps {
   question: string;
@@ -105,7 +106,7 @@ Keep it short and focused: Just explain why the correct answer is right and very
       if (err instanceof Error && err.name === 'AbortError') {
         return;
       }
-      console.error('Error generating AI explanation:', err);
+      errorLogger.error(err, { component: 'useAiExplanation', action: 'generate AI explanation' });
       setError(err instanceof Error ? err.message : 'An unexpected error occurred');
     } finally {
       setIsLoading(false);

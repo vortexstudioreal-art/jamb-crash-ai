@@ -24,6 +24,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 import { getCachedChapter, getCachedChaptersByNovel, getCachedNovel } from '@/services/offlineStorage';
+import { errorLogger } from '@/services/errorLogger';
 
 interface LikelyQuestion {
   question: string;
@@ -217,7 +218,7 @@ export const NovelReader = ({
         onConflict: 'email,novel_id'
       });
     
-    if (error) console.error('Error updating progress:', error);
+    if (error) errorLogger.error(error, { component: 'NovelReader', action: 'update progress' });
   }, [userEmail]);
 
   const handleBookmark = async () => {

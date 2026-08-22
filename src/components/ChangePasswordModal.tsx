@@ -4,6 +4,7 @@ import { Lock, Eye, EyeOff, X, Loader2, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
+import { errorLogger } from '@/services/errorLogger';
 import { toast } from 'sonner';
 
 interface ChangePasswordModalProps {
@@ -56,7 +57,7 @@ export const ChangePasswordModal = ({ isOpen, onClose }: ChangePasswordModalProp
         onClose();
       }
     } catch (err) {
-      console.error('Password update error:', err);
+      errorLogger.error(err, { component: 'ChangePasswordModal', action: 'update password' });
       toast.error('Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);

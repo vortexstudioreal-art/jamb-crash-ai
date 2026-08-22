@@ -6,6 +6,7 @@ import { FEATURE_NAMES, FeatureType } from '@/hooks/useFeatureUsage';
 import { getAdUnitForFeature, isMobileApp } from '@/config/admob';
 import { useAdAnalytics } from '@/hooks/useAdAnalytics';
 import { useAuth } from '@/contexts/AuthContext';
+import { errorLogger } from '@/services/errorLogger';
 
 interface WatchAdModalProps {
   isOpen: boolean;
@@ -130,7 +131,7 @@ export const WatchAdModal = ({ isOpen, onClose, onComplete, featureType, bonusAm
       setIsLoadingAd(false);
 
     } catch (error) {
-      console.error('AdMob error:', error);
+      errorLogger.error(error, { component: 'WatchAdModal', action: 'load ad' });
       trackAdFailed(userEmail, featureType, 'admob', String(error));
       setIsLoadingAd(false);
       setAdError('No ad is available right now. Please try again later.');

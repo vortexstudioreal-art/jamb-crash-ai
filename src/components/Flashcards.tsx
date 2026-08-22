@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useFeatureUsage } from '@/hooks/useFeatureUsage';
 import { FeatureLimitReached } from '@/components/FeatureLimitReached';
+import { errorLogger } from '@/services/errorLogger';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -238,7 +239,7 @@ export const Flashcards = ({ userEmail, subjects, onBack, initialSubject }: Flas
       toast.success(`Generated ${Math.min(newFlashcards.length, 20)} flashcards from your mistakes!`);
       loadFlashcards();
     } catch (error) {
-      console.error('Error generating flashcards:', error);
+      errorLogger.error(error, { component: 'Flashcards', action: 'generate flashcards' });
       toast.error('Failed to generate flashcards');
     } finally {
       setGenerating(false);
@@ -263,7 +264,7 @@ export const Flashcards = ({ userEmail, subjects, onBack, initialSubject }: Flas
         setCurrentIndex(prev => prev - 1);
       }
     } catch (error) {
-      console.error('Error deleting flashcard:', error);
+      errorLogger.error(error, { component: 'Flashcards', action: 'delete flashcard' });
       toast.error('Failed to delete flashcard');
     }
   };
@@ -281,7 +282,7 @@ export const Flashcards = ({ userEmail, subjects, onBack, initialSubject }: Flas
       setFlashcards(prev => prev.filter(f => f.topic !== topic));
       toast.success(`Deleted all flashcards for "${topic}"!`);
     } catch (error) {
-      console.error('Error deleting topic flashcards:', error);
+      errorLogger.error(error, { component: 'Flashcards', action: 'delete topic flashcards' });
       toast.error('Failed to delete flashcards');
     }
   };

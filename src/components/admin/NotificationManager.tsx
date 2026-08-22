@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { errorLogger } from '@/services/errorLogger';
 import { formatDistanceToNow } from 'date-fns';
 
 interface Notification {
@@ -66,7 +67,7 @@ export const NotificationManager = () => {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching notifications:', error);
+      errorLogger.error(error, { component: 'NotificationManager', action: 'fetch notifications' });
       toast.error('Failed to load notifications');
       return;
     }
@@ -113,7 +114,7 @@ export const NotificationManager = () => {
         .eq('id', editingId);
 
       if (error) {
-        console.error('Error updating notification:', error);
+        errorLogger.error(error, { component: 'NotificationManager', action: 'update notification' });
         toast.error('Failed to update notification');
         return;
       }
@@ -125,7 +126,7 @@ export const NotificationManager = () => {
         .insert(notificationData);
 
       if (error) {
-        console.error('Error creating notification:', error);
+        errorLogger.error(error, { component: 'NotificationManager', action: 'create notification' });
         toast.error('Failed to create notification');
         return;
       }
@@ -157,7 +158,7 @@ export const NotificationManager = () => {
       .eq('id', id);
 
     if (error) {
-      console.error('Error deleting notification:', error);
+      errorLogger.error(error, { component: 'NotificationManager', action: 'delete notification' });
       toast.error('Failed to delete notification');
       return;
     }

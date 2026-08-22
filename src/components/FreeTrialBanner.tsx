@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Sparkles, Zap, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { errorLogger } from '@/services/errorLogger';
 
 interface FreeTrialBannerProps {
   onStartTrial: () => void;
@@ -68,7 +69,7 @@ export const FreeTrialBanner = ({ onStartTrial, userEmail }: FreeTrialBannerProp
         device_fingerprint: deviceId
       });
     } catch (error) {
-      console.error('Error recording trial:', error);
+      errorLogger.error(error, { component: 'FreeTrialBanner', action: 'record trial' });
     }
     
     onStartTrial();

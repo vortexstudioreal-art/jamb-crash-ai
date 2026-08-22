@@ -3,10 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Mail, Loader2, Shield, CreditCard, Ticket, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { errorLogger } from '@/services/errorLogger';
 import { Label } from '@/components/ui/label';
 import { usePaystack, type PaystackConfig } from '@/hooks/usePaystack';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { errorLogger } from '@/services/errorLogger';
 import { z } from 'zod';
 
 interface PaymentModalProps {
@@ -154,7 +156,7 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
         }
 
         if (paymentError) {
-          console.error('Failed to create free payment record:', paymentError);
+          errorLogger.error(paymentError, { component: 'PaymentModal', action: 'create free payment record' });
           toast.error('Failed to claim free access. Please refresh and try again.');
           return;
         }
@@ -174,14 +176,14 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
             });
             await supabase.rpc('increment_coupon_usage', { p_coupon_id: appliedCouponId });
           } catch (err) {
-            console.error('Failed to record coupon usage:', err);
+            errorLogger.error(err, { component: 'PaymentModal', action: 'record coupon usage' });
           }
         }
 
         toast.success('100% discount applied! Access granted! 🎉');
         onSuccess(freeReference, email);
       } catch (err) {
-        console.error('Free transaction error:', err);
+        errorLogger.error(err, { component: 'PaymentModal', action: 'free transaction' });
         toast.error('Failed to claim free access. Please refresh and try again.');
       }
       return;
@@ -218,7 +220,7 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
             // Increment coupon usage count
             await supabase.rpc('increment_coupon_usage', { p_coupon_id: appliedCouponId });
           } catch (err) {
-            console.error('Failed to record coupon usage:', err);
+            errorLogger.error(err, { component: 'PaymentModal', action: 'record coupon usage (paystack)' });
           }
         }
         onSuccess(reference, email);

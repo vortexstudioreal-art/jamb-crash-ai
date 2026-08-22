@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { User, Sparkles, RefreshCw } from 'lucide-react';
 import { AdminBadge } from '@/components/AdminBadge';
+import { errorLogger } from '@/services/errorLogger';
 
 interface ProfileSettingsProps {
   userId: string;
@@ -33,7 +34,7 @@ export const ProfileSettings = ({ userId, userEmail }: ProfileSettingsProps) => 
       if (error) throw error;
       setDisplayTitle(data?.display_title || '');
     } catch (error) {
-      console.error('Error fetching display title:', error);
+      errorLogger.error(error, { component: 'ProfileSettings', action: 'fetch display title' });
     } finally {
       setLoading(false);
     }
@@ -50,7 +51,7 @@ export const ProfileSettings = ({ userId, userEmail }: ProfileSettingsProps) => 
       if (error) throw error;
       toast.success('Badge title updated! 🎨');
     } catch (error) {
-      console.error('Error saving display title:', error);
+      errorLogger.error(error, { component: 'ProfileSettings', action: 'save display title' });
       toast.error('Failed to update badge title');
     } finally {
       setSaving(false);

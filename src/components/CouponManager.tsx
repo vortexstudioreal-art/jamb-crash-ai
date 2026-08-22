@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { errorLogger } from '@/services/errorLogger';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   AlertDialog,
@@ -147,7 +148,7 @@ export const CouponManager = () => {
       if (error.code === '23505') {
         toast.error('This coupon code already exists');
       } else {
-        console.error('Create coupon error:', error);
+        errorLogger.error(error, { component: 'CouponManager', action: 'create coupon' });
         toast.error('Failed to create coupon');
       }
       return;

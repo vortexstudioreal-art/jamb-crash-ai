@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { errorLogger } from '@/services/errorLogger';
 
 interface HealthCheckResult {
   name: string;
@@ -248,7 +249,7 @@ export const AppHealthCheck = () => {
           return { working: false };
       }
     } catch (error) {
-      console.error(`Health check failed for ${featureName}:`, error);
+      errorLogger.error(error, { component: 'AppHealthCheck', action: `health check for ${featureName}` });
       return { working: false, details: 'Check failed with error' };
     }
   }, []);

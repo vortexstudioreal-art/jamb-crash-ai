@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft, Zap, Flame, Gamepad2, Lock } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
+
 import { useEffect } from 'react';
 import { useSeo } from '@/hooks/useSeo';
 
@@ -16,8 +16,8 @@ const StreakChallenge = lazy(() => import('@/components/StreakChallenge').then(m
 const LazyFallback = () => (
   <div className="min-h-screen bg-background flex items-center justify-center">
     <div className="space-y-4 w-full max-w-md px-4">
-      <Skeleton className="h-8 w-48 mx-auto" />
-      <Skeleton className="h-64 w-full rounded-xl" />
+      <div className="h-8 w-48 mx-auto animate-pulse rounded-md bg-muted" />
+      <div className="h-64 w-full animate-pulse rounded-md bg-muted" />
     </div>
   </div>
 );

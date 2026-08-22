@@ -7,6 +7,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { errorLogger } from '@/services/errorLogger';
 import { 
   ChartContainer, 
   ChartTooltip, 
@@ -70,7 +71,7 @@ export const AdAnalyticsDashboard = () => {
         .order('created_at', { ascending: true });
 
       if (error) {
-        console.error('Error fetching ad analytics:', error);
+        errorLogger.error(error, { component: 'AdAnalyticsDashboard', action: 'fetch ad analytics' });
         setLoading(false);
         return;
       }
@@ -170,7 +171,7 @@ export const AdAnalyticsDashboard = () => {
       );
 
     } catch (err) {
-      console.error('Error processing analytics:', err);
+      errorLogger.error(err, { component: 'AdAnalyticsDashboard', action: 'process analytics' });
     }
 
     setLoading(false);

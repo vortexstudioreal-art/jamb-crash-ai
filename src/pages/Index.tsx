@@ -20,11 +20,12 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { BookOpen, LogOut } from 'lucide-react';
 import { DashboardSkeleton } from '@/components/DashboardSkeleton';
-import { Skeleton } from '@/components/ui/skeleton';
+
 import { BottomNav, type DashboardTab } from '@/components/BottomNav';
 import { DesktopSidebar } from '@/components/DesktopSidebar';
 import { useSeo } from '@/hooks/useSeo';
 import { useFeatureAccess } from '@/components/FeatureGate';
+import { errorLogger } from '@/services/errorLogger';
 import { HomeTab } from '@/components/dashboard/HomeTab';
 import { StudyTab } from '@/components/dashboard/StudyTab';
 import { AiTab } from '@/components/dashboard/AiTab';
@@ -68,9 +69,9 @@ const OfflineReadyCard = lazy(() => import('@/components/OfflineReadyCard').then
 const LazyFallback = () => (
   <div className="min-h-screen bg-background flex items-center justify-center">
     <div className="space-y-4 w-full max-w-md px-4">
-      <Skeleton className="h-8 w-3/4 mx-auto" />
-      <Skeleton className="h-4 w-1/2 mx-auto" />
-      <Skeleton className="h-32 w-full" />
+      <div className="h-8 w-3/4 mx-auto animate-pulse rounded-md bg-muted" />
+      <div className="h-4 w-1/2 mx-auto animate-pulse rounded-md bg-muted" />
+      <div className="h-32 w-full animate-pulse rounded-md bg-muted" />
     </div>
   </div>
 );
@@ -318,7 +319,7 @@ const Index = () => {
             localStorage.setItem(`jamb_subjects_${userEmail}`, JSON.stringify(data.subjects));
           }
         } catch (err) {
-          console.error('Failed to sync subjects:', err);
+          errorLogger.error(err, { component: 'Index', action: 'sync subjects' });
         }
       }
       

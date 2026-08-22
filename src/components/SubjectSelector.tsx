@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 import { getMatchingCourses, getPartiallyMatchingCourses, SUBJECT_DISPLAY_NAMES } from '@/data/jambCourseRequirements';
+import { errorLogger } from '@/services/errorLogger';
 
 interface SubjectSelectorProps {
   userEmail: string;
@@ -122,7 +123,7 @@ export const SubjectSelector = ({
       }
       onComplete(selected);
     } catch (error) {
-      console.error('Error saving subjects:', error);
+      errorLogger.error(error, { component: 'SubjectSelector', action: 'save subjects' });
       // Network failure mid-save: still let the user in, cache + queue.
       if (typeof navigator !== "undefined" && !navigator.onLine) {
         try {

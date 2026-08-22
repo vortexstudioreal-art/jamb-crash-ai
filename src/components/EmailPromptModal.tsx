@@ -4,6 +4,7 @@ import { Mail, ArrowRight, Loader2, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
+import { errorLogger } from '@/services/errorLogger';
 import { z } from 'zod';
 
 const emailSchema = z.string().email('Please enter a valid email');
@@ -63,7 +64,7 @@ export const EmailPromptModal = ({
       // Otherwise, proceed to payment
       onProceedToPayment(email.toLowerCase().trim());
     } catch (error) {
-      console.error('Error checking access:', error);
+      errorLogger.error(error, { component: 'EmailPromptModal', action: 'check access' });
       // On error, default to payment flow
       onProceedToPayment(email.toLowerCase().trim());
     } finally {

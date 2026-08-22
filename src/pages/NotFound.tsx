@@ -2,6 +2,8 @@ import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { useSeo } from "@/hooks/useSeo";
 
+import { errorLogger } from "@/services/errorLogger";
+
 const NotFound = () => {
   const location = useLocation();
 
@@ -13,7 +15,7 @@ const NotFound = () => {
   });
 
   useEffect(() => {
-    console.error("404 Error: User attempted to access non-existent route:", location.pathname);
+    errorLogger.error(`404: User attempted to access non-existent route: ${location.pathname}`, { component: 'NotFound', action: 'log 404' });
   }, [location.pathname]);
 
   return (

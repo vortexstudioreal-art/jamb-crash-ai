@@ -24,6 +24,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { errorLogger } from '@/services/errorLogger';
 
 interface TopicMasteryTrackerProps {
   userEmail: string;
@@ -298,7 +299,7 @@ export const TopicMasteryTracker = ({
         setExpandedSubjects(new Set(result.map(r => r.subject)));
       }
     } catch (error) {
-      console.error('Error fetching topic data:', error);
+      errorLogger.error(error, { component: 'TopicMasteryTracker', action: 'fetch topic data' });
     } finally {
       setLoading(false);
     }

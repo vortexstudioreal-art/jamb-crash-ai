@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { errorLogger } from '@/services/errorLogger';
 
 interface PayoutRequest {
   id: string;
@@ -61,7 +62,7 @@ export const PayoutManagement = ({ isOwner, userEmail }: PayoutManagementProps) 
       if (error) throw error;
       setPayoutRequests(data || []);
     } catch (error) {
-      console.error('Error fetching payout requests:', error);
+      errorLogger.error(error, { component: 'PayoutManagement', action: 'fetch payout requests' });
       toast.error('Failed to fetch payout requests');
     } finally {
       setLoading(false);
@@ -108,14 +109,14 @@ export const PayoutManagement = ({ isOwner, userEmail }: PayoutManagementProps) 
           .eq('is_paid_out', false);
 
         if (usageError) {
-          console.error('Error updating coupon usage:', usageError);
+          errorLogger.error(usageError, { component: 'PayoutManagement', action: 'update coupon usage' });
         }
       }
 
       toast.success('Payout marked as paid! 💰');
       await fetchPayoutRequests();
     } catch (error) {
-      console.error('Error marking payout as paid:', error);
+      errorLogger.error(error, { component: 'PayoutManagement', action: 'mark payout as paid' });
       toast.error('Failed to process payout');
     } finally {
       setProcessingId(null);
@@ -149,7 +150,7 @@ export const PayoutManagement = ({ isOwner, userEmail }: PayoutManagementProps) 
       setRejectDialogOpen(false);
       await fetchPayoutRequests();
     } catch (error) {
-      console.error('Error rejecting payout:', error);
+      errorLogger.error(error, { component: 'PayoutManagement', action: 'reject payout' });
       toast.error('Failed to reject payout');
     } finally {
       setProcessingId(null);

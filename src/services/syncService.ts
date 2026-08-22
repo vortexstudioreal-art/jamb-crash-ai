@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { errorLogger } from '@/services/errorLogger';
 import type { Database } from '@/integrations/supabase/types';
 import { 
   getSyncQueue, 
@@ -28,7 +29,7 @@ export const syncPendingItems = async (): Promise<{ synced: number; failed: numb
       await removeSyncItem(item.id);
       synced++;
     } catch (error) {
-      console.error(`Failed to sync item ${item.id}:`, error);
+      errorLogger.error(error, { component: 'syncService', action: `sync item ${item.id}` });
       
       if (item.retries >= MAX_RETRIES) {
         await removeSyncItem(item.id);
@@ -139,7 +140,7 @@ export const downloadAllForOffline = async (
 
     return { success: true };
   } catch (error) {
-    console.error('Error downloading for offline:', error);
+    errorLogger.error(error, { component: 'syncService', action: 'download for offline' });
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'Failed to download data' 
@@ -179,7 +180,7 @@ export const startPeriodicSync = (
   }
 
   // Run initial sync immediately
-  syncPendingItems().then(onSyncComplete).catch(console.error);
+  syncPendingItems().then(onSyncComplete).catch((e) => errorLogger.error(e, { component: 'syncService', action: 'initial sync' }));
 
   // Set up periodic sync
   syncIntervalId = window.setInterval(async () => {
@@ -189,7 +190,7 @@ export const startPeriodicSync = (
         onSyncComplete?.(result);
       }
     } catch (error) {
-      console.error('Periodic sync failed:', error);
+      errorLogger.error(error, { component: 'syncService', action: 'periodic sync' });
     }
   }, intervalMs);
 };

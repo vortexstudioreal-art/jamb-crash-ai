@@ -4,6 +4,7 @@ import { TrendingUp, Award, Brain, BarChart3, BookOpen, Clock, Zap } from 'lucid
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useJambScorePredictor } from '@/hooks/useJambScorePredictor';
+import { errorLogger } from '@/services/errorLogger';
 
 interface QuizAttempt {
   id: string;
@@ -110,7 +111,7 @@ export const ScorePredictor = ({ userEmail, targetScore = 300, weakSubject, onSh
           plan_completed: true,
         }, { onConflict: 'email' });
     } catch (err) {
-      console.error('Error saving prediction:', err);
+      errorLogger.error(err, { component: 'ScorePredictor', action: 'save prediction' });
     }
 
     setIsCalculating(false);

@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { isMobileApp } from '@/config/admob';
+import { errorLogger } from '@/services/errorLogger';
 import type { Json } from '@/integrations/supabase/types';
 
 type AdEventType = 'ad_started' | 'ad_completed' | 'ad_failed' | 'reward_claimed';
@@ -44,10 +45,10 @@ export const useAdAnalytics = () => {
       }]);
 
       if (error) {
-        console.error('[AdAnalytics] Failed to track event:', error);
+        errorLogger.error(error, { component: 'useAdAnalytics', action: 'track event' });
       }
     } catch (err) {
-      console.error('[AdAnalytics] Error tracking event:', err);
+      errorLogger.error(err, { component: 'useAdAnalytics', action: 'track event' });
     }
   };
 

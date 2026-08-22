@@ -31,4 +31,11 @@ export default tseslint.config(
       "react-refresh/only-export-components": "off",
     },
   },
+  {
+    // Context providers and hooks export non-component values by design.
+    files: ["src/contexts/**/*.{ts,tsx}", "src/hooks/**/*.ts"],
+    rules: {
+      "react-refresh/only-export-components": "off",
+    },
+  },
 );

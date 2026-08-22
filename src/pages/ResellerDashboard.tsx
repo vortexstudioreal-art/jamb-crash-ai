@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { errorLogger } from '@/services/errorLogger';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useB2BBuyer, type B2BBuyer } from '@/hooks/useB2BBuyer';
 import { useB2BOrder, type B2BPIN } from '@/hooks/useB2BOrder';
@@ -67,7 +68,7 @@ const ResellerDashboard = () => {
       setPins(result.pins || []);
       setStats(result.stats || null);
     } catch (err) {
-      console.error('Failed to load stats:', err);
+      errorLogger.error(err, { component: 'ResellerDashboard', action: 'load stats' });
     }
   }, [getPins]);
 

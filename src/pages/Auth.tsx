@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { useSeo } from '@/hooks/useSeo';
+import { errorLogger } from '@/services/errorLogger';
 
 // Stricter email validation - blocks disposable/fake emails
 const emailSchema = z.string()
@@ -65,7 +66,7 @@ export default function Auth() {
           await supabase.auth.signOut();
         }
       } catch (err) {
-        console.error('Error checking session:', err);
+        errorLogger.error(err, { component: 'Auth', action: 'check session' });
       }
     };
     clearInvalidSession();
@@ -101,7 +102,7 @@ export default function Auth() {
             });
             
             if (error) {
-              console.error('Failed to set recovery session:', error);
+              errorLogger.error(error, { component: 'Auth', action: 'set recovery session' });
               toast.error('Reset link expired. Please request a new one.');
               setView('forgot-password');
             } else {
@@ -109,7 +110,7 @@ export default function Auth() {
               window.history.replaceState(null, '', window.location.pathname + '?recovery=true');
             }
           } catch (err) {
-            console.error('Session setup error:', err);
+            errorLogger.error(err, { component: 'Auth', action: 'session setup' });
             toast.error('Something went wrong. Please try again.');
             setView('forgot-password');
           }
@@ -226,7 +227,7 @@ export default function Auth() {
         toast.success('You can now sign in with your new password!');
       }
     } catch (err) {
-      console.error('Password reset error:', err);
+      errorLogger.error(err, { component: 'Auth', action: 'password reset' });
       toast.error('Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);

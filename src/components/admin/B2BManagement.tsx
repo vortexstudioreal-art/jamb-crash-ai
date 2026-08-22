@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { errorLogger } from '@/services/errorLogger';
 
 interface B2BOverview {
   total_buyers: number;
@@ -78,7 +79,7 @@ export const B2BManagement = () => {
       if (error) throw error;
       setOverview(data.overview);
     } catch (err) {
-      console.error('Failed to fetch B2B overview:', err);
+      errorLogger.error(err, { component: 'B2BManagement', action: 'fetch B2B overview' });
     }
   };
 
@@ -90,7 +91,7 @@ export const B2BManagement = () => {
       if (error) throw error;
       setBuyers(data.buyers || []);
     } catch (err) {
-      console.error('Failed to fetch buyers:', err);
+      errorLogger.error(err, { component: 'B2BManagement', action: 'fetch buyers' });
     }
   };
 
@@ -102,7 +103,7 @@ export const B2BManagement = () => {
       if (error) throw error;
       setPins(data.pins || []);
     } catch (err) {
-      console.error('Failed to fetch pins:', err);
+      errorLogger.error(err, { component: 'B2BManagement', action: 'fetch pins' });
     }
   };
 

@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
+import { errorLogger } from '@/services/errorLogger';
 
 interface Question {
   id: string;
@@ -74,7 +75,7 @@ export const TrialQuiz = ({ subjects, onComplete, onExit }: TrialQuizProps) => {
           toast.error("No questions available", { description: "Please try again later" });
         }
       } catch (error) {
-        console.error('Error loading questions:', error);
+        errorLogger.error(error, { component: 'TrialQuiz', action: 'load questions' });
         toast.error("Error loading quiz", { description: "Please try again" });
       } finally {
         setIsLoading(false);

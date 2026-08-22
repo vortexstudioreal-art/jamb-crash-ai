@@ -11,6 +11,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { errorLogger } from '@/services/errorLogger';
 
 interface WhatsAppReminderProps {
   userEmail: string;
@@ -59,7 +60,7 @@ export const WhatsAppReminder = ({ userEmail, isAdmin = false, onSetupComplete }
           setPhoneNumber(data.phone_number.replace('+234', ''));
         }
       } catch (err) {
-        console.error('Error checking WhatsApp setup:', err);
+        errorLogger.error(err, { component: 'WhatsAppReminder', action: 'check WhatsApp setup' });
       }
     };
     
@@ -122,7 +123,7 @@ export const WhatsAppReminder = ({ userEmail, isAdmin = false, onSetupComplete }
       onSetupComplete?.(fullNumber);
       toast.success('WhatsApp reminders activated! 🎉');
     } catch (err) {
-      console.error('Error setting up WhatsApp:', err);
+      errorLogger.error(err, { component: 'WhatsAppReminder', action: 'setup WhatsApp' });
       // Still mark as setup since localStorage worked
       setIsSetup(true);
       setSavedNumber(fullNumber);

@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useFeatureUsage } from '@/hooks/useFeatureUsage';
 import { FeatureLimitReached } from '@/components/FeatureLimitReached';
+import { errorLogger } from '@/services/errorLogger';
 
 interface ExtractedQuestion {
   question: string;
@@ -123,7 +124,7 @@ export const UploadSection = ({ onUploadComplete, userSubjects = [] }: UploadSec
         });
 
         if (error) {
-          console.error('Processing error:', error);
+          errorLogger.error(error, { component: 'UploadSection', action: 'process upload' });
           toast.error(`Failed to process ${file.name}`);
           continue;
         }
@@ -155,7 +156,7 @@ export const UploadSection = ({ onUploadComplete, userSubjects = [] }: UploadSec
         onUploadComplete(files);
       }
     } catch (err) {
-      console.error('Error processing files:', err);
+      errorLogger.error(err, { component: 'UploadSection', action: 'process files' });
       toast.error('Oops! Something went wrong. Try again! 💪');
     } finally {
       setIsProcessing(false);

@@ -18,6 +18,7 @@ import { getCourseTip, type CourseTip } from '@/data/courseTips';
 import { JAMB_COURSE_REQUIREMENTS, type CourseRequirement } from '@/data/jambCourseRequirements';
 import { CourseSelector } from './CourseSelector';
 import { supabase } from '@/integrations/supabase/client';
+import { errorLogger } from '@/services/errorLogger';
 import { toast } from 'sonner';
 
 interface CourseTipsCardProps {
@@ -52,7 +53,7 @@ export const CourseTipsCard = ({ userEmail, userSubjects }: CourseTipsCardProps)
           }
         }
       } catch (error) {
-        console.error('Error loading course:', error);
+        errorLogger.error(error, { component: 'CourseTipsCard', action: 'load course' });
       } finally {
         setIsLoading(false);
       }
@@ -89,7 +90,7 @@ export const CourseTipsCard = ({ userEmail, userSubjects }: CourseTipsCardProps)
       setShowSelector(false);
       toast.success(`Target course set to ${course.course}`);
     } catch (error) {
-      console.error('Error saving course:', error);
+      errorLogger.error(error, { component: 'CourseTipsCard', action: 'save course' });
       toast.error('Failed to save course selection');
     }
   };

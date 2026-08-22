@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
+import { errorLogger } from '@/services/errorLogger';
 
 interface LeaderboardProps {
   onBack: () => void;
@@ -81,7 +82,7 @@ export const Leaderboard = ({ onBack, userEmail }: LeaderboardProps) => {
         }
       }
     } catch (error) {
-      console.error('Error fetching leaderboard:', error);
+      errorLogger.error(error, { component: 'Leaderboard', action: 'fetch leaderboard' });
     } finally {
       setIsLoading(false);
     }

@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { errorLogger } from '@/services/errorLogger';
 
 interface UserData {
   id: string;
@@ -116,7 +117,7 @@ export const UserManagement = ({ isOwner }: UserManagementProps) => {
 
       setUsers(userData);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      errorLogger.error(error, { component: 'UserManagement', action: 'fetch users' });
       toast.error('Failed to fetch users');
     } finally {
       setLoading(false);
@@ -164,7 +165,7 @@ export const UserManagement = ({ isOwner }: UserManagementProps) => {
       toast.success(`User upgraded to ${newPlan} plan!`);
       await fetchUsers();
     } catch (error) {
-      console.error('Error updating user plan:', error);
+      errorLogger.error(error, { component: 'UserManagement', action: 'update user plan' });
       toast.error('Failed to update user plan');
     } finally {
       setUpdatingUser(null);
@@ -217,7 +218,7 @@ export const UserManagement = ({ isOwner }: UserManagementProps) => {
 
       await fetchUsers();
     } catch (error) {
-      console.error('Error updating user role:', error);
+      errorLogger.error(error, { component: 'UserManagement', action: 'update user role' });
       toast.error('Failed to update user role');
     } finally {
       setUpdatingUser(null);

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { AlertTriangle, RefreshCw, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { errorLogger } from '@/services/errorLogger';
 
 interface RenewalNudgeProps {
   userEmail: string;
@@ -39,7 +40,7 @@ export function RenewalNudge({ userEmail, onUpgrade, isAdmin, hasAccess }: Renew
       .maybeSingle();
 
     if (error) {
-      console.error('Failed to load subscription info:', error);
+      errorLogger.error(error, { component: 'RenewalNudge', action: 'load subscription info' });
       return;
     }
     setPayment(data);

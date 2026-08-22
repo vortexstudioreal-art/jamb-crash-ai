@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { errorLogger } from '@/services/errorLogger';
 import type { Database } from '@/integrations/supabase/types';
 
 type QuestionReportRow = Database['public']['Tables']['question_reports']['Row'];
@@ -43,7 +44,7 @@ export function QuestionReportsManager() {
       .limit(100);
 
     if (error) {
-      console.error('Failed to fetch reports:', error);
+      errorLogger.error(error, { component: 'QuestionReportsManager', action: 'fetch reports' });
       toast.error('Failed to load reports');
       setLoading(false);
       return;

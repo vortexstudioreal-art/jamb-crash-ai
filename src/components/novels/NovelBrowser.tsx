@@ -9,6 +9,7 @@ import { NovelCard } from './NovelCard';
 import { NovelProgress } from './NovelProgress';
 import { supabase } from '@/integrations/supabase/client';
 import { saveNovels, getCachedNovels, saveNovelChapters } from '@/services/offlineStorage';
+import { errorLogger } from '@/services/errorLogger';
 
 interface Novel {
   id: string;
@@ -118,7 +119,7 @@ export const NovelBrowser = ({ userEmail, onBack, onSelectNovel }: NovelBrowserP
         await saveNovelChapters(chapters);
       }
     } catch (err) {
-      console.error('Failed to cache novel chapters:', err);
+      errorLogger.error(err, { component: 'NovelBrowser', action: 'cache novel chapters' });
     }
   };
 

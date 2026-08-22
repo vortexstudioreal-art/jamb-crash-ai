@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { errorLogger } from '@/services/errorLogger';
 
 interface PayoutRequest {
   id: string;
@@ -43,7 +44,7 @@ export const PayoutHistory = ({ userEmail }: PayoutHistoryProps) => {
       if (error) throw error;
       setPayoutRequests(data || []);
     } catch (error) {
-      console.error('Error fetching payout history:', error);
+      errorLogger.error(error, { component: 'PayoutHistory', action: 'fetch payout history' });
     } finally {
       setLoading(false);
     }

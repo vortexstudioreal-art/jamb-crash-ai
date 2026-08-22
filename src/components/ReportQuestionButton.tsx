@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
+import { errorLogger } from '@/services/errorLogger';
 
 const REASONS = [
   { value: 'wrong_answer', label: 'Wrong answer key' },
@@ -47,7 +48,7 @@ export function ReportQuestionButton({ questionId, userEmail, compact = false, o
     });
     setSubmitting(false);
     if (error) {
-      console.error('Failed to submit report:', error);
+      errorLogger.error(error, { component: 'ReportQuestionButton', action: 'submit report' });
       return;
     }
     setDone(true);

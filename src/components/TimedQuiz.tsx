@@ -21,6 +21,7 @@ import { useFeatureUsage } from '@/hooks/useFeatureUsage';
 import { FeatureLimitReached } from '@/components/FeatureLimitReached';
 import { ReportQuestionButton } from '@/components/ReportQuestionButton';
 import { pickAdaptive, collectWeakQuestionCounts } from '@/lib/adaptive';
+import { errorLogger } from '@/services/errorLogger';
 
 interface Question {
   id: string;
@@ -430,7 +431,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
           toast.error("No questions found", { description: "Try different subjects or year range" });
         }
       } catch (error) {
-        console.error('Error loading questions:', error);
+        errorLogger.error(error, { component: 'TimedQuiz', action: 'load questions' });
       } finally {
         setIsLoading(false);
       }
@@ -567,7 +568,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
         toast("Saved Offline", { description: "Your quiz will sync when you're back online" });
       }
     } catch (error) {
-      console.error('Error saving quiz:', error);
+      errorLogger.error(error, { component: 'TimedQuiz', action: 'save quiz' });
       // Even if save fails, still show results to user
     }
 

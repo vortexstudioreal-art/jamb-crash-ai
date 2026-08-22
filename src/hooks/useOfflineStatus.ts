@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { syncPendingItems } from '@/services/syncService';
 import { getSyncQueueCount } from '@/services/offlineStorage';
+import { errorLogger } from '@/services/errorLogger';
 import { toast } from 'sonner';
 
 interface OfflineStatus {
@@ -23,7 +24,7 @@ export const useOfflineStatus = (): OfflineStatus => {
       const count = await getSyncQueueCount();
       setPendingSyncCount(count);
     } catch (error) {
-      console.error('Error getting sync queue count:', error);
+      errorLogger.error(error, { component: 'useOfflineStatus', action: 'get sync queue count' });
     }
   }, []);
 
@@ -44,7 +45,7 @@ export const useOfflineStatus = (): OfflineStatus => {
         toast.error(`Failed to sync ${failed} item${failed > 1 ? 's' : ''}`);
       }
     } catch (error) {
-      console.error('Sync failed:', error);
+      errorLogger.error(error, { component: 'useOfflineStatus', action: 'sync pending items' });
     } finally {
       setIsSyncing(false);
     }

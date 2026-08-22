@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { errorLogger } from '@/services/errorLogger';
 
 interface ReferralSystemProps {
   userEmail: string;
@@ -47,7 +48,7 @@ export const ReferralSystem = ({ userEmail }: ReferralSystemProps) => {
 
         setReferralCredits(profileData?.referral_credits || 0);
       } catch (err) {
-        console.error('Error with referral:', err);
+        errorLogger.error(err, { component: 'ReferralSystem', action: 'load referral data' });
       } finally {
         setIsLoading(false);
       }

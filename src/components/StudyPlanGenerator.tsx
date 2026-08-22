@@ -8,6 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
 import { useFeatureUsage } from '@/hooks/useFeatureUsage';
 import { FeatureLimitReached } from '@/components/FeatureLimitReached';
+import { errorLogger } from '@/services/errorLogger';
 
 interface StudyPlanGeneratorProps {
   userEmail: string;
@@ -414,7 +415,7 @@ export const StudyPlanGenerator = ({
 
       setSavedPlanId(planRow.id);
     } catch (error) {
-      console.error('Failed to save study plan:', error);
+      errorLogger.error(error, { component: 'StudyPlanGenerator', action: 'save study plan' });
       setSaveError(true);
     } finally {
       setIsSaving(false);
@@ -563,7 +564,7 @@ ${quizPerformance.filter(p => p.accuracy < 60).length > 0 ? `
         }, 100);
       }
     } catch (error) {
-      console.error('Download error:', error);
+      errorLogger.error(error, { component: 'StudyPlanGenerator', action: 'download plan' });
       // Ultimate fallback
       alert('Download failed. Please take a screenshot of your study plan instead.');
     }

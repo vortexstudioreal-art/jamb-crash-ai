@@ -15,6 +15,7 @@ import { AdminCouponDashboard } from '@/components/AdminCouponDashboard';
 import { ChangePasswordModal } from '@/components/ChangePasswordModal';
 import { DownloadManager } from '@/components/DownloadManager';
 import { useSeo } from '@/hooks/useSeo';
+import { errorLogger } from '@/services/errorLogger';
 const THEME_STORAGE_KEY = 'jamb_theme';
 const SETTINGS_STORAGE_KEY = 'jamb_user_settings';
 
@@ -159,7 +160,7 @@ export default function Settings() {
           }
         }
       } catch (error) {
-        console.error('Error loading user data:', error);
+        errorLogger.error(error, { component: 'Settings', action: 'load user data' });
       } finally {
         setIsLoading(false);
       }
@@ -195,7 +196,7 @@ export default function Settings() {
       setIsEditingName(false);
       toast.success('Name saved! ✨');
     } catch (error) {
-      console.error('Error updating name:', error);
+      errorLogger.error(error, { component: 'Settings', action: 'update name' });
       setIsEditingName(false);
       toast.success('Name saved locally! ✨');
     }
@@ -218,7 +219,7 @@ export default function Settings() {
         
         toast.success(enabled ? 'WhatsApp reminders enabled!' : 'WhatsApp reminders disabled');
       } catch (error) {
-        console.error('Error updating WhatsApp settings:', error);
+        errorLogger.error(error, { component: 'Settings', action: 'update WhatsApp settings' });
       }
     }
   };

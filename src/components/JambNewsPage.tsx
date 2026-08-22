@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { errorLogger } from '@/services/errorLogger';
 
 interface NewsItem {
   title: string;
@@ -53,7 +54,7 @@ export const JambNewsPage = ({ onBack }: JambNewsPageProps) => {
       if (error) throw error;
       toast.success('Notification sent to all users! 📢');
     } catch (err) {
-      console.error('Error sending notification:', err);
+      errorLogger.error(err, { component: 'JambNewsPage', action: 'send notification' });
       toast.error('Failed to send notification');
     } finally {
       setSendingNotification(null);
@@ -82,7 +83,7 @@ export const JambNewsPage = ({ onBack }: JambNewsPageProps) => {
         setNews([]);
       }
     } catch (err) {
-      console.error('Error fetching news:', err);
+      errorLogger.error(err, { component: 'JambNewsPage', action: 'fetch news' });
       setError('Could not load news. Please try the official sources below.');
       setNews([]);
     } finally {

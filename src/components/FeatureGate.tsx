@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import { ReactNode, useState } from 'react';
 import { useAuth, PACKAGE_FEATURES, UserPackage } from '@/contexts/AuthContext';
 import { useTrialContext } from '@/contexts/TrialContext';

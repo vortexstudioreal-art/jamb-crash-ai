@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { isMobileApp, ADMOB_CONFIG } from '@/config/admob';
 import { useAdAnalytics } from '@/hooks/useAdAnalytics';
 import { useAuth } from '@/contexts/AuthContext';
+import { errorLogger } from '@/services/errorLogger';
 
 interface BannerAdProps {
   placement: 'dashboard-footer' | 'quiz-footer' | 'syllabus-footer';
@@ -91,7 +92,7 @@ export const BannerAd = ({ placement, className = '' }: BannerAdProps) => {
 
         trackAdCompleted(userEmail, `banner_${placement}`, 'admob', 0);
       } catch (error) {
-        console.error('Banner ad error:', error);
+        errorLogger.error(error, { component: 'BannerAd', action: 'load banner ad' });
         // Fallback to promo ad shown
       }
     };

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { NotificationDropdown } from './NotificationDropdown';
+import { errorLogger } from '@/services/errorLogger';
 
 interface Notification {
   id: string;
@@ -33,7 +34,7 @@ export const NotificationBell = () => {
       .limit(20);
 
     if (notifsError) {
-      console.error('Error fetching notifications:', notifsError);
+      errorLogger.error(notifsError, { component: 'NotificationBell', action: 'fetch notifications' });
       return;
     }
 

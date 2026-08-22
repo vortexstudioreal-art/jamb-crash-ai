@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { errorLogger } from '@/services/errorLogger';
 import { toast } from 'sonner';
 
 export interface PaystackConfig {
@@ -84,7 +85,7 @@ export const usePaystack = () => {
         };
       };
     } catch (error) {
-      console.error('[Payment] Verification error:', error);
+      errorLogger.error(error, { component: 'usePaystack', action: 'verify payment' });
       throw error;
     }
   }, []);
@@ -144,13 +145,13 @@ export const usePaystack = () => {
                 toast.success('Payment verified successfully!');
                 onSuccess(response.reference);
               } else {
-                console.error('[Payment] Payment verification returned unsuccessful:', result);
+                errorLogger.error(result, { component: 'usePaystack', action: 'payment verification unsuccessful' });
                 toast.error(result?.message || 'Payment was not successful. Please try again.');
                 onClose();
               }
             })
             .catch((error) => {
-              console.error('[Payment] Verification error:', error);
+              errorLogger.error(error, { component: 'usePaystack', action: 'payment verification error in callback' });
               // Even if verification fails, still call onSuccess - the webhook can still update the payment
               toast.info('Payment received! Verification in progress...');
               onSuccess(response.reference);
@@ -161,7 +162,7 @@ export const usePaystack = () => {
         handler.openIframe();
       } catch (error) {
         setIsLoading(false);
-        console.error('Payment error:', error);
+        errorLogger.error(error, { component: 'usePaystack', action: 'initialize payment' });
         toast.error(error instanceof Error ? error.message : 'Payment failed. Please try again.');
       }
     },

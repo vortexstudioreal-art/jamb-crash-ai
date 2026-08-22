@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
+import { errorLogger } from '@/services/errorLogger';
 import { 
   Ticket, 
   TrendingUp, 
@@ -86,7 +87,7 @@ export const AdminCouponDashboard = () => {
         setUsageData(usageResult || []);
       }
     } catch (error) {
-      console.error('Error fetching coupon data:', error);
+      errorLogger.error(error, { component: 'AdminCouponDashboard', action: 'fetch coupon data' });
       setCoupons([]);
       setUsageData([]);
     } finally {

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { usePaystack } from '@/hooks/usePaystack';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSeo } from '@/hooks/useSeo';
+import { errorLogger } from '@/services/errorLogger';
 
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
@@ -44,7 +45,7 @@ const PaymentSuccess = () => {
           await refreshAccess();
         }
       } catch (error) {
-        console.error('Verification failed:', error);
+        errorLogger.error(error, { component: 'PaymentSuccess', action: 'verify payment' });
         setStatus('error');
       }
     };
