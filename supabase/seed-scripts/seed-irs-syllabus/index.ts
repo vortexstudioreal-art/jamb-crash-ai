@@ -12,7 +12,7 @@ const irsSyllabus = [
   
   // 1. Revelation of the Glorious Qur'an
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Revelation of the Glorious Qur'an",
     subtopic: "Prophet's Visits to Cave Hira",
     objectives: [
@@ -27,7 +27,7 @@ const irsSyllabus = [
     order_index: 1
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Preservation of the Glorious Qur'an",
     subtopic: "Compilation and Standardization",
     objectives: [
@@ -42,7 +42,7 @@ const irsSyllabus = [
     order_index: 2
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Importance of the Glorious Qur'an",
     subtopic: "Source of Guidance",
     objectives: [
@@ -55,7 +55,7 @@ const irsSyllabus = [
     order_index: 3
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Divine Authenticity of the Glorious Qur'an",
     subtopic: "Uniqueness and Preservation",
     objectives: [
@@ -69,7 +69,7 @@ const irsSyllabus = [
     order_index: 4
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Tafsir (Qur'anic Exegesis)",
     subtopic: "Development and Types",
     objectives: [
@@ -83,7 +83,7 @@ const irsSyllabus = [
     order_index: 5
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Introduction to Tajwid",
     subtopic: "Theory and Practice",
     objectives: [
@@ -96,7 +96,7 @@ const irsSyllabus = [
     order_index: 6
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Study of Short Suwar (Part 1)",
     subtopic: "Surah al-Fatihah to Surah an-Nas",
     objectives: [
@@ -111,7 +111,7 @@ const irsSyllabus = [
     order_index: 7
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Study of Short Suwar (Part 2)",
     subtopic: "Surah al-A'ala to Selected Ayats",
     objectives: [
@@ -125,7 +125,7 @@ const irsSyllabus = [
     order_index: 8
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Hadith Literature",
     subtopic: "History and Authentication",
     objectives: [
@@ -140,7 +140,7 @@ const irsSyllabus = [
     order_index: 9
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Hadith and the Glorious Qur'an",
     subtopic: "Relationship and Importance",
     objectives: [
@@ -154,7 +154,7 @@ const irsSyllabus = [
     order_index: 10
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "The Six Sound Collectors of Hadith",
     subtopic: "Biographies and Works",
     objectives: [
@@ -167,7 +167,7 @@ const irsSyllabus = [
     order_index: 11
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Muwatta and Imam Malik",
     subtopic: "Biography and Work",
     objectives: [
@@ -180,7 +180,7 @@ const irsSyllabus = [
     order_index: 12
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Selected Ahadith from an-Nawawi's Collection",
     subtopic: "Study of 20 Ahadith",
     objectives: [
@@ -193,7 +193,7 @@ const irsSyllabus = [
     order_index: 13
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Moral Lessons in the Qur'an and Hadith",
     subtopic: "Admonition of Luqman and Goodness to Parents",
     objectives: [
@@ -206,7 +206,7 @@ const irsSyllabus = [
     order_index: 14
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Moral Lessons: Honesty and Prohibition of Vices",
     subtopic: "Truthfulness and Forbidden Acts",
     objectives: [
@@ -219,7 +219,7 @@ const irsSyllabus = [
     order_index: 15
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Moral Lessons: Dignity of Labour and Modesty",
     subtopic: "Work Ethics and Dress Code",
     objectives: [
@@ -232,7 +232,7 @@ const irsSyllabus = [
     order_index: 16
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Moral Lessons: Sexual Ethics",
     subtopic: "Prohibition of Zina and Related Sins",
     objectives: [
@@ -245,7 +245,7 @@ const irsSyllabus = [
     order_index: 17
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Moral Lessons: Leadership and Trust",
     subtopic: "Justice, Obligations and Promises",
     objectives: [
@@ -258,7 +258,7 @@ const irsSyllabus = [
     order_index: 18
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Moral Lessons: Piety, Tolerance and Unity",
     subtopic: "Taqwa, Patience and Brotherhood",
     objectives: [
@@ -271,7 +271,7 @@ const irsSyllabus = [
     order_index: 19
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Moral Lessons: Enjoining Good and Forbidding Evil",
     subtopic: "Al-Amr bil-Ma'ruf wan-Nahy 'anil-Munkar",
     objectives: [
@@ -287,7 +287,7 @@ const irsSyllabus = [
   // ===== PART II: TAWHID AND FIQH =====
   
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Tawhid (Islamic Monotheism)",
     subtopic: "Concept and Importance",
     objectives: [
@@ -300,7 +300,7 @@ const irsSyllabus = [
     order_index: 21
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Kalimatush-Shahadah",
     subtopic: "Declaration of Faith",
     objectives: [
@@ -316,7 +316,7 @@ const irsSyllabus = [
     order_index: 22
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Shirk (Polytheism)",
     subtopic: "Beliefs Incompatible with Tawhid",
     objectives: [
@@ -330,7 +330,7 @@ const irsSyllabus = [
     order_index: 23
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Practices Incompatible with Tawhid",
     subtopic: "Superstition, Magic and Innovation",
     objectives: [
@@ -345,7 +345,7 @@ const irsSyllabus = [
     order_index: 24
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Articles of Faith (Arkan al-Iman)",
     subtopic: "Belief in Allah",
     objectives: [
@@ -359,7 +359,7 @@ const irsSyllabus = [
     order_index: 25
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Articles of Faith (Continued)",
     subtopic: "Angels, Books, Prophets, Last Day, Destiny",
     objectives: [
@@ -374,7 +374,7 @@ const irsSyllabus = [
     order_index: 26
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Ibadat (Acts of Worship)",
     subtopic: "Good Deeds and Taharah",
     objectives: [
@@ -387,7 +387,7 @@ const irsSyllabus = [
     order_index: 27
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Salah (Prayer)",
     subtopic: "Importance, Types and Requirements",
     objectives: [
@@ -401,7 +401,7 @@ const irsSyllabus = [
     order_index: 28
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Zakah (Obligatory Charity)",
     subtopic: "Types, Collection and Distribution",
     objectives: [
@@ -415,7 +415,7 @@ const irsSyllabus = [
     order_index: 29
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Sawm (Fasting)",
     subtopic: "Types, Exemptions and Violations",
     objectives: [
@@ -429,7 +429,7 @@ const irsSyllabus = [
     order_index: 30
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Hajj (Pilgrimage)",
     subtopic: "Importance, Types and Requirements",
     objectives: [
@@ -445,7 +445,7 @@ const irsSyllabus = [
     order_index: 31
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Jihad",
     subtopic: "Concept, Types and Manner",
     objectives: [
@@ -458,7 +458,7 @@ const irsSyllabus = [
     order_index: 32
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Marriage in Islam",
     subtopic: "Importance, Conditions and Rights",
     objectives: [
@@ -475,7 +475,7 @@ const irsSyllabus = [
     order_index: 33
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Divorce in Islam",
     subtopic: "Types, Iddah and Custody",
     objectives: [
@@ -492,7 +492,7 @@ const irsSyllabus = [
     order_index: 34
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Inheritance (Al-Mirath)",
     subtopic: "Heirs and Shares",
     objectives: [
@@ -506,7 +506,7 @@ const irsSyllabus = [
     order_index: 35
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Sources of Islamic Law",
     subtopic: "Primary Sources",
     objectives: [
@@ -518,7 +518,7 @@ const irsSyllabus = [
     order_index: 36
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "The Four Sunni Schools of Law",
     subtopic: "Madhahib and Their Founders",
     objectives: [
@@ -531,7 +531,7 @@ const irsSyllabus = [
     order_index: 37
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Islamic Economic System",
     subtopic: "Riba, Tatfif and Hoarding",
     objectives: [
@@ -545,7 +545,7 @@ const irsSyllabus = [
     order_index: 38
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Islamic Sources of Revenue",
     subtopic: "Zakah, Jizyah, Kharaj, Ghanimah and Baitul-Mal",
     objectives: [
@@ -560,7 +560,7 @@ const irsSyllabus = [
     order_index: 39
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Islamic Political System",
     subtopic: "Sovereignty, Shura, Justice and Rights",
     objectives: [
@@ -579,7 +579,7 @@ const irsSyllabus = [
   // ===== PART III: ISLAMIC HISTORY AND CIVILIZATION =====
   
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Pre-Islamic Arabia (Jahiliyyah)",
     subtopic: "Practices and Reforms",
     objectives: [
@@ -592,7 +592,7 @@ const irsSyllabus = [
     order_index: 41
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Life of Prophet Muhammad (SAW)",
     subtopic: "Birth, Early Life and Call to Prophethood",
     objectives: [
@@ -605,7 +605,7 @@ const irsSyllabus = [
     order_index: 42
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Da'wah in Makkah and Madinah",
     subtopic: "Preaching and Migration",
     objectives: [
@@ -618,7 +618,7 @@ const irsSyllabus = [
     order_index: 43
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Administration of the Ummah",
     subtopic: "State Building and the Role of the Mosque",
     objectives: [
@@ -630,7 +630,7 @@ const irsSyllabus = [
     order_index: 44
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "The Major Battles",
     subtopic: "Badr, Uhud and Khandaq",
     objectives: [
@@ -642,7 +642,7 @@ const irsSyllabus = [
     order_index: 45
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Treaty of Hudaibiyyah and Conquest of Makkah",
     subtopic: "Peace Agreement and Victory",
     objectives: [
@@ -655,7 +655,7 @@ const irsSyllabus = [
     order_index: 46
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "The Farewell Pilgrimage",
     subtopic: "Hijjatul-Wada and Final Sermon",
     objectives: [
@@ -667,7 +667,7 @@ const irsSyllabus = [
     order_index: 47
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Qualities of Prophet Muhammad (SAW)",
     subtopic: "Character and Lessons",
     objectives: [
@@ -679,7 +679,7 @@ const irsSyllabus = [
     order_index: 48
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Abu Bakr As-Siddiq",
     subtopic: "First Rightly Guided Caliph",
     objectives: [
@@ -692,7 +692,7 @@ const irsSyllabus = [
     order_index: 49
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Umar ibn al-Khattab",
     subtopic: "Second Rightly Guided Caliph",
     objectives: [
@@ -705,7 +705,7 @@ const irsSyllabus = [
     order_index: 50
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Uthman ibn Affan",
     subtopic: "Third Rightly Guided Caliph",
     objectives: [
@@ -718,7 +718,7 @@ const irsSyllabus = [
     order_index: 51
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Ali ibn Abi Talib",
     subtopic: "Fourth Rightly Guided Caliph",
     objectives: [
@@ -731,7 +731,7 @@ const irsSyllabus = [
     order_index: 52
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Early Contact of Islam with Africa",
     subtopic: "Hijrah to Abyssinia and Egypt",
     objectives: [
@@ -744,7 +744,7 @@ const irsSyllabus = [
     order_index: 53
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Spread of Islam in West Africa",
     subtopic: "Role of Traders, Teachers and Reformers",
     objectives: [
@@ -756,7 +756,7 @@ const irsSyllabus = [
     order_index: 54
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Impact of Islam on West African Empires",
     subtopic: "Ghana, Mali, Songhai and Borno",
     objectives: [
@@ -768,7 +768,7 @@ const irsSyllabus = [
     order_index: 55
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Economic Impact of Islam in West Africa",
     subtopic: "Timbuktu, Kano and Borno",
     objectives: [
@@ -780,7 +780,7 @@ const irsSyllabus = [
     order_index: 56
   },
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Contributions of Islam to Education",
     subtopic: "Aims, Objectives and Sources",
     objectives: [
@@ -796,7 +796,7 @@ const irsSyllabus = [
   
   // Additional topics for comprehensive coverage
   {
-    subject: "Islamic Religious Studies",
+    subject: "irs",
     topic: "Recommended Textbooks for IRS",
     subtopic: "Official JAMB Reading List",
     objectives: [
