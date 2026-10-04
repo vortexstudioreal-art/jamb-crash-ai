@@ -1,17 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ArrowLeft, 
-  ArrowRight, 
+import { motion } from 'framer-motion';
+import {
+  ArrowLeft,
   Book,
-  Bookmark, 
-  BookmarkCheck, 
-  ChevronLeft, 
-  ChevronRight, 
-  Minus, 
-  Moon, 
-  Plus, 
-  Sun, 
+  Bookmark,
+  BookmarkCheck,
+  ChevronLeft,
+  ChevronRight,
+  Minus,
+  Moon,
+  Plus,
+  Sun,
   X,
   CheckCircle2,
   XCircle
@@ -33,6 +32,12 @@ interface LikelyQuestion {
   explanation?: string;
 }
 
+interface ChapterSummary {
+  id: string;
+  chapter_number: number;
+  title: string;
+}
+
 interface NovelReaderProps {
   chapterId: string;
   userEmail: string;
@@ -50,23 +55,51 @@ export const NovelReader = ({
 }: NovelReaderProps) => {
   const [chapter, setChapter] = useState<(Database['public']['Tables']['novel_chapters']['Row'] & { novel?: Database['public']['Tables']['novels']['Row'] | null }) | null>(null);
   const [novel, setNovel] = useState<Database['public']['Tables']['novels']['Row'] | null>(null);
-  const [allChapters, setAllChapters] = useState<Database['public']['Tables']['novel_chapters']['Row'][]>([]);
+  const [allChapters, setAllChapters] = useState<ChapterSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large'>('medium');
   const [isDarkReading, setIsDarkReading] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
-  const [showQuestions, setShowQuestions] = useState(false);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({});
   const [showResults, setShowResults] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const startTimeRef = useRef<number>(Date.now());
-  const accumulatedTimeRef = useRef<number>(0);
 
   const fontSizeClasses = {
     small: 'text-sm leading-relaxed',
     medium: 'text-base leading-relaxed',
     large: 'text-lg leading-loose',
   };
+
+  const updateProgress = useCallback(async (novelId: string, currentChapterId: string, chapterNumber: number, totalChapters: number, additionalTime: number = 0) => {
+    const progressPercent = Math.round((chapterNumber / totalChapters) * 100);
+    const isCompleted = chapterNumber >= totalChapters;
+    
+    const { data: existingProgress } = await supabase
+      .from('user_novel_progress')
+      .select('total_time_spent_seconds')
+      .eq('email', userEmail)
+      .eq('novel_id', novelId)
+      .maybeSingle();
+
+    const currentTime = existingProgress?.total_time_spent_seconds || 0;
+    
+    const { error } = await supabase
+      .from('user_novel_progress')
+      .upsert({
+        email: userEmail,
+        novel_id: novelId,
+        current_chapter_id: currentChapterId,
+        progress_percent: progressPercent,
+        is_completed: isCompleted,
+        total_time_spent_seconds: currentTime + additionalTime,
+        last_read_at: new Date().toISOString(),
+      }, {
+        onConflict: 'email,novel_id'
+      });
+    
+    if (error) errorLogger.error(error, { component: 'NovelReader', action: 'update progress' });
+  }, [userEmail]);
 
   useEffect(() => {
     const loadChapter = async () => {
@@ -191,37 +224,8 @@ export const NovelReader = ({
     return () => clearInterval(interval);
   }, [novel, saveReadingTime]);
 
-  const updateProgress = useCallback(async (novelId: string, currentChapterId: string, chapterNumber: number, totalChapters: number, additionalTime: number = 0) => {
-    const progressPercent = Math.round((chapterNumber / totalChapters) * 100);
-    const isCompleted = chapterNumber >= totalChapters;
-    
-    const { data: existingProgress } = await supabase
-      .from('user_novel_progress')
-      .select('total_time_spent_seconds')
-      .eq('email', userEmail)
-      .eq('novel_id', novelId)
-      .maybeSingle();
-
-    const currentTime = existingProgress?.total_time_spent_seconds || 0;
-    
-    const { error } = await supabase
-      .from('user_novel_progress')
-      .upsert({
-        email: userEmail,
-        novel_id: novelId,
-        current_chapter_id: currentChapterId,
-        progress_percent: progressPercent,
-        is_completed: isCompleted,
-        total_time_spent_seconds: currentTime + additionalTime,
-        last_read_at: new Date().toISOString(),
-      }, {
-        onConflict: 'email,novel_id'
-      });
-    
-    if (error) errorLogger.error(error, { component: 'NovelReader', action: 'update progress' });
-  }, [userEmail]);
-
   const handleBookmark = async () => {
+    if (!novel) return;
     if (isBookmarked) {
       // Remove bookmark
       await supabase
@@ -529,6 +533,7 @@ export const NovelReader = ({
           ) : (
             <Button
               onClick={async () => {
+                if (!novel) return;
                 // Mark as completed
                 await supabase
                   .from('user_novel_progress')

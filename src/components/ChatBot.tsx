@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Loader2, Bot, User, Sparkles } from 'lucide-react';
+import {  X, Send, Loader2, Bot, User, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -30,7 +30,7 @@ interface UserContext {
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 
 export const ChatBot = () => {
-  const { user, userPackage, hasAccess } = useAuth();
+  const { user, userPackage } = useAuth();
   const isMobile = useIsMobile();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);

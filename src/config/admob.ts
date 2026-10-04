@@ -26,7 +26,7 @@ export const getAdUnitForFeature = (featureType: string): string => {
   const mapping: Record<string, string> = {
     pdf_upload: ADMOB_CONFIG.adUnits.pdfUpload,
     ai_explanation: ADMOB_CONFIG.adUnits.aiExplanation,
-    flashcard: ADMOB_CONFIG.adUnits.flashcardGeneration,
+    flashcard_generation: ADMOB_CONFIG.adUnits.flashcardGeneration,
     study_plan: ADMOB_CONFIG.adUnits.aiExplanation,
     subject_change: ADMOB_CONFIG.adUnits.pdfUpload,
     quick_quiz: ADMOB_CONFIG.adUnits.extraQuizQuestions,

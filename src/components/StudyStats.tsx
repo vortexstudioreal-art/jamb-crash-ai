@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Target, Clock, Flame, BookOpen, AlertCircle, Sparkles, RefreshCw, Info, ChevronRight, Minus } from 'lucide-react';
+import { TrendingUp, TrendingDown, Target, Clock, Flame, BookOpen, AlertCircle, RefreshCw, Info, ChevronRight, Minus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { useJambScorePredictor } from '@/hooks/useJambScorePredictor';
@@ -19,8 +19,8 @@ interface QuizAttempt {
   subjects: string[];
   total_questions: number;
   correct_answers: number;
-  time_taken_seconds: number;
-  created_at: string;
+  time_taken_seconds: number | null;
+  created_at: string | null;
   questions_data: unknown;
 }
 
@@ -32,7 +32,7 @@ export const StudyStats = ({ userEmail, refreshTrigger, onPracticeSubject, allow
   const [loadingTip, setLoadingTip] = useState(false);
 
   // Use the new algorithm hook
-  const prediction = useJambScorePredictor(quizzes);
+  const prediction = useJambScorePredictor(quizzes as unknown as Parameters<typeof useJambScorePredictor>[0]);
 
   const fetchStats = useCallback(async () => {
     try {
@@ -76,7 +76,7 @@ export const StudyStats = ({ userEmail, refreshTrigger, onPracticeSubject, allow
       today.setHours(0, 0, 0, 0);
       let streak = 0;
       const currentDate = new Date(today);
-      const quizDates = new Set(quizData.map(q => new Date(q.created_at).toDateString()));
+      const quizDates = new Set(quizData.map(q => new Date(q.created_at || '').toDateString()));
       while (quizDates.has(currentDate.toDateString())) {
         streak++;
         currentDate.setDate(currentDate.getDate() - 1);
@@ -129,7 +129,7 @@ export const StudyStats = ({ userEmail, refreshTrigger, onPracticeSubject, allow
     today.setHours(0, 0, 0, 0);
     let streak = 0;
     const currentDate = new Date(today);
-    const quizDates = new Set(quizData.map(q => new Date(q.created_at).toDateString()));
+    const quizDates = new Set(quizData.map(q => new Date(q.created_at || '').toDateString()));
     while (quizDates.has(currentDate.toDateString())) {
       streak++;
       currentDate.setDate(currentDate.getDate() - 1);
@@ -227,7 +227,7 @@ export const StudyStats = ({ userEmail, refreshTrigger, onPracticeSubject, allow
   const recentAttempts = quizzes.slice(0, 10).reverse();
   const dayCounts: Record<string, number> = {};
   const dailyData = recentAttempts.map((q) => {
-    const d = new Date(q.created_at);
+    const d = new Date(q.created_at || '');
     const weekday = d.toLocaleDateString('en-US', { weekday: 'short' });
     dayCounts[weekday] = (dayCounts[weekday] || 0) + 1;
     const n = dayCounts[weekday];
@@ -246,10 +246,8 @@ export const StudyStats = ({ userEmail, refreshTrigger, onPracticeSubject, allow
     };
   });
 
-  // Find weakest and strongest subjects
+  // Find weakest subject
   const weakestSubject = subjectData[0];
-  const strongestSubject = subjectData[subjectData.length - 1];
-  const lastQuiz = quizzes[0];
 
   // Generate personalized AI insight fallback
   const getAIInsight = () => {

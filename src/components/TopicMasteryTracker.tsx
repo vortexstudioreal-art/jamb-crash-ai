@@ -1,26 +1,23 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Target, 
-  AlertTriangle, 
-  CheckCircle2, 
-  TrendingUp, 
-  ChevronDown, 
-  ChevronUp, 
-  BookOpen, 
-  Flame, 
-  Zap, 
-  Search, 
-  Sparkles, 
-  Play, 
-  Filter, 
+import {
+  AlertTriangle,
+  TrendingUp,
+  ChevronDown,
+  ChevronUp,
+  BookOpen,
+  Flame,
+  Zap,
+  Search,
+  Sparkles,
+  Play,
+  Filter,
   X,
   ArrowRight,
   ShieldAlert,
   Award
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,6 +28,7 @@ interface TopicMasteryTrackerProps {
   refreshTrigger?: number;
   allowedSubjects?: string[];
   onStartPracticeTopic?: (subject: string, topic?: string) => void;
+  onGoToSyllabusTopic?: (subject: string, topic: string) => void;
 }
 
 interface QuestionData {
@@ -206,7 +204,8 @@ export const TopicMasteryTracker = ({
   userEmail, 
   refreshTrigger, 
   allowedSubjects,
-  onStartPracticeTopic 
+  onStartPracticeTopic,
+  onGoToSyllabusTopic
 }: TopicMasteryTrackerProps) => {
   const [loading, setLoading] = useState(true);
   const [subjectTopics, setSubjectTopics] = useState<SubjectTopics[]>([]);
@@ -254,7 +253,7 @@ export const TopicMasteryTracker = ({
               total: 0,
               percentage: 0,
               masteryLevel: 'weak',
-              lastAttempted: new Date(attempt.created_at),
+              lastAttempted: new Date(attempt.created_at || ''),
               isHighWeight,
             });
           }
@@ -896,6 +895,16 @@ export const TopicMasteryTracker = ({
                                       className="h-8 px-3 text-xs font-extrabold shrink-0 bg-background hover:bg-primary hover:text-primary-foreground border border-border shadow-xs transition-colors"
                                     >
                                       Practice 🎯
+                                    </Button>
+                                  )}
+                                  {onGoToSyllabusTopic && (
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => onGoToSyllabusTopic(subjectData.subject, topic.topic)}
+                                      className="h-8 px-3 text-xs font-extrabold shrink-0 text-primary hover:bg-primary/10 transition-colors"
+                                    >
+                                      Study 📖
                                     </Button>
                                   )}
                                 </div>

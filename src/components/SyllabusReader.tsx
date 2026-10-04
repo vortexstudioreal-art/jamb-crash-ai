@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   BookOpen, Clock, Check, ChevronRight, ArrowLeft, BookMarked,
@@ -16,6 +16,8 @@ import { InteractiveLesson } from '@/components/InteractiveLesson';
 import { useLessonProgress } from '@/hooks/useLessonProgress';
 import type { Lesson } from '@/types/lesson';
 import { errorLogger } from '@/services/errorLogger';
+import { getSyllabus } from '@/services/offlineStorage';
+import { JAMB_OFFLINE_SYLLABUS } from '@/data/jambSyllabusData';
 
 interface SyllabusItem {
   id: string;
@@ -24,11 +26,11 @@ interface SyllabusItem {
   subtopic: string | null;
   objectives: string[] | null;
   recommended_content: string | null;
-  difficulty_level: string;
-  estimated_reading_time: number;
-  order_index: number;
+  difficulty_level: string | null;
+  estimated_reading_time: number | null;
+  order_index: number | null;
   image_url?: string | null;
-  reference_materials?: { title: string; author?: string; url?: string }[] | null;
+  reference_materials?: unknown;
 }
 
 interface ReadingProgress {
@@ -51,6 +53,7 @@ interface SyllabusReaderProps {
   subjects: string[];
   onBack: () => void;
   initialSubject?: string | null;
+  initialTopic?: string | null;
   onGenerateFlashcards?: (topic: string, subject: string) => void;
   onStartTopicQuiz?: (questions: TopicQuizQuestion[], topic: string, subject: string) => void;
 }
@@ -89,7 +92,7 @@ const MASTERY_LABELS: Record<string, string> = {
   mastered: 'Mastered',
 };
 
-export const SyllabusReader = ({ userEmail, subjects, onBack, initialSubject, onGenerateFlashcards, onStartTopicQuiz }: SyllabusReaderProps) => {
+export const SyllabusReader = ({ userEmail, subjects, onBack, initialSubject, initialTopic, onGenerateFlashcards }: SyllabusReaderProps) => {
   const [syllabus, setSyllabus] = useState<SyllabusItem[]>([]);
   const [progress, setProgress] = useState<Record<string, ReadingProgress>>({});
   const [selectedSubject, setSelectedSubject] = useState<string | null>(initialSubject ?? null);
@@ -122,34 +125,101 @@ export const SyllabusReader = ({ userEmail, subjects, onBack, initialSubject, on
   const lessonId = structuredLesson?.id || null;
   const lessonProgress = useLessonProgress(lessonId, userEmail);
 
+  // Deep-link to a specific topic when initialTopic is provided
+  useEffect(() => {
+    if (initialTopic && syllabus.length > 0 && !selectedTopic) {
+      const match = syllabus.find(
+        t => t.topic.toLowerCase() === initialTopic.toLowerCase() ||
+             t.id === initialTopic
+      );
+      if (match) {
+        setSelectedSubject(match.subject.toLowerCase());
+        startReading(match);
+      }
+    }
+  }, [initialTopic, syllabus]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Load syllabus and progress
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
       
-      // Load syllabus for user's subjects
-      const { data: syllabusData } = await supabase
-        .from('jamb_syllabus')
-        .select('*')
-        .in('subject', subjects.map(s => s.toLowerCase()))
-        .order('order_index');
+      let syllabusData: SyllabusItem[] | null = null;
+
+      // Try Supabase first
+      try {
+        const { data, error } = await supabase
+          .from('jamb_syllabus')
+          .select('*')
+          .in('subject', subjects.map(s => s.toLowerCase()))
+          .order('order_index');
+
+        if (!error && data && data.length > 0) {
+          syllabusData = data;
+        }
+      } catch {
+        // Offline — fall through to offline data
+      }
+
+      // Fallback to IndexedDB if online query returned nothing
+      if (!syllabusData || syllabusData.length === 0) {
+        try {
+          const cached = await getSyllabus(subjects.map(s => s.toLowerCase()));
+          if (cached.length > 0) {
+            syllabusData = cached;
+          }
+        } catch {
+          // IndexedDB unavailable
+        }
+      }
+
+      // Final fallback: embedded offline syllabus data
+      if (!syllabusData || syllabusData.length === 0) {
+        const embedded: SyllabusItem[] = [];
+        for (const subject of subjects) {
+          const key = subject.toLowerCase().replace(/_/g, ' ');
+          const items = JAMB_OFFLINE_SYLLABUS[key] || JAMB_OFFLINE_SYLLABUS[subject.toLowerCase()] || [];
+          for (const item of items) {
+            embedded.push({
+              id: item.id,
+              subject: item.subject,
+              topic: item.topic,
+              subtopic: item.subtopic,
+              objectives: item.objectives,
+              recommended_content: item.recommended_content,
+              difficulty_level: item.difficulty_level,
+              estimated_reading_time: item.estimated_reading_time,
+              order_index: item.order_index,
+            });
+          }
+        }
+        if (embedded.length > 0) {
+          syllabusData = embedded;
+        }
+      }
 
       if (syllabusData) {
         setSyllabus(syllabusData);
       }
 
       // Load user's reading progress
-      const { data: progressData } = await supabase
-        .from('reading_progress')
-        .select('*')
-        .eq('email', userEmail);
+      try {
+        const { data: progressData } = await supabase
+          .from('reading_progress')
+          .select('*')
+          .eq('email', userEmail);
 
-      if (progressData) {
-        const progressMap: Record<string, ReadingProgress> = {};
-        progressData.forEach(p => {
-          progressMap[p.syllabus_id] = p as ReadingProgress;
-        });
-        setProgress(progressMap);
+        if (progressData) {
+          const progressMap: Record<string, ReadingProgress> = {};
+          progressData.forEach(p => {
+            if (p.syllabus_id) {
+              progressMap[p.syllabus_id] = p as ReadingProgress;
+            }
+          });
+          setProgress(progressMap);
+        }
+      } catch {
+        // Offline — progress will be unavailable
       }
 
       setLoading(false);
@@ -196,7 +266,7 @@ export const SyllabusReader = ({ userEmail, subjects, onBack, initialSubject, on
           .maybeSingle();
 
         if (!error && data) {
-          setStructuredLesson(data as Lesson);
+          setStructuredLesson(data as unknown as Lesson);
         } else {
           setStructuredLesson(null);
         }
@@ -294,7 +364,7 @@ export const SyllabusReader = ({ userEmail, subjects, onBack, initialSubject, on
       .eq('id', sessionIdRef.current);
 
     // Calculate progress percent based on time spent vs estimated
-    const estimatedSeconds = selectedTopic.estimated_reading_time * 60;
+    const estimatedSeconds = (selectedTopic.estimated_reading_time ?? 0) * 60;
     const progressPercent = Math.min(100, Math.round((readingTime / estimatedSeconds) * 100));
 
     // Determine mastery level
@@ -352,6 +422,13 @@ export const SyllabusReader = ({ userEmail, subjects, onBack, initialSubject, on
     setShowLimitReached(false);
     toast.success('Bonus use earned! You can now generate AI content.');
   };
+  const limitReachedNode: ReactNode = showLimitReached ? (
+    <FeatureLimitReached
+      featureType="syllabus_ai_explanation"
+      onBonusEarned={handleBonusEarned}
+      className="mb-6"
+    />
+  ) : null;
 
   const generateAIContent = async (type: 'explanation' | 'flashcards' | 'quiz' | 'summarize' | 'expand') => {
     if (!selectedTopic) return;
@@ -400,7 +477,6 @@ export const SyllabusReader = ({ userEmail, subjects, onBack, initialSubject, on
 
       // Add context for summarize/expand
       if (type === 'summarize') {
-        const currentContent = aiExplanation || selectedTopic.recommended_content;
         requestBody = {
           ...requestBody,
           type: 'explanation',
@@ -525,8 +601,7 @@ export const SyllabusReader = ({ userEmail, subjects, onBack, initialSubject, on
 
   const handleQuizAnswer = (answer: string) => {
     if (!topicQuizQuestions || showQuizFeedback !== null) return;
-    
-    const currentQ = topicQuizQuestions[currentQuizIndex];
+
     setQuizAnswers(prev => ({ ...prev, [currentQuizIndex]: answer }));
     setShowQuizFeedback(currentQuizIndex);
   };
@@ -746,14 +821,7 @@ export const SyllabusReader = ({ userEmail, subjects, onBack, initialSubject, on
               </div>
             )}
 
-            {/* Show limit reached component if daily limit is hit */}
-            {showLimitReached && (
-              <FeatureLimitReached
-                featureType="syllabus_ai_explanation"
-                onBonusEarned={handleBonusEarned}
-                className="mb-6"
-              />
-            )}
+            {limitReachedNode}
 
             {/* AI Content Buttons */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
@@ -963,14 +1031,14 @@ export const SyllabusReader = ({ userEmail, subjects, onBack, initialSubject, on
             </AnimatePresence>
 
             {/* Reference Materials */}
-            {selectedTopic.reference_materials && selectedTopic.reference_materials.length > 0 && (
+            {Array.isArray(selectedTopic.reference_materials) && selectedTopic.reference_materials.length > 0 && (
               <div className="mb-6">
                 <h3 className="font-semibold text-foreground flex items-center gap-2 mb-3">
                   <BookOpen className="w-4 h-4 text-primary" />
                   Recommended References
                 </h3>
                 <div className="space-y-2">
-                  {selectedTopic.reference_materials.map((ref, i) => (
+                  {(selectedTopic.reference_materials as { title: string; author?: string; url?: string }[]).map((ref, i) => (
                     <div key={i} className="bg-muted/30 rounded-lg p-3 border border-border/50">
                       <p className="font-medium text-sm text-foreground">{ref.title}</p>
                       {ref.author && <p className="text-xs text-muted-foreground mt-0.5">{ref.author}</p>}

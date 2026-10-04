@@ -16,7 +16,7 @@ interface PremiumDashboardProps {
   onUpgrade?: () => void;
 }
 
-export const PremiumDashboard = ({ userEmail, isAdmin, adminRole, targetScore, weakSubject, onUpgrade }: PremiumDashboardProps) => {
+export const PremiumDashboard = ({ userEmail,   targetScore, weakSubject, onUpgrade }: PremiumDashboardProps) => {
   const [showResultCard, setShowResultCard] = useState(false);
   const [predictedScores, setPredictedScores] = useState<{ min: number; max: number } | null>(null);
   const { userPackage } = useAuth();

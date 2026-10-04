@@ -24,7 +24,7 @@ const getPlatform = (): string => {
   return 'web';
 };
 
-export const useAdAnalytics = () => {
+export const adAnalytics = () => {
   const trackAdEvent = async (
     email: string | null,
     event: AdAnalyticsEvent

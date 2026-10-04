@@ -11,7 +11,6 @@ import type { QuizResultsProps } from '@/components/QuizResults';
 import { TrialTimerBadge } from '@/components/TrialTimerBadge';
 import { BackButton } from '@/components/BackButton';
 import { useFeatureUsage } from '@/hooks/useFeatureUsage';
-import { useExamDate } from '@/hooks/useExamDate';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTrialContext } from '@/contexts/TrialContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,6 +24,7 @@ import { BottomNav, type DashboardTab } from '@/components/BottomNav';
 import { DesktopSidebar } from '@/components/DesktopSidebar';
 import { useSeo } from '@/hooks/useSeo';
 import { useFeatureAccess } from '@/components/FeatureGate';
+import type { Step, QuizType } from '@/types/dashboard';
 import { errorLogger } from '@/services/errorLogger';
 import { HomeTab } from '@/components/dashboard/HomeTab';
 import { StudyTab } from '@/components/dashboard/StudyTab';
@@ -39,34 +39,20 @@ const MockExam = lazy(() => import('@/components/MockExam').then(m => ({ default
 const Flashcards = lazy(() => import('@/components/Flashcards').then(m => ({ default: m.Flashcards })));
 const StudyPlanGenerator = lazy(() => import('@/components/StudyPlanGenerator').then(m => ({ default: m.StudyPlanGenerator })));
 const StudyPlanTracker = lazy(() => import('@/components/StudyPlanTracker').then(m => ({ default: m.StudyPlanTracker })));
-const SyllabusReader = lazy(() => import('@/components/SyllabusReader').then(m => ({ default: m.SyllabusReader })));
-const StudyMaterials = lazy(() => import('@/components/StudyMaterials').then(m => ({ default: m.StudyMaterials })));
-const NovelBrowser = lazy(() => import('@/components/novels/NovelBrowser').then(m => ({ default: m.NovelBrowser })));
+const SyllabusReader = lazy(() => import('@/components/SyllabusReader').then(m => ({ default: m.SyllabusReader })));const NovelBrowser = lazy(() => import('@/components/novels/NovelBrowser').then(m => ({ default: m.NovelBrowser })));
 const NovelDetail = lazy(() => import('@/components/novels/NovelDetail').then(m => ({ default: m.NovelDetail })));
 const NovelReader = lazy(() => import('@/components/novels/NovelReader').then(m => ({ default: m.NovelReader })));
 const JambNewsPage = lazy(() => import('@/components/JambNewsPage').then(m => ({ default: m.JambNewsPage })));
 const ScholarshipPage = lazy(() => import('@/components/ScholarshipPage').then(m => ({ default: m.ScholarshipPage })));
 const Leaderboard = lazy(() => import('@/components/Leaderboard').then(m => ({ default: m.Leaderboard })));
-const StudyNotes = lazy(() => import('@/components/StudyNotes').then(m => ({ default: m.StudyNotes })));
-const StudyStats = lazy(() => import('@/components/StudyStats').then(m => ({ default: m.StudyStats })));
-const ChatBot = lazy(() => import('@/components/ChatBot').then(m => ({ default: m.ChatBot })));
+const StudyNotes = lazy(() => import('@/components/StudyNotes').then(m => ({ default: m.StudyNotes })));const ChatBot = lazy(() => import('@/components/ChatBot').then(m => ({ default: m.ChatBot })));
 const HeroSection = lazy(() => import('@/components/HeroSection').then(m => ({ default: m.HeroSection })));
 const HowItWorksSection = lazy(() => import('@/components/HowItWorksSection').then(m => ({ default: m.HowItWorksSection })));
 const PricingSection = lazy(() => import('@/components/PricingSection').then(m => ({ default: m.PricingSection })));
 const PersonalizationForm = lazy(() => import('@/components/PersonalizationForm').then(m => ({ default: m.PersonalizationForm })));
-const PaymentModal = lazy(() => import('@/components/PaymentModal').then(m => ({ default: m.PaymentModal })));
-const PremiumDashboard = lazy(() => import('@/components/PremiumDashboard').then(m => ({ default: m.PremiumDashboard })));
-const SubjectSelector = lazy(() => import('@/components/SubjectSelector').then(m => ({ default: m.SubjectSelector })));
-const QuizResults = lazy(() => import('@/components/QuizResults').then(m => ({ default: m.QuizResults })));
-const TopicMasteryTracker = lazy(() => import('@/components/TopicMasteryTracker').then(m => ({ default: m.TopicMasteryTracker })));
-const CourseRequirements = lazy(() => import('@/components/CourseRequirements').then(m => ({ default: m.CourseRequirements })));
-const CourseTipsCard = lazy(() => import('@/components/CourseTipsCard').then(m => ({ default: m.CourseTipsCard })));
-const Footer = lazy(() => import('@/components/Footer').then(m => ({ default: m.Footer })));
-const FeatureLimitReached = lazy(() => import('@/components/FeatureLimitReached').then(m => ({ default: m.FeatureLimitReached })));
-const HomeSummary = lazy(() => import('@/components/HomeSummary').then(m => ({ default: m.HomeSummary })));
-const ReferralSystem = lazy(() => import('@/components/ReferralSystem').then(m => ({ default: m.ReferralSystem })));
-const OfflineReadyCard = lazy(() => import('@/components/OfflineReadyCard').then(m => ({ default: m.OfflineReadyCard })));
-const LazyFallback = () => (
+const PaymentModal = lazy(() => import('@/components/PaymentModal').then(m => ({ default: m.PaymentModal })));const SubjectSelector = lazy(() => import('@/components/SubjectSelector').then(m => ({ default: m.SubjectSelector })));
+const QuizResults = lazy(() => import('@/components/QuizResults').then(m => ({ default: m.QuizResults })));const CourseRequirements = lazy(() => import('@/components/CourseRequirements').then(m => ({ default: m.CourseRequirements })));const Footer = lazy(() => import('@/components/Footer').then(m => ({ default: m.Footer })));
+const FeatureLimitReached = lazy(() => import('@/components/FeatureLimitReached').then(m => ({ default: m.FeatureLimitReached })));const LazyFallback = () => (
   <div className="min-h-screen bg-background flex items-center justify-center">
     <div className="space-y-4 w-full max-w-md px-4">
       <div className="h-8 w-3/4 mx-auto animate-pulse rounded-md bg-muted" />
@@ -75,9 +61,6 @@ const LazyFallback = () => (
     </div>
   </div>
 );
-
-type Step = 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'mock' | 'study-plan' | 'study-plan-tracker' | 'study-materials' | 'syllabus' | 'flashcards' | 'course-requirements' | 'novels' | 'novel-detail' | 'novel-reader' | 'news' | 'scholarships' | 'leaderboard' | 'notes' | 'speed-round' | 'streak';
-type QuizType = 'full' | 'mini' | 'subject' | 'timed-practice';
 
 interface FormData {
   targetScore: string;
@@ -177,17 +160,16 @@ const Index = () => {
   const [selectedChapterId, setSelectedChapterId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<DashboardTab>('home');
   const [showQuizLimitModal, setShowQuizLimitModal] = useState(false);
-  const [pendingQuizType, setPendingQuizType] = useState<QuizType>('mini');
+  const [pendingQuizType] = useState<QuizType>('mini');
   const [showSubjectChangeLimitModal, setShowSubjectChangeLimitModal] = useState(false);
   
   // Track if we're waiting for payment flow to initialize
-  const [isPaymentFlowLoading, setIsPaymentFlowLoading] = useState(() => {
+  const [, setIsPaymentFlowLoading] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('openPayment') === 'true';
   });
   
   const { user, isLoading, hasAccess, isAdmin, isOwner, userRole, userPackage, signOut, refreshAccess } = useAuth();
-  const { year: examYear } = useExamDate();
   const navigate = useNavigate();
   const { canUseFeature, incrementUsage } = useFeatureUsage();
 
@@ -219,9 +201,9 @@ const Index = () => {
   // Database-backed trial system (shared via context)
   const { 
     formattedTime, 
-    isTrialExpired, 
+     
     isTrialActive,
-    hasTrialUsed,
+    
     canStartTrial,
     startTrial,
     loading: trialLoading,
@@ -340,12 +322,10 @@ const Index = () => {
         const subjectScores: Record<string, { correct: number; total: number }> = {};
         quizData.forEach(attempt => {
           const subjects = attempt.subjects as string[];
-          const scorePerSubject = attempt.correct_answers / subjects.length;
-          const totalPerSubject = attempt.total_questions / subjects.length;
           subjects.forEach(s => {
             if (!subjectScores[s]) subjectScores[s] = { correct: 0, total: 0 };
-            subjectScores[s].correct += scorePerSubject;
-            subjectScores[s].total += totalPerSubject;
+            subjectScores[s].correct += attempt.correct_answers;
+            subjectScores[s].total += attempt.total_questions;
           });
         });
 
@@ -505,7 +485,7 @@ const Index = () => {
     setIsPaymentModalOpen(false);
   };
 
-  const handlePaymentSuccess = async (reference: string, email: string) => {
+  const handlePaymentSuccess = async (_reference: string, _email: string) => {
     setIsPaymentModalOpen(false);
     await refreshAccess();
     
@@ -586,17 +566,6 @@ const Index = () => {
     navigateStep('study-plan');
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
-
-  const requireAccess = (step: Step) => {
-    if (!effectiveAccess && !isTrialActive) {
-      setIsPlanSelectionOpen(true);
-      setSelectedPlan('pro');
-      return;
-    }
-    navigateStep(step);
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  };
-
   const handleGenerateStudyPlan = () => {
     navigateStep('study-plan');
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -642,14 +611,6 @@ const Index = () => {
     startTransition(() => setCurrentStep('dashboard'));
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
-
-  const handleGoToSyllabusTopic = (subject: string, topic: string) => {
-    setSyllabusTargetSubject(subject);
-    setSyllabusTargetTopic(topic);
-    navigateStep('syllabus');
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  };
-
   // Study plan calendar -> learning section links
   const handleStudyPlanPractice = (subject: string) => {
     setPracticeSubjectOverride(subject);

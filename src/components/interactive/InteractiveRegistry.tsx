@@ -16,8 +16,12 @@ const ElectrolysisSimulator = lazy(() =>
   import('./ElectrolysisSimulator').then((m) => ({ default: m.ElectrolysisSimulator }))
 );
 
-const COMPONENT_REGISTRY: Record<InteractiveComponentName, React.LazyExoticComponent<ComponentType<InteractiveProps>>> = {
-  formula_calculator: FormulaCalculator,
+// The registry is intentionally partial: components marked "Phase 3" above are
+// not built yet, and InteractiveRenderer falls back to UnknownComponent for them.
+const COMPONENT_REGISTRY: Partial<Record<InteractiveComponentName, React.LazyExoticComponent<ComponentType<InteractiveProps>>>> = {
+  // FormulaCalculator requires a structured config (formula/variables/output),
+  // which is narrower than the generic InteractiveProps the registry exposes.
+  formula_calculator: FormulaCalculator as unknown as React.LazyExoticComponent<ComponentType<InteractiveProps>>,
   wave_simulator: WaveSimulator,
   motion_simulator: MotionSimulator,
   electrolysis_simulator: ElectrolysisSimulator,

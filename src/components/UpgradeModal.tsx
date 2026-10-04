@@ -1,5 +1,4 @@
-import { motion } from 'framer-motion';
-import { Lock, Crown, Zap, Star, X, Check } from 'lucide-react';
+import { Lock, Crown, Zap, Star,  Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,

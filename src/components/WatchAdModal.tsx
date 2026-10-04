@@ -4,7 +4,7 @@ import { X, Gift, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FEATURE_NAMES, FeatureType } from '@/hooks/useFeatureUsage';
 import { getAdUnitForFeature, isMobileApp } from '@/config/admob';
-import { useAdAnalytics } from '@/hooks/useAdAnalytics';
+import { adAnalytics } from '@/hooks/useAdAnalytics';
 import { useAuth } from '@/contexts/AuthContext';
 import { errorLogger } from '@/services/errorLogger';
 
@@ -24,7 +24,7 @@ export const WatchAdModal = ({ isOpen, onClose, onComplete, featureType, bonusAm
   const [isRewarded, setIsRewarded] = useState(false);
 
   const { user } = useAuth();
-  const { trackAdStarted, trackAdCompleted, trackAdFailed, trackRewardClaimed } = useAdAnalytics();
+  const { trackAdStarted, trackAdCompleted, trackAdFailed, trackRewardClaimed } = adAnalytics();
   const userEmail = user?.email || null;
   const rewardListenerRef = useRef<{ remove: () => void } | null>(null);
   const dismissListenerRef = useRef<{ remove: () => void } | null>(null);

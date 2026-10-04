@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Download, Calendar, Clock, BookOpen, CheckCircle, Star, Sparkles, ArrowRight, Brain, Target, TrendingUp } from 'lucide-react';
+import { Download, Calendar, Clock, BookOpen, CheckCircle, Sparkles, ArrowRight, Brain, Target, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { useFeatureUsage } from '@/hooks/useFeatureUsage';
 import { FeatureLimitReached } from '@/components/FeatureLimitReached';
 import { errorLogger } from '@/services/errorLogger';
@@ -88,7 +89,6 @@ export const StudyPlanGenerator = ({
   subjects,
   targetScore = 300,
   hoursPerDay = 4,
-  weakestSubject,
   examDate,
   onBack,
   onViewCalendar,
@@ -378,7 +378,7 @@ export const StudyPlanGenerator = ({
         .from('study_plans')
         .insert({
           email: userEmail,
-          plan_data: planToSave,
+          plan_data: planToSave as unknown as Database['public']['Tables']['study_plans']['Insert']['plan_data'],
           target_score: targetScore,
           hours_per_day: hoursPerSession,
         })
@@ -475,10 +475,9 @@ ${quizPerformance.filter(p => p.accuracy < 60).length > 0 ? `
 
       const filename = `JAMB_AI_Study_Plan_${new Date().toISOString().split('T')[0]}.txt`;
       
-      // Check if we're on mobile/iOS or if regular download might fail
+      // Check if we're on mobile or if regular download might fail
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-      
+
       if (isMobile) {
         // Mobile-friendly approach: open in new window for copy/save
         const newWindow = window.open('', '_blank');

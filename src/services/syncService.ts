@@ -45,17 +45,22 @@ export const syncPendingItems = async (): Promise<{ synced: number; failed: numb
 
 const processSyncItem = async (item: SyncItem): Promise<void> => {
   switch (item.type) {
-    case 'quiz_attempt':
-      await supabase.from('quiz_attempts').insert(item.data as Database['public']['Tables']['quiz_attempts']['Insert']);
-      break;
-    case 'flashcard_update': {
-      const data = item.data as { updates: Database['public']['Tables']['flashcards']['Update']; id: string };
-      await supabase.from('flashcards').update(data.updates).eq('id', data.id);
+    case 'quiz_attempt': {
+      const { error } = await supabase.from('quiz_attempts').insert(item.data as Database['public']['Tables']['quiz_attempts']['Insert']);
+      if (error) throw error;
       break;
     }
-    case 'reading_progress':
-      await supabase.from('reading_progress').upsert(item.data as Database['public']['Tables']['reading_progress']['Insert'], { onConflict: 'email,syllabus_id' });
+    case 'flashcard_update': {
+      const data = item.data as { updates: Database['public']['Tables']['flashcards']['Update']; id: string };
+      const { error } = await supabase.from('flashcards').update(data.updates).eq('id', data.id);
+      if (error) throw error;
       break;
+    }
+    case 'reading_progress': {
+      const { error } = await supabase.from('reading_progress').upsert(item.data as Database['public']['Tables']['reading_progress']['Insert'], { onConflict: 'email,syllabus_id' });
+      if (error) throw error;
+      break;
+    }
   }
 };
 
@@ -125,7 +130,7 @@ export const downloadAllForOffline = async (
 
       const { data: chapters } = await supabase
         .from('novel_chapters')
-        .select('id, novel_id, chapter_number, title, content, estimated_reading_time, word_count, likely_questions')
+        .select('id, novel_id, chapter_number, title, content, estimated_reading_time, word_count, likely_questions, created_at')
         .in('novel_id', novels.map(n => n.id));
 
       if (chapters && chapters.length > 0) {

@@ -1,6 +1,4 @@
-import { startTransition } from 'react';
-import { motion } from 'framer-motion';
-import {
+import { startTransition } from 'react';import {
   Home, BookOpen, Sparkles, Trophy, User,
   Target, Zap, Play, Settings, LogOut, Shield
 } from 'lucide-react';
@@ -43,7 +41,7 @@ export const DesktopSidebar = ({
   onSignOut,
   onNavigate,
   onQuickStart,
-  hasAccess
+  
 }: DesktopSidebarProps) => {
   const displayName = userName?.split(' ')[0] || 'Champion';
   const initials = displayName.charAt(0).toUpperCase();

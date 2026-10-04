@@ -7,7 +7,6 @@ import { ReferralSystem } from '@/components/ReferralSystem';
 import type { DashboardContext } from '@/types/dashboard';
 
 interface CommunityTabProps extends DashboardContext {
-  navigateStep: (step: never) => void;
   navigate: (path: string) => void;
 }
 

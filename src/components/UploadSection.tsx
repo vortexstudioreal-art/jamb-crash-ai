@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Upload, Camera, FileText, X, CheckCircle, Sparkles, Loader2, BookOpen, Lock } from 'lucide-react';
+import { Upload, Camera, FileText, X,  Sparkles, Loader2, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';

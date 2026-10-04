@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  ArrowLeft, RotateCcw, Check, X, Sparkles, 
-  Brain, Shuffle, ChevronLeft, ChevronRight, Plus, Trash2, Lock 
+  ArrowLeft,  Check, X, Sparkles, 
+  Brain, Shuffle, ChevronLeft, ChevronRight,  Trash2 
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -81,7 +81,7 @@ export const Flashcards = ({ userEmail, subjects, onBack, initialSubject }: Flas
   const [showLimitReached, setShowLimitReached] = useState(false);
   
   // Feature usage limits
-  const { canUseFeature, incrementUsage, getRemainingUses, refreshUsage } = useFeatureUsage();
+  const { canUseFeature, incrementUsage,  refreshUsage } = useFeatureUsage();
 
   const loadFlashcards = useCallback(async () => {
     setLoading(true);

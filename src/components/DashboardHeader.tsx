@@ -14,9 +14,9 @@ interface DashboardHeaderProps {
 }
 
 export const DashboardHeader = ({ 
-  userEmail, 
+   
   isOwner, 
-  isCollaborator, 
+   
   userRole,
   onSignOut 
 }: DashboardHeaderProps) => {

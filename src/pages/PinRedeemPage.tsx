@@ -64,7 +64,7 @@ const PinRedeemPage = () => {
   const handleRedeem = async () => {
     const fullPin = pinParts.join('-');
     
-    if (pinParts.some(p => p.length < (pinParts.indexOf(p) < 2 ? 3 : 4))) {
+    if (pinParts.some((p, i) => p.length < (i < 2 ? 3 : 4))) {
       toast.error('Please enter the complete PIN');
       return;
     }
@@ -91,11 +91,11 @@ const PinRedeemPage = () => {
       } else {
         toast.error(data.message);
       }
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to redeem PIN');
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Failed to redeem PIN');
       setResult({
         success: false,
-        message: err.message || 'An error occurred. Please try again.',
+        message: (err instanceof Error && err.message) || 'An error occurred. Please try again.',
       });
     } finally {
       setLoading(false);

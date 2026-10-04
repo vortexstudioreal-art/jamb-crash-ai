@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  DollarSign, Users, Clock, CheckCircle, XCircle, RefreshCw, 
-  Banknote, AlertCircle, Check, X
+  DollarSign, Clock, CheckCircle, XCircle, RefreshCw, 
+  Banknote, Check, X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,7 +28,7 @@ interface PayoutRequest {
   bank_name: string | null;
   account_number: string | null;
   account_name: string | null;
-  requested_at: string;
+  requested_at: string | null;
   processed_at: string | null;
   processed_by: string | null;
   notes: string | null;
@@ -310,7 +310,7 @@ export const PayoutManagement = ({ isOwner, userEmail }: PayoutManagementProps) 
                         )}
                       </td>
                       <td className="py-3 px-2 text-muted-foreground text-xs">
-                        {formatDate(request.requested_at)}
+                        {formatDate(request.requested_at || '')}
                       </td>
                       {isOwner && (
                         <td className="py-3 px-2 text-right">

@@ -1,6 +1,4 @@
-import { motion } from 'framer-motion';
-import { ExternalLink } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';import { Button } from '@/components/ui/button';
 
 const TIKTOK_URL = 'https://www.tiktok.com/@jamb.crash.ai';
 const WHATSAPP_CHANNEL_URL = 'https://whatsapp.com/channel/0029VbBXiJs1nozBfLioDZ1X';

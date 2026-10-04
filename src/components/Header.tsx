@@ -8,7 +8,7 @@ interface HeaderProps {
   hasAccess?: boolean;
 }
 
-export const Header = ({ onGetStarted, hasAccess }: HeaderProps) => {
+export const Header = ({ onGetStarted }: HeaderProps) => {
   const navigate = useNavigate();
 
   const handleLogin = () => {

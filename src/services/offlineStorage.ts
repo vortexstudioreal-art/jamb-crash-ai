@@ -1,4 +1,5 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
+import type { Json } from '@/integrations/supabase/types';
 
 interface Question {
   id: string;
@@ -9,9 +10,11 @@ interface Question {
   option_c: string;
   option_d: string;
   correct_answer: string;
-  explanation?: string;
-  year?: number;
+  explanation?: string | null;
+  year?: number | null;
   image_url?: string | null;
+  topics?: string[] | null;
+  created_at?: string | null;
 }
 
 interface Flashcard {
@@ -20,10 +23,17 @@ interface Flashcard {
   front: string;
   back: string;
   subject: string;
-  topic?: string;
-  mastery_level?: string;
-  times_reviewed?: number;
-  next_review_at?: string;
+  topic?: string | null;
+  mastery_level?: string | null;
+  times_reviewed?: number | null;
+  next_review_at?: string | null;
+  difficulty?: string | null;
+  source_id?: string | null;
+  source_type?: string | null;
+  times_correct?: number | null;
+  last_reviewed_at?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
 }
 
 interface SyllabusItem {
@@ -33,9 +43,13 @@ interface SyllabusItem {
   subtopic: string | null;
   objectives: string[] | null;
   recommended_content: string | null;
-  difficulty_level: string;
-  estimated_reading_time: number;
-  order_index: number;
+  difficulty_level: string | null;
+  estimated_reading_time: number | null;
+  order_index: number | null;
+  image_url?: string | null;
+  reference_materials?: Json | null;
+  created_at?: string | null;
+  updated_at?: string | null;
 }
 
 interface SyncItem {
@@ -58,6 +72,11 @@ interface CachedNovel {
   is_premium: boolean | null;
   difficulty_level: string | null;
   subject: string | null;
+  created_at: string | null;
+  download_url: string | null;
+  full_book_pdf_path: string | null;
+  full_book_pdf_url: string | null;
+  updated_at: string | null;
 }
 
 interface CachedChapter {
@@ -68,7 +87,8 @@ interface CachedChapter {
   content: string;
   estimated_reading_time: number | null;
   word_count: number | null;
-  likely_questions: unknown;
+  likely_questions: Json | null;
+  created_at: string | null;
 }
 
 interface JambOfflineDB extends DBSchema {
@@ -347,7 +367,9 @@ export const setMetadata = async (key: string, value: unknown): Promise<void> =>
 export const getMetadata = async <T = unknown>(key: string): Promise<T> => {
   const db = await getDB();
   const item = await db.get('metadata', key);
-  return item?.value;
+  // Typed wrapper around IndexedDB: the caller supplies T via the generic,
+  // so the stored value is returned as the requested type.
+  return item?.value as T;
 };
 
 // Clear all data
@@ -381,7 +403,7 @@ export const getStorageInfo = async (): Promise<{
     getSyncQueueCount(),
     getNovelsCount(),
     getNovelChaptersCount(),
-    getMetadata('questions_last_sync'),
+    getMetadata<number | null>('questions_last_sync'),
   ]);
 
   return {

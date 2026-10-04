@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { 
-  Key, Users, Package, TrendingUp, Search, Ban, 
-  Copy, CheckCircle, XCircle, RefreshCw, Loader2,
+  Key, Users, Package,  Search, Ban, 
+  Copy, CheckCircle,  RefreshCw, Loader2,
   BarChart3, DollarSign, ShoppingCart
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';

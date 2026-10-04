@@ -1512,91 +1512,6 @@ Gross Profit + Other Income - Expenses = Net Profit
 - Roughages: Fibrous feeds (hay, grass)`
     },
   ],
-  history: [
-    { 
-      title: 'Nigeria & West Africa Timeline', 
-      type: 'notes', 
-      description: 'Historical events and dates',
-      content: `## Nigerian & West African History
-
-### PRE-COLONIAL ERA
-
-**Early Kingdoms & Empires:**
-
-**Ghana Empire (300-1200 AD):**
-- First major West African empire
-- Controlled gold and salt trade
-- Declined due to Almoravid attacks
-
-**Mali Empire (1235-1600 AD):**
-- Founded by Sundiata Keita
-- Mansa Musa: Famous pilgrimage to Mecca
-- Timbuktu: Center of learning
-
-**Songhai Empire (1464-1591 AD):**
-- Largest West African empire
-- Sunni Ali and Askia Muhammad
-- Fell to Moroccan invasion
-
-**Nigerian Kingdoms:**
-
-**Benin Kingdom:**
-- Advanced bronze casting
-- Trade with Portuguese
-- Oba as divine ruler
-
-**Oyo Empire:**
-- Yoruba kingdom
-- Alaafin and Oyomesi
-- Strong cavalry
-
-**Hausa City-States:**
-- Kano, Katsina, Zaria
-- Trade and crafts
-- Islamic influence
-
-### COLONIAL ERA
-
-**1861:** Lagos annexed by Britain
-**1884-85:** Berlin Conference (Scramble for Africa)
-**1900:** Northern and Southern Protectorates
-**1914:** Amalgamation by Lord Lugard
-
-**Colonial Administration:**
-- Direct rule in South
-- Indirect rule in North
-- Native authority system
-
-### ROAD TO INDEPENDENCE
-
-**1922:** Clifford Constitution (Lagos elections)
-**1946:** Richards Constitution (regional councils)
-**1951:** Macpherson Constitution
-**1954:** Lyttleton Constitution (federal system)
-**1957:** Regional self-government
-**1960:** Independence (October 1)
-**1963:** Republic declared
-
-### POST-INDEPENDENCE
-
-**First Republic (1960-1966):**
-- Tafawa Balewa (PM)
-- Nnamdi Azikiwe (President)
-
-**Military Coups:**
-- 1966: January and July coups
-- Civil War (1967-1970)
-
-**Key Military Leaders:**
-- Ironsi, Gowon, Murtala, Obasanjo, Buhari, Babangida, Abacha
-
-**Second Republic (1979-1983):**
-- Shehu Shagari
-
-**Fourth Republic (1999-present):**
-- Obasanjo, Yar'Adua, Jonathan, Buhari, Tinubu`
-    },
-  ],
   geography: [
     { 
       title: 'Physical & Human Geography', 
@@ -1710,7 +1625,6 @@ const SUBJECT_DISPLAY_NAMES: Record<string, string> = {
   crs: 'CRS',
   irs: 'IRS',
   'agricultural science': 'Agric Science',
-  history: 'History',
   geography: 'Geography',
 };
 
@@ -1729,7 +1643,6 @@ const ALL_SUBJECTS = [
   'crs',
   'irs',
   'agricultural science',
-  'history',
   'geography',
 ];
 

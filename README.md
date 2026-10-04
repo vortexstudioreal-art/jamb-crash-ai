@@ -1,73 +1,99 @@
-# Welcome to your Lovable project
+# Jamb Crash AI
 
-## Project info
+JAMB exam preparation app — practice questions, mock exams, study plans,
+interactive lessons and a B2B reseller/collaborator programme, targeting the
+Nigerian JAMB UTME.
 
-**URL**: https://lovable.dev/projects/146cea08-b8be-4ede-8a06-af89bb73640e
+Runs as a web app, a PWA (offline-capable) and a native app via Capacitor.
 
-## How can I edit this code?
+## Tech stack
 
-There are several ways of editing your application.
+- **React 18 + TypeScript** (Vite 5, strict mode)
+- **Supabase** — Postgres, Auth, Edge Functions, RLS
+- **Tailwind CSS + shadcn-ui** (Radix primitives)
+- **Capacitor** — Android/iOS packaging, background runner, AdMob
+- **Vitest** (unit) · **Playwright** (e2e)
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/146cea08-b8be-4ede-8a06-af89bb73640e) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+## Getting started
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
 npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+cp .env.example .env      # then fill in your Supabase values
+npm run dev               # http://localhost:8080
 ```
 
-**Edit a file directly in GitHub**
+Required environment variables (see `.env.example`):
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+| Variable | Purpose |
+|---|---|
+| `VITE_SUPABASE_URL` | Supabase project URL |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | anon/publishable key (client-safe) |
+| `VITE_SUPABASE_PROJECT_ID` | project id |
 
-**Use GitHub Codespaces**
+Only `VITE_*` values belong here — anything prefixed `VITE_` is bundled into
+the client. Secret keys (`SERVICE_ROLE`, Paystack secret) belong in Supabase
+Edge Function secrets, never in this repo.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Scripts
 
-## What technologies are used for this project?
+| Script | What it does |
+|---|---|
+| `npm run dev` | Dev server with HMR on :8080 |
+| `npm run build` | **Typecheck, then bundle** — `tsc --noEmit && vite build` |
+| `npm run typecheck` | `tsc -p tsconfig.app.json --noEmit` |
+| `npm test` | Vitest unit suite |
+| `npm run test:e2e` | Playwright money-path specs (see `e2e/README.md`) |
+| `npm run lint` | ESLint |
+| `npm run preview` | Preview the production bundle |
 
-This project is built with:
+> `build` runs the typecheck first, so a bundle that builds is a bundle that
+> typechecks. Keep it that way.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Project layout
 
-## How can I deploy this project?
+```
+src/
+  pages/            Routes (Index, Auth, AdminPanel, ResellerDashboard, …)
+  components/       UI, incl. interactive/ lesson renderers
+  contexts/         AuthContext, TrialContext, DashboardContext
+  hooks/            usePaystack, useB2BOrder, feature usage, SEO
+  services/         errorLogger, sync, domain services
+  integrations/
+    supabase/       client + hand-maintained Database types
+  config/           admob.ts, ads.ts
+supabase/
+  functions/        Deployed Edge Functions (payments, B2B, seeding, AI)
+  seed-scripts/     One-off seeding scripts NOT deployed as functions
+  migrations/       SQL migrations — source of truth for schema
+e2e/                Playwright specs
+docs/               Known gaps and deferred decisions
+```
 
-Simply open [Lovable](https://lovable.dev/projects/146cea08-b8be-4ede-8a06-af89bb73640e) and click on Share -> Publish.
+**Schema source of truth is `supabase/migrations/`.** The TypeScript types in
+`src/integrations/supabase/types.ts` are maintained by hand to match them —
+`supabase gen types` could not be run while the project was inactive.
 
-## Can I connect a custom domain to my Lovable project?
+## Edge functions vs. seed scripts
 
-Yes, you can!
+Supabase only deploys `supabase/functions/<name>/`. Scripts under
+`supabase/seed-scripts/` are **not** deployed — invoking them from the app will
+404. The AdminPanel seed buttons invoke functions that live in
+`supabase/functions/`.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+`supabase/config.toml` declares `verify_jwt` per function; keep the file in
+sync when adding or removing functions, or they silently inherit the default.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## Testing
+
+```sh
+npm test                    # unit — no backend required
+npm run test:e2e            # e2e — structural, no backend required
+E2E_LIVE_BACKEND=1 npm run test:e2e   # un-skips live assertions
+npx playwright install chromium        # one-time browser install
+```
+
+## Documentation
+
+- [`docs/KNOWN_GAPS.md`](docs/KNOWN_GAPS.md) — features configured but not
+  wired, environment blockers, deferred decisions, cleanup follow-ups
+- [`e2e/README.md`](e2e/README.md) — e2e scope and requirements

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Crown, Users, CreditCard, TrendingUp, Plus, Trash2, ArrowLeft, RefreshCw, Mail,
-  CheckCircle, XCircle, AlertCircle, Settings, Send, Key, Activity, Database, Zap, Ticket, UserCog, Bell, DollarSign, BarChart3, BookOpen
+  CheckCircle, AlertCircle, Settings, Send, Key, Activity, Database, Zap, Ticket, UserCog, Bell, DollarSign, BarChart3, BookOpen
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,15 +31,15 @@ interface Payment {
 interface AdminUser {
   id: string;
   email: string;
-  role: string;
+  role: string | null;
   created_at: string;
 }
 
 interface FeatureStatus {
   feature_name: string;
-  is_working: boolean;
+  is_working: boolean | null;
   notes: string | null;
-  last_checked: string;
+  last_checked: string | null;
 }
 
 interface Stats {
@@ -65,7 +65,7 @@ const B2BManagement = lazy(() => import('@/components/admin/B2BManagement').then
 
 const AdminPanel = () => {
   const navigate = useNavigate();
-  const { user, isLoading, isAdmin, isOwner: authIsOwner, userRole, hasAccess } = useAuth();
+  const { user, isLoading, isAdmin, isOwner: authIsOwner, userRole } = useAuth();
   const userEmail = user?.email || null;
   const adminRole = userRole;
 
@@ -77,7 +77,7 @@ const AdminPanel = () => {
   });
   const [payments, setPayments] = useState<Payment[]>([]);
   const [admins, setAdmins] = useState<AdminUser[]>([]);
-  const [features, setFeatures] = useState<FeatureStatus[]>([]);
+  const [, setFeatures] = useState<FeatureStatus[]>([]);
   const [questionStats, setQuestionStats] = useState<{ subject: string; count: number; minYear: number; maxYear: number }[]>([]);
   const [stats, setStats] = useState<Stats>({ 
     totalPayments: 0, totalRevenue: 0, activeUsers: 0, totalAdmins: 0, totalQuizzes: 0, totalQuestions: 0 
@@ -124,7 +124,7 @@ const AdminPanel = () => {
 
   const checkEmailConfig = async () => {
     try {
-      const { data, error } = await supabase.functions.invoke('send-test-email', {
+      const { data } = await supabase.functions.invoke('send-test-email', {
         body: { test_mode: true }
       });
       setEmailConfigured(data?.configured || false);
@@ -135,7 +135,7 @@ const AdminPanel = () => {
 
   const checkWhatsAppConfig = async () => {
     try {
-      const { data, error } = await supabase.functions.invoke('send-whatsapp-reminder', {
+      const { data } = await supabase.functions.invoke('send-whatsapp-reminder', {
         body: { test_mode: true }
       });
       setWhatsappConfigured(data?.configured || false);
@@ -204,9 +204,11 @@ const AdminPanel = () => {
       .from('quiz_attempts')
       .select('*', { count: 'exact', head: true });
     
-    if (!error) {
-      setStats(prev => ({ ...prev, totalQuizzes: count || 0 }));
+    if (error) {
+      errorLogger.error(error, { component: 'AdminPanel', action: 'fetchQuizStats' });
+      return;
     }
+    setStats(prev => ({ ...prev, totalQuizzes: count || 0 }));
   };
 
   const fetchQuestionCount = async () => {
@@ -214,9 +216,11 @@ const AdminPanel = () => {
       .from('jamb_questions')
       .select('*', { count: 'exact', head: true });
     
-    if (!error) {
-      setStats(prev => ({ ...prev, totalQuestions: count || 0 }));
+    if (error) {
+      errorLogger.error(error, { component: 'AdminPanel', action: 'fetchQuestionCount' });
+      return;
     }
+    setStats(prev => ({ ...prev, totalQuestions: count || 0 }));
   };
 
   const fetchQuestionStats = async () => {
@@ -246,21 +250,6 @@ const AdminPanel = () => {
       
       setQuestionStats(stats);
     }
-  };
-
-  const toggleFeature = async (featureName: string, currentStatus: boolean) => {
-    const { error } = await supabase
-      .from('feature_status')
-      .update({ is_working: !currentStatus, last_checked: new Date().toISOString() })
-      .eq('feature_name', featureName);
-    
-    if (error) {
-      toast.error('Failed to update feature');
-      return;
-    }
-    
-    toast.success(`Feature ${!currentStatus ? 'enabled' : 'disabled'}`);
-    fetchFeatures();
   };
 
   const testWhatsAppReminder = async () => {
@@ -410,18 +399,6 @@ const AdminPanel = () => {
       month: 'short',
       year: 'numeric',
     });
-  };
-
-  const getFeatureIcon = (name: string) => {
-    switch (name) {
-      case 'pdf_upload': return '📄';
-      case 'timed_quizzes': return '⏱️';
-      case 'whatsapp_reminders': return '📱';
-      case 'email_delivery': return '✉️';
-      case 'ai_explanations': return '🤖';
-      case 'payment_processing': return '💳';
-      default: return '⚙️';
-    }
   };
 
   if (isLoading || loadingData) {
@@ -643,29 +620,6 @@ const AdminPanel = () => {
                         >
                           <Database className="w-4 h-4" />
                           Base Questions
-                        </Button>
-                        <Button 
-                          onClick={async () => {
-                            toast.loading('Seeding more questions...', { id: 'seed-more' });
-                            try {
-                              const { data, error } = await supabase.functions.invoke('seed-more-questions');
-                              if (error) throw error;
-                              if (data?.inserted === 0) {
-                                toast.success(`All additional questions already loaded!`, { id: 'seed-more' });
-                              } else {
-                                toast.success(`Added ${data?.inserted || 0} new questions!`, { id: 'seed-more' });
-                              }
-                              fetchData();
-                            } catch (err: unknown) {
-                              toast.error('Seed failed: ' + (err instanceof Error ? err.message : 'Unknown error'), { id: 'seed-more' });
-                            }
-                          }}
-                          size="sm"
-                          variant="outline"
-                          className="gap-2"
-                        >
-                          <Plus className="w-4 h-4" />
-                          More Questions
                         </Button>
                         <Button 
                           onClick={async () => {

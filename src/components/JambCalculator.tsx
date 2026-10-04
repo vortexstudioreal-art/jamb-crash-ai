@@ -13,7 +13,7 @@ export const JambCalculator = ({ isOpen, onClose }: JambCalculatorProps) => {
   const [operation, setOperation] = useState<string | null>(null);
   const [waitingForOperand, setWaitingForOperand] = useState(false);
   const [bracketCount, setBracketCount] = useState(0);
-  const [expression, setExpression] = useState<string[]>([]);
+  const [, setExpression] = useState<string[]>([]);
   const calculatorRef = useRef<HTMLDivElement>(null);
 
   const inputDigit = useCallback((digit: string) => {

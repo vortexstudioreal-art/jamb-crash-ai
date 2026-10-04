@@ -23,7 +23,7 @@ const SETTINGS_STORAGE_KEY = 'jamb_user_settings';
 const SANDBOX_NUMBER = '+14155238886';
 const SANDBOX_JOIN_MESSAGE = 'join sound-sound';
 
-export const WhatsAppReminder = ({ userEmail, isAdmin = false, onSetupComplete }: WhatsAppReminderProps) => {
+export const WhatsAppReminder = ({ userEmail,  onSetupComplete }: WhatsAppReminderProps) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSetup, setIsSetup] = useState(false);
@@ -170,7 +170,7 @@ export const WhatsAppReminder = ({ userEmail, isAdmin = false, onSetupComplete }
           onClick={async () => {
             setIsSendingTest(true);
             try {
-              const { data, error } = await supabase.functions.invoke('send-whatsapp-reminder', {
+              const {  error } = await supabase.functions.invoke('send-whatsapp-reminder', {
                 body: { phone_number: savedNumber, email: userEmail }
               });
               if (error) throw error;

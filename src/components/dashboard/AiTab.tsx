@@ -20,6 +20,9 @@ export const AiTab = ({
   handleUpgradeClick,
   setPracticeSubjectOverride,
   setQuizType,
+  setSyllabusTargetSubject,
+  setSyllabusTargetTopic,
+  navigateStep,
 }: AiTabProps) => {
   return (
     <motion.div key="ai" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
@@ -51,7 +54,7 @@ export const AiTab = ({
         <PremiumDashboard
           userEmail={userEmail}
           isAdmin={effectiveAdmin}
-          adminRole={userRole}
+          adminRole={(userRole as 'owner' | 'admin' | 'collaborator' | null) ?? null}
           targetScore={personalizationData?.targetScore ? parseInt(personalizationData.targetScore) : undefined}
           weakSubject={weakSubjectFromQuiz || personalizationData?.weakestSubject}
           onUpgrade={handleUpgradeClick}
@@ -64,7 +67,7 @@ export const AiTab = ({
           <TopicMasteryTracker 
             userEmail={userEmail} 
             allowedSubjects={effectiveSubjects}
-            onStartPracticeTopic={(subject, topic) => {
+            onStartPracticeTopic={(subject, _topic) => {
               if (subject && subject !== 'all') {
                 setPracticeSubjectOverride(subject);
                 setQuizType('subject');
@@ -73,7 +76,11 @@ export const AiTab = ({
                 setQuizType('mini');
               }
             }}
-            onGoToSyllabusTopic={() => {}}
+            onGoToSyllabusTopic={(subject, topic) => {
+              setSyllabusTargetSubject(subject);
+              setSyllabusTargetTopic(topic);
+              navigateStep('syllabus');
+            }}
           />
         </Suspense>
       </div>

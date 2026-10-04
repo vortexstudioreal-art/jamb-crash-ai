@@ -18,9 +18,9 @@ interface Novel {
   description: string | null;
   cover_image_url: string | null;
   category: string;
-  total_chapters: number;
+  total_chapters: number | null;
   year: number | null;
-  is_premium: boolean;
+  is_premium: boolean | null;
 }
 
 interface NovelBrowserProps {
@@ -83,7 +83,9 @@ export const NovelBrowser = ({ userEmail, onBack, onSelectNovel }: NovelBrowserP
         if (progressData) {
           const progressMap: Record<string, number> = {};
           progressData.forEach(p => {
-            progressMap[p.novel_id] = p.progress_percent;
+            if (p.progress_percent != null) {
+              progressMap[p.novel_id] = p.progress_percent;
+            }
           });
           setUserProgress(progressMap);
         }
@@ -112,7 +114,7 @@ export const NovelBrowser = ({ userEmail, onBack, onSelectNovel }: NovelBrowserP
     try {
       const { data: chapters } = await supabase
         .from('novel_chapters')
-        .select('id, novel_id, chapter_number, title, content, estimated_reading_time, word_count, likely_questions')
+        .select('id, novel_id, chapter_number, title, content, estimated_reading_time, word_count, likely_questions, created_at')
         .in('novel_id', novelIds);
       
       if (chapters && chapters.length > 0) {
@@ -237,9 +239,9 @@ export const NovelBrowser = ({ userEmail, onBack, onSelectNovel }: NovelBrowserP
                       author={novel.author}
                       coverImageUrl={novel.cover_image_url || undefined}
                       category={novel.category}
-                      totalChapters={novel.total_chapters}
+                      totalChapters={novel.total_chapters ?? 0}
                       year={novel.year || undefined}
-                      isPremium={novel.is_premium}
+                      isPremium={novel.is_premium ?? false}
                       progress={userProgress[novel.id]}
                       onClick={() => onSelectNovel(novel.id)}
                     />
@@ -289,9 +291,9 @@ export const NovelBrowser = ({ userEmail, onBack, onSelectNovel }: NovelBrowserP
                         author={novel.author}
                         coverImageUrl={novel.cover_image_url || undefined}
                         category={novel.category}
-                        totalChapters={novel.total_chapters}
+                        totalChapters={novel.total_chapters ?? 0}
                         year={novel.year || undefined}
-                        isPremium={novel.is_premium}
+                        isPremium={novel.is_premium ?? false}
                         progress={userProgress[novel.id]}
                         onClick={() => onSelectNovel(novel.id)}
                       />

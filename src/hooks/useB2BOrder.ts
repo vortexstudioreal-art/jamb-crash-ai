@@ -105,7 +105,9 @@ export function useB2BOrder() {
   };
 
   const exportPinsCsv = async (orderId?: string) => {
-    let url = `${supabase.functions.url}/b2b-get-pins?format=csv`;
+    // `supabase.functions.url` is protected, so build the URL the same way
+    // the rest of the app does.
+    let url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/b2b-get-pins?format=csv`;
     if (orderId) url += `&order_id=${orderId}`;
 
     const { data: { session } } = await supabase.auth.getSession();

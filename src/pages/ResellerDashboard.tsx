@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   ShoppingCart, Package, CheckCircle, Clock, Copy, Download, 
-  Plus, Key, CreditCard, BarChart3, Search, Filter, ChevronDown,
-  School, Users, UserCheck, ArrowLeft, Loader2, Check, AlertCircle
+   Key, CreditCard, BarChart3,   
+    UserCheck,  Loader2, Check
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,12 +12,28 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { errorLogger } from '@/services/errorLogger';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { useB2BBuyer, type B2BBuyer } from '@/hooks/useB2BBuyer';
+import { useB2BBuyer } from '@/hooks/useB2BBuyer';
 import { useB2BOrder, type B2BPIN } from '@/hooks/useB2BOrder';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 type View = 'dashboard' | 'register' | 'purchase' | 'pins' | 'orders';
+
+interface ResellerStats {
+  total_pins_purchased: number;
+  total_pins_redeemed: number;
+  total_pins_available: number;
+  total_spent: number;
+  active_orders: number;
+  recent_redemptions: Redemption[];
+}
+
+interface Redemption {
+  pin_code: string;
+  plan_type: string;
+  redeemed_by_email: string | null;
+  redeemed_at: string | null;
+}
 
 const planColors: Record<string, string> = {
   ace_30: 'bg-blue-500/20 text-blue-500',
@@ -45,7 +61,7 @@ const ResellerDashboard = () => {
   
   const [view, setView] = useState<View>('dashboard');
   const [pins, setPins] = useState<B2BPIN[]>([]);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<ResellerStats | null>(null);
   const [copiedPin, setCopiedPin] = useState<string | null>(null);
   
   // Purchase flow state
@@ -87,8 +103,8 @@ const ResellerDashboard = () => {
       await registerBuyer(regForm);
       toast.success('Registration successful!');
       setView('dashboard');
-    } catch (err: any) {
-      toast.error(err.message || 'Registration failed');
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Registration failed');
     }
   };
 
@@ -99,8 +115,8 @@ const ResellerDashboard = () => {
         window.open(result.authorization_url, '_blank');
         setShowPayment(true);
       }
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to initialize order');
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Failed to initialize order');
     }
   };
 
@@ -113,8 +129,8 @@ const ResellerDashboard = () => {
         loadStats();
         setView('pins');
       }
-    } catch (err: any) {
-      toast.error(err.message || 'Verification failed');
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Verification failed');
     }
   };
 
@@ -159,7 +175,7 @@ const ResellerDashboard = () => {
               </div>
               <div>
                 <label className="text-sm font-medium">Buyer Type *</label>
-                <Select value={regForm.buyer_type} onValueChange={(v) => setRegForm({ ...regForm, buyer_type: v as any })}>
+                <Select value={regForm.buyer_type} onValueChange={(v) => setRegForm({ ...regForm, buyer_type: v as 'school' | 'teacher' | 'reseller' })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -473,14 +489,14 @@ const ResellerDashboard = () => {
         )}
 
         {/* Recent Activity */}
-        {view === 'dashboard' && stats?.recent_redemptions?.length > 0 && (
+        {view === 'dashboard' && stats && stats.recent_redemptions.length > 0 && (
           <Card>
             <CardHeader>
               <CardTitle>Recent Redemptions</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {stats.recent_redemptions.map((r: any, i: number) => (
+                {stats.recent_redemptions.map((r: Redemption, i: number) => (
                   <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-sm">{r.pin_code}</span>

@@ -1,7 +1,7 @@
 import { ReactNode, useState } from 'react';
-import { useAuth, PACKAGE_FEATURES, UserPackage } from '@/contexts/AuthContext';
+import { useAuth, PACKAGE_FEATURES } from '@/contexts/AuthContext';
 import { useTrialContext } from '@/contexts/TrialContext';
-import { useFeatureUsage, FeatureType, FEATURE_NAMES } from '@/hooks/useFeatureUsage';
+import { useFeatureUsage, FeatureType } from '@/hooks/useFeatureUsage';
 import { Lock, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
@@ -167,7 +167,7 @@ export const FeatureGate = ({ children, feature, fallback, onUpgrade }: FeatureG
         onClose={() => setShowUpgradeModal(false)}
         feature={featureNames[feature]}
         requiredPlan={requiredPackage[feature]}
-        onUpgrade={(plan) => {
+        onUpgrade={(_plan) => {
           setShowUpgradeModal(false);
           if (onUpgrade) onUpgrade();
         }}
@@ -184,17 +184,20 @@ export const useFeatureAccess = () => {
   // Check if user is in trial using shared context
   const { isTrialActive } = useTrialContext();
 
-  const hasFeature = (feature: PlanFeature): boolean => {
+  const hasFeature = (feature: string): boolean => {
     // Admins and owners have all features
     if (isAdmin || isOwner) return true;
-    
+
+    const planFeature = feature as PlanFeature;
+
     // Trial users get Pro features (full access)
-    if (isTrialActive && TRIAL_FEATURES.includes(feature)) {
+    if (isTrialActive && TRIAL_FEATURES.includes(planFeature)) {
       return true;
     }
-    
-    // Check package
-    const packageKey = featureToPackageKey[feature];
+
+    // Check package (unknown features are treated as locked)
+    const packageKey = featureToPackageKey[planFeature];
+    if (!packageKey) return false;
     return packageFeatures[packageKey] === true;
   };
 

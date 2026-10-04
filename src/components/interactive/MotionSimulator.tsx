@@ -9,7 +9,7 @@ interface MotionConfig {
   max_acceleration?: number;
 }
 
-export function MotionSimulator({ config, onInteraction }: InteractiveProps) {
+export function MotionSimulator({ config }: InteractiveProps) {
   const cfg = config as MotionConfig;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animRef = useRef<number>(0);

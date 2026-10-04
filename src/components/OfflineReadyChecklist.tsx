@@ -29,7 +29,7 @@ export const OfflineReadyChecklist = () => {
   const [dismissed, setDismissed] = useState(
     () => localStorage.getItem(DISMISS_KEY) === '1',
   );
-  const [alreadyReady, setAlreadyReady] = useState(
+  const [alreadyReady] = useState(
     () => localStorage.getItem(READY_KEY) === '1',
   );
 

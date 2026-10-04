@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Bell, Plus, Trash2, Edit2, Send, X, Check } from 'lucide-react';
+import { Bell, Plus, Trash2, Edit2, Send, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -19,11 +19,11 @@ interface Notification {
   title: string;
   message: string;
   link: string | null;
-  type: string;
-  is_global: boolean;
+  type: string | null;
+  is_global: boolean | null;
   target_email: string | null;
   created_by_email: string | null;
-  created_at: string;
+  created_at: string | null;
   expires_at: string | null;
 }
 
@@ -143,8 +143,8 @@ export const NotificationManager = () => {
     setTitle(notification.title);
     setMessage(notification.message);
     setLink(notification.link || '');
-    setType(notification.type);
-    setIsGlobal(notification.is_global);
+    setType(notification.type || 'info');
+    setIsGlobal(notification.is_global ?? true);
     setTargetEmail(notification.target_email || '');
     setIsCreating(true);
   };
@@ -327,7 +327,7 @@ export const NotificationManager = () => {
                   animate={{ opacity: 1 }}
                   className="flex items-start gap-3 p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
                 >
-                  <div className={`w-3 h-3 rounded-full mt-1.5 ${getTypeColor(notification.type)}`} />
+                  <div className={`w-3 h-3 rounded-full mt-1.5 ${getTypeColor(notification.type || 'info')}`} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <h4 className="font-medium text-foreground truncate">{notification.title}</h4>
@@ -341,7 +341,7 @@ export const NotificationManager = () => {
                     </div>
                     <p className="text-sm text-muted-foreground line-clamp-2">{notification.message}</p>
                     <p className="text-xs text-muted-foreground mt-2">
-                      {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+                      {formatDistanceToNow(new Date(notification.created_at || ''), { addSuffix: true })}
                       {notification.created_by_email && ` • by ${notification.created_by_email}`}
                     </p>
                   </div>

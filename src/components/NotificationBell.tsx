@@ -48,6 +48,8 @@ export const NotificationBell = () => {
 
     const enrichedNotifs = (notifs || []).map(n => ({
       ...n,
+      type: n.type || 'info',
+      created_at: n.created_at || '',
       is_read: readIds.has(n.id)
     }));
 

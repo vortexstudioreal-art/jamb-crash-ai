@@ -11,8 +11,8 @@ export interface MockQuestion {
   option_d: string;
   correct_answer: string;
   subject: string;
-  year?: number;
-  explanation?: string;
+  year?: number | null;
+  explanation?: string | null;
   image_url?: string | null;
 }
 
@@ -54,7 +54,7 @@ export const buildMockSections = (subjects: string[]): MockSection[] => {
       minutes: MOCK_ENGLISH_MINUTES,
     },
   ];
-  subjects.slice(0, 3).forEach((subject, i) => {
+  subjects.slice(0, 3).forEach((subject) => {
     sections.push({
       key: subject,
       title: subject.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase()),

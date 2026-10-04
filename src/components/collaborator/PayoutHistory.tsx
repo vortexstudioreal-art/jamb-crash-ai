@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { 
   Clock, CheckCircle, XCircle, RefreshCw, Banknote, Check
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,7 +13,7 @@ interface PayoutRequest {
   id: string;
   amount: number;
   status: string;
-  requested_at: string;
+  requested_at: string | null;
   processed_at: string | null;
   notes: string | null;
 }
@@ -25,10 +25,6 @@ interface PayoutHistoryProps {
 export const PayoutHistory = ({ userEmail }: PayoutHistoryProps) => {
   const [payoutRequests, setPayoutRequests] = useState<PayoutRequest[]>([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchPayoutHistory();
-  }, [userEmail, fetchPayoutHistory]);
 
   const fetchPayoutHistory = useCallback(async () => {
     if (!userEmail) return;
@@ -49,6 +45,10 @@ export const PayoutHistory = ({ userEmail }: PayoutHistoryProps) => {
       setLoading(false);
     }
   }, [userEmail]);
+
+  useEffect(() => {
+    fetchPayoutHistory();
+  }, [userEmail, fetchPayoutHistory]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -119,7 +119,7 @@ export const PayoutHistory = ({ userEmail }: PayoutHistoryProps) => {
                       {formatCurrency(request.amount)}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Requested: {formatDate(request.requested_at)}
+                      Requested: {formatDate(request.requested_at || '')}
                     </p>
                     {request.processed_at && (
                       <p className="text-xs text-muted-foreground">

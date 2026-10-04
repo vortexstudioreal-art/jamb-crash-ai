@@ -24,7 +24,7 @@ interface UserData {
   id: string;
   email: string;
   full_name: string | null;
-  created_at: string;
+  created_at: string | null;
   role: 'owner' | 'admin' | 'collaborator' | null;
   subscription: {
     package: string | null;
@@ -451,7 +451,7 @@ export const UserManagement = ({ isOwner }: UserManagementProps) => {
                       {getSubscriptionBadge(user)}
                     </td>
                     <td className="py-3 px-2 text-muted-foreground">
-                      {formatDate(user.created_at)}
+                      {formatDate(user.created_at || '')}
                     </td>
                     {isOwner && (
                       <td className="py-3 px-2 text-right">

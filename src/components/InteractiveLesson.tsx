@@ -1,18 +1,18 @@
 import { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ArrowRight, Check, ChevronRight, Lightbulb, BookOpen,
+  ArrowRight, Check, Lightbulb, BookOpen,
   Calculator, AlertTriangle, Eye, Brain, Target, FlaskConical,
-  Sparkles, RotateCcw, Trophy, CheckCircle2, XCircle, Image,
+  Sparkles, Trophy, CheckCircle2, XCircle, Image,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { InteractiveRenderer } from '@/components/interactive/InteractiveRegistry';
 import type {
-  Lesson, ContentSection, HookContent, IntuitiveExplanationContent,
+  Lesson, HookContent, IntuitiveExplanationContent,
   FormalExplanationContent, FormulaContent, WorkedExampleContent,
   CommonMisconceptionContent, JambInsightContent, InlinePracticeContent,
-  MemoryHookContent, ReflectionContent, PracticeQuestion,
+  MemoryHookContent,
 } from '@/types/lesson';
 
 interface InteractiveLessonProps {
@@ -188,8 +188,23 @@ function WorkedExampleStep({ content }: { content: WorkedExampleContent }) {
     <div className="space-y-4">
       <div className="p-4 bg-muted/50 rounded-xl">
         <p className="text-sm font-medium text-muted-foreground mb-1">Problem:</p>
-        <p className="text-foreground">{content.problem}</p>
+        <p className="text-foreground">{content.scenario}</p>
       </div>
+      {content.given && content.given.length > 0 && (
+        <div className="p-3 bg-muted/30 rounded-lg">
+          <p className="text-sm font-medium text-muted-foreground mb-1">Given:</p>
+          <ul className="text-sm space-y-1">
+            {content.given.map((g, i) => (
+              <li key={i}>• {g}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {content.principle && (
+        <div className="p-3 bg-purple-500/10 rounded-lg border-l-4 border-purple-500">
+          <p className="text-sm"><span className="font-medium text-purple-600 dark:text-purple-400">Principle:</span> {content.principle}</p>
+        </div>
+      )}
       {!showSteps ? (
         <Button variant="outline" onClick={() => setShowSteps(true)}>
           <Target className="w-4 h-4 mr-2" />
@@ -212,7 +227,10 @@ function WorkedExampleStep({ content }: { content: WorkedExampleContent }) {
               <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold shrink-0">
                 {i + 1}
               </div>
-              <p className="text-foreground">{step}</p>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">{step.explanation}</p>
+                <p className="text-foreground font-mono">{step.calculation}</p>
+              </div>
             </motion.div>
           ))}
           {!showAnswer ? (
@@ -228,8 +246,8 @@ function WorkedExampleStep({ content }: { content: WorkedExampleContent }) {
             >
               <p className="font-medium text-green-600 dark:text-green-400 mb-1">Answer:</p>
               <p className="text-foreground">{content.answer}</p>
-              {content.explanation && (
-                <p className="mt-2 text-sm text-muted-foreground">{content.explanation}</p>
+              {content.check && (
+                <p className="mt-2 text-sm text-muted-foreground">{content.check}</p>
               )}
             </motion.div>
           )}
@@ -309,8 +327,8 @@ function PracticeStep({ content, onAnswer }: { content: InlinePracticeContent; o
           <p className={`font-medium ${isCorrect ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
             {isCorrect ? '✓ Correct!' : '✗ Not quite'}
           </p>
-          {question.explanation && (
-            <p className="mt-1 text-sm text-muted-foreground">{question.explanation}</p>
+          {content.explanation && (
+            <p className="mt-1 text-sm text-muted-foreground">{content.explanation}</p>
           )}
         </motion.div>
       )}
@@ -369,7 +387,7 @@ function MemoryHookStep({ content }: { content: MemoryHookContent }) {
   return (
     <div className="p-4 bg-pink-500/10 rounded-xl border border-pink-500/20">
       <p className="text-sm font-medium text-pink-600 dark:text-pink-400 mb-2">🧠 Memory Hook</p>
-      <p className="text-lg text-foreground italic">{content.text || (content as Record<string, string>).hook || 'Remember this!'}</p>
+      <p className="text-lg text-foreground italic">{content.text || content.hook || 'Remember this!'}</p>
     </div>
   );
 }
@@ -453,7 +471,7 @@ export function InteractiveLesson({
 
   const renderSection = () => {
     if (!section) return null;
-    const content = section.content as Record<string, unknown>;
+    const content = section.content as unknown as Record<string, unknown>;
 
     switch (section.type) {
       case 'hook':

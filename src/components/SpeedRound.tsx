@@ -8,7 +8,6 @@ import { BackButton } from '@/components/BackButton';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
-import { toast } from 'sonner';
 import { shuffleQuestionList } from '@/lib/quizShuffle';
 import { useFeatureUsage } from '@/hooks/useFeatureUsage';
 import { FeatureLimitReached } from '@/components/FeatureLimitReached';
@@ -35,6 +34,7 @@ interface Question {
   subject: string;
   year?: number;
   image_url?: string | null;
+  [key: string]: unknown;
 }
 
 type GameState = 'ready' | 'playing' | 'finished';
@@ -206,7 +206,7 @@ export const SpeedRound = ({ userEmail, subjects, isOwner, isAdmin, userRole, on
                             onClick={() => handleAnswer(opt)}
                           >
                             <span className="font-bold mr-2 text-primary">{opt}.</span>
-                            <span className="text-sm">{currentQ[`option_${opt.toLowerCase()}` as keyof Question]}</span>
+                            <span className="text-sm">{currentQ[`option_${opt.toLowerCase()}` as keyof Question] as string}</span>
                           </Button>
                         ))}
                       </div>

@@ -42,9 +42,7 @@ export const AdminBadge = ({ role, linkToAdmin = false, customTitle }: AdminBadg
   if (!role) return null;
   
   const isOwner = role === 'owner';
-  const isAdmin = role === 'admin';
-  const isCollaborator = role === 'collaborator';
-  
+  const isAdmin = role === 'admin';  
   const getBadgeStyles = () => {
     if (isOwner) return 'bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-600 text-black shadow-yellow-400/50';
     if (isAdmin) return 'bg-gradient-to-r from-blue-400 to-indigo-500 text-white shadow-blue-400/50';

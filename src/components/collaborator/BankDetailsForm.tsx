@@ -56,10 +56,6 @@ export const BankDetailsForm = ({ userEmail, onSave }: BankDetailsFormProps) => 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    fetchBankDetails();
-  }, [userEmail, fetchBankDetails]);
-
   const fetchBankDetails = useCallback(async () => {
     if (!userEmail) return;
     
@@ -84,6 +80,10 @@ export const BankDetailsForm = ({ userEmail, onSave }: BankDetailsFormProps) => 
       setLoading(false);
     }
   }, [userEmail]);
+
+  useEffect(() => {
+    fetchBankDetails();
+  }, [userEmail, fetchBankDetails]);
 
   const handleSave = async () => {
     if (!bankName || !accountNumber || !accountName) {

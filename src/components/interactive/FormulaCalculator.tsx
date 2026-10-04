@@ -47,11 +47,7 @@ function formatNumber(num: number): string {
   return num.toFixed(2);
 }
 
-function formatUnit(unit: string): string {
-  const superscripts: Record<string, string> = {
-    '²': '²', '³': '³', '-1': '⁻¹', '-2': '⁻²', '-3': '⁻³',
-  };
-  return unit.replace(/⁻(\d)/g, (_, n) => '⁻' + n);
+function formatUnit(unit: string): string {  return unit.replace(/⁻(\d)/g, (_, n) => '⁻' + n);
 }
 
 export function FormulaCalculator({ config, onInteraction }: FormulaCalculatorProps) {
@@ -77,9 +73,7 @@ export function FormulaCalculator({ config, onInteraction }: FormulaCalculatorPr
     
     // Simple formula evaluator for F = kQq/r² type formulas
     // This handles: multiplication, division, exponentiation
-    const formula = config.formula;
-    const lhs = formula.split('=')[0].trim();
-    const rhs = formula.split('=')[1].trim();
+    const formula = config.formula;    const rhs = formula.split('=')[1].trim();
     
     // Parse the RHS: handle patterns like kQq/r²
     let computed = 1;

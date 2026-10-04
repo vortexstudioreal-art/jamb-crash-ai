@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { 
   TrendingUp, Play, CheckCircle, XCircle, Gift, RefreshCw, 
-  Smartphone, Monitor, Calendar, BarChart3 
+  Smartphone,  Calendar, BarChart3 
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/chart';
 import { 
   BarChart, Bar, XAxis, YAxis, ResponsiveContainer, 
-  LineChart, Line, PieChart, Pie, Cell, Legend,
+    PieChart, Pie, Cell, Legend,
   CartesianGrid, Tooltip
 } from 'recharts';
 
@@ -402,7 +402,7 @@ export const AdAnalyticsDashboard = () => {
                         fill="#8884d8"
                         dataKey="count"
                       >
-                        {platformStats.map((entry, index) => (
+                        {platformStats.map((_entry, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>

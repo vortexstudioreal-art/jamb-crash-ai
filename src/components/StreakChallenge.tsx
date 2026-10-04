@@ -34,6 +34,7 @@ interface Question {
   subject: string;
   year?: number;
   image_url?: string | null;
+  [key: string]: unknown;
 }
 
 type GameState = 'ready' | 'playing' | 'gameover';
@@ -217,7 +218,7 @@ export const StreakChallenge = ({ userEmail, subjects, isOwner, isAdmin, userRol
                               disabled={!!selectedAnswer}
                             >
                               <span className="font-bold mr-2 text-primary">{opt}.</span>
-                              <span className="text-sm">{currentQ[`option_${opt.toLowerCase()}` as keyof Question]}</span>
+                              <span className="text-sm">{currentQ[`option_${opt.toLowerCase()}` as keyof Question] as string}</span>
                             </Button>
                           );
                         })}

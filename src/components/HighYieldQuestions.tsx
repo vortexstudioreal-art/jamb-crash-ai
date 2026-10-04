@@ -2,12 +2,12 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { TrendingUp, Target, BookOpen, Flame, ChevronRight, Lightbulb, AlertCircle, Play, ArrowLeft, CheckCircle, XCircle, Loader2, Sparkles } from 'lucide-react';
+import { TrendingUp, Target, BookOpen, Flame, Lightbulb, AlertCircle, Play, ArrowLeft, CheckCircle, Loader2, Sparkles } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -30,6 +30,7 @@ interface Question {
   subject: string;
   year?: number;
   image_url?: string | null;
+  [key: string]: unknown;
 }
 
 interface TopicGroup {
@@ -898,7 +899,7 @@ const HighYieldQuestions = () => {
                               {group.years.size > 10 && ` +${group.years.size - 10} more`}
                             </div>
                             <div className="space-y-3">
-                              {group.questions.slice(0, 3).map((q, idx) => (
+                              {group.questions.slice(0, 3).map((q) => (
                                 <div key={q.id} className="p-3 bg-muted/50 rounded-lg">
                                   <div className="flex items-start gap-2 mb-2">
                                     <Badge variant="outline" className="text-xs shrink-0">

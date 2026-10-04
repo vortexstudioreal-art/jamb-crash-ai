@@ -71,5 +71,9 @@ export const useSeo = ({ title, description, path, image = DEFAULT_IMAGE, noinde
     upsertMeta('name', 'robots', noindex ? 'noindex, nofollow' : 'index, follow');
 
     if (jsonLd) setJsonLd(jsonLd);
+
+    return () => {
+      document.querySelectorAll('script[data-seo-jsonld]').forEach((el) => el.remove());
+    };
   }, [title, description, path, image, noindex, jsonLd]);
 };

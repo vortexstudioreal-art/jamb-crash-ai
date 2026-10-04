@@ -1527,6 +1527,339 @@ export type Database = {
         }
         Relationships: []
       }
+      lessons: {
+        Row: {
+          id: string
+          subject: string
+          topic: string
+          subtopic: string
+          title: string
+          learning_objectives: Json
+          difficulty_level: string | null
+          estimated_minutes: number | null
+          content_sections: Json
+          practice_questions: Json | null
+          mastery_criteria: Json | null
+          version: number | null
+          status: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          subject: string
+          topic: string
+          subtopic: string
+          title: string
+          learning_objectives?: Json
+          difficulty_level?: string | null
+          estimated_minutes?: number | null
+          content_sections: Json
+          practice_questions?: Json | null
+          mastery_criteria?: Json | null
+          version?: number | null
+          status?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          subject?: string
+          topic?: string
+          subtopic?: string
+          title?: string
+          learning_objectives?: Json
+          difficulty_level?: string | null
+          estimated_minutes?: number | null
+          content_sections?: Json
+          practice_questions?: Json | null
+          mastery_criteria?: Json | null
+          version?: number | null
+          status?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      lesson_progress: {
+        Row: {
+          id: string
+          email: string
+          lesson_id: string
+          sections_viewed: Json
+          predictions: Json
+          practice_attempts: Json
+          practice_score: number | null
+          mastery_level: string | null
+          mastery_score: number | null
+          time_spent_seconds: number | null
+          last_accessed_at: string | null
+          completed_at: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          email: string
+          lesson_id: string
+          sections_viewed?: Json
+          predictions?: Json
+          practice_attempts?: Json
+          practice_score?: number | null
+          mastery_level?: string | null
+          mastery_score?: number | null
+          time_spent_seconds?: number | null
+          last_accessed_at?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          email?: string
+          lesson_id?: string
+          sections_viewed?: Json
+          predictions?: Json
+          practice_attempts?: Json
+          practice_score?: number | null
+          mastery_level?: string | null
+          mastery_score?: number | null
+          time_spent_seconds?: number | null
+          last_accessed_at?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      b2b_buyers: {
+        Row: {
+          id: string
+          auth_user_id: string
+          email: string
+          full_name: string
+          organization: string | null
+          buyer_type: "school" | "teacher" | "reseller"
+          phone: string | null
+          is_active: boolean
+          total_purchased: number
+          total_redeemed: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          auth_user_id: string
+          email: string
+          full_name: string
+          organization?: string | null
+          buyer_type?: "school" | "teacher" | "reseller"
+          phone?: string | null
+          is_active?: boolean
+          total_purchased?: number
+          total_redeemed?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          auth_user_id?: string
+          email?: string
+          full_name?: string
+          organization?: string | null
+          buyer_type?: "school" | "teacher" | "reseller"
+          phone?: string | null
+          is_active?: boolean
+          total_purchased?: number
+          total_redeemed?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      b2b_bulk_orders: {
+        Row: {
+          id: string
+          buyer_id: string
+          plan_type: string
+          quantity: number
+          unit_price: number
+          discount_percent: number
+          total_amount: number
+          status:
+            | "pending_payment"
+            | "paid"
+            | "generating"
+            | "ready"
+            | "partially_redeemed"
+            | "completed"
+            | "cancelled"
+            | "refunded"
+          paystack_reference: string | null
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          buyer_id: string
+          plan_type: string
+          quantity: number
+          unit_price: number
+          discount_percent?: number
+          total_amount: number
+          status?:
+            | "pending_payment"
+            | "paid"
+            | "generating"
+            | "ready"
+            | "partially_redeemed"
+            | "completed"
+            | "cancelled"
+            | "refunded"
+          paystack_reference?: string | null
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          buyer_id?: string
+          plan_type?: string
+          quantity?: number
+          unit_price?: number
+          discount_percent?: number
+          total_amount?: number
+          status?:
+            | "pending_payment"
+            | "paid"
+            | "generating"
+            | "ready"
+            | "partially_redeemed"
+            | "completed"
+            | "cancelled"
+            | "refunded"
+          paystack_reference?: string | null
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      b2b_activation_pins: {
+        Row: {
+          id: string
+          pin_code: string
+          order_id: string
+          buyer_id: string
+          plan_type: string
+          status: "available" | "redeemed" | "expired" | "revoked"
+          redeemed_by_email: string | null
+          redeemed_at: string | null
+          access_expires_at: string | null
+          expires_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          pin_code: string
+          order_id: string
+          buyer_id: string
+          plan_type: string
+          status?: "available" | "redeemed" | "expired" | "revoked"
+          redeemed_by_email?: string | null
+          redeemed_at?: string | null
+          access_expires_at?: string | null
+          expires_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          pin_code?: string
+          order_id?: string
+          buyer_id?: string
+          plan_type?: string
+          status?: "available" | "redeemed" | "expired" | "revoked"
+          redeemed_by_email?: string | null
+          redeemed_at?: string | null
+          access_expires_at?: string | null
+          expires_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      b2b_pin_redemption_log: {
+        Row: {
+          id: string
+          pin_code: string
+          attempted_by_email: string
+          was_successful: boolean
+          failure_reason: string | null
+          access_expires_at: string | null
+          ip_address: string | null
+          user_agent: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          pin_code: string
+          attempted_by_email: string
+          was_successful: boolean
+          failure_reason?: string | null
+          access_expires_at?: string | null
+          ip_address?: string | null
+          user_agent?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          pin_code?: string
+          attempted_by_email?: string
+          was_successful?: boolean
+          failure_reason?: string | null
+          access_expires_at?: string | null
+          ip_address?: string | null
+          user_agent?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      b2b_pin_bulk_prices: {
+        Row: {
+          id: string
+          plan_type: string
+          min_quantity: number
+          discount_percent: number
+          unit_price: number
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          plan_type: string
+          min_quantity: number
+          discount_percent?: number
+          unit_price: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          plan_type?: string
+          min_quantity?: number
+          discount_percent?: number
+          unit_price?: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       topic_frequency: {
@@ -1742,6 +2075,18 @@ export const Constants = {
         "accounting",
         "commerce",
         "agricultural_science",
+      ],
+      b2b_buyer_type: ["school", "teacher", "reseller"],
+      pin_status: ["available", "redeemed", "expired", "revoked"],
+      bulk_order_status: [
+        "pending_payment",
+        "paid",
+        "generating",
+        "ready",
+        "partially_redeemed",
+        "completed",
+        "cancelled",
+        "refunded",
       ],
     },
   },

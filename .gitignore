@@ -13,6 +13,8 @@ dist-ssr
 *.local
 .env
 .env.*
+# The template must stay versioned so new contributors can set up
+!.env.example
 
 # Editor directories and files
 .vscode/*

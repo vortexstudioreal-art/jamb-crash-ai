@@ -42,7 +42,7 @@ export const FeatureLimitReached = ({
     setShowAdModal(false);
   };
 
-  const handleUpgrade = (plan: string) => {
+  const handleUpgrade = (_plan: string) => {
     setShowUpgradeModal(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };

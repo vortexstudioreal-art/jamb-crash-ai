@@ -9,8 +9,14 @@ export type SectionType =
   | 'interactive'
   | 'worked_example'
   | 'common_misconception'
+  // Legacy section types (used by existing seed data)
   | 'jamb_insight'
   | 'inline_practice'
+  // Current section types (used by generate-topic-content prompt)
+  | 'jamb_focus'
+  | 'practice'
+  | 'summary'
+  | 'mastery_check'
   | 'memory_hook'
   | 'reflection';
 
@@ -90,16 +96,27 @@ export interface WorkedExampleContent {
 }
 
 export interface CommonMisconceptionContent {
-  mistake: string;
-  why_wrong: string;
-  correct_model: string;
+  // Current schema (generate-topic-content prompt)
+  misconception?: string;
+  correction?: string;
+  why_confusing?: string;
+  // Legacy schema (seeded lessons)
+  mistake?: string;
+  why_wrong?: string;
+  correct_model?: string;
 }
 
 export interface JambInsightContent {
-  focus_area: string;
+  // Legacy schema (seeded lessons, type: "jamb_insight")
+  focus_area?: string;
   trap?: string;
   tip?: string;
   related_topics?: string[];
+  // Current schema (generate-topic-content prompt, type: "jamb_focus")
+  frequency?: string;
+  typical_question?: string;
+  common_mistakes?: string[];
+  exam_tip?: string;
 }
 
 export interface InlinePracticeContent {
@@ -111,7 +128,9 @@ export interface InlinePracticeContent {
 }
 
 export interface MemoryHookContent {
-  text: string;
+  text?: string;
+  /** Legacy field name for the hook text */
+  hook?: string;
   hook_type?: 'mnemonic' | 'analogy' | 'story' | 'visualization';
 }
 

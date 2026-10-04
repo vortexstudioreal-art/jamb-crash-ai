@@ -18,10 +18,10 @@ interface LeaderboardEntry {
   full_name: string;
   total_score: number;
   questions_answered: number;
-  average_accuracy: number;
-  best_quiz_score: number;
+  average_accuracy: number | null;
+  best_quiz_score: number | null;
   rank: number;
-  is_placeholder: boolean;
+  is_placeholder: boolean | null;
 }
 
 export const Leaderboard = ({ onBack, userEmail }: LeaderboardProps) => {
@@ -300,7 +300,7 @@ export const Leaderboard = ({ onBack, userEmail }: LeaderboardProps) => {
                         )}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {entry.questions_answered} questions • {entry.average_accuracy.toFixed(1)}% accuracy
+                        {entry.questions_answered} questions • {entry.average_accuracy != null ? `${entry.average_accuracy.toFixed(1)}%` : 'N/A'} accuracy
                       </p>
                     </div>
 

@@ -4,7 +4,7 @@ import {
   Bell,
   BellOff,
   BookMarked,
-  BookOpen,
+  
   Calendar,
   CheckCircle2,
   ChevronLeft,
@@ -14,7 +14,7 @@ import {
   PartyPopper,
   Play,
   Sparkles,
-  Target,
+  
   Trophy,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';

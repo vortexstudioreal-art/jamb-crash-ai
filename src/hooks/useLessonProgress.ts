@@ -169,7 +169,7 @@ export function useLessonProgress(
 
   const calculateMastery = useCallback((
     requiredSections: string[],
-    minScore: number
+    _minScore: number
   ): number => {
     if (!progress) return 0;
 

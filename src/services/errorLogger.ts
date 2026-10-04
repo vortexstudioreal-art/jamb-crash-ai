@@ -19,9 +19,13 @@ interface ErrorEntry {
 class ErrorLogger {
   private isDev = import.meta.env.DEV;
 
-  log(error: Error | string, context?: ErrorContext, level: ErrorLevel = 'error') {
-    const message = typeof error === 'string' ? error : error.message;
-    const stack = error instanceof Error ? error.stack : undefined;
+  log(error: unknown, context?: ErrorContext, level: ErrorLevel = 'error') {
+    const err =
+      error instanceof Error
+        ? error
+        : new Error(typeof error === 'string' ? error : JSON.stringify(error));
+    const message = err.message;
+    const stack = err.stack;
 
     const entry: ErrorEntry = {
       level,
@@ -41,11 +45,11 @@ class ErrorLogger {
     }
   }
 
-  error(error: Error | string, context?: ErrorContext) {
+  error(error: unknown, context?: ErrorContext) {
     this.log(error, context, 'error');
   }
 
-  warn(error: Error | string, context?: ErrorContext) {
+  warn(error: unknown, context?: ErrorContext) {
     this.log(error, context, 'warn');
   }
 

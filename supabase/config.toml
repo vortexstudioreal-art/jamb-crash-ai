@@ -1,24 +1,37 @@
 project_id = "pjdgzqnyyobtiwplatni"
 
+# ---------------------------------------------------------------------------
+# Seed functions (owner-only, invoked from AdminPanel via supabase.functions.invoke,
+# which sends the signed-in admin's JWT — so verify_jwt = true both works and
+# keeps the service-role scripts from being callable by anonymous clients).
+# ---------------------------------------------------------------------------
 [functions.seed-jamb-questions]
-verify_jwt = false
+verify_jwt = true
 
-[functions.seed-science-syllabus]
-verify_jwt = false
+[functions.seed-extra-questions]
+verify_jwt = true
 
-[functions.seed-art-syllabus]
-verify_jwt = false
+[functions.seed-low-count-subjects]
+verify_jwt = true
 
-[functions.seed-commercial-syllabus]
-verify_jwt = false
+[functions.seed-all-subjects]
+verify_jwt = true
 
-[functions.seed-irs-syllabus]
-verify_jwt = false
-
+# ---------------------------------------------------------------------------
+# Public / self-authenticating functions.
+# verify_jwt = false here is deliberate: each validates its own input
+# (Paystack signature, client-supplied session, or intentionally public data).
+# ---------------------------------------------------------------------------
 [functions.generate-topic-content]
 verify_jwt = false
 
-[functions.seed-more-questions]
+[functions.generate-study-tip]
+verify_jwt = false
+
+[functions.chat]
+verify_jwt = false
+
+[functions.jamb-news]
 verify_jwt = false
 
 [functions.paystack-config]
@@ -33,52 +46,13 @@ verify_jwt = false
 [functions.paystack-webhook]
 verify_jwt = false
 
-[functions.send-whatsapp-reminder]
-verify_jwt = false
-
-[functions.seed-novels]
-verify_jwt = false
-
-[functions.seed-full-novels]
-verify_jwt = false
-
-[functions.seed-all-jamb-novels]
-verify_jwt = false
-
-[functions.seed-remaining-novels]
-verify_jwt = false
-
-[functions.seed-faceless-complete]
-verify_jwt = false
-
-[functions.seed-native-son]
-verify_jwt = false
-
-[functions.seed-second-class-citizen]
-verify_jwt = false
-
-[functions.seed-unexpected-joy]
-verify_jwt = false
-
-[functions.generate-study-tip]
-verify_jwt = false
-
-[functions.jamb-news]
-verify_jwt = false
-
-[functions.seed-extra-questions]
-verify_jwt = false
-
-[functions.chat]
-verify_jwt = false
-
 [functions.process-upload]
 verify_jwt = false
 
-[functions.seed-10000-questions]
+[functions.auto-confirm]
 verify_jwt = false
 
-[functions.auto-confirm]
+[functions.send-whatsapp-reminder]
 verify_jwt = false
 
 [functions.b2b-register-buyer]
@@ -99,17 +73,24 @@ verify_jwt = false
 [functions.b2b-admin-manage]
 verify_jwt = false
 
-[functions.seed-coulomb-lesson]
+# ---------------------------------------------------------------------------
+# Previously present in supabase/functions/ but missing from this file, so they
+# silently inherited the default verify_jwt = true.
+# ---------------------------------------------------------------------------
+# Invoked by pg_cron from a migration (net.http_post sends no JWT) — must be
+# callable without one, otherwise the scheduled job is rejected.
+[functions.daily-educational-notification]
 verify_jwt = false
 
-[functions.seed-physics-lessons]
-verify_jwt = false
+[functions.generate-study-plan]
+verify_jwt = true
 
-[functions.seed-physics-batch2]
-verify_jwt = false
+# Called from TimedQuiz with the signed-in user's token.
+[functions.update-leaderboard]
+verify_jwt = true
 
-[functions.seed-physics-batch3]
-verify_jwt = false
+[functions.enrich-novel-chapters]
+verify_jwt = true
 
-[functions.seed-english-lessons]
-verify_jwt = false
+[functions.send-test-email]
+verify_jwt = true

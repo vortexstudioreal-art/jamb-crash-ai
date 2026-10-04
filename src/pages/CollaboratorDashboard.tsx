@@ -31,7 +31,7 @@ const MINIMUM_PAYOUT = 5000; // ₦5,000 minimum
 
 const CollaboratorDashboard = () => {
   const navigate = useNavigate();
-  const { user, userRole } = useAuth();
+  const { user, userRole, roleResolved } = useAuth();
 
   useSeo({
     title: 'Collaborator Dashboard | Jamb Crash AI',
@@ -53,17 +53,26 @@ const CollaboratorDashboard = () => {
   const userEmail = user?.email || '';
 
   useEffect(() => {
-    // Redirect if not a collaborator
-    if (userRole && userRole !== 'collaborator') {
-      navigate('/');
+    // The role lookup resolves asynchronously; until it settles, userRole is
+    // null and cannot be distinguished from "not a collaborator".
+    if (!roleResolved) return;
+
+    // Only collaborators may use this dashboard.
+    if (!user || userRole !== 'collaborator') {
+      navigate('/', { replace: true });
       return;
     }
 
-    if (userEmail) {
-      fetchData();
-    }
+    fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, userRole, navigate, userEmail]);
+  }, [user, userRole, roleResolved, navigate, userEmail]);
+
+  // Render nothing once we know the user isn't a collaborator (the effect above
+  // handles the redirect). While the lookup is still pending we keep showing the
+  // normal loading state rather than flashing protected content.
+  if (roleResolved && (!user || userRole !== 'collaborator')) {
+    return null;
+  }
 
   const fetchData = async () => {
     setLoading(true);

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, User, Eye, EyeOff, Sparkles, ArrowRight, Loader2, ArrowLeft, CheckCircle } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, Sparkles, ArrowRight, Loader2, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
@@ -130,7 +130,7 @@ export default function Auth() {
 
     initRecoverySession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, _session) => {
       if (event === 'PASSWORD_RECOVERY') {
         setView('reset-password');
       }
@@ -254,6 +254,7 @@ export default function Auth() {
         setView('login');
       }
     } catch (err) {
+      errorLogger.error(err, { component: 'Auth', action: 'forgot password' });
       toast.error('Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);

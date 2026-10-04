@@ -112,6 +112,8 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   isLoading: boolean;
+  /** True once the role/access lookup for the current auth state has settled. */
+  roleResolved: boolean;
   isOwner: boolean;
   isAdmin: boolean;
   userRole: 'owner' | 'admin' | 'collaborator' | null;
@@ -162,6 +164,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  // True once the role/access lookup for the *current* auth state has settled.
+  // `isLoading` cannot serve this purpose: it flips false as soon as the session
+  // is read, while `checkUserAccess` is still in flight (deferred via
+  // setTimeout / not awaited), so `userRole === null` is ambiguous between
+  // "still resolving" and "resolved with no role".
+  const [roleResolved, setRoleResolved] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [userRole, setUserRole] = useState<'owner' | 'admin' | 'collaborator' | null>(null);
@@ -270,16 +278,28 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
+  // Brackets checkUserAccess with the roleResolved flag, so every exit path
+  // (offline cache, RPC error, no rows, success, thrown exception) resolves the
+  // flag exactly once.
+  const runAccessCheck = async (email: string) => {
+    setRoleResolved(false);
+    try {
+      await checkUserAccess(email);
+    } finally {
+      setRoleResolved(true);
+    }
+  };
+
   const refreshAccess = async () => {
     if (user?.email) {
-      await checkUserAccess(user.email);
+      await runAccessCheck(user.email);
     }
   };
 
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -300,15 +320,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         
         // Defer access check to avoid deadlock
         if (session?.user?.email) {
+          // Mark unresolved immediately: the check doesn't actually start until
+          // the timeout below runs, so without this the previous role would be
+          // treated as final during that gap.
+          setRoleResolved(false);
           setTimeout(() => {
-            checkUserAccess(session.user.email!);
+            runAccessCheck(session.user.email!);
           }, 0);
         } else {
+          // No session: the role is definitively "none", so it counts as resolved.
           setHasAccess(false);
           setIsAdmin(false);
           setUserRole(null);
           setIsOwner(false);
           setUserPackage(null);
+          setRoleResolved(true);
         }
         
         setIsLoading(false);
@@ -330,6 +356,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       } catch (e) {
         errorLogger.error(e, { component: 'AuthContext', action: 'restoreCachedSession' });
       }
+      // restoreCachedAccess above is synchronous and deliberately never
+      // restores admin/owner roles, so the role is settled by this point.
+      setRoleResolved(true);
       setIsLoading(false);
       return;
     }
@@ -345,6 +374,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           errorMsg.includes('not found')
         ) {
           supabase.auth.signOut();
+          setRoleResolved(true);
           setIsLoading(false);
           return;
         }
@@ -363,7 +393,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
       
       if (session?.user?.email) {
-        checkUserAccess(session.user.email);
+        runAccessCheck(session.user.email);
+      } else {
+        // No session: role is definitively "none", so it counts as resolved.
+        setRoleResolved(true);
       }
       
       setIsLoading(false);
@@ -376,7 +409,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Start/stop periodic sync based on user session
   useEffect(() => {
     if (user) {
-      startPeriodicSync(5 * 60 * 1000, (result) => {
+      startPeriodicSync(5 * 60 * 1000, (_result) => {
       });
     } else {
       stopPeriodicSync();
@@ -476,6 +509,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         user,
         session,
         isLoading,
+        roleResolved,
         isOwner,
         isAdmin,
         userRole,

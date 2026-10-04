@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -26,7 +26,7 @@ interface CouponCode {
   discount_amount: number;
   discount_percentage: number | null;
   is_active: boolean;
-  times_used: number;
+  times_used: number | null;
   created_at: string;
   expiry_date: string | null;
   usage_limit: number | null;
@@ -44,7 +44,7 @@ interface CouponUsage {
 }
 
 export const AdminCouponDashboard = () => {
-  const { user, isAdmin, isOwner, userRole } = useAuth();
+  const { user, userRole } = useAuth();
   const [coupons, setCoupons] = useState<CouponCode[]>([]);
   const [usageData, setUsageData] = useState<CouponUsage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -52,12 +52,6 @@ export const AdminCouponDashboard = () => {
   // Only show for collaborators (content creators) - they see their personal earnings dashboard
   // Owners and admins have full access via CouponManager instead
   const isContentCreator = userRole === 'collaborator';
-
-  useEffect(() => {
-    if (user?.email && isContentCreator) {
-      fetchMyCoupons();
-    }
-  }, [user?.email, isContentCreator, fetchMyCoupons]);
 
   const fetchMyCoupons = useCallback(async () => {
     if (!user?.email) return;
@@ -94,6 +88,12 @@ export const AdminCouponDashboard = () => {
       setIsLoading(false);
     }
   }, [user?.email]);
+
+  useEffect(() => {
+    if (user?.email && isContentCreator) {
+      fetchMyCoupons();
+    }
+  }, [user?.email, isContentCreator, fetchMyCoupons]);
 
   const copyCode = (code: string) => {
     navigator.clipboard.writeText(code);

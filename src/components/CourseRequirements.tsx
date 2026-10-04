@@ -4,7 +4,7 @@ import { Search, GraduationCap, CheckCircle2, XCircle, AlertTriangle, ArrowLeft,
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
@@ -12,7 +12,7 @@ import {
   FACULTIES, 
   checkSubjectMatch, 
   getMatchingCourses,
-  getPartiallyMatchingCourses,
+  
   SUBJECT_DISPLAY_NAMES,
   CourseRequirement 
 } from '@/data/jambCourseRequirements';
@@ -31,8 +31,6 @@ export const CourseRequirements = ({ userSubjects = [], onBack, isEmbedded = fal
 
   const hasUserSubjects = userSubjects.length > 0;
   const matchingCourses = useMemo(() => getMatchingCourses(userSubjects), [userSubjects]);
-  const partiallyMatchingCourses = useMemo(() => getPartiallyMatchingCourses(userSubjects), [userSubjects]);
-
   const filteredCourses = useMemo(() => {
     let courses = JAMB_COURSE_REQUIREMENTS;
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Book, BookOpen, Check, Clock, Play, Star, User, WifiOff, FileText, Download, ExternalLink, Lock, Maximize2, Minimize2, ZoomIn, ZoomOut, Moon, Sun, X } from 'lucide-react';
+import { ArrowLeft, Book, BookOpen, Check, Clock, Play, Star, User, WifiOff, FileText, Download, ExternalLink, Lock, Maximize2, ZoomIn, ZoomOut, Moon, Sun, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -14,7 +14,7 @@ interface Chapter {
   id: string;
   chapter_number: number;
   title: string;
-  estimated_reading_time: number;
+  estimated_reading_time: number | null;
 }
 
 interface NovelDetailProps {
@@ -170,7 +170,7 @@ export const NovelDetail = ({ novelId, userEmail, onBack, onStartReading }: Nove
   }
 
   const currentChapterNumber = progress?.current_chapter?.chapter_number || 0;
-  const totalReadingTime = chapters.reduce((acc, ch) => acc + ch.estimated_reading_time, 0);
+  const totalReadingTime = chapters.reduce((acc, ch) => acc + (ch.estimated_reading_time ?? 0), 0);
   
   const handleStartReading = () => {
     const startChapter = progress?.current_chapter_id || chapters[0]?.id;
@@ -248,13 +248,13 @@ export const NovelDetail = ({ novelId, userEmail, onBack, onStartReading }: Nove
             </span>
           </div>
           
-          {progress && progress.progress_percent > 0 && (
+          {progress && (progress.progress_percent ?? 0) > 0 && (
             <div className="mb-4">
               <div className="flex justify-between text-sm mb-1">
                 <span className="text-muted-foreground">Your Progress</span>
                 <span className="text-primary font-medium">{progress.progress_percent}%</span>
               </div>
-              <Progress value={progress.progress_percent} className="h-2" />
+              <Progress value={progress.progress_percent ?? 0} className="h-2" />
               {currentChapterNumber > 0 && (
                 <p className="text-xs text-muted-foreground mt-1">
                   Currently on Chapter {currentChapterNumber}
@@ -270,7 +270,7 @@ export const NovelDetail = ({ novelId, userEmail, onBack, onStartReading }: Nove
             disabled={chapters.length === 0}
           >
             <Play className="w-4 h-4 mr-2" />
-            {progress?.progress_percent > 0 ? 'Continue Reading' : 'Start Reading'}
+            {(progress?.progress_percent ?? 0) > 0 ? 'Continue Reading' : 'Start Reading'}
           </Button>
         </div>
       </motion.div>
@@ -336,7 +336,7 @@ export const NovelDetail = ({ novelId, userEmail, onBack, onStartReading }: Nove
                           {chapter.title}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          ~{chapter.estimated_reading_time} min read
+                          ~{chapter.estimated_reading_time ?? 0} min read
                         </p>
                       </div>
                     </div>

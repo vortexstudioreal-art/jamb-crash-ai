@@ -30,7 +30,7 @@ export function registerServiceWorker() {
   const register = () => {
     navigator.serviceWorker
       .register("/sw.js")
-      .catch((err) => {
+      .catch((_err) => {
       });
   };
   if (document.readyState === "complete") register();

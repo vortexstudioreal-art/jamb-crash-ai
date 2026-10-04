@@ -14,14 +14,10 @@ interface ProfileSettingsProps {
   userEmail: string;
 }
 
-export const ProfileSettings = ({ userId, userEmail }: ProfileSettingsProps) => {
+export const ProfileSettings = ({ userId }: ProfileSettingsProps) => {
   const [displayTitle, setDisplayTitle] = useState('');
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchDisplayTitle();
-  }, [userId, fetchDisplayTitle]);
 
   const fetchDisplayTitle = useCallback(async () => {
     try {
@@ -39,6 +35,10 @@ export const ProfileSettings = ({ userId, userEmail }: ProfileSettingsProps) => 
       setLoading(false);
     }
   }, [userId]);
+
+  useEffect(() => {
+    fetchDisplayTitle();
+  }, [userId, fetchDisplayTitle]);
 
   const saveDisplayTitle = async () => {
     setSaving(true);

@@ -21,7 +21,7 @@ interface Question {
   userAnswer?: string;
 }
 
-interface QuizResultsProps {
+export interface QuizResultsProps {
   results: {
     totalQuestions: number;
     correctAnswers: number;

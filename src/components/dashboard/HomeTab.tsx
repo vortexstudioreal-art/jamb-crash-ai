@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Play, Zap, BookOpen, Target, Trophy, Lock, Award } from 'lucide-react';
+import { Play, Zap, BookOpen, Target,  Lock, Award } from 'lucide-react';
 import { Sparkles } from 'lucide-react';
 import { HomeSummary } from '@/components/HomeSummary';
 import { StudyPlanTodayCard } from '@/components/StudyPlanTodayCard';
@@ -22,13 +22,13 @@ export const HomeTab = ({
   effectiveAdmin,
   effectiveAccess,
   isTrialActive,
-  effectiveSubjects,
+  
   handleUpgradeClick,
   handleOpenStudyCalendar,
   handleGenerateStudyPlan,
   handleStartQuiz,
   handleTabChange,
-  weakSubjectFromQuiz,
+  
   hasFeature,
 }: HomeTabProps) => {
   return (

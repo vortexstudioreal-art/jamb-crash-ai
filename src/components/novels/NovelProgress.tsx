@@ -33,7 +33,7 @@ export const NovelProgress = ({ userEmail }: NovelProgressProps) => {
       
       if (progressData) {
         const completed = progressData.filter(p => p.is_completed).length;
-        const inProgress = progressData.filter(p => !p.is_completed && p.progress_percent > 0).length;
+        const inProgress = progressData.filter(p => !p.is_completed && (p.progress_percent ?? 0) > 0).length;
         const totalTime = progressData.reduce((acc, p) => acc + (p.total_time_spent_seconds || 0), 0);
         
         setStats({

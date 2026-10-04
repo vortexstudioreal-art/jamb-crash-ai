@@ -25,7 +25,7 @@ const LazyFallback = () => (
 type GameMode = 'menu' | 'speed-round' | 'streak';
 
 const GamesPage = () => {
-  const { user, isAdmin, isOwner } = useAuth();
+  const { user, isAdmin, isOwner, isLoading } = useAuth();
   const navigate = useNavigate();
 
   useSeo({
@@ -72,8 +72,21 @@ const GamesPage = () => {
     navigate('/');
   };
 
+  // The redirect must happen in an effect: calling navigate() during render is
+  // a side effect during render, and it also fired before the session resolved,
+  // which bounced a logged-in user to /auth on first paint.
+  useEffect(() => {
+    if (!isLoading && !user) {
+      navigate('/auth', { replace: true });
+    }
+  }, [isLoading, user, navigate]);
+
+  // Wait for auth to settle so we don't flash the game menu at a signed-out user.
+  if (isLoading) {
+    return <LazyFallback />;
+  }
+
   if (!user) {
-    navigate('/auth');
     return null;
   }
 

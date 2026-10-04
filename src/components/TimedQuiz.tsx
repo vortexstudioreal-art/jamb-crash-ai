@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, CheckCircle, XCircle, Pause, Play, Flag, ChevronLeft, ChevronRight, Sparkles, Volume2, VolumeX, Timer, Settings2, Calculator, WifiOff, Loader2 } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, Pause, Play, Flag, ChevronLeft, ChevronRight, Sparkles, Volume2, VolumeX, Calculator, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,12 +8,9 @@ import type { Database } from '@/integrations/supabase/types';
 import ReactMarkdown from 'react-markdown';
 import { useAiExplanation } from '@/hooks/useAiExplanation';
 import { toast } from 'sonner';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
 import { JambCalculator } from '@/components/JambCalculator';
 import { getQuestions, saveQuestions, addToSyncQueue } from '@/services/offlineStorage';
 import { shuffleQuestionList } from '@/lib/quizShuffle';
@@ -35,6 +32,7 @@ interface Question {
   subject: string;
   year?: number;
   image_url?: string | null;
+  [key: string]: unknown;
 }
 
 interface TimedQuizProps {
@@ -169,7 +167,6 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
   const [isLoading, setIsLoading] = useState(true);
   const [showMotivation, setShowMotivation] = useState(false);
   const [motivationMsg, setMotivationMsg] = useState('');
-  const [selectedSubjectFilter, setSelectedSubjectFilter] = useState<string>('all');
   const [showAnswerFeedback, setShowAnswerFeedback] = useState<string | null>(null);
   const [showCalculator, setShowCalculator] = useState(false);
   const [showQuizLimitModal, setShowQuizLimitModal] = useState(false);
@@ -402,7 +399,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
         if (allQuestions.length === 0) {
           const cachedQuestions = await getQuestions(subjectsToUse);
           if (cachedQuestions.length > 0) {
-            allQuestions = cachedQuestions;
+            allQuestions = cachedQuestions as unknown as Question[];
             if (!isOnline) {
               toast("Offline Mode", { description: "Using cached questions" });
             }
@@ -572,7 +569,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
           if (data.pointsEarned > 0) {
             toast(`+${data.pointsEarned} leaderboard points earned!`, { description: `${correctCount}/${questions.length} correct answers` });
           }
-        }).catch(err => {
+        }).catch(() => {
         });
       } else {
         // Queue for sync when back online
@@ -995,7 +992,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
               if (isPracticeMode) {
                 if (showAnswerFeedback) {
                   isCorrect = showAnswerFeedback === letter;
-                  isWrong = showAnswerFeedback && isSelected && !isCorrect;
+                  isWrong = !!showAnswerFeedback && isSelected && !isCorrect;
                 } else if (isAnswered) {
                   isCorrect = currentQuestion.correct_answer === letter;
                   isWrong = isSelected && userAnswer !== currentQuestion.correct_answer;

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { User, Mail, Crown, Shield, Calendar, Package, ArrowLeft, LogOut, Edit2, Check, X, HelpCircle, FileText, MessageCircle, Moon, Sun, Phone, Bell, Users, Ticket, Lock, Download, Trash2 } from 'lucide-react';
+import { User, Mail, Crown, Shield, Calendar, Package, ArrowLeft, LogOut, Edit2, Check, X, HelpCircle, FileText, MessageCircle, Moon, Sun, Phone, Bell, Users, Ticket, Lock,  Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,11 +28,16 @@ interface UserSettings {
 }
 
 const loadSettings = (email: string): UserSettings => {
+  const defaults: UserSettings = { fullName: '', whatsappNumber: '', whatsappEnabled: false, notificationsEnabled: true, emailNotifications: true };
   const stored = localStorage.getItem(`${SETTINGS_STORAGE_KEY}_${email}`);
   if (stored) {
-    return JSON.parse(stored);
+    try {
+      return JSON.parse(stored);
+    } catch {
+      return defaults;
+    }
   }
-  return { fullName: '', whatsappNumber: '', whatsappEnabled: false, notificationsEnabled: true, emailNotifications: true };
+  return defaults;
 };
 
 const saveSettings = (email: string, settings: UserSettings) => {
@@ -695,7 +700,7 @@ export default function Settings() {
                 }
                 if ('serviceWorker' in navigator) {
                   const regs = await navigator.serviceWorker.getRegistrations();
-                  await Promise.all(regs.map((r) => r.update()));
+                  await Promise.all(regs.map((r) => r.unregister()));
                 }
                 toast.success('Offline cache cleared. Reloading...');
                 setTimeout(() => window.location.reload(), 600);

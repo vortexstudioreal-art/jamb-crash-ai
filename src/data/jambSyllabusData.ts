@@ -415,6 +415,337 @@ For inelastic collisions (stick together): m₁u₁ + m₂u₂ = (m₁ + m₂)V`
         <text x="155" y="70" fill="#eab308" fontSize="12" fontWeight="bold">Equilibrium (E)</text>
       </svg>`
     }
+  ],
+
+  literature: [
+    {
+      id: 'lit_drama_01',
+      subject: 'literature',
+      topic: 'Drama',
+      subtopic: 'Tragic Hero, Dramatic Irony & Stage Craft',
+      difficulty_level: 'medium',
+      estimated_reading_time: 20,
+      order_index: 1,
+      objectives: [
+        'Identify characteristics of a tragic hero (hamartia, peripeteia, catharsis)',
+        'Distinguish dramatic irony from verbal and situational irony',
+        'Analyze stage directions and their role in characterization'
+      ],
+      recommended_content: `### Drama & Literary Terms
+
+#### Tragic Hero (Aristotle):
+1. **Hamartia**: A fatal flaw leading to the hero's downfall
+2. **Peripeteia**: A sudden reversal of fortune
+3. **Anagnorisis**: The moment of critical discovery
+4. **Catharsis**: The audience's emotional release (pity and fear)
+
+#### Types of Irony:
+- **Dramatic Irony**: Audience knows what characters do not
+- **Verbal Irony**: Words mean the opposite of intent (sarcasm)
+- **Situational Irony**: Outcome contradicts expectations
+
+#### Key Nigerian Drama Texts:
+- *Death and the King's Horseman* — Wole Soyinka
+- *A Dance of the Forests* — Wole Soyinka
+- *The Lion and the Jewel* — Wole Soyinka`,
+      key_formulas: [
+        'Tragic Hero = High status + Hamartia + Downfall + Catharsis',
+        'Dramatic Irony = Audience knowledge > Character knowledge'
+      ]
+    }
+  ],
+
+  government: [
+    {
+      id: 'gov_const_01',
+      subject: 'government',
+      topic: 'Constitutional Development',
+      subtopic: 'Nigerian Constitutions from 1914 to 1999',
+      difficulty_level: 'medium',
+      estimated_reading_time: 25,
+      order_index: 1,
+      objectives: [
+        'Trace the evolution of Nigerian constitutions from Clifford to 1999',
+        'Compare features of the 1963 and 1979 republican constitutions',
+        'Analyze the role of military rule in shaping Nigerian governance'
+      ],
+      recommended_content: `### Constitutional Development in Nigeria
+
+#### Key Constitutions:
+1. **Clifford Constitution (1922)**: First legislative council, limited franchise
+2. **Richards Constitution (1946)**: Regional representation, 3 regions
+3. **Macpherson Constitution (1951)**: Greater autonomy, federal structure
+4. **Lyttleton Constitution (1954)**: Federal system, regions gained self-govt
+5. **Independence Constitution (1960)**: Parliamentary system, GG/Nigerianized
+6. **Republican Constitution (1963)**: President instead of GG, 3 regions
+7. **1979 Constitution**: Presidential system, 19 states, 2 chambers
+8. **1999 Constitution**: Current constitution, 36 states, federal republic
+
+#### Military Interventions:
+- 1966 (Jan & Jul coups) → 1975 → 1979 (2nd Republic)
+- 1983 (coup) → 1985 (Babangida) → 1993 (Abacha) → 1999 (3rd Republic)`,
+      key_formulas: [
+        'Federal Character Principle = Fair representation of all states',
+        'Separation of Powers = Executive, Legislature, Judiciary'
+      ]
+    }
+  ],
+
+  crs: [
+    {
+      id: 'crs_nt_01',
+      subject: 'crs',
+      topic: 'New Testament',
+      subtopic: 'The Gospels, Acts & Pauline Epistles',
+      difficulty_level: 'medium',
+      estimated_reading_time: 25,
+      order_index: 1,
+      objectives: [
+        'Summarize the Synoptic Gospels and their unique perspectives',
+        'Trace the growth of the early church in Acts of the Apostles',
+        'Identify key themes in Pauline Epistles (grace, faith, justification)'
+      ],
+      recommended_content: `### Christian Religious Studies — New Testament
+
+#### The Four Gospels:
+1. **Matthew**: Written for Jewish audience, emphasizes Jesus as Messiah, includes Sermon on the Mount
+2. **Mark**: Shortest gospel, emphasizes Jesus as Servant, fast-paced narrative
+3. **Luke**: Written for Gentile audience, emphasizes Jesus as Son of Man, includes parables (Good Samaritan, Prodigal Son)
+4. **John**: Emphasizes Jesus as divine Word (Logos), "I Am" statements
+
+#### Acts of the Apostles:
+- Pentecost (Acts 2): Birth of the church
+- Peter's ministry (Acts 1-12)
+- Paul's missionary journeys (Acts 13-28)
+
+#### Key Pauline Themes:
+- **Justification by Faith**: Romans 3:28 — "A person is justified by faith, not by works of the law"
+- **Grace**: Ephesians 2:8-9 — "By grace you have been saved through faith"
+- **Love**: 1 Corinthians 13 — "Love is patient, love is kind"`,
+      key_formulas: [
+        'Justification = Faith + Grace (not works)',
+        'Great Commission = Matthew 28:19-20'
+      ]
+    }
+  ],
+
+  irs: [
+    {
+      id: 'irs_quran_01',
+      subject: 'irs',
+      topic: 'The Quran',
+      subtopic: 'Surah Al-Fatiha, Al-Baqarah & Key Chapters',
+      difficulty_level: 'medium',
+      estimated_reading_time: 25,
+      order_index: 1,
+      objectives: [
+        'Recite and explain the opening chapter (Al-Fatiha)',
+        'Identify the main themes of Surah Al-Baqarah',
+        'Understand the significance of Quranic revelations (Makki vs Madani)'
+      ],
+      recommended_content: `### Islamic Religious Studies — The Quran
+
+#### Surah Al-Fatiha (The Opening):
+- Recited in every unit (rak'ah) of prayer
+- 7 verses praising Allah, seeking guidance
+- Key phrase: "Guide us on the Straight Path" (Sirat al-Mustaqim)
+
+#### Surah Al-Baqarah (The Cow):
+- Longest surah (286 verses)
+- Themes: Faith, Torah vs Quran, Moses, Solomon, patience
+- Story of the cow (v. 67-73), Al-Kursi verse (v. 255)
+
+#### Makki vs Madani Revelations:
+- **Makki**: Revealed in Mecca, shorter surahs, focus on monotheism and moral values
+- **Madani**: Revealed in Medina, longer surahs, focus on law and governance
+
+#### Key Quranic Concepts:
+- **Tawhid**: Absolute monotheism — Allah is One, without partners
+- **Risalah**: Prophethood — Muhammad (SAW) is the final messenger
+- **Akhirah**: Day of Judgment — accountability for all actions`,
+      key_formulas: [
+        'Al-Fatiha = 7 verses, recited in every prayer',
+        'Tawhid = Oneness of Allah'
+      ]
+    }
+  ],
+
+  accounting: [
+    {
+      id: 'acc_fin_01',
+      subject: 'accounting',
+      topic: 'Financial Accounting',
+      subtopic: 'Double Entry, Trial Balance & Final Accounts',
+      difficulty_level: 'medium',
+      estimated_reading_time: 25,
+      order_index: 1,
+      objectives: [
+        'Apply the double-entry bookkeeping principle',
+        'Prepare a trial balance from ledger accounts',
+        'Construct income statement and balance sheet'
+      ],
+      recommended_content: `### Financial Accounting — Fundamentals
+
+#### Double Entry Principle:
+Every transaction has TWO effects:
+- **Debit (Dr)**: What comes IN / what the business owes
+- **Credit (Cr)**: What goes OUT / what the business owns
+
+#### Rules of Double Entry:
+| Account Type | Debit | Credit |
+|---|---|---|
+| Assets | Increase | Decrease |
+| Liabilities | Decrease | Increase |
+| Capital/Equity | Decrease | Increase |
+| Revenue/Income | Decrease | Increase |
+| Expenses | Increase | Decrease |
+
+#### Trial Balance:
+Lists all ledger balances to check arithmetic accuracy:
+- Total Debits = Total Credits
+- If not equal → there's an error
+
+#### Final Accounts:
+1. **Income Statement (P&L)**: Revenue - Expenses = Profit/Loss
+2. **Balance Sheet**: Assets = Liabilities + Owner's Equity (Accounting Equation)`,
+      key_formulas: [
+        'Assets = Liabilities + Owner\'s Equity',
+        'Profit = Revenue - Expenses',
+        'Trial Balance: Total Dr = Total Cr'
+      ]
+    }
+  ],
+
+  commerce: [
+    {
+      id: 'com_trade_01',
+      subject: 'commerce',
+      topic: 'Trade',
+      subtopic: 'Home Trade, Foreign Trade & Terms of Trade',
+      difficulty_level: 'medium',
+      estimated_reading_time: 20,
+      order_index: 1,
+      objectives: [
+        'Distinguish between home trade and foreign trade',
+        'Explain common trade terms (FOB, CIF, Invoice, L/C)',
+        'Analyze methods of payment in international trade'
+      ],
+      recommended_content: `### Commerce — Trade
+
+#### Home Trade (Internal Trade):
+- **Wholesale**: Buying in bulk from manufacturers, selling to retailers
+- **Retail**: Selling directly to consumers in small quantities
+- **Hawking**: Moving from place to place selling goods
+- **Market**: Central place where buyers and sellers meet
+
+#### Foreign Trade (International Trade):
+- **Importation**: Buying goods from abroad
+- **Exportation**: Selling goods abroad
+- **Entrepot Trade**: Importing goods and re-exporting after processing (e.g. crude oil refining)
+
+#### Terms of Trade:
+- **FOB (Free On Board)**: Seller pays until goods are loaded on ship
+- **CIF (Cost, Insurance, Freight)**: Seller pays cost, insurance, and freight to destination
+- **Letter of Credit (L/C)**: Bank guarantees payment to exporter
+- **Bill of Lading**: Document of title to goods in transit
+
+#### Methods of Payment:
+- Cash on Delivery (COD)
+- Open Account
+- Documentary Collection
+- Letter of Credit`,
+      key_formulas: [
+        'Balance of Trade = Exports - Imports',
+        'FOB: Seller risk ends at ship loading',
+        'CIF: Seller covers cost + insurance + freight'
+      ]
+    }
+  ],
+
+  agricultural_science: [
+    {
+      id: 'agri_crop_01',
+      subject: 'agricultural science',
+      topic: 'Crop Production',
+      subtopic: 'Soil Types, Cropping Systems & Crop Management',
+      difficulty_level: 'medium',
+      estimated_reading_time: 20,
+      order_index: 1,
+      objectives: [
+        'Classify soil types and their suitability for different crops',
+        'Compare monocropping, intercropping, and rotation systems',
+        'Apply principles of crop nutrient management'
+      ],
+      recommended_content: `### Agricultural Science — Crop Production
+
+#### Soil Types in Nigeria:
+- **Sandy Soil**: Large particles, good drainage, low nutrient retention (coastal areas)
+- **Clay Soil**: Small particles, poor drainage, high nutrient retention (inland)
+- **Loam Soil**: Balanced mixture, ideal for most crops (most fertile)
+
+#### Cropping Systems:
+1. **Monocropping**: Growing one crop on the same land continuously
+   - Advantage: Specialized management
+   - Disadvantage: Soil nutrient depletion, pest buildup
+2. **Intercropping**: Growing two or more crops together
+   - Example: Maize + Cowpea (maize provides support, cowpea fixes nitrogen)
+3. **Crop Rotation**: Alternating crops on the same land each season
+   - Example: Year 1: Legumes → Year 2: Cereals → Year 3: Root crops
+
+#### Crop Nutrient Management:
+- **N-P-K**: Nitrogen (leaf growth), Phosphorus (root/flower), Potassium (overall health)
+- **Organic Manure**: Compost, farmyard manure
+- **Inorganic Fertilizer**: NPK 15:15:15, Urea (46% N)`,
+      key_formulas: [
+        'NPK Fertilizer = Nitrogen + Phosphorus + Potassium',
+        'Loam Soil = Sand + Silt + Clay (balanced)',
+        'Intercropping = 2+ crops grown together'
+      ]
+    }
+  ],
+
+  geography: [
+    {
+      id: 'geo_phys_01',
+      subject: 'geography',
+      topic: 'Physical Geography',
+      subtopic: 'Landforms, Climate & Vegetation',
+      difficulty_level: 'medium',
+      estimated_reading_time: 20,
+      order_index: 1,
+      objectives: [
+        'Classify major landforms and their formation processes',
+        'Explain Nigerian climate zones and vegetation belts',
+        'Analyze the influence of climate on agriculture and settlement'
+      ],
+      recommended_content: `### Physical Geography — Landforms & Climate
+
+#### Nigerian Landforms:
+- **Niger-Benue Trough**: Major river valley, formed by rift activity
+- **Jos Plateau**: Highland area (1,200-1,400m), tin mining, cooler climate
+- **Obudu Plateau**: Border region with Cameroon, cattle rearing
+- **Niger Delta**: Largest delta in Africa, oil-producing region
+- **Sokoto Plains**: Northern lowland, seasonal flooding
+
+#### Climate Zones of Nigeria:
+1. **Equatorial (South)**: Heavy rainfall (>2,000mm/year), no dry season
+2. **Tropical (Middle Belt)**: Wet and dry seasons, 1,000-1,500mm rainfall
+3. **Sudan (North)**: Short wet season, 500-1,000mm rainfall
+4. **Sahel (Far North)**: Semi-arid, <500mm, desertification risk
+
+#### Vegetation Belts:
+- **Mangrove Swamp** (coastal south)
+- **Rain Forest** (southwest)
+- **Derived Savanna** (middle belt)
+- **Guinea Savanna** (north)
+- **Sudan Savanna** (far north)
+- **Sahel Savanna** (extreme north)`,
+      key_formulas: [
+        'Rainfall decreases from south to north',
+        'Vegetation follows rainfall gradient',
+        'Niger-Benue Trough = Rift valley origin'
+      ]
+    }
   ]
 };
 

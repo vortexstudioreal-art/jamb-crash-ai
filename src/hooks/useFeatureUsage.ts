@@ -55,7 +55,7 @@ interface FeatureUsageData {
 }
 
 export const useFeatureUsage = () => {
-  const { user, userPackage, isAdmin, isOwner, hasAccess } = useAuth();
+  const { user, userPackage, isAdmin, isOwner } = useAuth();
   const [usageData, setUsageData] = useState<Record<FeatureType, number>>({
     pdf_upload: 0,
     study_plan_days: 0,
