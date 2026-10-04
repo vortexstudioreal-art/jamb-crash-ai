@@ -252,10 +252,21 @@ const LESSONS = [
           units_note: "Algebraic expressions have no units until variables are assigned values with units.",
         },
       },
+    {
+      id: "algebra_interactive_graph_01",
+      type: "interactive",
+      order: 5,
+      content: {
+        component: "graph_explorer",
+        config: { "function": "quadratic", "x_min": -5, "x_max": 5 },
+        instruction: "Change a, b and c one at a time. Then set b to zero and watch the parabola become symmetric about the y-axis, with the vertex moving to x = 0.",
+        prediction_prompt: "If you make a negative, does the parabola still open upwards? Predict first.",
+      },
+    },
       {
         id: "algebra_practice_01",
         type: "worked_example",
-        order: 5,
+        order: 6,
         content: {
           scenario: "Simplify: 3(2x − 4) + 2(x + 5) − 3x",
           given: ["An algebraic expression to simplify"],
@@ -275,7 +286,7 @@ const LESSONS = [
       {
         id: "algebra_misconception_01",
         type: "common_misconception",
-        order: 6,
+        order: 7,
         content: {
           mistake: "(x + y)² = x² + y²",
           why_wrong: "This is one of the most common algebra errors. Squaring a sum is NOT the same as squaring each term separately.",
@@ -285,7 +296,7 @@ const LESSONS = [
       {
         id: "algebra_jamb_01",
         type: "jamb_insight",
-        order: 7,
+        order: 8,
         content: {
           focus_area: "JAMB tests expansion, factorization, simplification, and solving equations. Questions often combine multiple skills.",
           trap: "JAMB may include expressions with negative signs before brackets. Remember: −(x − 3) = −x + 3 (both signs change).",
@@ -296,7 +307,7 @@ const LESSONS = [
       {
         id: "algebra_memory_01",
         type: "memory_hook",
-        order: 8,
+        order: 9,
         content: {
           text: "FOIL: First, Outer, Inner, Last. Difference of squares: a²−b² = (a+b)(a−b). Perfect square: (a+b)² = a²+2ab+b². Signs matter — a negative before a bracket changes EVERYTHING inside.",
           hook_type: "mnemonic",
@@ -305,7 +316,7 @@ const LESSONS = [
       {
         id: "algebra_reflection_01",
         type: "reflection",
-        order: 9,
+        order: 10,
         content: {
           question: "Why is factorization useful? How does it help in solving equations?",
           expected_understanding: "Factorization reveals the structure of expressions. If (x−2)(x+3) = 0, then x = 2 or x = 3. This is how we solve quadratic equations — find values that make each factor zero.",

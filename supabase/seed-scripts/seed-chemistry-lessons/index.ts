@@ -869,10 +869,21 @@ const LESSONS = [
           units_note: "Electrode potentials are measured in volts (V) under standard conditions (298 K, 1 mol/dm³, 1 atm).",
         },
       },
+    {
+      id: "electrochem_interactive_electrolysis_01",
+      type: "interactive",
+      order: 5,
+      content: {
+        component: "electrolysis_simulator",
+        config: {},
+        instruction: "Change the electrolyte and the electrode materials. Identify which ions are oxidised at the anode and which are reduced at the cathode.",
+        prediction_prompt: "At the anode, oxidation happens — so should mass be lost or gained there? Predict, then check the electrode masses.",
+      },
+    },
       {
         id: "electrochem_worked_example_01",
         type: "worked_example",
-        order: 5,
+        order: 6,
         content: {
           problem: "Calculate the EMF of a Daniell cell: Zn | Zn²⁺ || Cu²⁺ | Cu. Given E°(Zn²⁺/Zn) = −0.76 V and E°(Cu²⁺/Cu) = +0.34 V.",
           steps: [
@@ -888,7 +899,7 @@ const LESSONS = [
       {
         id: "electrochem_jamb_focus_01",
         type: "jamb_focus",
-        order: 6,
+        order: 7,
         content: {
           frequency: "Common — electrochemistry and electrolysis are regular JAMB topics",
           typical_question: "Describe the electrolysis of molten NaCl. What is produced at each electrode?",
@@ -903,7 +914,7 @@ const LESSONS = [
       {
         id: "electrochem_practice_01",
         type: "practice",
-        order: 7,
+        order: 8,
         content: {
           questions: [
             {
@@ -930,7 +941,7 @@ const LESSONS = [
       {
         id: "electrochem_summary_01",
         type: "summary",
-        order: 8,
+        order: 9,
         content: {
           key_takeaways: [
             "Anode = oxidation, Cathode = reduction",
@@ -948,7 +959,7 @@ const LESSONS = [
       {
         id: "electrochem_mastery_01",
         type: "mastery_check",
-        order: 9,
+        order: 10,
         content: {
           description: "Demonstrate mastery of Electrochemistry",
           min_score: 80,

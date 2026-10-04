@@ -1,0 +1,21 @@
+# Line endings
+#
+# The repo is overwhelmingly LF (49/50 migrations, all source). Without this,
+# core.autocrlf=true rewrites freshly added files to CRLF in the working tree,
+# which broke scripts/__tests__/generate-lessons-migration.test.ts: the
+# generator emits LF but the committed migration was compared byte-for-byte.
+*.sql   text eol=lf
+*.mjs   text eol=lf
+*.cjs   text eol=lf
+
+# Keep diffs quiet for assets that must never be touched.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.ico   binary
+*.pdf   binary
+*.mp4   binary
+*.woff  binary
+*.woff2 binary

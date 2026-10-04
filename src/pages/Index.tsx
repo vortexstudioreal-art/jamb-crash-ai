@@ -39,7 +39,9 @@ const MockExam = lazy(() => import('@/components/MockExam').then(m => ({ default
 const Flashcards = lazy(() => import('@/components/Flashcards').then(m => ({ default: m.Flashcards })));
 const StudyPlanGenerator = lazy(() => import('@/components/StudyPlanGenerator').then(m => ({ default: m.StudyPlanGenerator })));
 const StudyPlanTracker = lazy(() => import('@/components/StudyPlanTracker').then(m => ({ default: m.StudyPlanTracker })));
-const SyllabusReader = lazy(() => import('@/components/SyllabusReader').then(m => ({ default: m.SyllabusReader })));const NovelBrowser = lazy(() => import('@/components/novels/NovelBrowser').then(m => ({ default: m.NovelBrowser })));
+const SyllabusReader = lazy(() => import('@/components/SyllabusReader').then(m => ({ default: m.SyllabusReader })));
+const LessonLibrary = lazy(() => import('@/components/LessonLibrary').then(m => ({ default: m.LessonLibrary })));
+const NovelBrowser = lazy(() => import('@/components/novels/NovelBrowser').then(m => ({ default: m.NovelBrowser })));
 const NovelDetail = lazy(() => import('@/components/novels/NovelDetail').then(m => ({ default: m.NovelDetail })));
 const NovelReader = lazy(() => import('@/components/novels/NovelReader').then(m => ({ default: m.NovelReader })));
 const JambNewsPage = lazy(() => import('@/components/JambNewsPage').then(m => ({ default: m.JambNewsPage })));
@@ -835,6 +837,30 @@ const Index = () => {
               onBack={handleBackToDashboard}
               initialSubject={syllabusTargetSubject || undefined}
               initialTopic={syllabusTargetTopic || undefined}
+            />
+          </Suspense>
+        </div>
+      </div>
+    );
+  }
+
+  // Interactive Lessons step
+  if (currentStep === 'lessons' && userEmail) {
+    return (
+      <div className="min-h-screen bg-background">
+        <DashboardHeader
+          userEmail={userEmail}
+          isOwner={effectiveOwner}
+          isCollaborator={isAdmin && !isOwner}
+          userRole={userRole}
+          onSignOut={handleSignOut}
+        />
+        <div className="pt-16">
+          <Suspense fallback={<LazyFallback />}>
+            <LessonLibrary
+              userEmail={userEmail}
+              subjects={effectiveSubjects}
+              onBack={handleBackToDashboard}
             />
           </Suspense>
         </div>

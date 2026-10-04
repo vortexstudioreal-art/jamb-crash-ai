@@ -75,10 +75,21 @@ const LESSONS = [
           units_note: "F in newtons, m in kilograms, a in m/s². If mass is given in grams, convert to kg (÷ 1000).",
         },
       },
+    {
+      id: "forces_interactive_pendulum_01",
+      type: "interactive",
+      order: 5,
+      content: {
+        component: "pendulum_simulator",
+        config: { length: 1, angle: 30, gravity: 9.8 },
+        instruction: "Double the length and watch the period. Then change the initial angle — does the period change? Add damping and watch the energy bar fall.",
+        prediction_prompt: "Does the period of a pendulum depend on how far you pull it back, or only on its length? Predict before you change the angle.",
+      },
+    },
       {
         id: "forces_worked_example_01",
         type: "worked_example",
-        order: 5,
+        order: 6,
         content: {
           scenario: "A block of mass 5 kg is placed on a smooth (frictionless) horizontal surface. A horizontal force of 20 N is applied. Calculate the acceleration of the block.",
           given: ["m = 5 kg", "F = 20 N", "Surface is frictionless"],
@@ -96,7 +107,7 @@ const LESSONS = [
       {
         id: "forces_misconception_01",
         type: "common_misconception",
-        order: 6,
+        order: 7,
         content: {
           mistake: "A heavier object falls faster than a lighter one because it has more weight.",
           why_wrong: "In the absence of air resistance, ALL objects fall with the same acceleration (g ≈ 10 m/s²) regardless of mass. Weight increases, but so does the mass being accelerated — they cancel out.",
@@ -106,7 +117,7 @@ const LESSONS = [
       {
         id: "forces_jamb_01",
         type: "jamb_insight",
-        order: 7,
+        order: 8,
         content: {
           focus_area: "JAMB tests F = ma calculations, free-body diagrams, and resolving forces on inclined planes. They often give a scenario and ask for acceleration or a specific force.",
           trap: "JAMB may give mass in grams — convert to kg. Also, on inclined planes, the component of weight along the plane is mg sin θ, not mg.",
@@ -117,7 +128,7 @@ const LESSONS = [
       {
         id: "forces_memory_01",
         type: "memory_hook",
-        order: 8,
+        order: 9,
         content: {
           text: "F = ma. Think 'Force = Mass × acceleration'. A big force on a small mass gives big acceleration. A small force on a big mass gives small acceleration. Newton's Second Law.",
           hook_type: "mnemonic",

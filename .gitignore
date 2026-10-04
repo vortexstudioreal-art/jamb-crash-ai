@@ -16,6 +16,13 @@ dist-ssr
 # The template must stay versioned so new contributors can set up
 !.env.example
 
+# Never commit local secrets
+password.txt
+PASSWORD
+*.password
+.env.local
+.env.*.local
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -15,9 +15,25 @@ const MotionSimulator = lazy(() =>
 const ElectrolysisSimulator = lazy(() =>
   import('./ElectrolysisSimulator').then((m) => ({ default: m.ElectrolysisSimulator }))
 );
+const CircuitSimulator = lazy(() =>
+  import('./CircuitSimulator').then((m) => ({ default: m.CircuitSimulator }))
+);
+const FieldLineViewer = lazy(() =>
+  import('./FieldLineViewer').then((m) => ({ default: m.FieldLineViewer }))
+);
+const ChargeExplorer = lazy(() =>
+  import('./ChargeExplorer').then((m) => ({ default: m.ChargeExplorer }))
+);
+const GraphExplorer = lazy(() =>
+  import('./GraphExplorer').then((m) => ({ default: m.GraphExplorer }))
+);
+const ProjectileSimulator = lazy(() =>
+  import('./ProjectileSimulator').then((m) => ({ default: m.ProjectileSimulator }))
+);
+const PendulumSimulator = lazy(() =>
+  import('./PendulumSimulator').then((m) => ({ default: m.PendulumSimulator }))
+);
 
-// The registry is intentionally partial: components marked "Phase 3" above are
-// not built yet, and InteractiveRenderer falls back to UnknownComponent for them.
 const COMPONENT_REGISTRY: Partial<Record<InteractiveComponentName, React.LazyExoticComponent<ComponentType<InteractiveProps>>>> = {
   // FormulaCalculator requires a structured config (formula/variables/output),
   // which is narrower than the generic InteractiveProps the registry exposes.
@@ -25,13 +41,12 @@ const COMPONENT_REGISTRY: Partial<Record<InteractiveComponentName, React.LazyExo
   wave_simulator: WaveSimulator,
   motion_simulator: MotionSimulator,
   electrolysis_simulator: ElectrolysisSimulator,
-  // Phase 3 — uncomment as built:
-  // circuit_simulator: CircuitSimulator,
-  // charge_explorer: ChargeExplorer,
-  // field_line_viewer: FieldLineViewer,
-  // graph_explorer: GraphExplorer,
-  // projectile_simulator: ProjectileSimulator,
-  // pendulum_simulator: PendulumSimulator,
+  circuit_simulator: CircuitSimulator,
+  charge_explorer: ChargeExplorer,
+  field_line_viewer: FieldLineViewer,
+  graph_explorer: GraphExplorer,
+  projectile_simulator: ProjectileSimulator,
+  pendulum_simulator: PendulumSimulator,
 };
 
 interface InteractiveRendererProps {

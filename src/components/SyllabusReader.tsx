@@ -147,6 +147,7 @@ export const SyllabusReader = ({ userEmail, subjects, onBack, initialSubject, in
       let syllabusData: SyllabusItem[] | null = null;
 
       // Try Supabase first
+      let remoteFailed = false;
       try {
         const { data, error } = await supabase
           .from('jamb_syllabus')
@@ -154,11 +155,15 @@ export const SyllabusReader = ({ userEmail, subjects, onBack, initialSubject, in
           .in('subject', subjects.map(s => s.toLowerCase()))
           .order('order_index');
 
-        if (!error && data && data.length > 0) {
+        if (error) {
+          remoteFailed = true;
+          errorLogger.error(error, { component: 'SyllabusReader', action: 'fetch syllabus' });
+        } else if (data && data.length > 0) {
           syllabusData = data;
         }
-      } catch {
-        // Offline — fall through to offline data
+      } catch (err) {
+        remoteFailed = true;
+        errorLogger.error(err, { component: 'SyllabusReader', action: 'fetch syllabus' });
       }
 
       // Fallback to IndexedDB if online query returned nothing
@@ -168,12 +173,14 @@ export const SyllabusReader = ({ userEmail, subjects, onBack, initialSubject, in
           if (cached.length > 0) {
             syllabusData = cached;
           }
-        } catch {
-          // IndexedDB unavailable
+        } catch (err) {
+          errorLogger.error(err, { component: 'SyllabusReader', action: 'read cached syllabus' });
         }
       }
 
-      // Final fallback: embedded offline syllabus data
+      // Final fallback: embedded offline syllabus data. This is a tiny
+      // placeholder set (18 topics, mostly one per subject), so reaching it
+      // means the student sees almost nothing — worth surfacing loudly.
       if (!syllabusData || syllabusData.length === 0) {
         const embedded: SyllabusItem[] = [];
         for (const subject of subjects) {
@@ -195,6 +202,11 @@ export const SyllabusReader = ({ userEmail, subjects, onBack, initialSubject, in
         }
         if (embedded.length > 0) {
           syllabusData = embedded;
+          toast.error(
+            remoteFailed
+              ? "Couldn't reach the syllabus. Showing the offline starter topics."
+              : 'No syllabus topics found for these subjects.'
+          );
         }
       }
 
@@ -257,20 +269,32 @@ export const SyllabusReader = ({ userEmail, subjects, onBack, initialSubject, in
     const fetchLesson = async () => {
       setLoadingLesson(true);
       try {
+        // Joined on subject + topic only. The two tables use different
+        // subtopic taxonomies (lessons use short buckets like "Basic Concepts",
+        // jamb_syllabus uses long descriptive strings), so including subtopic
+        // here would match fewer lessons, not more. limit(1) keeps maybeSingle
+        // safe if a (subject, topic) pair ever gains a second lesson.
         const { data, error } = await supabase
           .from('lessons')
           .select('*')
           .eq('subject', selectedTopic.subject.toLowerCase())
           .eq('topic', selectedTopic.topic)
           .eq('status', 'published')
+          .limit(1)
           .maybeSingle();
 
-        if (!error && data) {
-          setStructuredLesson(data as unknown as Lesson);
-        } else {
+        if (error) {
+          errorLogger.error(error, {
+            component: 'SyllabusReader',
+            action: 'fetch structured lesson',
+          });
           setStructuredLesson(null);
+          return;
         }
-      } catch {
+
+        setStructuredLesson(data ? (data as unknown as Lesson) : null);
+      } catch (err) {
+        errorLogger.error(err, { component: 'SyllabusReader', action: 'fetch structured lesson' });
         setStructuredLesson(null);
       } finally {
         setLoadingLesson(false);

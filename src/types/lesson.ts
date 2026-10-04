@@ -60,7 +60,8 @@ export interface FormulaContent {
   variables: Array<{
     name: string;
     description: string;
-    unit: string;
+    /** Omitted by most seeded lessons, which describe non-numeric variables. */
+    unit?: string;
   }>;
   when_to_use?: string;
   common_traps?: string[];

@@ -76,10 +76,32 @@ const LESSONS = [
           units_note: "Always convert to SI units: metres, seconds, m/s, m/s². If given km/h, convert to m/s by dividing by 3.6.",
         },
       },
+    {
+      id: "motion_interactive_motion_01",
+      type: "interactive",
+      order: 5,
+      content: {
+        component: "motion_simulator",
+        config: { max_velocity: 50, max_acceleration: 20 },
+        instruction: "Set the initial velocity and acceleration, then press Play. The v-t graph is drawn live — read off the gradient as the acceleration.",
+        prediction_prompt: "If acceleration is negative, will the velocity reach zero and come back? Predict before you press Play.",
+      },
+    },
+    {
+      id: "motion_interactive_projectile_01",
+      type: "interactive",
+      order: 6,
+      content: {
+        component: "projectile_simulator",
+        config: { speed: 25, angle: 45, gravity: 9.8 },
+        instruction: "Launch at 45°, then at 30°. Compare the range and the maximum height. Then set g to 1.6 (the Moon) and launch again.",
+        prediction_prompt: "Two launches, same speed, angles 30° and 60°. Which one travels further? Only one of them can be right.",
+      },
+    },
       {
         id: "motion_worked_example_01",
         type: "worked_example",
-        order: 5,
+        order: 7,
         content: {
           scenario: "A car starts from rest and accelerates uniformly at 2 m/s² for 10 seconds. Calculate its final velocity and the distance covered.",
           given: ["u = 0 (starts from rest)", "a = 2 m/s²", "t = 10 s"],
@@ -96,7 +118,7 @@ const LESSONS = [
       {
         id: "motion_misconception_01",
         type: "common_misconception",
-        order: 6,
+        order: 8,
         content: {
           mistake: "When a ball is thrown up, at the highest point its velocity is maximum.",
           why_wrong: "At the highest point, the ball momentarily stops before coming back down. Its velocity is ZERO at the top.",
@@ -106,7 +128,7 @@ const LESSONS = [
       {
         id: "motion_jamb_01",
         type: "jamb_insight",
-        order: 7,
+        order: 9,
         content: {
           focus_area: "JAMB loves giving velocity-time graphs and asking for distance (area under the graph), acceleration (gradient), or interpreting the shape.",
           trap: "On a v-t graph, the AREA under the line = distance, not the gradient. The GRADIENT = acceleration. Students confuse these two.",
@@ -117,7 +139,7 @@ const LESSONS = [
       {
         id: "motion_memory_01",
         type: "memory_hook",
-        order: 8,
+        order: 10,
         content: {
           text: "The equations of motion: SUVAT. S = ut + ½at², v² = u² + 2as, v = u + at. Think 'SUVAT' — some use all three.",
           hook_type: "mnemonic",
@@ -126,7 +148,7 @@ const LESSONS = [
       {
         id: "motion_reflection_01",
         type: "reflection",
-        order: 9,
+        order: 11,
         content: {
           question: "If a car is moving at constant velocity, what is its acceleration? What does the velocity-time graph look like?",
           expected_understanding: "Acceleration is zero when velocity is constant. The v-t graph is a horizontal line at the velocity value.",
@@ -248,10 +270,21 @@ const LESSONS = [
           units_note: "V in volts, I in amperes, R in ohms. If given mA, convert to A (1 mA = 0.001 A).",
         },
       },
+    {
+      id: "ohm_interactive_circuit_01",
+      type: "interactive",
+      order: 5,
+      content: {
+        component: "circuit_simulator",
+        config: { voltage: 12, resistors: 2 },
+        instruction: "Build the circuit in series, then in parallel. Add resistors one at a time and watch R_total, the current and the power change.",
+        prediction_prompt: "In series, adding a resistor makes the current go up or down? In parallel? Predict, then test.",
+      },
+    },
       {
         id: "ohm_worked_example_01",
         type: "worked_example",
-        order: 5,
+        order: 6,
         content: {
           scenario: "A resistor of 10 Ω is connected across a 6 V battery. Calculate the current flowing through the resistor.",
           given: ["R = 10 Ω", "V = 6 V"],
@@ -269,7 +302,7 @@ const LESSONS = [
       {
         id: "ohm_misconception_01",
         type: "common_misconception",
-        order: 6,
+        order: 7,
         content: {
           mistake: "If voltage is zero, resistance is also zero.",
           why_wrong: "Resistance is a property of the conductor itself (its material, length, cross-section). It doesn't depend on whether voltage is applied.",
@@ -279,7 +312,7 @@ const LESSONS = [
       {
         id: "ohm_jamb_01",
         type: "jamb_insight",
-        order: 7,
+        order: 8,
         content: {
           focus_area: "JAMB tests Ohm's Law with circuit calculations. They give you two values and ask for the third. Sometimes they test the concept with a V-I graph (straight line through origin = ohmic conductor).",
           trap: "JAMB may give current in mA. Always convert to A before using V = IR.",
@@ -290,7 +323,7 @@ const LESSONS = [
       {
         id: "ohm_memory_01",
         type: "memory_hook",
-        order: 8,
+        order: 9,
         content: {
           text: "V = IR. Think of it as a triangle: V on top, I and R below. Cover what you want to find — if you cover I, you get V/R. If you cover R, you get V/I. If you cover V, you get IR.",
           hook_type: "visualization",
@@ -413,10 +446,21 @@ const LESSONS = [
           units_note: "v in m/s, f in Hz (which is 1/s), λ in m. Check that units are consistent.",
         },
       },
+    {
+      id: "wave_interactive_wave_01",
+      type: "interactive",
+      order: 5,
+      content: {
+        component: "wave_simulator",
+        config: {},
+        instruction: "Change the frequency and the amplitude independently. Note which one changes the pitch (wavelength) and which changes the loudness.",
+        prediction_prompt: "If you halve the frequency, does the wavelength halve or double? Set it up and check.",
+      },
+    },
       {
         id: "wave_worked_example_01",
         type: "worked_example",
-        order: 5,
+        order: 6,
         content: {
           scenario: "A wave has a frequency of 10 Hz and a wavelength of 0.5 m. Calculate the speed of the wave.",
           given: ["f = 10 Hz", "λ = 0.5 m"],
@@ -433,7 +477,7 @@ const LESSONS = [
       {
         id: "wave_misconception_01",
         type: "common_misconception",
-        order: 6,
+        order: 7,
         content: {
           mistake: "If you increase the frequency of a wave, the wavelength stays the same.",
           why_wrong: "In a given medium, wave speed is constant (determined by the medium). Since v = fλ, if f increases, λ must decrease to keep v constant.",
@@ -443,7 +487,7 @@ const LESSONS = [
       {
         id: "wave_jamb_01",
         type: "jamb_insight",
-        order: 7,
+        order: 8,
         content: {
           focus_area: "JAMB tests v = fλ calculations, properties of transverse vs longitudinal waves, and the relationship between frequency, wavelength, and period.",
           trap: "JAMB may give frequency in kHz or MHz. Always convert to Hz: 1 kHz = 1000 Hz, 1 MHz = 1,000,000 Hz.",
@@ -454,7 +498,7 @@ const LESSONS = [
       {
         id: "wave_memory_01",
         type: "memory_hook",
-        order: 8,
+        order: 9,
         content: {
           text: "v = fλ. Think 'Victor has fλeas' — v = f × λ. Or 'Very Fast Lambs' — v, f, λ.",
           hook_type: "mnemonic",
@@ -463,7 +507,7 @@ const LESSONS = [
       {
         id: "wave_reflection_01",
         type: "reflection",
-        order: 9,
+        order: 10,
         content: {
           question: "If you send a wave from water into a deeper region, what happens to its speed? Its frequency? Its wavelength?",
           expected_understanding: "Wave speed changes with depth (deeper = faster in most cases). Frequency stays the same (determined by the source). Wavelength changes because v = fλ and v changed while f stayed constant.",
@@ -587,10 +631,21 @@ const LESSONS = [
           units_note: "P in watts, I in amps, V in volts, R in ohms. For energy: E = Pt, so E in joules = P in watts × t in seconds.",
         },
       },
+    {
+      id: "current_interactive_circuit_01",
+      type: "interactive",
+      order: 5,
+      content: {
+        component: "circuit_simulator",
+        config: { voltage: 12, resistors: 3 },
+        instruction: "Compare the current through a series chain with the current in each branch of a parallel network. Which arrangement gives the bigger current for the same EMF?",
+        prediction_prompt: "Three 10Ω resistors in series give a smaller total resistance than one 10Ω resistor alone. Agree? Test it.",
+      },
+    },
       {
         id: "current_worked_example_01",
         type: "worked_example",
-        order: 5,
+        order: 6,
         content: {
           scenario: "A 60 W light bulb is connected to a 240 V supply. Calculate the current flowing through it and its resistance.",
           given: ["P = 60 W", "V = 240 V"],
@@ -607,7 +662,7 @@ const LESSONS = [
       {
         id: "current_misconception_01",
         type: "common_misconception",
-        order: 6,
+        order: 7,
         content: {
           mistake: "In a series circuit, the voltage is the same across each component.",
           why_wrong: "In a series circuit, the CURRENT is the same through each component. The VOLTAGE is shared (divided) among them.",
@@ -617,7 +672,7 @@ const LESSONS = [
       {
         id: "current_jamb_01",
         type: "jamb_insight",
-        order: 7,
+        order: 8,
         content: {
           focus_area: "JAMB tests series vs parallel circuits, power calculations, and energy calculations. They often give a circuit diagram and ask for current, voltage, or power at different points.",
           trap: "JAMB may give power in kW. Convert to W before using P = IV.",
@@ -628,7 +683,7 @@ const LESSONS = [
       {
         id: "current_memory_01",
         type: "memory_hook",
-        order: 8,
+        order: 9,
         content: {
           text: "Series: Same Current, Shared Voltage (SCSV). Parallel: Same Voltage, Shared Current (SVSC). Remember: Series = Single path. Parallel = Multiple paths.",
           hook_type: "mnemonic",

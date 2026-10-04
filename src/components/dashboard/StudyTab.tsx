@@ -112,6 +112,10 @@ export const StudyTab = ({
           <BookOpen className="w-6 h-6 text-purple-500" />
           <span className="font-bold text-sm">Syllabus</span>
         </Button>
+        <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-indigo-500 hover:bg-indigo-500/5" onClick={() => navigateStep('lessons')}>
+          <GraduationCap className="w-6 h-6 text-indigo-500" />
+          <span className="font-bold text-sm">Lessons</span>
+        </Button>
         <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-rose-500 hover:bg-rose-500/5" onClick={() => navigateStep('novels')}>
           <Library className="w-6 h-6 text-rose-500" />
            <span className="font-bold text-sm">Library</span>

@@ -157,7 +157,10 @@ function FormulaStep({ content }: { content: FormulaContent }) {
           {content.variables.map((v, i) => (
             <div key={i} className="flex items-start gap-2 p-2 bg-muted/30 rounded-lg">
               <span className="font-mono font-bold text-primary">{v.name}</span>
-              <span className="text-sm text-muted-foreground">= {v.description} ({v.unit})</span>
+              <span className="text-sm text-muted-foreground">
+                = {v.description}
+                {v.unit ? ` (${v.unit})` : ''}
+              </span>
             </div>
           ))}
         </div>

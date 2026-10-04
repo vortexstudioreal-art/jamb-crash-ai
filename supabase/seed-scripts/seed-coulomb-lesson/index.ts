@@ -97,9 +97,31 @@ const COULOMB_LESSON = {
       },
     },
     {
+      id: "coulomb_interactive_field_01",
+      type: "interactive",
+      order: 6,
+      content: {
+        component: "field_line_viewer",
+        config: { charge: 2, field_lines: 14 },
+        instruction: "Switch between opposite and like charges. Then reduce the separation slider and look for the neutral point where the field lines vanish.",
+        prediction_prompt: "Between two like charges, is there a point where the electric field is zero? Where would it be?",
+      },
+    },
+    {
+      id: "coulomb_interactive_charge_01",
+      type: "interactive",
+      order: 7,
+      content: {
+        component: "charge_explorer",
+        config: { charge: 2 },
+        instruction: "Move the test charge around and read the potential V and the force F = qE. Double the test charge and watch F double while V stays put.",
+        prediction_prompt: "Potential depends on position; force also depends on the test charge. So doubling q should change one of them and not the other. Which?",
+      },
+    },
+    {
       id: "coulomb_worked_example_01",
       type: "worked_example",
-      order: 6,
+      order: 8,
       content: {
         scenario: "Two point charges, Q = +4 × 10⁻⁶ C and q = +2 × 10⁻⁶ C, are placed 0.3 m apart in vacuum. Calculate the electrostatic force between them.",
         given: [
@@ -125,7 +147,7 @@ const COULOMB_LESSON = {
     {
       id: "coulomb_misconception_01",
       type: "common_misconception",
-      order: 7,
+      order: 9,
       content: {
         mistake: "If I double the distance, the force halves.",
         why_wrong: "This confuses linear and inverse-square relationships. Coulomb's Law has r² in the denominator, not r.",
@@ -135,7 +157,7 @@ const COULOMB_LESSON = {
     {
       id: "coulomb_misconception_02",
       type: "common_misconception",
-      order: 8,
+      order: 10,
       content: {
         mistake: "A larger charge always experiences a larger force.",
         why_wrong: "Force depends on BOTH charges. The force on Q is equal in magnitude to the force on q (Newton's Third Law). A tiny charge near a huge charge feels the same force as the huge charge feels from the tiny one.",
@@ -145,7 +167,7 @@ const COULOMB_LESSON = {
     {
       id: "coulomb_jamb_01",
       type: "jamb_insight",
-      order: 9,
+      order: 11,
       content: {
         focus_area: "Coulomb's Law questions usually test the relationship between force, charge, and distance. JAMB often asks: 'What happens to F if Q doubles, q triples, and r quadruples?' These require you to apply the proportional relationships.",
         trap: "JAMB may give distances in cm but expect answers in metres. Always check units before calculating.",
@@ -156,7 +178,7 @@ const COULOMB_LESSON = {
     {
       id: "coulomb_practice_inline_01",
       type: "inline_practice",
-      order: 10,
+      order: 12,
       content: {
         question: "Two charges of +3 × 10⁻⁶ C and +5 × 10⁻⁶ C are 0.2 m apart. What is the force between them?",
         options: [
@@ -177,7 +199,7 @@ const COULOMB_LESSON = {
     {
       id: "coulomb_memory_01",
       type: "memory_hook",
-      order: 11,
+      order: 13,
       content: {
         text: "Coulomb's Law is like gossip: The bigger the story (more charge), the stronger the reaction. The farther it travels (more distance), the weaker it gets. And it fades FAST — double the distance, quarter the force.",
         hook_type: "analogy",
@@ -186,7 +208,7 @@ const COULOMB_LESSON = {
     {
       id: "coulomb_reflection_01",
       type: "reflection",
-      order: 12,
+      order: 14,
       content: {
         question: "Can you explain why a charged rod can pick up small pieces of paper, even though the paper is neutral? What does Coulomb's Law have to do with it?",
         expected_understanding: "The charged rod induces a temporary charge separation in the neutral paper. The near side becomes oppositely charged and is attracted more strongly than the far side is repelled. This is an application of electrostatic induction, which relies on Coulomb's Law.",

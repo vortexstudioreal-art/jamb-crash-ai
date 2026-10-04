@@ -71,23 +71,32 @@ CREATE POLICY "Published lessons are viewable by everyone"
 -- Lesson progress: users can read/update their own
 CREATE POLICY "Users can view own lesson progress"
   ON lesson_progress FOR SELECT
+  TO authenticated
   USING (auth.email() = email);
 
 CREATE POLICY "Users can insert own lesson progress"
   ON lesson_progress FOR INSERT
+  TO authenticated
   WITH CHECK (auth.email() = email);
 
 CREATE POLICY "Users can update own lesson progress"
   ON lesson_progress FOR UPDATE
-  USING (auth.email() = email);
+  TO authenticated
+  USING (auth.email() = email)
+  WITH CHECK (auth.email() = email);
 
--- Service role can manage everything (for seed functions)
+-- Service role can manage everything (for seed functions).
+-- These must stay scoped to service_role: an unscoped FOR ALL policy is also
+-- granted to anon/authenticated, which would let any client with the
+-- publishable key rewrite or delete lessons.
 CREATE POLICY "Service role full access on lessons"
   ON lessons FOR ALL
+  TO service_role
   USING (true)
   WITH CHECK (true);
 
 CREATE POLICY "Service role full access on lesson_progress"
   ON lesson_progress FOR ALL
+  TO service_role
   USING (true)
   WITH CHECK (true);
