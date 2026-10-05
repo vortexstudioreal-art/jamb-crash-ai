@@ -176,7 +176,7 @@ export const DesktopSidebar = ({
 
       {/* Bottom Actions */}
       <div className="px-3 py-3 border-t border-border space-y-1 shrink-0">
-        {isAdmin && (
+        {(isAdmin || isOwner) && (
           <button
             onClick={() => onNavigate?.('/admin')}
             className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"

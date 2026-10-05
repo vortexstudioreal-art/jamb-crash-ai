@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import { useFeatureUsage } from '@/hooks/useFeatureUsage';
 import { FeatureLimitReached } from '@/components/FeatureLimitReached';
+import { saveLocalPlan } from '@/lib/studyPlanCache';
 import { errorLogger } from '@/services/errorLogger';
 
 interface StudyPlanGeneratorProps {
@@ -358,6 +359,9 @@ export const StudyPlanGenerator = ({
 
     setPlan(generatedPlan);
     setStep('display');
+    // Cache locally first so the calendar works even if the DB save fails
+    // (offline, RLS, inactive project). DB remains source of truth.
+    saveLocalPlan(userEmail, generatedPlan, targetScore, hoursPerSession);
     void savePlanToDb(generatedPlan);
   };
 
@@ -888,7 +892,7 @@ ${quizPerformance.filter(p => p.accuracy < 60).length > 0 ? `
             </div>
           )}
           <div className="flex flex-col sm:flex-row justify-center gap-3">
-            {savedPlanId && !saveError && onViewCalendar && (
+            {onViewCalendar && (
               <Button
                 onClick={onViewCalendar}
                 size="lg"

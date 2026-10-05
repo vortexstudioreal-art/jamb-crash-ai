@@ -3,6 +3,7 @@ import { Calendar, CheckCircle2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
+import { loadLocalPlan, loadProgress, localTaskKey } from '@/lib/studyPlanCache';
 
 interface StudyPlanTodayCardProps {
   userEmail: string;
@@ -43,8 +44,35 @@ export const StudyPlanTodayCard = ({ userEmail, onOpenCalendar, onGenerate }: St
         .maybeSingle();
       if (cancelled) return;
       if (!planData) {
-        setHasPlan(false);
-        setTasks([]);
+        // No DB plan — fall back to the locally cached plan so the card
+        // doesn't flip back to "Create Plan" after generating one offline.
+        const local = loadLocalPlan(userEmail);
+        if (cancelled) return;
+        if (local && local.status === 'active') {
+          const progress = loadProgress(local.id);
+          const synth: PlanTask[] = [];
+          local.plan_data.forEach((d) => {
+            d.subjects.forEach((s, idx) => {
+              const p = progress[localTaskKey(d.day, s.name)];
+              synth.push({
+                id: `local-${d.day}-${idx}`,
+                date: d.isoDate,
+                subject: s.name,
+                topics: s.topics,
+                duration: s.duration,
+                quiz_goal: s.quizGoal,
+                completed: p?.completed ?? false,
+                priority: s.priority,
+              });
+            });
+          });
+          if (cancelled) return;
+          setHasPlan(true);
+          setTasks(synth);
+        } else {
+          setHasPlan(false);
+          setTasks([]);
+        }
         setLoading(false);
         return;
       }
@@ -69,7 +97,16 @@ export const StudyPlanTodayCard = ({ userEmail, onOpenCalendar, onGenerate }: St
   const totalDays = Array.from(new Set(tasks.map((t) => t.date))).length;
   const completedDays = Array.from(new Set(tasks.filter((t) => t.completed).map((t) => t.date))).length;
 
-  if (loading) return null;
+  // Skeleton instead of null: returning null while the two DB queries run
+  // is what made the card flash in and out on every dashboard visit.
+  if (loading) {
+    return (
+      <div className="rounded-2xl p-5 border border-border bg-muted/30 animate-pulse">
+        <div className="h-5 w-40 rounded-md bg-muted mb-2" />
+        <div className="h-4 w-64 rounded-md bg-muted" />
+      </div>
+    );
+  }
 
   if (!hasPlan) {
     return (

@@ -14,10 +14,13 @@ export const ProtectedRoute = ({
   requireAccess = false,
   requireAdmin = false 
 }: ProtectedRouteProps) => {
-  const { user, isLoading, hasAccess, isAdmin, isOwner } = useAuth();
+  const { user, isLoading, roleResolved, hasAccess, isAdmin, isOwner } = useAuth();
   const location = useLocation();
 
-  if (isLoading) {
+  // Wait for the role/access lookup, not just the session: the lookup runs
+  // deferred after the session loads, and redirecting before it settles
+  // bounces admins to "/" on slow connections (seen on desktop builds).
+  if (isLoading || (user && !roleResolved)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">

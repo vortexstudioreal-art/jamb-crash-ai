@@ -23,6 +23,13 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import {
+  loadLocalPlan,
+  loadProgress,
+  localTaskKey,
+  saveProgress,
+  setLocalPlanStatus,
+} from '@/lib/studyPlanCache';
 
 interface StudyPlanTrackerProps {
   userEmail: string;
@@ -147,8 +154,43 @@ export const StudyPlanTracker = ({
         .order('date', { ascending: true });
       setTasks((taskData ?? []) as unknown as PlanTask[]);
     } else {
-      setPlan(null);
-      setTasks([]);
+      // No DB plan (offline / save failed / RLS) — fall back to the locally
+      // cached plan so a just-generated plan still opens a calendar.
+      const local = loadLocalPlan(userEmail);
+      if (local && local.status === 'active') {
+        const progress = loadProgress(local.id);
+        const synth: PlanTask[] = [];
+        local.plan_data.forEach((d) => {
+          d.subjects.forEach((s, idx) => {
+            const p = progress[localTaskKey(d.day, s.name)];
+            synth.push({
+              id: `local-${d.day}-${idx}`,
+              plan_id: local.id,
+              day: d.day,
+              date: d.isoDate,
+              day_name: d.dayName,
+              subject: s.name,
+              topics: s.topics,
+              duration: s.duration,
+              priority: s.priority,
+              quiz_goal: s.quizGoal,
+              completed: p?.completed ?? false,
+              completed_at: p?.completed_at ?? null,
+            });
+          });
+        });
+        setPlan({
+          id: local.id,
+          plan_data: local.plan_data,
+          target_score: local.target_score,
+          hours_per_day: local.hours_per_day,
+          status: local.status,
+        });
+        setTasks(synth);
+      } else {
+        setPlan(null);
+        setTasks([]);
+      }
     }
     setLoading(false);
   }, [userEmail]);
@@ -242,6 +284,15 @@ export const StudyPlanTracker = ({
   const toggleTask = async (task: PlanTask) => {
     const next = !task.completed;
     const completedAt = next ? new Date().toISOString() : null;
+    // Locally-cached plan (no DB row) — persist check-offs locally.
+    if (task.id.startsWith('local-')) {
+      setTasks((prev) => prev.map((t) => (t.id === task.id ? { ...t, completed: next, completed_at: completedAt } : t)));
+      const progress = loadProgress(task.plan_id);
+      progress[localTaskKey(task.day, task.subject)] = { completed: next, completed_at: completedAt };
+      saveProgress(task.plan_id, progress);
+      if (next) toast.success(`${task.subject.replace('_', ' ')} done!`);
+      return;
+    }
     setTasks((prev) => prev.map((t) => (t.id === task.id ? { ...t, completed: next, completed_at: completedAt } : t)));
     const { error } = await supabase
       .from('study_plan_tasks')
@@ -257,6 +308,13 @@ export const StudyPlanTracker = ({
 
   const completePlan = async () => {
     if (!plan) return;
+    // Locally-cached plan — mark complete locally instead of the DB.
+    if (plan.id.startsWith('local-')) {
+      setLocalPlanStatus(userEmail, 'completed');
+      setPlan({ ...plan, status: 'completed' });
+      toast.success('Study plan completed! 🎉');
+      return;
+    }
     const { error } = await supabase
       .from('study_plans')
       .update({ status: 'completed', updated_at: new Date().toISOString() })
