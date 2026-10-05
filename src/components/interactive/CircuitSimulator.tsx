@@ -117,7 +117,6 @@ export function CircuitSimulator({ config }: InteractiveProps) {
       ctx.lineTo(pad + 30, top);
       ctx.stroke();
 
-      const span = right - pad - 60;
       for (let i = 0; i < count; i++) {
         const y = top + (i * (bottom - top)) / (count - 1 || 1);
         ctx.strokeStyle = 'hsl(30, 40%, 25%)';
