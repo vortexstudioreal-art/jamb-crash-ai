@@ -65,7 +65,7 @@ const PLAN_FEATURES = {
   premium: [
     'Everything in ACE',
     'WhatsApp Reminders',
-    'Refer & Earn system',
+    'Refer & Boost system',
     'Advanced AI Prediction',
     'Priority support',
   ],

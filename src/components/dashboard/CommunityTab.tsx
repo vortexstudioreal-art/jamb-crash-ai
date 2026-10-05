@@ -69,7 +69,7 @@ export const CommunityTab = ({
         </div>
       </div>
 
-      {/* Refer & Earn */}
+      {/* Refer & Boost */}
       {userEmail && (
         <Suspense fallback={null}>
           <ReferralSystem userEmail={userEmail} />

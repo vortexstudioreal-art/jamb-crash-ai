@@ -57,7 +57,7 @@ const featureNames: Record<PlanFeature, string> = {
   practiceQuiz: 'Practice Quiz',
   aiScorePrediction: 'AI Score Prediction',
   whatsAppReminders: 'WhatsApp Reminders',
-  referralBonus: 'Refer & Earn',
+  referralBonus: 'Refer & Boost',
   emailReminder: 'Email Reminders',
   aiStudyTips: 'AI Study Tips',
   advancedPrediction: 'Advanced Prediction',

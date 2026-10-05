@@ -78,7 +78,7 @@ const healthChecks: Omit<HealthCheckResult, 'status'>[] = [
     {
       name: 'Referral system',
       icon: <Gift className="w-5 h-5" />,
-      fixPrompt: 'Fix Referral System: The ReferralSystem component should generate unique referral codes via generate_referral_code function, track referrals in the referrals table, and apply ₦1,000 discount when referred users make payment.',
+      fixPrompt: 'Fix Referral System: The ReferralSystem component should generate unique referral codes via generate_referral_code function, track referrals in the referrals table, and grant Refer & Boost tier rewards (Bronze/Silver/Gold premium days) via claim payments rows.',
     },
     {
       name: 'Owner bypass (never sees paywall)',

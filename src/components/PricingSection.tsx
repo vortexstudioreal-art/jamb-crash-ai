@@ -46,7 +46,7 @@ const plans = [
     features: [
       'Everything in ACE',
       'WhatsApp Reminders',
-      'Refer & Earn (₦1,000 bonus)',
+      'Refer & Boost (free premium tiers)',
       'Advanced AI Prediction',
       'Lifetime access forever',
       'Priority support 24/7',
