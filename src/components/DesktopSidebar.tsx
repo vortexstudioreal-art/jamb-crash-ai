@@ -1,6 +1,6 @@
-import { startTransition } from 'react';import {
+import { startTransition, useState } from 'react';import {
   Home, BookOpen, Sparkles, Trophy, User,
-  Target, Zap, Play, Settings, LogOut, Shield
+  Target, Zap, Play, Settings, LogOut, Shield, ChevronDown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { DashboardTab } from '@/components/BottomNav';
@@ -46,6 +46,9 @@ export const DesktopSidebar = ({
   const displayName = userName?.split(' ')[0] || 'Champion';
   const initials = displayName.charAt(0).toUpperCase();
   const effectiveRole = isOwner ? 'owner' : userRole;
+  // Collapsed by default: the 4-button grid bolted into the scroll area is
+  // what forces the sidebar to scroll on short (Windows laptop) screens.
+  const [quickStartOpen, setQuickStartOpen] = useState(false);
 
   return (
     <aside className="hidden md:flex flex-col w-[260px] lg:w-[280px] h-screen overflow-hidden border-r border-border bg-card/50 backdrop-blur-xl fixed left-0 top-0 z-40">
@@ -115,8 +118,17 @@ export const DesktopSidebar = ({
           );
         })}
 
-        {/* Quick Actions */}
-        <p className="px-3 mt-5 mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Quick Start</p>
+        {/* Quick Actions (collapsible — keeps the sidebar scroll-free) */}
+        <button
+          type="button"
+          onClick={() => setQuickStartOpen((v) => !v)}
+          aria-expanded={quickStartOpen}
+          className="w-full flex items-center justify-between px-3 mt-5 mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <span>Quick Start</span>
+          <ChevronDown className={cn("w-3.5 h-3.5 transition-transform", quickStartOpen && "rotate-180")} />
+        </button>
+        {quickStartOpen && (
         <div className="grid grid-cols-2 gap-2 px-1">
           <button
             onClick={() => {
@@ -167,6 +179,7 @@ export const DesktopSidebar = ({
             <span className="text-[11px] font-medium text-foreground">Study Plan</span>
           </button>
         </div>
+        )}
       </nav>
 
       {/* AdSense — Sidebar */}

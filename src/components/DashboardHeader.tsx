@@ -44,11 +44,11 @@ export const DashboardHeader = ({
           <span className="font-bold text-lg text-foreground">Jamb Crash AI</span>
         </div>
 
-        {/* Desktop: Page title area */}
+        {/* Desktop: Page title area — badge links to /admin for admins */}
         <div className="hidden md:flex items-center gap-2">
           <AdminBadge 
             role={effectiveRole} 
-            linkToAdmin={false} 
+            linkToAdmin={showAdminButton} 
           />
         </div>
 
