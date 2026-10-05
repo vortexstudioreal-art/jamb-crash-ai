@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { User, Mail, Crown, Shield, Calendar, Package, ArrowLeft, LogOut, Edit2, Check, X, HelpCircle, FileText, MessageCircle, Moon, Sun, Phone, Bell, Users, Ticket, Lock,  Trash2 } from 'lucide-react';
+import { User, Mail, Crown, Shield, Calendar, Package, ArrowLeft, LogOut, Edit2, Check, X, HelpCircle, FileText, MessageCircle, Moon, Sun, Phone, Bell, Users, Ticket, Lock, Trash2, MailCheck, Send, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -66,6 +66,9 @@ export default function Settings() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [showChangePassword, setShowChangePassword] = useState(false);
+  const [emailVerified, setEmailVerified] = useState<boolean | null>(null);
+  const [isResending, setIsResending] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // All access checks come from server-side via AuthContext
   const userEmail = user?.email?.toLowerCase() || '';
@@ -173,6 +176,62 @@ export default function Settings() {
 
     loadUserData();
   }, [userEmail, effectiveAdmin]);
+
+  // Email verification status — resolved from the live session, not the
+  // cached context user, so "Refresh" picks up a just-clicked email link.
+  useEffect(() => {
+    const checkVerification = async () => {
+      if (!user) {
+        setEmailVerified(null);
+        return;
+      }
+      try {
+        const { data } = await supabase.auth.getUser();
+        const u = data.user ?? user;
+        setEmailVerified(Boolean(u?.email_confirmed_at || (u as { confirmed_at?: string })?.confirmed_at));
+      } catch {
+        const u = user as { email_confirmed_at?: string; confirmed_at?: string };
+        setEmailVerified(Boolean(u?.email_confirmed_at || u?.confirmed_at));
+      }
+    };
+    checkVerification();
+  }, [user]);
+
+  const handleResendVerification = async () => {
+    if (!userEmail) return;
+    setIsResending(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: userEmail,
+        options: { emailRedirectTo: window.location.origin },
+      });
+      if (error) throw error;
+      toast.success('Verification email sent! Check your inbox (and spam). 📧');
+    } catch (error) {
+      errorLogger.error(error, { component: 'Settings', action: 'resend verification' });
+      toast.error(error instanceof Error ? error.message : 'Failed to resend verification email.');
+    } finally {
+      setIsResending(false);
+    }
+  };
+
+  const handleRefreshVerification = async () => {
+    setIsRefreshing(true);
+    try {
+      const { data, error } = await supabase.auth.getUser();
+      if (error) throw error;
+      const u = data.user as unknown as { email_confirmed_at?: string; confirmed_at?: string } | null;
+      const verified = Boolean(u?.email_confirmed_at || u?.confirmed_at);
+      setEmailVerified(verified);
+      toast.success(verified ? 'Email verified! ✅' : 'Still unverified — click the link in your inbox, then refresh again.');
+    } catch (error) {
+      errorLogger.error(error, { component: 'Settings', action: 'refresh verification' });
+      toast.error('Could not refresh status. Check your connection.');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   const handleSaveName = async () => {
     if (!fullName.trim()) {
@@ -411,6 +470,67 @@ export default function Settings() {
                   <p className="text-foreground">{userEmail}</p>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Email Verification Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.12 }}
+        >
+          <Card className="mb-6">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2">
+                <MailCheck className="w-5 h-5 text-primary" />
+                Email Verification
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="font-medium text-foreground">
+                    {emailVerified === null
+                      ? 'Checking status…'
+                      : emailVerified
+                        ? 'Your email is verified ✅'
+                        : 'Your email is not verified yet'}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {emailVerified
+                      ? 'You have full access to sign in on any device.'
+                      : 'Verify to secure your account and recover access easily.'}
+                  </p>
+                </div>
+                <Badge variant={emailVerified ? 'default' : 'secondary'}>
+                  {emailVerified === null ? '…' : emailVerified ? 'Verified' : 'Pending'}
+                </Badge>
+              </div>
+              {!emailVerified && (
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={handleResendVerification}
+                    disabled={isResending}
+                  >
+                    <Send className="w-4 h-4 mr-2" />
+                    {isResending ? 'Sending…' : 'Resend Verification Email'}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex-1"
+                    onClick={handleRefreshVerification}
+                    disabled={isRefreshing}
+                  >
+                    <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+                    {isRefreshing ? 'Checking…' : "I've Verified — Refresh"}
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </motion.div>

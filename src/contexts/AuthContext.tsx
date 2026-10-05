@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { supabase, supabaseUrl } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { startPeriodicSync, stopPeriodicSync } from '@/services/syncService';
 import { errorLogger } from '@/services/errorLogger';
 
@@ -430,15 +430,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     });
     
     if (!error && data?.user) {
-      // Auto-confirm via edge function (best effort)
+      // Auto-confirm via edge function (best effort) so signup never blocks
+      // on email verification. Uses invoke() so the anon apikey is attached
+      // (raw fetch without it gets rejected — that was the "API not working").
       try {
-        await fetch(`${supabaseUrl}/functions/v1/auto-confirm`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email }),
+        await supabase.functions.invoke('auto-confirm', {
+          body: { email },
         });
       } catch {
-        // Edge function not deployed yet
+        // Edge function not deployed / project inactive — non-fatal
       }
 
       // Also try RPC directly (in case migration is applied)

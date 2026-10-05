@@ -48,9 +48,9 @@ export const DesktopSidebar = ({
   const effectiveRole = isOwner ? 'owner' : userRole;
 
   return (
-    <aside className="hidden md:flex flex-col w-[260px] lg:w-[280px] h-screen border-r border-border bg-card/50 backdrop-blur-xl fixed left-0 top-0 z-40">
+    <aside className="hidden md:flex flex-col w-[260px] lg:w-[280px] h-screen overflow-hidden border-r border-border bg-card/50 backdrop-blur-xl fixed left-0 top-0 z-40">
       {/* Logo & Brand */}
-      <div className="px-5 py-5 border-b border-border">
+      <div className="px-5 py-5 border-b border-border shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
             <BookOpen className="w-6 h-6 text-primary-foreground" />
@@ -63,7 +63,7 @@ export const DesktopSidebar = ({
       </div>
 
       {/* User Card */}
-      <div className="px-4 py-4 border-b border-border">
+      <div className="px-4 py-4 border-b border-border shrink-0">
         <div className="flex items-center gap-3 p-2 rounded-xl bg-muted/50">
           <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
             {initials}
@@ -85,7 +85,7 @@ export const DesktopSidebar = ({
       </div>
 
       {/* Main Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+      <nav className="flex-1 min-h-0 px-3 py-4 space-y-1 overflow-y-auto overscroll-contain sidebar-scroll [scrollbar-width:thin]">
         <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Navigation</p>
         {mainNav.map(({ id, label, Icon, description }) => {
           const isActive = active === id;
@@ -170,12 +170,12 @@ export const DesktopSidebar = ({
       </nav>
 
       {/* AdSense — Sidebar */}
-      <div className="px-3 py-3">
+      <div className="px-3 py-3 shrink-0">
         <GoogleAdSense className="rounded-xl overflow-hidden" />
       </div>
 
       {/* Bottom Actions */}
-      <div className="px-3 py-3 border-t border-border space-y-1">
+      <div className="px-3 py-3 border-t border-border space-y-1 shrink-0">
         {isAdmin && (
           <button
             onClick={() => onNavigate?.('/admin')}

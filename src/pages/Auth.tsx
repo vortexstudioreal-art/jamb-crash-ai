@@ -32,7 +32,7 @@ const emailSchema = z.string()
   }, 'Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
 
-type AuthView = 'login' | 'signup' | 'forgot-password' | 'reset-password' | 'verify-email';
+type AuthView = 'login' | 'signup' | 'forgot-password' | 'reset-password';
 
 export default function Auth() {
   const [view, setView] = useState<AuthView>('login');
@@ -293,9 +293,20 @@ export default function Auth() {
       } else {
         const { error } = await signUp(email, password, fullName);
         if (error) {
-          if (error.message === 'email_not_confirmed') {
-            setView('verify-email');
-            toast.success('Check your email to verify your account! 📧');
+          const msg = error.message.toLowerCase();
+          if (
+            msg === 'email_not_confirmed' ||
+            msg.includes('email not confirmed') ||
+            msg.includes('email confirmation') ||
+            msg.includes('not confirmed') ||
+            msg.includes('verify')
+          ) {
+            // Email confirmation is enforced on the project but the
+            // auto-confirm step didn't run (function undeployed / project
+            // inactive). Don't strand the user on a verification screen —
+            // send them to sign-in and let them verify later from Settings.
+            toast.success('Account created! Please sign in to continue. 📧 You can verify your email later from Settings.');
+            setView('login');
           } else if (error.message.includes('already registered')) {
             toast.error('This email is already registered. Please sign in instead.');
             setView('login');
@@ -319,8 +330,6 @@ export default function Auth() {
         return 'Reset Password';
       case 'reset-password':
         return 'Set New Password';
-      case 'verify-email':
-        return 'Check Your Email';
       case 'signup':
         return 'Create Account';
       default:
@@ -334,8 +343,6 @@ export default function Auth() {
         return "Enter your email and we'll send you a reset link";
       case 'reset-password':
         return 'Enter your new password below';
-      case 'verify-email':
-        return `We sent a verification link to ${email}`;
       case 'signup':
         return 'Join thousands of students crushing their JAMB goals';
       default:
@@ -417,67 +424,7 @@ export default function Auth() {
           </motion.div>
         )}
 
-        {/* Email Verification Screen */}
-        {view === 'verify-email' && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="card-elevated p-6 rounded-2xl text-center"
-          >
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-              <Mail className="w-8 h-8 text-primary" />
-            </div>
-            <h3 className="text-lg font-semibold text-foreground mb-2">Verification Email Sent!</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              We've sent a verification link to <strong>{email}</strong>. 
-              Please check your inbox and click the link to verify your account.
-            </p>
-            <p className="text-xs text-muted-foreground mb-6">
-              Didn't receive the email? Check your spam folder or try again.
-            </p>
-            <div className="space-y-3">
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={async () => {
-                  try {
-                    const { error } = await supabase.auth.resend({
-                      type: 'signup',
-                      email: email,
-                      options: {
-                        emailRedirectTo: window.location.origin,
-                      }
-                    });
-                    if (error) {
-                      toast.error(error.message);
-                    } else {
-                      toast.success('Verification email resent! Check your inbox.');
-                    }
-                  } catch {
-                    toast.error('Failed to resend email. Please try again.');
-                  }
-                }}
-              >
-                Resend Verification Email
-              </Button>
-              <Button
-                variant="ghost"
-                className="w-full"
-                onClick={() => {
-                  setView('login');
-                  setEmail('');
-                  setPassword('');
-                }}
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Sign In
-              </Button>
-            </div>
-          </motion.div>
-        )}
-
         {/* Form Card */}
-        {view !== 'verify-email' && (
         <div className="card-elevated p-6 rounded-2xl">
           <form onSubmit={handleSubmit} className="space-y-4">
             {view === 'signup' && (
@@ -638,7 +585,6 @@ export default function Auth() {
           </p>
           )}
         </div>
-        )}
 
         {/* Footer */}
         <p className="text-center text-xs text-muted-foreground mt-6">
