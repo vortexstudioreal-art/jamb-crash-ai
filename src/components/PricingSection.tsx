@@ -12,7 +12,7 @@ const plans = [
   {
     key: 'basic',
     name: 'Basic',
-    price: 5000,
+    price: 1500,
     features: [
       'Full & Mini Quiz modes',
       'Study Materials & Stats',
@@ -25,7 +25,7 @@ const plans = [
   {
     key: 'pro',
     name: 'ACE',
-    price: 10000,
+    price: 3500,
     popular: true,
     features: [
       'Everything in Basic',
@@ -42,13 +42,13 @@ const plans = [
   {
     key: 'premium',
     name: 'SCHOLAR',
-    price: 15000,
+    price: 7500,
     features: [
       'Everything in ACE',
       'WhatsApp Reminders',
       'Refer & Boost (free premium tiers)',
       'Advanced AI Prediction',
-      'Lifetime access forever',
+      'Full access, no limits',
       'Priority support 24/7',
     ],
   },
@@ -79,7 +79,7 @@ export const PricingSection = ({ onSelectPlan, highlightStandard }: PricingSecti
             Choose Your Success Plan
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Invest in your future. One payment, lifetime access to your personalized study materials.
+            Invest in your future. One payment, full access to your personalized study materials.
           </p>
         </motion.div>
 

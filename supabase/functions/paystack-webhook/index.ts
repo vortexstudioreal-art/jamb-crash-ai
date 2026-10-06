@@ -72,13 +72,9 @@ serve(async (req) => {
 
       // Determine access duration based on package
       // NOTE: Must match paystack-verify/index.ts durations
+      // All plans grant ~1 year; no duration is shown in the UI.
       const packageName = metadata?.package || "basic";
-      let accessDays = 365; // 1 year for basic
-      if (packageName === "pro") {
-        accessDays = 365; // 1 year
-      } else if (packageName === "premium" || packageName === "ultimate") {
-        accessDays = 36500; // ~100 years = forever
-      }
+      const accessDays = 365; // 1 year for every plan
       const accessExpiresAt = new Date();
       accessExpiresAt.setDate(accessExpiresAt.getDate() + accessDays);
 

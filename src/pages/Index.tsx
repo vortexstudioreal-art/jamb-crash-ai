@@ -72,9 +72,9 @@ interface FormData {
 }
 
 const plans = {
-  basic: { name: 'Basic', price: 5000 },
-  pro: { name: 'ACE', price: 10000 },
-  premium: { name: 'SCHOLAR', price: 15000 },
+  basic: { name: 'Basic', price: 1500 },
+  pro: { name: 'ACE', price: 3500 },
+  premium: { name: 'SCHOLAR', price: 7500 },
 };
 
 const DASHBOARD_STATE_KEY = 'jamb_dashboard_state';
