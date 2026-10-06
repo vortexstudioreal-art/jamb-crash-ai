@@ -31,9 +31,11 @@ const STEP_ICONS: Record<string, typeof Sparkles> = {
   worked_example: Target,
   common_misconception: AlertTriangle,
   jamb_focus: Eye,
+  jamb_insight: Eye,
   practice: FlaskConical,
+  inline_practice: FlaskConical,
   memory_hook: Brain,
-  reflection: Target,
+  reflection: Sparkles,
   interactive: FlaskConical,
   diagram: Image,
   mastery_check: Trophy,
@@ -48,7 +50,9 @@ const STEP_COLORS: Record<string, string> = {
   worked_example: 'from-emerald-500 to-green-500',
   common_misconception: 'from-red-500 to-rose-500',
   jamb_focus: 'from-orange-500 to-amber-500',
+  jamb_insight: 'from-orange-500 to-amber-500',
   practice: 'from-cyan-500 to-teal-500',
+  inline_practice: 'from-cyan-500 to-teal-500',
   memory_hook: 'from-pink-500 to-rose-500',
   reflection: 'from-violet-500 to-purple-500',
   interactive: 'from-green-500 to-emerald-500',
@@ -65,7 +69,9 @@ const STEP_LABELS: Record<string, string> = {
   worked_example: 'Worked Example',
   common_misconception: 'Watch Out!',
   jamb_focus: 'JAMB Tip',
+  jamb_insight: 'JAMB Tip',
   practice: 'Quick Check',
+  inline_practice: 'Quick Check',
   memory_hook: 'Memory Hook',
   reflection: 'Think About It',
   interactive: 'Try It',
@@ -366,19 +372,43 @@ function MisconceptionStep({ content }: { content: CommonMisconceptionContent })
 }
 
 function JambFocusStep({ content }: { content: JambInsightContent }) {
+  const related = content.related_topics || [];
   return (
     <div className="space-y-4">
       <div className="p-4 bg-orange-500/10 rounded-xl border border-orange-500/20">
         <p className="text-sm font-medium text-orange-600 dark:text-orange-400 mb-2">JAMB Focus</p>
+        {content.focus_area && <p className="text-foreground mb-2">{content.focus_area}</p>}
         {content.frequency && <p className="text-sm text-muted-foreground mb-2">Frequency: {content.frequency}</p>}
+        {content.trap && (
+          <div className="p-3 bg-red-500/10 rounded-lg border-l-4 border-red-500 mb-2">
+            <p className="text-sm"><span className="font-medium text-red-600 dark:text-red-400">Trap:</span> {content.trap}</p>
+          </div>
+        )}
         {content.typical_question && (
           <div className="p-3 bg-background/50 rounded-lg mb-2">
             <p className="text-sm"><span className="font-medium">Typical question:</span> {content.typical_question}</p>
           </div>
         )}
-        {content.exam_tip && (
+        {content.common_mistakes && content.common_mistakes.length > 0 && (
+          <div className="p-3 bg-red-500/10 rounded-lg mb-2">
+            <p className="text-sm font-medium text-red-600 dark:text-red-400 mb-1">Common mistakes:</p>
+            <ul className="text-sm space-y-1">
+              {content.common_mistakes.map((m, i) => (
+                <li key={i}>• {m}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {(content.exam_tip || content.tip) && (
           <div className="p-3 bg-primary/10 rounded-lg">
-            <p className="text-sm font-medium text-primary">💡 Tip: {content.exam_tip}</p>
+            <p className="text-sm font-medium text-primary">💡 Tip: {content.exam_tip || content.tip}</p>
+          </div>
+        )}
+        {related.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {related.map((t, i) => (
+              <span key={i} className="px-2 py-0.5 bg-muted rounded-full text-xs text-muted-foreground">{t}</span>
+            ))}
           </div>
         )}
       </div>
@@ -391,6 +421,21 @@ function MemoryHookStep({ content }: { content: MemoryHookContent }) {
     <div className="p-4 bg-pink-500/10 rounded-xl border border-pink-500/20">
       <p className="text-sm font-medium text-pink-600 dark:text-pink-400 mb-2">🧠 Memory Hook</p>
       <p className="text-lg text-foreground italic">{content.text || content.hook || 'Remember this!'}</p>
+    </div>
+  );
+}
+
+function ReflectionStep({ content }: { content: { question?: string; expected_understanding?: string } }) {
+  if (!content.question) return null;
+  return (
+    <div className="space-y-4">
+      <div className="p-4 bg-violet-500/10 rounded-xl border border-violet-500/20">
+        <p className="text-sm font-medium text-violet-600 dark:text-violet-400 mb-2">Think About It</p>
+        <p className="text-lg text-foreground">{content.question}</p>
+      </div>
+      {content.expected_understanding && (
+        <p className="text-sm text-muted-foreground">{content.expected_understanding}</p>
+      )}
     </div>
   );
 }
@@ -422,6 +467,41 @@ function SummaryStep({ content }: { content: Record<string, unknown> }) {
   );
 }
 
+// Sections that would render empty are dropped entirely so they never
+// occupy a step (no blank cards, no question-less "Quick Check" steps,
+// no "coming soon" placeholders inside the lesson flow).
+const isSectionRenderable = (s: { type: string; content: unknown }): boolean => {
+  const c = (s.content || {}) as Record<string, unknown>;
+  switch (s.type) {
+    case 'practice':
+    case 'inline_practice':
+      return typeof c.question === 'string' && c.question.trim().length > 0;
+    case 'interactive':
+      return typeof (c as { component?: unknown }).component === 'string';
+    case 'summary': {
+      const takeaways = (c.key_takeaways as unknown[]) || [];
+      const connections = (c.connections as unknown[]) || [];
+      return takeaways.length > 0 || connections.length > 0;
+    }
+    case 'diagram':
+      return Boolean(c.description || c.caption);
+    case 'reflection':
+      return typeof c.question === 'string' && (c.question as string).trim().length > 0;
+    case 'hook':
+    case 'intuitive_explanation':
+    case 'formal_explanation':
+    case 'formula':
+    case 'worked_example':
+    case 'common_misconception':
+    case 'jamb_focus':
+    case 'jamb_insight':
+    case 'memory_hook':
+      return true;
+    default:
+      return false;
+  }
+};
+
 export function InteractiveLesson({
   lesson,
   sectionsViewed,
@@ -430,7 +510,7 @@ export function InteractiveLesson({
 }: InteractiveLessonProps) {
   const sections = useMemo(() =>
     (lesson.content_sections || [])
-      .filter(s => s.type !== 'mastery_check')
+      .filter(s => s.type !== 'mastery_check' && isSectionRenderable(s))
       .sort((a, b) => a.order - b.order),
     [lesson]
   );
@@ -488,13 +568,17 @@ export function InteractiveLesson({
       case 'worked_example':
         return <WorkedExampleStep content={content as unknown as WorkedExampleContent} />;
       case 'practice':
+      case 'inline_practice':
         return <PracticeStep content={content as unknown as InlinePracticeContent} onAnswer={handlePracticeAnswer} />;
       case 'common_misconception':
         return <MisconceptionStep content={content as unknown as CommonMisconceptionContent} />;
       case 'jamb_focus':
+      case 'jamb_insight':
         return <JambFocusStep content={content as unknown as JambInsightContent} />;
       case 'memory_hook':
         return <MemoryHookStep content={content as unknown as MemoryHookContent} />;
+      case 'reflection':
+        return <ReflectionStep content={content as unknown as { question?: string; expected_understanding?: string }} />;
       case 'summary':
         return <SummaryStep content={content as Record<string, unknown>} />;
       case 'interactive': {
@@ -521,7 +605,9 @@ export function InteractiveLesson({
         );
       }
       default:
-        return <p className="text-muted-foreground">Section type: {section.type}</p>;
+        // Unknown section type — render nothing instead of leaking
+        // debug text ("Section type: …") into the lesson.
+        return null;
     }
   };
 
