@@ -33,3 +33,5 @@ PASSWORD
 *.njsproj
 *.sln
 *.sw?
+
+google-services.json
