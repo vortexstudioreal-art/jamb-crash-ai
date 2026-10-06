@@ -1912,6 +1912,11 @@ export type Database = {
         }[]
       }
       confirm_user_email: { Args: { user_email: string }; Returns: boolean }
+      check_referral_code: {
+        Args: { p_code: string }
+        Returns: { referrer_email: string; valid: boolean }[]
+      }
+      redeem_referral_code: { Args: { p_code: string; p_email: string }; Returns: boolean }
       generate_referral_code: { Args: { user_email: string }; Returns: string }
       get_auth_email: { Args: never; Returns: string }
       has_role: {

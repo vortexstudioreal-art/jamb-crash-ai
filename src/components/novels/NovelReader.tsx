@@ -32,6 +32,50 @@ interface LikelyQuestion {
   explanation?: string;
 }
 
+/**
+ * The extractor stored options as a Record ({A: text}) in some chapters
+ * and arrays in others, with answers as letters, indices, or answer text.
+ * Normalize everything here so the renderer below can never crash with
+ * "k.map is not a function" on malformed rows.
+ */
+const normalizeLikelyQuestions = (raw: unknown): LikelyQuestion[] => {
+  if (!Array.isArray(raw)) return [];
+  const out: LikelyQuestion[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== 'object') continue;
+    const rec = item as Record<string, unknown>;
+    const rawOptions = rec.options;
+    let options: string[] = [];
+    if (Array.isArray(rawOptions)) {
+      options = rawOptions.map((o) => String(o ?? ''));
+    } else if (rawOptions && typeof rawOptions === 'object') {
+      options = Object.entries(rawOptions as Record<string, unknown>)
+        .sort(([a], [b]) => String(a).localeCompare(String(b)))
+        .map(([, v]) => String(v ?? ''));
+    }
+    if (options.length === 0) continue;
+    const rawCorrect = rec.correct_answer;
+    let idx = -1;
+    if (typeof rawCorrect === 'number' && Number.isFinite(rawCorrect)) {
+      idx = rawCorrect;
+    } else if (typeof rawCorrect === 'string') {
+      const t = rawCorrect.trim().toUpperCase();
+      if (/^[A-D]$/.test(t)) {
+        idx = t.charCodeAt(0) - 65;
+      } else {
+        idx = options.findIndex((o) => o.trim().toLowerCase() === t.toLowerCase());
+      }
+    }
+    out.push({
+      question: String(rec.question ?? ''),
+      options,
+      correct_answer: idx >= 0 && idx < options.length ? idx : -1,
+      explanation: typeof rec.explanation === 'string' ? rec.explanation : undefined,
+    });
+  }
+  return out;
+};
+
 interface ChapterSummary {
   id: string;
   chapter_number: number;
@@ -269,7 +313,7 @@ export const NovelReader = ({
   const hasPrev = currentIndex > 0;
   const hasNext = currentIndex < allChapters.length - 1;
 
-  const likelyQuestions: LikelyQuestion[] = (chapter?.likely_questions as LikelyQuestion[] | null) || [];
+  const likelyQuestions: LikelyQuestion[] = normalizeLikelyQuestions(chapter?.likely_questions);
 
   const handleAnswerSelect = (questionIndex: number, answerIndex: number) => {
     setSelectedAnswers(prev => ({ ...prev, [questionIndex]: answerIndex }));
@@ -411,7 +455,7 @@ export const NovelReader = ({
               : ''
           }`}
         >
-          {chapter.content.split('\n\n').map((paragraph: string, index: number) => (
+          {(chapter.content || '').split('\n\n').map((paragraph: string, index: number) => (
             <p key={index} className="mb-4">
               {paragraph}
             </p>

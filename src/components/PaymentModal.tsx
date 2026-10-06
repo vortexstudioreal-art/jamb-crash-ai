@@ -44,6 +44,7 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
 
   const finalPrice = Math.max(0, plan.price - appliedDiscount);
   const [couponType, setCouponType] = useState<string | null>(null);
+  const [appliedReferralCode, setAppliedReferralCode] = useState<string | null>(null);
   const [commissionPercentage, setCommissionPercentage] = useState<number>(0);
 
   const validateCoupon = async () => {
@@ -59,30 +60,58 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
         coupon_code: couponCode.trim()
       });
 
-      if (error || !data || data.length === 0 || !data[0].valid) {
-        setCouponStatus('invalid');
-        setAppliedDiscount(0);
-        setAppliedCouponId(null);
-        setCouponType(null);
-        setCommissionPercentage(0);
-        toast.error('Invalid or expired coupon code');
+      if (!error && data && data.length > 0 && data[0].valid) {
+        const couponData = data[0];
+
+        // Calculate discount - use percentage if available, otherwise fixed amount
+        let discount = couponData.discount;
+        if (couponData.discount_pct && couponData.discount_pct > 0) {
+          discount = Math.floor(plan.price * (couponData.discount_pct / 100));
+        }
+
+        setCouponStatus('valid');
+        setAppliedDiscount(discount);
+        setAppliedCouponId(couponData.coupon_id);
+        setCouponType(couponData.coupon_type_val);
+        setCommissionPercentage(couponData.commission_pct || 0);
+        setAppliedReferralCode(null);
+        toast.success(`Coupon applied! ₦${discount.toLocaleString()} off 🎉`);
         return;
       }
 
-      const couponData = data[0];
-      
-      // Calculate discount - use percentage if available, otherwise fixed amount
-      let discount = couponData.discount;
-      if (couponData.discount_pct && couponData.discount_pct > 0) {
-        discount = Math.floor(plan.price * (couponData.discount_pct / 100));
+      // Not a coupon — try a friend's referral code (Refer & Boost)
+      const { data: refData, error: refError } = await supabase.rpc('check_referral_code', {
+        p_code: couponCode.trim(),
+      });
+      const row = refData?.[0];
+      if (
+        !refError && row?.valid &&
+        row.referrer_email?.toLowerCase() !== email.trim().toLowerCase()
+      ) {
+        const discount = Math.min(1000, plan.price);
+        setCouponStatus('valid');
+        setAppliedDiscount(discount);
+        setAppliedCouponId(null);
+        setCouponType('referral');
+        setCommissionPercentage(0);
+        setAppliedReferralCode(couponCode.trim().toUpperCase());
+        toast.success(`Friend's code applied! ₦${discount.toLocaleString()} off 🎉`);
+        return;
+      }
+      if (row?.valid) {
+        setCouponStatus('invalid');
+        toast.error("That's your own code — share it with friends instead!");
+        return;
       }
 
-      setCouponStatus('valid');
-      setAppliedDiscount(discount);
-      setAppliedCouponId(couponData.coupon_id);
-      setCouponType(couponData.coupon_type_val);
-      setCommissionPercentage(couponData.commission_pct || 0);
-      toast.success(`Coupon applied! ₦${discount.toLocaleString()} off 🎉`);
+      setCouponStatus('invalid');
+      setAppliedDiscount(0);
+      setAppliedCouponId(null);
+      setCouponType(null);
+      setCommissionPercentage(0);
+      setAppliedReferralCode(null);
+      toast.error('Invalid or expired coupon code');
+      return;
     } catch (err) {
       setCouponStatus('invalid');
       toast.error('Failed to validate coupon');
@@ -96,6 +125,20 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
     setAppliedCouponId(null);
     setCouponType(null);
     setCommissionPercentage(0);
+    setAppliedReferralCode(null);
+  };
+
+  // Credit the referrer once payment succeeds (both free + paystack paths).
+  const redeemReferral = async (buyerEmail: string) => {
+    if (!appliedReferralCode) return;
+    try {
+      await supabase.rpc('redeem_referral_code', {
+        p_code: appliedReferralCode,
+        p_email: buyerEmail,
+      });
+    } catch (err) {
+      errorLogger.error(err, { component: 'PaymentModal', action: 'redeem referral' });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -180,6 +223,7 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
         }
 
         toast.success('100% discount applied! Access granted! 🎉');
+        await redeemReferral(email);
         onSuccess(freeReference, email);
       } catch (err) {
         errorLogger.error(err, { component: 'PaymentModal', action: 'free transaction' });
@@ -195,6 +239,7 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
         package: getPackageCode(plan.name),
         couponId: appliedCouponId,
         discountApplied: appliedDiscount,
+        referralCode: appliedReferralCode,
       },
       async (reference) => {
         // Record coupon usage if applied
@@ -222,6 +267,7 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
             errorLogger.error(err, { component: 'PaymentModal', action: 'record coupon usage (paystack)' });
           }
         }
+        await redeemReferral(email);
         onSuccess(reference, email);
       },
       () => {
@@ -287,7 +333,7 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
             <div className="mb-4">
               <Label className="flex items-center gap-2 mb-2">
                 <Ticket className="w-4 h-4 text-primary" />
-                Have a coupon code?
+                Have a coupon or referral code?
               </Label>
               <div className="flex gap-2">
                 <div className="relative flex-1">

@@ -316,8 +316,8 @@ export const ReferralSystem = ({ userEmail }: ReferralSystemProps) => {
         {/* How it works */}
         <div className="text-xs text-center space-y-1 text-muted-foreground bg-muted/30 rounded-lg p-3">
           <p className="font-medium text-foreground">How Refer & Boost Works:</p>
-          <p>1. Share your code — friends get ₦1,000 off</p>
-          <p>2. They count once they pay for a plan</p>
+          <p>1. Share your code with friends</p>
+          <p>2. They enter it at checkout for ₦1,000 off</p>
           <p>3. Hit 1 / 3 / 5 refs to claim Bronze / Silver / Gold 🚀</p>
         </div>
       </div>

@@ -9,6 +9,7 @@ export interface PaystackConfig {
   package: string;
   couponId?: string | null;
   discountApplied?: number;
+  referralCode?: string | null;
 }
 
 declare global {
@@ -130,6 +131,7 @@ export const usePaystack = () => {
             package: config.package,
             couponId: config.couponId,
             discountApplied: config.discountApplied,
+            referralCode: config.referralCode,
           },
         onClose: () => {
           setIsLoading(false);

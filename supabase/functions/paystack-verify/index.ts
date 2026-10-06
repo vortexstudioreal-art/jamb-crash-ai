@@ -110,6 +110,19 @@ serve(async (req) => {
       console.log("[paystack-verify] Payment record updated:", updateData);
     }
 
+    // Backup referral credit: the client also redeems on success, but if
+    // that call failed (network), the referrer still earns here. Idempotent.
+    const referralCode = paystackData.data.metadata?.referralCode;
+    const customerEmail = paystackData.data.customer.email;
+    if (typeof referralCode === "string" && referralCode && customerEmail) {
+      const { error: redeemError } = await supabase.rpc("redeem_referral_code", {
+        p_code: referralCode,
+        p_email: customerEmail,
+      });
+      if (redeemError) console.error("[paystack-verify] referral redeem error:", redeemError.message);
+      else console.log("[paystack-verify] referral redeemed:", referralCode);
+    }
+
     console.log("[paystack-verify] Success! Returning payment details");
     return new Response(
       JSON.stringify({
