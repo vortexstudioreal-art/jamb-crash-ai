@@ -40,8 +40,12 @@ export const GoogleAdSense = ({
 
   // Paying users never see ads. Wait for the role lookup so paid users
   // don't flash an ad while access is still resolving.
+  // ?ads=preview forces slots visible (owner testing only).
   const isPaying = hasAccess || isAdmin || isOwner;
-  const allowed = audience === 'all' || (roleResolved && !isPaying);
+  const preview =
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('ads') === 'preview';
+  const allowed = audience === 'all' || preview || (roleResolved && !isPaying);
 
   useEffect(() => {
     if (!isAdSenseConfigured || !allowed) return;
