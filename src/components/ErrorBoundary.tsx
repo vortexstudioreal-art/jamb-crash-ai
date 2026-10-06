@@ -13,6 +13,17 @@ interface ErrorBoundaryState {
   error: Error | null;
 }
 
+const CHUNK_ERROR_KEY = 'jamb_chunk_reload';
+
+// Lazy chunks are content-hashed: after a redeploy, an already-open tab
+// still references the old filenames, which Vercel has evicted — so the
+// dynamic import 404s. The fix is a hard reload to the fresh bundle.
+const isChunkLoadError = (error: Error | null): boolean =>
+  !!error &&
+  (/Failed to fetch dynamically imported module/i.test(error.message) ||
+    /Loading chunk [\w-]+ failed/i.test(error.message) ||
+    /ChunkLoadError/i.test(error.message));
+
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
@@ -25,6 +36,17 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   componentDidCatch(error: Error, _errorInfo: ErrorInfo): void {
     errorLogger.error(error, { component: 'ErrorBoundary', action: 'catch error' });
+    // Auto-recover once from stale-chunk crashes (open tab + redeploy).
+    if (isChunkLoadError(error)) {
+      try {
+        if (!sessionStorage.getItem(CHUNK_ERROR_KEY)) {
+          sessionStorage.setItem(CHUNK_ERROR_KEY, '1');
+          window.location.reload();
+        }
+      } catch {
+        // storage unavailable — fall through to the error UI
+      }
+    }
   }
 
   handleReload = async (): Promise<void> => {
@@ -41,6 +63,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   };
 
   handleRetry = (): void => {
+    try {
+      sessionStorage.removeItem(CHUNK_ERROR_KEY);
+    } catch {
+      // ignore
+    }
     this.setState({ hasError: false, error: null });
   };
 

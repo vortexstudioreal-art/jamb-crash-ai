@@ -672,6 +672,24 @@ const AdminPanel = () => {
                           <Plus className="w-4 h-4" />
                           +200 NEW Questions
                         </Button>
+                        <Button
+                          onClick={async () => {
+                            toast.loading('Importing real UTME questions (runs in background, dedupes automatically)...', { id: 'import-aloc' });
+                            try {
+                              const { error } = await supabase.functions.invoke('import-aloc-questions');
+                              if (error) throw error;
+                              toast.success('Import started! Fresh questions land over the next minutes — refresh stats to watch.', { id: 'import-aloc' });
+                              setTimeout(() => fetchData(), 30000);
+                            } catch (err: unknown) {
+                              toast.error('Import failed: ' + (err instanceof Error ? err.message : 'Unknown error'), { id: 'import-aloc' });
+                            }
+                          }}
+                          size="sm"
+                          className="gap-2 bg-amber-600 hover:bg-amber-700 text-white"
+                        >
+                          <Database className="w-4 h-4" />
+                          Import Real UTME
+                        </Button>
                       </div>
                     )}
                   </CardTitle>
