@@ -193,12 +193,18 @@ function FormulaStep({ content }: { content: FormulaContent }) {
 function WorkedExampleStep({ content }: { content: WorkedExampleContent }) {
   const [showSteps, setShowSteps] = useState(false);
   const [showAnswer, setShowAnswer] = useState(false);
+  // Two schemas exist in the DB: seeded lessons use scenario + object steps,
+  // AI-prompt lessons use problem + string steps. Render whichever is present.
+  const problemText = content.scenario || content.problem || '';
+  const steps = Array.isArray(content.steps) ? content.steps : [];
   return (
     <div className="space-y-4">
-      <div className="p-4 bg-muted/50 rounded-xl">
-        <p className="text-sm font-medium text-muted-foreground mb-1">Problem:</p>
-        <p className="text-foreground">{content.scenario}</p>
-      </div>
+      {problemText ? (
+        <div className="p-4 bg-muted/50 rounded-xl">
+          <p className="text-sm font-medium text-muted-foreground mb-1">Problem:</p>
+          <p className="text-foreground">{problemText}</p>
+        </div>
+      ) : null}
       {content.given && content.given.length > 0 && (
         <div className="p-3 bg-muted/30 rounded-lg">
           <p className="text-sm font-medium text-muted-foreground mb-1">Given:</p>
@@ -219,29 +225,54 @@ function WorkedExampleStep({ content }: { content: WorkedExampleContent }) {
           <Target className="w-4 h-4 mr-2" />
           Show me the steps
         </Button>
-      ) : (
+      ) : steps.length > 0 ? (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="space-y-3"
         >
-          {content.steps?.map((step, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.15 }}
-              className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg"
-            >
-              <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold shrink-0">
-                {i + 1}
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">{step.explanation}</p>
-                <p className="text-foreground font-mono">{step.calculation}</p>
-              </div>
-            </motion.div>
-          ))}
+          {steps.map((step, i) => {
+            const isObj = typeof step === 'object' && step !== null;
+            const explanation = isObj
+              ? (step as { explanation?: string }).explanation || ''
+              : '';
+            const calculation = isObj
+              ? (step as { calculation?: string; result?: string }).calculation ||
+                (step as { result?: string }).result ||
+                ''
+              : String(step);
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.15 }}
+                className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg"
+              >
+                <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold shrink-0">
+                  {i + 1}
+                </div>
+                <div>
+                  {explanation ? (
+                    <p className="text-sm font-medium text-muted-foreground">{explanation}</p>
+                  ) : null}
+                  {calculation ? (
+                    <p className="text-foreground font-mono">{calculation}</p>
+                  ) : null}
+                </div>
+              </motion.div>
+            );
+          })}
+          {content.required ? (
+            <div className="p-3 bg-muted/30 rounded-lg">
+              <p className="text-sm"><span className="font-medium text-muted-foreground">Required:</span> {content.required}</p>
+            </div>
+          ) : null}
+          {content.explanation ? (
+            <div className="p-3 bg-blue-500/10 rounded-lg border-l-4 border-blue-500">
+              <p className="text-sm"><span className="font-medium text-blue-600 dark:text-blue-400">Why it works:</span> {content.explanation}</p>
+            </div>
+          ) : null}
           {!showAnswer ? (
             <Button variant="outline" size="sm" onClick={() => setShowAnswer(true)}>
               <CheckCircle2 className="w-4 h-4 mr-2" />
@@ -261,7 +292,7 @@ function WorkedExampleStep({ content }: { content: WorkedExampleContent }) {
             </motion.div>
           )}
         </motion.div>
-      )}
+      ) : null}
     </div>
   );
 }
@@ -487,6 +518,12 @@ export const isSectionRenderable = (s: { type: string; content: unknown }): bool
       return Boolean(c.description || c.caption);
     case 'reflection':
       return typeof c.question === 'string' && (c.question as string).trim().length > 0;
+    case 'worked_example': {
+      const st = (c as { steps?: unknown }).steps;
+      const text = (c as { scenario?: unknown; problem?: unknown }).scenario ??
+        (c as { problem?: unknown }).problem;
+      return Array.isArray(st) && st.length > 0 && typeof text === 'string' && text.trim().length > 0;
+    }
     case 'hook':
     case 'intuitive_explanation':
     case 'formal_explanation':

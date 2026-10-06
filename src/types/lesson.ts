@@ -83,7 +83,8 @@ export interface InteractiveContent {
 }
 
 export interface WorkedExampleContent {
-  scenario: string;
+  // Seeded-lessons schema
+  scenario?: string;
   given?: string[];
   required?: string;
   principle?: string;
@@ -91,9 +92,12 @@ export interface WorkedExampleContent {
     explanation: string;
     calculation: string;
     result?: string;
-  }>;
+  }> | string[];
   answer: string;
   check?: string;
+  // AI-prompt schema (generate-topic-content 'lesson' type)
+  problem?: string;
+  explanation?: string;
 }
 
 export interface CommonMisconceptionContent {

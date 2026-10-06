@@ -192,16 +192,21 @@ export function LessonLibrary({
     const inSubject = lessons.filter((l) => l.subject.toLowerCase() === subj);
     if (inSubject.length === 0) return;
     const topic = initialTopic?.toLowerCase().trim();
+    // Only auto-open on a real match. If a topic was requested but nothing
+    // matches, stay on the filtered list — opening an unrelated lesson is
+    // worse than opening none.
+    if (!topic) {
+      if (inSubject[0]) void openLessonById(inSubject[0].id);
+      return;
+    }
     const match =
-      (topic &&
-        (inSubject.find((l) => l.topic.toLowerCase() === topic) ||
-          inSubject.find(
-            (l) =>
-              l.topic.toLowerCase().includes(topic) ||
-              topic.includes(l.topic.toLowerCase()) ||
-              l.title.toLowerCase().includes(topic)
-          ))) ||
-      inSubject[0];
+      inSubject.find((l) => l.topic.toLowerCase() === topic) ||
+      inSubject.find(
+        (l) =>
+          l.topic.toLowerCase().includes(topic) ||
+          topic.includes(l.topic.toLowerCase()) ||
+          l.title.toLowerCase().includes(topic)
+      );
     if (match) void openLessonById(match.id);
   }, [loading, lessons, initialSubject, initialTopic, openLessonById]);
 
