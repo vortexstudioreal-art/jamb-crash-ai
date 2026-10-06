@@ -94,7 +94,7 @@ export const MockExam = ({ userEmail, subjects, onExit }: MockExamProps) => {
       for (const section of builtSections) {
         const { data, error } = await supabase
           .from('jamb_questions')
-          .select('id, question, option_a, option_b, option_c, option_d, correct_answer, subject, year, explanation, image_url')
+          .select('id, question, option_a, option_b, option_c, option_d, correct_answer, subject, year, explanation, image_url, is_ai_generated')
           .eq('subject', section.subject as Database['public']['Enums']['jamb_subject'])
           .limit(200);
         if (error) throw error;
@@ -392,6 +392,9 @@ export const MockExam = ({ userEmail, subjects, onExit }: MockExamProps) => {
                               {correct ? <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" /> : <XCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />}
                               <div>
                                 <p className="font-medium text-foreground">{qi + 1}. {q.question}</p>
+                                {q.is_ai_generated && (
+                                  <span className="inline-block mt-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-violet-500/10 text-violet-500">AI Practice</span>
+                                )}
                                 <p className="text-xs text-muted-foreground mt-1">
                                   Your answer: <span className={correct ? 'text-emerald-600 font-medium' : 'text-red-500 font-medium'}>{userAnswer ? `Option ${userAnswer.toUpperCase()}` : 'Not answered'}</span>
                                   {!correct && <> · Correct: <span className="text-emerald-600 font-medium">Option {q.correct_answer.toUpperCase()}</span></>}
@@ -463,9 +466,14 @@ export const MockExam = ({ userEmail, subjects, onExit }: MockExamProps) => {
                     <img src={currentQuestion.image_url} alt="Question diagram" className="rounded-xl border max-h-56 mb-4" />
                   )}
                   <div className="flex items-start justify-between gap-3 mb-4">
-                    <p className="font-semibold text-foreground text-base leading-relaxed">
-                      {currentQIdx + 1}. {currentQuestion.question}
-                    </p>
+                    <div>
+                      {currentQuestion.is_ai_generated && (
+                        <Badge className="bg-violet-500/10 text-violet-500 border-violet-500/30 mb-2">AI Practice</Badge>
+                      )}
+                      <p className="font-semibold text-foreground text-base leading-relaxed">
+                        {currentQIdx + 1}. {currentQuestion.question}
+                      </p>
+                    </div>
                     <ReportQuestionButton questionId={currentQuestion.id} userEmail={userEmail} compact />
                   </div>
                   <div className="space-y-2">

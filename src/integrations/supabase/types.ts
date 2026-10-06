@@ -411,6 +411,7 @@ export type Database = {
           explanation: string | null
           id: string
           image_url: string | null
+          is_ai_generated: boolean
           option_a: string
           option_b: string
           option_c: string
@@ -426,6 +427,7 @@ export type Database = {
           explanation?: string | null
           id?: string
           image_url?: string | null
+          is_ai_generated?: boolean
           option_a: string
           option_b: string
           option_c: string
@@ -441,6 +443,7 @@ export type Database = {
           explanation?: string | null
           id?: string
           image_url?: string | null
+          is_ai_generated?: boolean
           option_a?: string
           option_b?: string
           option_c?: string

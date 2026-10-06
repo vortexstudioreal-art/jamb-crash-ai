@@ -32,6 +32,7 @@ interface Question {
   subject: string;
   year?: number;
   image_url?: string | null;
+  is_ai_generated?: boolean | null;
   [key: string]: unknown;
 }
 
@@ -955,6 +956,9 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
               {currentQuestion.year && (
                 <Badge variant="outline">{currentQuestion.year}</Badge>
               )}
+              {currentQuestion.is_ai_generated && (
+                <Badge className="bg-violet-500/10 text-violet-500 border-violet-500/30">AI Practice</Badge>
+              )}
               {quizMode === 'practice' && (
                 <Badge className="bg-green-500/10 text-green-600">Learn mode</Badge>
               )}
@@ -1052,6 +1056,9 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
                 </p>
                 {currentQuestion.explanation && (
                   <p className="text-muted-foreground text-sm">{currentQuestion.explanation}</p>
+                )}
+                {currentQuestion.is_ai_generated && (
+                  <p className="text-xs text-violet-500/80 italic">AI-generated likely question — explanation written by AI, not from a past paper.</p>
                 )}
               </div>
 

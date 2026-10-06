@@ -1,0 +1,6542 @@
+[
+ {
+  "subject": "mathematics",
+  "year": 1986,
+  "question": "Evaluate (212)₃ − (121)₃ + (222)₃. All subscripts indicate base three.",
+  "options": [
+   "(313)₃",
+   "(1000)₃",
+   "(1020)₃",
+   "(1222)₃"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1986,
+  "question": "Find the reciprocal of (2/3) ÷ (1/2 + 1/3).",
+  "options": [
+   "4/5",
+   "5/4",
+   "2/5",
+   "6/7"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1986,
+  "question": "If P = 18, Q = 21, R = −6 and S = −4, calculate [(P − Q)³ + S²]/R³.",
+  "options": [
+   "−11/216",
+   "11/216",
+   "−43/116",
+   "43/116"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1986,
+  "question": "Udoh deposited ₦150.00 in a bank. After 5 years, the simple interest earned was ₦55.00. What was the annual interest rate?",
+  "options": [
+   "11%",
+   "7⅓%",
+   "5%",
+   "3½%"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1986,
+  "question": "The ages of Tosan and Isa differ by 6 years, and their product is 187. Write the ages as (x, y), where x > y.",
+  "options": [
+   "(12, 9)",
+   "(23, 17)",
+   "(17, 11)",
+   "(18, 12)"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1986,
+  "question": "Factorize completely: 8a + 125ax³.",
+  "options": [
+   "(2a + 5x²)(4 + 25ax)",
+   "a(2 + 5x)(4 − 10x + 25x²)",
+   "(2a + 5x)(4 − 10ax + 25ax²)",
+   "a(2 + 5x)(4 + 10ax + 25ax²)"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1986,
+  "question": "Find all real numbers x satisfying (x + 1)/3 − 1 > (x + 4)/5.",
+  "options": [
+   "x < 11",
+   "x < -1",
+   "x > 6",
+   "x > 11"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1986,
+  "question": "Factorize x² + 2a + ax + 2x.",
+  "options": [
+   "(x + 2a)(x + 1)",
+   "(x + 2a)(x − 1)",
+   "(x² − 1)(x + a)",
+   "(x + 2)(x + a)"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1986,
+  "question": "Solve 3x² + 6x − 2 = 0.",
+  "options": [
+   "x = −1 ± √3/3",
+   "x = −1 ± √15/3",
+   "x = −2 ± 2√3/3",
+   "x = −2 ± 2√15/3"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1986,
+  "question": "For x ≠ −1, simplify 1/(5x + 5) + 1/(7x + 7).",
+  "options": [
+   "12/(35x + 1)",
+   "1/[35(x + 1)]",
+   "12x/[35(x + 7)]",
+   "12/(35x + 35)"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1986,
+  "question": "At which points does the curve y = −x² + 3x + 4 intersect the coordinate axes?",
+  "options": [
+   "(4, 0), (0, 0), (−1, 0)",
+   "(−4, 0), (0, 4), (1, 1)",
+   "(0, 0), (0, 1), (1, 0)",
+   "(0, 4), (4, 0), (−1, 0)"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1986,
+  "question": "Factorize (4a + 3)² − (3a − 2)².",
+  "options": [
+   "(a + 1)(a + 5)",
+   "(a - 5)(7a - 1)",
+   "(a + 5)(7a + 1)",
+   "a(7a + 1)"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1986,
+  "question": "For x ≠ 2 and x ≠ −2, simplify 1/(x − 2) + 1/(x + 2) + 2x/(x² − 4).",
+  "options": [
+   "2x/[(x − 2)(x + 2)(x² − 4)]",
+   "2x/(x² − 4)",
+   "x/(x² − 4)",
+   "4x/(x² − 4)"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1986,
+  "question": "Make v the subject of S = √(6/v − w/2), using the principal square root. Assume S ≥ 0 and 2S² + w ≠ 0.",
+  "options": [
+   "v = 12/(2S²)",
+   "v = 12/(2S + w)",
+   "v = 12/(2S² + w)",
+   "v = 12/(2S²) + w"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1986,
+  "question": "Find all real x satisfying 16ˣ − 5 × 4ˣ + 4 = 0.",
+  "options": [
+   "1 and 4",
+   "−2 and 2",
+   "0 and 1",
+   "−1 and 0"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1986,
+  "question": "For real numbers with b ≠ 0 and d ≠ 0, suppose a/b = c/d = k. Express (3a² − ac + c²)/(3b² − bd + d²) in terms of k.",
+  "options": [
+   "3k²",
+   "3k − k²",
+   "17k²/4",
+   "k²"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1986,
+  "question": "At which points does the line y = 2x + 1 intersect the curve y = 2x² + 5x − 1?",
+  "options": [
+   "(−2, −3) and (1/2, 2)",
+   "(−1/2, 0) and (2, 5)",
+   "(1/2, 2) and (1, 3)",
+   "(1, 3) and (2, 5)"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1986,
+  "question": "If cos θ = a/b and a and b are nonzero, express 1 + tan² θ in terms of a and b.",
+  "options": [
+   "b²/a²",
+   "a²/b²",
+   "(a² + b²)/(b² − a²)",
+   "(2a² + b²)/(a² + b²)"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1986,
+  "question": "A vertical tower is 50 m high. Points X and Y lie on level ground on opposite sides of its base, with X, the base and Y on one straight line. The angles of elevation of the top from X and Y are 30° and 60° respectively. Find XY to two decimal places.",
+  "options": [
+   "14.43 m",
+   "57.73 m",
+   "101.03 m",
+   "115.47 m"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1986,
+  "question": "An arc of a circle of radius 6 cm is 8 cm long. Find the area of its sector.",
+  "options": [
+   "5⅓ cm²",
+   "24 cm²",
+   "36 cm²",
+   "48 cm²"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1986,
+  "question": "Find the total surface area, including the circular base, of a right circular cone with radius 2√3 cm and slant height 4√3 cm.",
+  "options": [
+   "8√3π cm²",
+   "24π cm²",
+   "15√3π cm²",
+   "36π cm²"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1986,
+  "question": "An open rectangular box has external length 4 m, width 3 m and height 4 m. Find the total cost of painting its outside, including the base, at ₦2.00 per square metre.",
+  "options": [
+   "₦96.00",
+   "₦112.00",
+   "₦136.00",
+   "₦160.00"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1986,
+  "question": "An integer is selected uniformly at random from 40 to 50 inclusive. What is the probability that it is prime?",
+  "options": [
+   "3/11",
+   "5/11",
+   "3/10",
+   "4/11"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1986,
+  "question": "A group of students obtained the following scores in a Mathematics test. Each pair gives (score, frequency): (1, 2), (2, 4), (3, 7), (4, 14), (5, 12), (6, 6), (7, 4), (8, 1). If m is the mode and S is the number of students who scored 4 or less, what is (S, m)?",
+  "options": [
+   "(27, 4)",
+   "(14, 4)",
+   "(13, 4)",
+   "(4, 4)"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1987,
+  "question": "Find the least length of a rod which can be cut into exactly equal strips, each of either 40cm or 48cm in length.",
+  "options": [
+   "120 cm",
+   "240 cm",
+   "360 cm",
+   "480 cm"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1987,
+  "question": "Round each number to two significant figures, then evaluate (0.02174 × 1.2047) / 0.023789.",
+  "options": [
+   "0.8",
+   "0.9",
+   "1.1",
+   "1.2"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1987,
+  "question": "If the length of a square is increased by 20% while its width is decreased by 20% to form a rectangle, what is the ratio of the area of the rectangle to the area of the square?",
+  "options": [
+   "6:5",
+   "25:24",
+   "5:6",
+   "24:25"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1987,
+  "question": "Two brothers invested a total of ₦5,000.00 on a farm project. The farm yield was sold for ₦ 15, 000.00 at the end of the season. If the profit was shared in the ratio 2:3, what is the difference in the amount of profit received by the brothers?",
+  "options": [
+   "₦2,000.00",
+   "₦4,000.00",
+   "₦6,000.00",
+   "₦10,000.00"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1987,
+  "question": "Peter earns ₦20 per week for the first 20 weeks and ₦36 per week for the next 24 weeks. His average weekly wage for all 52 weeks is ₦30. Find his average weekly wage for the remaining 8 weeks.",
+  "options": [
+   "₦37.00",
+   "₦35.00",
+   "₦30.00",
+   "₦5.00"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1987,
+  "question": "By selling 20 oranges for ₦1.35, a trader makes a profit of 8%. What is the percentage gain or loss if he sells the same 20 oranges for ₦1.10?",
+  "options": [
+   "8%",
+   "10%",
+   "12%",
+   "15%"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1987,
+  "question": "Instead of writing 35/6 correct to 3 significant figures, a student writes it correct to 3 decimal places. Express the difference between these two rounded values in standard form.",
+  "options": [
+   "0.003",
+   "3.0 × 10⁻³",
+   "0.3 × 10²",
+   "0.3 × 10⁻³"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1987,
+  "question": "Simplify [log₂(6) − log₂(3)] / [log₂(8) − 2log₂(1/2)] without using tables.",
+  "options": [
+   "1/5",
+   "1/2",
+   "−1/2",
+   "log₂(3)/log₂(7)"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1987,
+  "question": "Simplify [(2√14)(3√21)] / [(7√24)(2√98)] without using tables.",
+  "options": [
+   "3√14/4",
+   "3√21/4",
+   "3√14/28",
+   "3√2/28"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1987,
+  "question": "The formula Q = 15 + 0.5n gives the cost Q, in naira, of feeding n people for a week. Find, in kobo, the extra cost of feeding one additional person.",
+  "options": [
+   "350 kobo",
+   "200 kobo",
+   "150 kobo",
+   "50 kobo"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1987,
+  "question": "If P varies inversely as V and V varies directly as R², find the relationship between P and R, given that R = 7 when P = 2.",
+  "options": [
+   "P = 98R²",
+   "PR² = 98",
+   "P = 1/98R",
+   "P = R²/98"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1987,
+  "question": "Make y the subject of Z = x² + 1/y³, for real values with Z ≠ x².",
+  "options": [
+   "y = 1/(Z − x²)³",
+   "y = 1/∛(Z + x³)",
+   "y = 1/∛(Z − x²)",
+   "y = 1/(∛Z − ∛(x²))"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1987,
+  "question": "Find the values of m for which x² + 2(m + 1)x + m + 3 is a perfect square.",
+  "options": [
+   "−1, 1",
+   "−1, 2",
+   "1, −2",
+   "2, −2"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1987,
+  "question": "Find the two values of y that satisfy the simultaneous equations x + y = 5 and x² − 2y² = 1.",
+  "options": [
+   "12, −2",
+   "−12, 12",
+   "−12, 2",
+   "2, −2"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1987,
+  "question": "Solve the inequality x − 1 > 4(x + 2).",
+  "options": [
+   "x > −3",
+   "x < −3",
+   "2 < x < 3",
+   "−3 < x < −2"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1987,
+  "question": "Simplify (x² − y²)/(2x² + xy − y²), where the original denominator is nonzero.",
+  "options": [
+   "(x + y)/(2x + y)",
+   "(x + y)/(2x − y)",
+   "(x − y)/(2x − y)",
+   "(x − y)/(2x + y)"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1987,
+  "question": "Daylight lasts from 5:30 a.m. to 7:00 p.m. Express the daylight and darkness durations as angles of Earth’s rotation, in that order, using 360° for 24 hours.",
+  "options": [
+   "187°30′, 172°30′",
+   "135°, 225°",
+   "202°30′, 157°30′",
+   "195°, 165°"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1987,
+  "question": "A figure is selected at random from a square, a rectangle, a rhombus, a kite and a trapezium. Find the probability that it is a parallelogram.",
+  "options": [
+   "3/5",
+   "2/5",
+   "4/5",
+   "1/5"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1988,
+  "question": "Evaluate 0.24633 / 0.0306, correct to one decimal place.",
+  "options": [
+   "0.8",
+   "1.8",
+   "8.0",
+   "8.1"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1988,
+  "question": "Taiwo and Kehinde own a store in the ratio 11:9. Kehinde sells two-thirds of her share to Taiwo for ₦720. What is the value of the whole store?",
+  "options": [
+   "₦1,080",
+   "₦2,400",
+   "₦3,000",
+   "₦3,600"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1988,
+  "question": "Given log₁₀(2) = 0.3010 and log₁₀(3) = 0.4771, evaluate log₁₀(4.5) using these values, without logarithm tables.",
+  "options": [
+   "0.3010",
+   "0.4771",
+   "0.6532",
+   "0.9542"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1988,
+  "question": "An 800-page book is 18 mm thick. Calculate the thickness of one leaf in metres, expressed in standard form. Treat the thickness as that of the paper leaves alone.",
+  "options": [
+   "2.25 × 10⁻⁴ m",
+   "4.50 × 10⁻⁴ m",
+   "2.25 × 10⁻⁵ m",
+   "4.50 × 10⁻⁵ m"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1988,
+  "question": "If 1/p = (a² + 2ab + b²)/(a − b) and 1/q = (a + b)/(a² − 2ab + b²), find p/q. Assume a ≠ b and a ≠ −b.",
+  "options": [
+   "(a + b)/(a − b)",
+   "1/(a² − b²)",
+   "(a − b)/(a + b)",
+   "a² − b²"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1988,
+  "question": "x varies inversely as the cube root of y. Given x = 1 when y = 8, find y when x = 3.",
+  "options": [
+   "1/3",
+   "2/3",
+   "8/27",
+   "4/9"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1988,
+  "question": "If g(y) = (y − 3)/11 + 11/(y² − 9), find g(y + 3), where y ≠ 0 and y ≠ −6.",
+  "options": [
+   "y/11 + 11/[y(y + 6)]",
+   "y/11 + 11/[y(y + 3)]",
+   "(y + 30)/11 + 11/[y(y + 3)]",
+   "(y + 3)/11 + 11/[y(y − 6)]"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1988,
+  "question": "Solve 3x − 5y − 3 = 0 and 2y − 6x + 5 = 0. Give the ordered pair (x, y).",
+  "options": [
+   "(−1/8, 19/24)",
+   "(8, 24/10)",
+   "(−8, 24/19)",
+   "(19/24, −1/8)"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1988,
+  "question": "Simplify 1/(x² + 5x + 6) + 1/(x² + 3x + 2), where x ≠ −1, −2, −3.",
+  "options": [
+   "(x + 3)/[(x + 1)(x + 2)]",
+   "1/[(x + 1)(x + 2)(x + 3)]",
+   "2/[(x + 1)(x + 3)]",
+   "4/[(x + 1)(x + 3)]"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1988,
+  "question": "Simplify (4a² − 49b²)/(2a² + 5ab − 7b²), where the denominator is nonzero.",
+  "options": [
+   "(a − b)/(2a + b)",
+   "(2a + 7b)/(a − b)",
+   "(2a − 7b)/(a + b)",
+   "(2a − 7b)/(a − b)"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1988,
+  "question": "Solve x² − x − 1 = 0, giving the roots to one decimal place.",
+  "options": [
+   "x = 1.6 and x = −0.6",
+   "x = −1.6 and x = 0.6",
+   "x = 1.6 and x = 0.6",
+   "x = −1.6 and x = −0.6"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1988,
+  "question": "The solutions of x² − 2x − 1 = 0 are the x-coordinates where two graphs intersect. If one graph is y = 2 + x − x², which is the second graph?",
+  "options": [
+   "y = 1 − x",
+   "y = 1 + x",
+   "y = x − 1",
+   "y = 3x + 3"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1988,
+  "question": "Which of these can be the exterior angle of a regular polygon? (i) 35°; (ii) 18°; (iii) 115°.",
+  "options": [
+   "i and ii",
+   "ii only",
+   "ii and iii",
+   "iii only"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1988,
+  "question": "A man is 14√3 metres horizontally from a tree on level ground. From a point 2 metres above the ground, he measures an angle of elevation of 30° to the top of the tree. How tall is the tree?",
+  "options": [
+   "12 m",
+   "14 m",
+   "14√3 m",
+   "16 m"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1988,
+  "question": "A metal pipe is 10 cm long, has an external diameter of 12 cm and a wall thickness of 1 cm. Find the volume of metal in the pipe.",
+  "options": [
+   "120π cm³",
+   "110π cm³",
+   "60π cm³",
+   "50π cm³"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1988,
+  "question": "Let x be the mean and y the median of 11, 12, 13, 14, 15, 16, 17, 18, 19, 21. Find x/y, correct to one decimal place.",
+  "options": [
+   "1.6",
+   "1.2",
+   "1.1",
+   "1.0"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1988,
+  "question": "A score distribution is given by these (score, frequency) pairs: (0, 7), (1, 11), (2, 6), (3, 7), (4, 7), (5, 5), (6, 3). Find the mode and the median, respectively.",
+  "options": [
+   "(1, 3)",
+   "(1, 2)",
+   "(3, 3)",
+   "(0, 2)"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1988,
+  "question": "Two fair six-sided dice are thrown independently. What is the probability that their total score is at least 10?",
+  "options": [
+   "1/6",
+   "1/12",
+   "5/6",
+   "11/12"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1989,
+  "question": "Evaluate (2,700,000 × 0.03) / 18,000.",
+  "options": [
+   "4.5 × 10⁰",
+   "4.5 × 10¹",
+   "4.5 × 10²",
+   "4.5 × 10³"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1989,
+  "question": "Which list contains all the distinct prime factors of 2,520?",
+  "options": [
+   "2, 9, 5",
+   "2, 9, 7",
+   "2, 3, 5, 7",
+   "2, 3, 7, 9"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1989,
+  "question": "Find the absolute difference between 0.007685 rounded to three significant figures and the same number rounded to four decimal places.",
+  "options": [
+   "10⁻⁵",
+   "7 × 10⁻⁴",
+   "8 × 10⁻⁵",
+   "10⁻⁶"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1989,
+  "question": "Find p in terms of q if log₃(p) + 3log₃(q) = 3, with p > 0 and q > 0.",
+  "options": [
+   "(3/q)³",
+   "∛(q/3)",
+   "(q/3)³",
+   "∛(3/q)"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1989,
+  "question": "Find all real values of y satisfying 9ʸ − 4(3ʸ) + 3 = 0.",
+  "options": [
+   "−1 and 0",
+   "−1 and 1",
+   "1 and 3",
+   "0 and 1"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1989,
+  "question": "Make R the subject of S = √[(2R + T)/(2RT)], using the principal square root and values for which the original expression is defined.",
+  "options": [
+   "R = T/(TS² − 1)",
+   "R = T/[2(TS² − 1)]",
+   "R = T/(TS² + 1)",
+   "R = T/[2(TS² + 1)]"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1989,
+  "question": "The cost of dinner for a group of students is partly constant and partly varies directly with the number of students. It costs ₦74.00 for 20 students and ₦96.00 for 30 students. Find the cost for 15 students.",
+  "options": [
+   "₦68.50",
+   "₦63.00",
+   "₦60.00",
+   "₦52.00"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1989,
+  "question": "If f(x) = 2x² − 5x + 3, find f(x + 1).",
+  "options": [
+   "2x² − x",
+   "2x² − x + 10",
+   "4x² + 3x + 2",
+   "4x² + 3x + 12"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1989,
+  "question": "Factorize 4a² + 12ab − c² + 9b².",
+  "options": [
+   "4a(a − 3b) + (3b − c)²",
+   "(2a + 3b − c)(2a + 3b + c)",
+   "(2a − 3b − c)(2a − 3b + c)",
+   "4a(a − 3b) + (3b + c)²"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1989,
+  "question": "Find K and L, respectively, if ½(3y − 4x)² = 8x² + Kxy + Ly².",
+  "options": [
+   "(−12, 9/2)",
+   "(−6, 9)",
+   "(6, 9)",
+   "(12, 9/2)"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1989,
+  "question": "Solve 2x⁻¹ − 3y⁻¹ = 4 and 4x⁻¹ + y⁻¹ = 1 for x and y, respectively, where x and y are nonzero.",
+  "options": [
+   "(−1, 2)",
+   "(1, 2)",
+   "(2, 1)",
+   "(2, −1)"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1989,
+  "question": "What value of Q makes 4x² + 5x + Q a perfect square?",
+  "options": [
+   "25/16",
+   "25/64",
+   "5/8",
+   "5/4"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1989,
+  "question": "For positive a, b and c, find the range of r satisfying r/a + r/b + r/c > 1.",
+  "options": [
+   "r > abc/(bc + ac + ab)",
+   "r > abc",
+   "r > 1/a + 1/b + 1/c",
+   "r > 1/(abc)"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1989,
+  "question": "If −8, m, n and 19 are consecutive terms of an arithmetic progression, find (m, n).",
+  "options": [
+   "(1, 10)",
+   "(2, 10)",
+   "(3, 13)",
+   "(4, 16)"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1989,
+  "question": "In triangle PQR, H lies on PQ and K lies on PR, with HK parallel to QR. PH = 4 cm and HQ = 3 cm. Find KR : PR.",
+  "options": [
+   "7 : 3",
+   "3 : 7",
+   "3 : 4",
+   "4 : 3"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1989,
+  "question": "In triangle XYZ, angles Y and Z are each 30° and XZ = 3 cm. Find YZ.",
+  "options": [
+   "√3/2 cm",
+   "3√3/2 cm",
+   "3√3 cm",
+   "2√3 cm"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1989,
+  "question": "Triangle RST is right-angled at S. Its perpendicular sides have lengths x and y, and its hypotenuse has length z. If x : y = 5 : 12 and z = 52 cm, find its perimeter.",
+  "options": [
+   "68 cm",
+   "84 cm",
+   "100 cm",
+   "120 cm"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1989,
+  "question": "An aeroplane flies horizontally at a height of 10 km toward a landmark on level ground. At two positions before reaching it, the angles of depression are 35° and 55°, respectively. Find the distance between the observation positions.",
+  "options": [
+   "10(sin 35° − sin 55°) km",
+   "10(cos 35° − cos 55°) km",
+   "10(tan 35° − tan 55°) km",
+   "10(cot 35° − cot 55°) km"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1989,
+  "question": "The average age of a family of 21 people is 14 years. Excluding the grandfather, the average age of the remaining 20 people is 12 years. How old is the grandfather?",
+  "options": [
+   "35 years",
+   "40 years",
+   "42 years",
+   "54 years"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1989,
+  "question": "Two numbers are chosen at random from the three numbers1,3 and6. Find the probability that their sum is not odd.",
+  "options": [
+   "2/3",
+   "1/2",
+   "1/3",
+   "1/6"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1990,
+  "question": "Simplify (4¾ − 6¼) ÷ (4⅕ × 1¼).",
+  "options": [
+   "−7⅞",
+   "−2/7",
+   "−10/21",
+   "10/21"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1990,
+  "question": "Find the highest common factor of a²bx + abx² and a²b − b³.",
+  "options": [
+   "b",
+   "a + b",
+   "a(a + b)",
+   "abx(a² − b²)"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1990,
+  "question": "Evaluate 241.34 × (3 × 10⁻³)² and give the answer to four significant figures.",
+  "options": [
+   "0.0014",
+   "0.001448",
+   "0.0022",
+   "0.002172"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1990,
+  "question": "At what annual simple-interest rate would ₦100 deposited for five years earn ₦7.50 interest?",
+  "options": [
+   "1½%",
+   "2½%",
+   "15%",
+   "25%"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1990,
+  "question": "Three children share a basket of mangoes. The first takes ¼ of the mangoes and the second takes ¾ of the remainder. What fraction of the original basket does the third child receive?",
+  "options": [
+   "3/16",
+   "7/16",
+   "9/16",
+   "13/16"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1990,
+  "question": "Three brothers share a profit. The first receives ⅓ of the total and the second receives ⅔ of the remainder. The third receives the remaining ₦12,000. What was the total profit?",
+  "options": [
+   "₦60,000",
+   "₦54,000",
+   "₦48,000",
+   "₦42,000"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1990,
+  "question": "If a² + b² = 16 and 2ab = 7, find all possible values of a − b.",
+  "options": [
+   "3 and −3",
+   "2 and −2",
+   "1 and −1",
+   "3 and −1"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1990,
+  "question": "Divide x³ − 2x² − 5x + 6 by x − 1.",
+  "options": [
+   "x² − x − 6",
+   "x² − 5x + 6",
+   "x² − 7x + 6",
+   "x² − 5x − 6"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1990,
+  "question": "Solve x − 8√x + 15 = 0 over the real numbers.",
+  "options": [
+   "3 and 5",
+   "−3 and −5",
+   "9 and 25",
+   "−9 and 25"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1990,
+  "question": "A rectangular lawn has perimeter 24 m and area 35 m². Find its width, taking the width as the shorter side.",
+  "options": [
+   "5 m",
+   "7 m",
+   "12 m",
+   "14 m"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1990,
+  "question": "Simplify x/(x + y) + y/(x − y) − x²/(x² − y²), where x ≠ y and x ≠ −y.",
+  "options": [
+   "x²/(x² − y²)",
+   "y²/(x² − y²)",
+   "x/(x² − y²)",
+   "y/(x² − y²)"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1990,
+  "question": "Find the sum of the first twenty terms of the arithmetic progression log a, log(a²), log(a³), …, where a > 0 and the logarithms have the same valid base.",
+  "options": [
+   "log(a²⁰)",
+   "log(a²¹)",
+   "log(a²⁰⁰)",
+   "log(a²¹⁰)"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1990,
+  "question": "Find the sum of the first 18 terms of the progression 3, 6, 12, ….",
+  "options": [
+   "3(2¹⁷ − 1)",
+   "3 × 2¹⁸ − 1",
+   "3(2¹⁸ + 1)",
+   "3(2¹⁸ − 1)"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1990,
+  "question": "A sector of a circle has radius 10.5 cm and central angle 48°. Calculate its perimeter to one decimal place.",
+  "options": [
+   "8.8 cm",
+   "25.4 cm",
+   "25.6 cm",
+   "29.8 cm"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1990,
+  "question": "Find the length of a side of a rhombus whose diagonals are 6 cm and 8 cm.",
+  "options": [
+   "8 cm",
+   "5 cm",
+   "4 cm",
+   "3 cm"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1990,
+  "question": "If cos θ = 12/13, find 1 + cot² θ.",
+  "options": [
+   "169/25",
+   "25/169",
+   "169/144",
+   "144/169"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1990,
+  "question": "OPRS is a rectangle with OP = 11 cm. A semicircle is attached outside it along diameter PR. Inside the rectangle, triangle OTS is right-angled at T, with OT = 6 cm and ST = 8 cm. Find the area of the rectangle and semicircle together, excluding triangle OTS. Use π = 22/7.",
+  "options": [
+   "125 2/7 cm²",
+   "149 2/7 cm²",
+   "243 1/7 cm²",
+   "267 1/2 cm²"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1990,
+  "question": "Two distinct numbers are drawn at random without replacement from 1, 2, 3 and 4. What is the probability that their sum is even?",
+  "options": [
+   "2/3",
+   "½",
+   "1/3",
+   "¼"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1990,
+  "question": "An integer is selected uniformly at random from 41 to 56 inclusive. What is the probability that it is a multiple of 9?",
+  "options": [
+   "1/8",
+   "2/15",
+   "3/16",
+   "7/8"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1991,
+  "question": "Calculate (1/0.05) ÷ (1/5.005) − (0.05 × 2.05), correct to three decimal places.",
+  "options": [
+   "99.998",
+   "98.999",
+   "89.899",
+   "9.998"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1991,
+  "question": "Express62/3 as a decimal correct to three significant figures.",
+  "options": [
+   "20.6",
+   "20.667",
+   "20.67",
+   "20.7"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1991,
+  "question": "Musa borrows ₦10.00 at2% interest per month and repays ₦8.00 after four months. How much does he still owe?",
+  "options": [
+   "₦10.80",
+   "₦10.67",
+   "₦2.80",
+   "₦2.67"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1991,
+  "question": "Three gallons of spirit containing20% water are mixed with five gallons containing15% water. What percentage of the mixture is water?",
+  "options": [
+   "2⅘%",
+   "16⅞%",
+   "18⅛%",
+   "18⅞%"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1991,
+  "question": "Simplify 2 log₁₀(2/5) − log₁₀(72/125) + log₁₀9.",
+  "options": [
+   "1 − 4 log₁₀3",
+   "−1 + 2 log₁₀3",
+   "−1 + 5 log₁₀2",
+   "1 − 2 log₁₀2"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1991,
+  "question": "If w varies inversely as uv/(u + v), and w = 8 when u = 2 and v = 6, find the relationship between u, v and w.",
+  "options": [
+   "uvw = 16(u + v)",
+   "16uv = 3w(u + v)",
+   "uvw = 12(u + v)",
+   "12uvw = u + v"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1991,
+  "question": "Which of the following is a factor of rs + tr − pt − ps?",
+  "options": [
+   "p − s",
+   "s − p",
+   "r − p",
+   "r + p"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1991,
+  "question": "Find the two values of y that satisfy the simultaneous equations 3x + y = 8 and x² + xy = 6.",
+  "options": [
+   "−1 and 5",
+   "−5 and 1",
+   "1 and 5",
+   "1 and 1"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1991,
+  "question": "Find the range of x that satisfies x/2 + x/3 + x/4 < 1.",
+  "options": [
+   "x < 12/13",
+   "x < 13",
+   "x < 9",
+   "x < 13/12"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1991,
+  "question": "Solve the equation (x − 2)(x − 3) = 12.",
+  "options": [
+   "2 and 3",
+   "3 and 6",
+   "−1 and 6",
+   "1 and 6"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1991,
+  "question": "Simplify (√(1 + x) + √x)/(√(1 + x) − √x).",
+  "options": [
+   "1 − 2x − 2√(x(1 + x))",
+   "1 + 2x + 2√(x(1 + x))",
+   "√(x(1 + x))",
+   "1 + 2x − 2√(x(1 + x))"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1991,
+  "question": "What is the nth term of the progression 27, 9, 3, …?",
+  "options": [
+   "27(1/3)^(n − 1)",
+   "3^(n + 2)",
+   "27 + 18(n − 1)",
+   "27 + 6(n − 1)"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1991,
+  "question": "The angles of a quadrilateral are (5x − 30)°, (4x + 60)°, (60 − x)° and (3x + 61)°. Which is the smallest angle?",
+  "options": [
+   "(5x − 30)°",
+   "(4x + 60)°",
+   "(60 − x)°",
+   "(3x + 61)°"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1991,
+  "question": "The area of a square is 144 cm². Find the length of its diagonal.",
+  "options": [
+   "11√3 cm",
+   "12 cm",
+   "12√2 cm",
+   "13 cm"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1991,
+  "question": "One angle of a rhombus is 60°. The shorter diagonal is 8 cm. Find the length of the longer diagonal.",
+  "options": [
+   "8√3 cm",
+   "16/√3 cm",
+   "5√3 cm",
+   "10/√3 cm"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1991,
+  "question": "From a point P outside a circle, PT is a tangent. Two secants pass through the circle in the orders P–M–N and P–Q–R. If PM = 5 cm, PN = 12 cm and PQ = 4.8 cm, find PR and PT respectively, to the nearest 0.1 cm.",
+  "options": [
+   "7.3 cm and 5.9 cm",
+   "7.7 cm and 12.5 cm",
+   "12.5 cm and 7.7 cm",
+   "5.9 cm and 7.3 cm"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1991,
+  "question": "Simplify cos²x(sec²x + sec²x tan²x).",
+  "options": [
+   "tan x",
+   "tan x sec x",
+   "sec²x",
+   "cosec²x"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1991,
+  "question": "PQRS is a square of side 8 cm, with its vertices named in order. U lies on PQ, V on QR and W on RS. Given UQ = 4 cm, QV = 6 cm and RW = 2 cm, find the area of triangle UVW.",
+  "options": [
+   "64 cm²",
+   "54 cm²",
+   "50 cm²",
+   "10 cm²"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1991,
+  "question": "Find the total surface area of a solid cylinder whose base radius is 4 cm and height is 5 cm.",
+  "options": [
+   "56π cm²",
+   "72π cm²",
+   "96π cm²",
+   "192π cm²"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1991,
+  "question": "A family spends 3% of its income on electricity, 59% on food, 20% on transport, 11% on education and 7% on extended family. What angles represent education and food, respectively, in a pie chart?",
+  "options": [
+   "76.8° and 25.2°",
+   "10.8° and 224.6°",
+   "112.4° and 72.0°",
+   "39.6° and 212.4°"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1991,
+  "question": "Fifty boxes, each containing 50 balls, were inspected. The numbers of defective balls per box were 4, 5, 6, 7, 8 and 9, with corresponding numbers of boxes 2, 7, 17, 10, 8 and 6. Find the mean (to one decimal place) and median number of defective balls per box, respectively.",
+  "options": [
+   "6.7 and 6",
+   "6.7 and 6.5",
+   "6 and 6.7",
+   "6.5 and 6.7"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1992,
+  "question": "Simplify 5√18 − 3√72 + 4√50.",
+  "options": [
+   "17√4",
+   "4√17",
+   "17√2",
+   "12√4"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1992,
+  "question": "Make t the subject of the formula s = ut + ½at².",
+  "options": [
+   "(u ± √(u² − 2as))/a",
+   "(−u ± √(u² − 2as))/a",
+   "(u ± √(u² + 2as))/a",
+   "(−u ± √(u² + 2as))/a"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1992,
+  "question": "Solve the equation y − 11√y + 24 = 0.",
+  "options": [
+   "8, 3",
+   "64, 9",
+   "6, 4",
+   "9, −8"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1992,
+  "question": "Resolve 3/(x² + x − 2) into partial fractions.",
+  "options": [
+   "1/(x−1) − 1/(x+2)",
+   "1/(x+2) − 1/(x−1)",
+   "1/(x+1) − 1/(x−2)",
+   "1/(x−2) + 1/(x+1)"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1992,
+  "question": "What is the nth term of the sequence 2, 6, 12, 20, …?",
+  "options": [
+   "4n − 2",
+   "2(3n − 1)",
+   "n² + n",
+   "n² + 3n + 2"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1992,
+  "question": "For real numbers m and n, the binary operation * is defined by m*n = mn + m + n. Find its identity element.",
+  "options": [
+   "e = 1",
+   "e = −1",
+   "e = −2",
+   "e = 0"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1992,
+  "question": "P and R are the endpoints of a diameter of a circle, and Q is a point on the semicircle. PQ and QR are chords. S lies on PR, with QS perpendicular to PR. Which expression gives the length QS?",
+  "options": [
+   "QS = PS × SR",
+   "QS = √(PS × SR)",
+   "QS = √2 × √(PS × SR)",
+   "QS = (1/√2) × √(PS × SR)"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1992,
+  "question": "Towns P and Q both lie on latitude 60°N. Their longitudes are 20°E and 25°W respectively. Calculate the distance between them along this latitude, taking Earth’s radius as 6400 km.",
+  "options": [
+   "800π/9 km",
+   "800√(3π)/9 km",
+   "800π km",
+   "800√(3π) km"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1992,
+  "question": "Two perpendicular radii of a circle with centre O each have length 6 cm. A chord joins their endpoints. Find the area of the minor segment between this chord and the quarter-circle arc.",
+  "options": [
+   "9π cm²",
+   "9(π − 2) cm²",
+   "18π cm²",
+   "36π cm²"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1992,
+  "question": "The locus of a point which is equidistant from two given fixed points is the",
+  "options": [
+   "perpendicular bisector of the straight line joining them",
+   "parallel line to the straight line joining them",
+   "transverse to the straight line joining them",
+   "angle bisector of 90° which the straight line joining them makes with the horizontal"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1992,
+  "question": "Find the equation of the line through (5, 7) parallel to the line 7x + 5y = 12.",
+  "options": [
+   "5x + 7y = 120",
+   "7x + 5y = 70",
+   "x + y = 7",
+   "15x + 17y = 90"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1992,
+  "question": "A frequency distribution has values 2, 4, 6 and 8, with respective frequencies 4, y, 6 and 5. If its mean is 5.2, find y.",
+  "options": [
+   "6.0",
+   "5.2",
+   "5.0",
+   "4.0"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1992,
+  "question": "The numbers of children in families are 0, 1, 2, 3, 4, 5 and 6, with respective frequencies 7, 11, 6, 7, 7, 5 and 3. Find the mode and median, respectively.",
+  "options": [
+   "2,1",
+   "1,2",
+   "1,5",
+   "5,2"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1992,
+  "question": "Two fair six-sided dice are thrown together. Determine the probability of obtaining a total score of 8.",
+  "options": [
+   "1/12",
+   "5/36",
+   "1/8",
+   "7/36"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1992,
+  "question": "Events P and Q have probabilities 3/4 and 1/6, respectively. If the probability that both occur is 1/12, what is the probability that at least one occurs?",
+  "options": [
+   "1/96",
+   "1/8",
+   "5/6",
+   "11/12"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1993,
+  "question": "Make x the subject of (1 + ax)/(1 − ax) = p/q.",
+  "options": [
+   "(p+q)/[a(p−q)]",
+   "(p−q)/[a(p+q)]",
+   "(p−q)/(apq)",
+   "pq/[a(p−q)]"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1993,
+  "question": "Which of the following is a factor of 15 + 7x − 2x²?",
+  "options": [
+   "x − 3",
+   "x + 3",
+   "x − 5",
+   "x + 5"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1993,
+  "question": "Solve x² + y − 5 = 0 and y − 7x + 3 = 0 for x.",
+  "options": [
+   "−2, 4",
+   "2, 4",
+   "−1, 8",
+   "1, −8"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1993,
+  "question": "Divide x³ + 7x² − x − 7 by x² − 1.",
+  "options": [
+   "−x³ + 7x² − x − 7",
+   "−x³ − 7x + 7",
+   "x − 7",
+   "x + 7"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1993,
+  "question": "Solve the inequality y² − 3y > 18.",
+  "options": [
+   "−2 < y < 6",
+   "y < −3 or y > 6",
+   "y > −3 or y > 6",
+   "y < −3 or y < 6"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1993,
+  "question": "If k + 1, 2k − 1 and 3k + 1 are consecutive terms of a geometric progression, find the possible common ratios.",
+  "options": [
+   "0, 8",
+   "−1, 5/3",
+   "2, 3",
+   "1, −1"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1993,
+  "question": "Find the radius of a sphere whose surface area is 154 cm². Use π = 22/7.",
+  "options": [
+   "7.00 cm",
+   "3.50 cm",
+   "3.00 cm",
+   "1.75 cm"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1993,
+  "question": "Find the area of a sector of a circle of radius 3 m and angle 60°, correct to one decimal place.",
+  "options": [
+   "4.0 m²",
+   "4.1 m²",
+   "4.7 m²",
+   "5.0 m²"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1993,
+  "question": "If sin θ = cos θ, find θ for 0° < θ < 360°.",
+  "options": [
+   "45°, 225°",
+   "135°, 315°",
+   "45°, 315°",
+   "135°, 225°"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1993,
+  "question": "Two angles of a triangle are 30° each and its longest side is 10 cm. Find the length of each of the other sides.",
+  "options": [
+   "5 cm",
+   "4 cm",
+   "3√3 cm",
+   "10√3/3 cm"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1993,
+  "question": "Estimate the mode of the grouped frequency distribution.",
+  "options": [
+   "13.2 g",
+   "15.0 g",
+   "16.8 g",
+   "17.5 g"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1993,
+  "question": "Independent events X, Y and Z have probabilities 1/2, 2/3 and 1/4 respectively. Find the probability that Y and Z occur but X does not.",
+  "options": [
+   "1/8",
+   "1/24",
+   "1/12",
+   "1/4"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1994,
+  "question": "Given √2 ≈ 1.414, estimate 1/√2 to three decimal places.",
+  "options": [
+   "0.141",
+   "0.301",
+   "0.667",
+   "0.707"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1994,
+  "question": "For A ⊆ B in a universal set E, simplify A ∩ (A ∩ B)′.",
+  "options": [
+   "A",
+   "∅",
+   "B",
+   "Σ"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1994,
+  "question": "Factorise a²x − b²y − b²x + a²y completely.",
+  "options": [
+   "(a − b)(x + y)",
+   "(y − x)(a − b)(a + b)",
+   "(x − y)(a − b)(a + b)",
+   "(x + y)(a − b)(a + b)"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1994,
+  "question": "Find p and q if (x − 1) and (x − 3) are factors of px³ + qx² + 11x − 6.",
+  "options": [
+   "−1, −6",
+   "1, −6",
+   "1, 6",
+   "6, −1"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1994,
+  "question": "Solve 1/x > 2 over the real numbers.",
+  "options": [
+   "x < 1/2",
+   "x < 0 or x > 1/2",
+   "0 < x < 1/2",
+   "1 < x < 2"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1994,
+  "question": "Find the nth term of 3, 6, 10, 15, 21, …, starting with n = 1.",
+  "options": [
+   "n(n − 1/2)",
+   "n(n + 1/2)",
+   "(n + 1)(n + 2)/2",
+   "n(2n + 1)"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1994,
+  "question": "Three angles of a quadrilateral are (3y − x − z)°, 3x° and (2z − 2y − x)°. Find the fourth.",
+  "options": [
+   "(360 − x − y − z)°",
+   "(360 + x + y − z)°",
+   "(180 − x + y + z)°",
+   "(180 + x + y + z)°"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1994,
+  "question": "An open wooden box has uniform thickness 2 cm and internal dimensions 50 cm × 36 cm × 20 cm. Find the volume of wood.",
+  "options": [
+   "11520 cm³",
+   "36000 cm³",
+   "38200 cm³",
+   "47520 cm³"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1994,
+  "question": "A conical frustum has height h and its top diameter is twice its bottom diameter. Find the height of the complete cone formed by extending its sides to a vertex below.",
+  "options": [
+   "2h",
+   "2πh",
+   "πh",
+   "πh/2"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1994,
+  "question": "M(4, q) is the midpoint of L(p, −2) and N(q, p). Find p and q.",
+  "options": [
+   "p = 2, q = 4",
+   "p = 3, q = 1",
+   "p = 5, q = 3",
+   "p = 6, q = 2"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1994,
+  "question": "A boat on level water is viewed at a depression angle of 30° from a 10 m high cliff. Find its horizontal distance from the cliff foot.",
+  "options": [
+   "5√3/3 m",
+   "5√3 m",
+   "10√3 m",
+   "10√3/3 m"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1994,
+  "question": "Evaluate sin(−690°).",
+  "options": [
+   "√3/2",
+   "−√3/2",
+   "−1/2",
+   "1/2"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1994,
+  "question": "At which point does y = 2x² − 2x + 3 have gradient2?",
+  "options": [
+   "(1, 3)",
+   "(2, 7)",
+   "(0, 3)",
+   "(3, 15)"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1994,
+  "question": "Integrate (1 − x)/x³ with respect to x, for x ≠ 0.",
+  "options": [
+   "(x − x²)/x⁴ + k",
+   "4/x⁴ − 3/x³ + k",
+   "1/x − 1/(2x²) + k",
+   "1/(3x³) − 1/(2x) + k"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1994,
+  "question": "A grade pie chart has sectors A₁ = 144°, A₂ = 72°, A₃ = 64.8° and C₄ = 43.2°, with F taking the remainder. What percentage received C₄?",
+  "options": [
+   "52.0%",
+   "43.2%",
+   "40.0%",
+   "12.0%"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1994,
+  "question": "Class intervals 1–5, 6–10, 11–15, 16–20 and 21–25 have frequencies6,15,20,7,2. Using continuous class boundaries, estimate the median.",
+  "options": [
+   "10.5",
+   "11.5",
+   "12.5",
+   "13"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1994,
+  "question": "A class has6 pupils aged10,27 aged11 and7 aged12. What is the probability that a randomly chosen pupil is at least11?",
+  "options": [
+   "27/40",
+   "17/20",
+   "33/40",
+   "3/20"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1995,
+  "question": "Calculate 3310₅ − 1442₅.",
+  "options": [
+   "1313₅",
+   "2113₅",
+   "4302₅",
+   "1103₅"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1995,
+  "question": "Round 3.1415926 to five decimal places.",
+  "options": [
+   "3.14160",
+   "3.14159",
+   "0.31415",
+   "3.14200"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1995,
+  "question": "A notebook is 15 cm long but is measured as 16.8 cm. Find the percentage error to two significant figures.",
+  "options": [
+   "12%",
+   "11%",
+   "10.71%",
+   "0.12%"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1995,
+  "question": "Express 0.0014 × 0.011 in standard form.",
+  "options": [
+   "1.54 × 10²",
+   "1.54 × 10⁻³",
+   "1.54 × 10⁴",
+   "1.54 × 10⁻⁵"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1995,
+  "question": "Evaluate (81^(3/4) − 27^(1/3))/(3 × 2³).",
+  "options": [
+   "27",
+   "1",
+   "1/3",
+   "1/8"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1995,
+  "question": "Evaluate 16^(3/2) + log₁₀(0.0001) + log₂(32).",
+  "options": [
+   "0.065",
+   "0.650",
+   "6.500",
+   "65.00"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1995,
+  "question": "Simplify (√12 − √3)/(√12 + √3).",
+  "options": [
+   "1/3",
+   "0",
+   "9/15",
+   "1"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1995,
+  "question": "Four players belong to both an 11-player cricket team and a 14-player rugby team. How many belong to at least one team?",
+  "options": [
+   "25",
+   "21",
+   "16",
+   "3"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1995,
+  "question": "If S = {x : x² = 9 and x > 4}, what is S?",
+  "options": [
+   "0",
+   "{0}",
+   "∅",
+   "{∅}"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1995,
+  "question": "At which points does y = x² − 5x + 6 cross the x-axis?",
+  "options": [
+   "(−6, 0), (−1, 0)",
+   "(−3, 0), (−2, 0)",
+   "(−6, 0), (1, 0)",
+   "(2, 0), (3, 0)"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1995,
+  "question": "Factorise abx² + 6y − 3ax − 2byx completely.",
+  "options": [
+   "(ax − 2y)(bx − 3)",
+   "(bx + 3)(2y − ax)",
+   "(bx + 3)(ax − 2y)",
+   "(ax − 2y)(ax − b)"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1995,
+  "question": "Solve (x − 3)(x − 4) ≤ 0.",
+  "options": [
+   "3 ≤ x ≤ 4",
+   "3 < x < 4",
+   "3 ≤ x < 4",
+   "3 < x ≤ 4"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1995,
+  "question": "Simplify (x² − 1)/(x³ + 2x² − x − 2), for x ≠ −2, −1, 1.",
+  "options": [
+   "1/(x + 2)",
+   "(x − 1)/(x + 1)",
+   "(x − 1)/(x + 2)",
+   "1/(x − 2)"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1995,
+  "question": "Which binary rule is commutative for all integers a and b?",
+  "options": [
+   "a*b = a + 2b",
+   "a*b = a + b − ab",
+   "a*b = a² + b",
+   "a*b = a(b + 1)/2"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1995,
+  "question": "A closed circular cylinder has diameter 14 cm and height 12 cm. Find its total surface area using π = 22/7.",
+  "options": [
+   "836 cm²",
+   "528 cm²",
+   "308 cm²",
+   "154 cm²"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1995,
+  "question": "Triangle PQR has PR = 10 cm, angle QPR = 30° and area 35 cm². Find PQ.",
+  "options": [
+   "97 cm",
+   "10 cm",
+   "14 cm",
+   "17 cm"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1995,
+  "question": "In triangle QRS, QS = 12 m, angle RQS = 30° and angle QRS = 45°. Find RS.",
+  "options": [
+   "18√2 m",
+   "12√2 m",
+   "6√2 m",
+   "3√2 m"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1995,
+  "question": "Differentiate cosec x with respect to x, with angles in radians.",
+  "options": [
+   "tan x cosec x",
+   "−cot x cosec x",
+   "tan x sec x",
+   "−cot x sec x"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1995,
+  "question": "Given dy/dx = 4x − 3 and y = 5 at x = 2, find y.",
+  "options": [
+   "2x² − 3x + 5",
+   "2x² − 3x + 3",
+   "2x² − 3x",
+   "4"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1995,
+  "question": "Ages 13,14,15,16,17 have frequencies 3,10,30,42,15. What pie-chart angle represents the 15-year-olds?",
+  "options": [
+   "27°",
+   "30°",
+   "54°",
+   "108°"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1995,
+  "question": "In a class pie chart, Economics occupies 150°, History 90° and French 90°; C.R.K. occupies the remainder. If30 students take French, how many take C.R.K.?",
+  "options": [
+   "25",
+   "15",
+   "10",
+   "8"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1995,
+  "question": "Find the population variance of the scores 1,2,3,4,5.",
+  "options": [
+   "1.2",
+   "1.4",
+   "2.0",
+   "3.0"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1997,
+  "question": "Express (0.006)³ + (0.004)³ in standard form.",
+  "options": [
+   "2.8 × 10⁻⁹",
+   "2.8 × 10⁻⁸",
+   "2.8 × 10⁻⁷",
+   "2.8 × 10⁻⁶"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1997,
+  "question": "Given logₐ2 = 0.693 and logₐ3 = 1.097, find logₐ13.5.",
+  "options": [
+   "1.404",
+   "1.790",
+   "2.598",
+   "2.790"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1997,
+  "question": "Simplify log₂96 − 2log₂6.",
+  "options": [
+   "2 − log₂3",
+   "3 − log₂3",
+   "log₂3 − 3",
+   "log₂3 − 2"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1997,
+  "question": "If 8^(x/2) = 2^(3/8) × 4^(3/4), find x.",
+  "options": [
+   "3/8",
+   "3/4",
+   "4/5",
+   "5/4"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1997,
+  "question": "At what simple interest rate per year does ₦1000 grow to ₦1240 in 3 years?",
+  "options": [
+   "6%",
+   "8%",
+   "10%",
+   "12%"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1997,
+  "question": "Solve 2/x − 3/y = 2 and 4/x + 3/y = 10.",
+  "options": [
+   "x = 3/2, y = 1/2",
+   "x = 1/2, y = 3/2",
+   "x = −1/2, y = −3/2",
+   "x = 1/2, y = −3/2"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1997,
+  "question": "Find the minimum of x² − 3x + 2 over the real numbers.",
+  "options": [
+   "−1/4",
+   "−1/2",
+   "1/4",
+   "1/2"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1997,
+  "question": "Make f the subject of t = √[v/(1/f + 1/g)], where the denominators are nonzero.",
+  "options": [
+   "(gv − t²)/(gt²)",
+   "gt²/(gv − t²)",
+   "v/√t − 1/g",
+   "gv/t² − g"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1997,
+  "question": "Let f(x) = 2x + 4 and g(x) = 6x + 7 > 0. Solve f(x)/g(x) < 1.",
+  "options": [
+   "x < −3/4",
+   "x > −4/3",
+   "x > −3/4",
+   "x > −12"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1997,
+  "question": "Solve 12x² < x + 1.",
+  "options": [
+   "−1/4 < x < 1/3",
+   "1/4 < x < 1/3",
+   "−1/3 < x < 1/4",
+   "−1/4 < x < −1/3"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1997,
+  "question": "If Sₙ = n² − 1 is the sum of the first n terms, find the nth term for n ≥ 2.",
+  "options": [
+   "4n + 1",
+   "4n − 1",
+   "2n + 1",
+   "2n − 1"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1997,
+  "question": "The nth term is 3^(1−n), starting at n = 1. Find the sum of the first three terms.",
+  "options": [
+   "13/9",
+   "1",
+   "1/3",
+   "1/9"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1997,
+  "question": "A sector has radius 6 cm and central angle 70°. Find its area using π = 22/7.",
+  "options": [
+   "22 cm²",
+   "44 cm²",
+   "66 cm²",
+   "88 cm²"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1997,
+  "question": "A right prism is 11 cm long. Its trapezoidal cross-section has parallel sides 8 cm and 10 cm separated perpendicularly by 5 cm. Find its volume.",
+  "options": [
+   "990 cm³",
+   "880 cm³",
+   "550 cm³",
+   "495 cm³"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1997,
+  "question": "A line makes an angle 135° with the positive x-axis and passes through(2,3). Find its equation.",
+  "options": [
+   "x − y = 1",
+   "x + y = 1",
+   "x + y = 5",
+   "x − y = 5"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1997,
+  "question": "In triangle XYZ, angle XYZ = 60°, XY = 3 cm and YZ = 4 cm. Find XZ.",
+  "options": [
+   "√23 cm",
+   "√13 cm",
+   "2√5 cm",
+   "2√3 cm"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1997,
+  "question": "In triangle XYZ, XY = 5 cm and XZ = 2 cm. Extending XZ through Z to E gives exterior angle YZE = 150°. If angle XYZ = θ, find sinθ.",
+  "options": [
+   "3/5",
+   "1/2",
+   "2/5",
+   "1/5"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1997,
+  "question": "Differentiate (6x³ − 5x² + 1)/(3x²), for x ≠ 0.",
+  "options": [
+   "2 + 2/(3x³)",
+   "2 + 1/(6x)",
+   "2 − 2/(3x³)",
+   "2 − 1/(6x)"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1997,
+  "question": "Find the gradient of y = 2√x − 1/x at x = 1.",
+  "options": [
+   "0",
+   "1",
+   "2",
+   "3"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1997,
+  "question": "Integrate 1/x + cos x with respect to x, for x > 0.",
+  "options": [
+   "−1/x² + sin x + k",
+   "ln x + sin x + k",
+   "ln x − sin x + k",
+   "−1/x² − sin x + k"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1997,
+  "question": "A₦6000 monthly income is divided in a pie chart: Housing 69°, Transport 60°, Meal 61°, Others 50° and Basic the remainder. Find the Basic amount.",
+  "options": [
+   "₦2000",
+   "₦2600",
+   "₦3100",
+   "₦3450"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1997,
+  "question": "A basket contains 6 grapes,11 bananas and 13 oranges. One fruit is selected uniformly at random. Find the probability of a grape or banana.",
+  "options": [
+   "17/30",
+   "11/30",
+   "6/30",
+   "5/30"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1998,
+  "question": "Evaluate [(1/0.03) ÷ (1/0.024)]⁻¹ to two decimal places.",
+  "options": [
+   "3.76",
+   "1.25",
+   "0.94",
+   "0.75"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1998,
+  "question": "The polynomial pm² + qm + 1 leaves remainder 2 on division by m − 1 and remainder 4 on division by m + 1. Find p and q.",
+  "options": [
+   "2, −1",
+   "−1, 2",
+   "3, −2",
+   "−2, 3"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1998,
+  "question": "Factorise r² − r(2p + q) + 2pq.",
+  "options": [
+   "(r − 2q)(2r − p)",
+   "(r − q)(r + p)",
+   "(r − q)(r − 2p)",
+   "(2r − q)(r + p)"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1998,
+  "question": "Solve √x − √(x − 2) − 1 = 0 over the real numbers.",
+  "options": [
+   "3/2",
+   "2/3",
+   "4/9",
+   "9/4"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1998,
+  "question": "Divide 2x³ + 11x² + 17x + 6 by 2x + 1.",
+  "options": [
+   "x² + 5x + 6",
+   "2x² + 5x + 6",
+   "2x² − 5x + 6",
+   "x² − 5x + 6"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1998,
+  "question": "Resolve(11x + 2)/(6x² − x − 1) into partial fractions, excluding denominator zeros.",
+  "options": [
+   "1/(3x − 1) + 3/(2x + 1)",
+   "3/(3x + 1) − 1/(2x − 1)",
+   "3/(3x − 1) − 1/(2x + 1)",
+   "1/(3x + 1) + 3/(2x − 1)"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1998,
+  "question": "For positive real x, solve 1/(3x) + 1/2 > 1/(4x).",
+  "options": [
+   "x > −1/6",
+   "x > 0",
+   "0 < x < 4",
+   "0 < x < 1/6"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1998,
+  "question": "If p + 1,2p − 10 and 1 − 4p² are consecutive arithmetic-progression terms, find p.",
+  "options": [
+   "−4, 2",
+   "−2, 4/11",
+   "−11/4, 2",
+   "5, −3"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1998,
+  "question": "The first three terms of a convergent geometric progression sum to half its nonzero infinite sum. Find its positive common ratio.",
+  "options": [
+   "1/4",
+   "1/2",
+   "1/∛3",
+   "1/∛2"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1998,
+  "question": "PQST is a parallelogram with TS = 10 cm. T,S,R lie in that order on a straight line, SR = 8 cm, and triangle QRS has area 20 cm². Find trapezium PQRT’s area.",
+  "options": [
+   "35 cm²",
+   "65 cm²",
+   "70 cm²",
+   "140 cm²"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1998,
+  "question": "Distinct points S and T lie on a circle of radius 8 cm centred at N. If ST = SN, find the area of triangle STN.",
+  "options": [
+   "4√3 cm²",
+   "16√3 cm²",
+   "32 cm²",
+   "64 cm²"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1998,
+  "question": "Q,T,R lie in that order on a straight line. PQ = 15, PT = 8, PR = 10 and angle PQT = 30°. Find sin(angle PTR).",
+  "options": [
+   "8/15",
+   "2/3",
+   "3/4",
+   "15/16"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1998,
+  "question": "For 0° ≤ x ≤ 180°, at what x does 6sin(2x − 25)° attain its maximum?",
+  "options": [
+   "12.5°",
+   "32.5°",
+   "57.5°",
+   "147.5°"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1998,
+  "question": "From a150 m mast, huts due east and west are seen at depression angles 60° and 45°. Find their separation on level ground.",
+  "options": [
+   "150(1 + √3) m",
+   "50(3 + √3) m",
+   "150√3 m",
+   "50/√3 m"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1998,
+  "question": "For y = 243(4x + 5)⁻², find dy/dx at x = 1.",
+  "options": [
+   "−8/3",
+   "3/8",
+   "9/8",
+   "−8/9"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1998,
+  "question": "Differentiate x/cos x with respect to x, where cos x ≠ 0.",
+  "options": [
+   "1 + x sec x tan x",
+   "1 + sec²x",
+   "cos x + x tan x",
+   "sec x + x sec x tan x"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1998,
+  "question": "Find the curve through(2,5) with derivative 6x − 5.",
+  "options": [
+   "6x² − 5x + 5",
+   "6x² + 5x + 5",
+   "3x² − 5x − 5",
+   "3x² − 5x + 3"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1998,
+  "question": "Class intervals 5–9,10–14,15–19,20–24 have frequencies 17,32,25,24. Estimate the grouped mode to one decimal place using continuous class boundaries.",
+  "options": [
+   "12.2",
+   "12.7",
+   "12.9",
+   "13.4"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1998,
+  "question": "Marks 0 through 10 have frequencies 1,3,4,7,10,8,7,9,8,2,1 respectively. If the pass mark is 5, what percentage failed, to one decimal place?",
+  "options": [
+   "59.4%",
+   "50.0%",
+   "41.7%",
+   "25.0%"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1998,
+  "question": "Only one team can win gold. If teams X and Y have winning probabilities 2/5 and 1/3, find the probability that either wins.",
+  "options": [
+   "2/15",
+   "7/15",
+   "11/15",
+   "13/15"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1998,
+  "question": "Choose x and y independently and uniformly from{1,2,3,4}. Find the probability that xy ≤ 6.",
+  "options": [
+   "5/8",
+   "5/16",
+   "1/2",
+   "3/8"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1999,
+  "question": "Solve √2/(x + √2) = 1/(x − √2), excluding zero denominators.",
+  "options": [
+   "3√2 + 4",
+   "3√2 − 4",
+   "3 − 2√2",
+   "4 + 2√2"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1999,
+  "question": "If log₈10 = x, express log₈5 in terms of x.",
+  "options": [
+   "x/2",
+   "x − 1/4",
+   "x − 1/3",
+   "x − 1/2"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1999,
+  "question": "A convergent geometric progression has first term twice its common ratio and infinite sum 8. Find the sum of its first two terms.",
+  "options": [
+   "8/5",
+   "8/3",
+   "72/25",
+   "56/9"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1999,
+  "question": "Divide 4x³ − 3x + 1 by 2x − 1.",
+  "options": [
+   "2x² − x + 1",
+   "2x² − x − 1",
+   "2x² + x + 1",
+   "2x² + x − 1"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1999,
+  "question": "Two real numbers have positive difference p and sum 2p. Find the larger number.",
+  "options": [
+   "p/2",
+   "3p/2",
+   "5p/2",
+   "3p"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1999,
+  "question": "Find the locus of P(x,y) such that PV = PW, where V = (1,1) and W = (3,5).",
+  "options": [
+   "2x + 2y = 9",
+   "2x + 3y = 8",
+   "2x + y = 9",
+   "x + 2y = 8"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1999,
+  "question": "Find the tangent of the acute angle between 2x + y = 3 and 3x − 2y = 5.",
+  "options": [
+   "−7/4",
+   "7/8",
+   "7/4",
+   "7/2"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1999,
+  "question": "From P, the bearings of Q and R are N67°W and N23°E. From Q, R is on bearing N68°E. If PQ = 150 m, find PR.",
+  "options": [
+   "120 m",
+   "140 m",
+   "150 m",
+   "160 m"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 1999,
+  "question": "At what value of x does y = x³ − x have a local minimum?",
+  "options": [
+   "−√3",
+   "−√3/2",
+   "√3/3",
+   "√3"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2000,
+  "question": "A town has population 240000 in January 1998 and grows by 2% annually. What is its population in January 2000?",
+  "options": [
+   "480000",
+   "249696",
+   "249600",
+   "244800"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2000,
+  "question": "Evaluate [(2.813 × 10⁻³) × 1.063]/(5.637 × 10⁻²), first rounding each number to two significant figures, then expressing the answer to two significant figures.",
+  "options": [
+   "0.056",
+   "0.055",
+   "0.054",
+   "0.54"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2000,
+  "question": "The third term of an arithmetic progression is 4x − 2y and the ninth is 10x − 8y. Find its common difference.",
+  "options": [
+   "19x − 17y",
+   "8x − 4y",
+   "x − y",
+   "2x"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2000,
+  "question": "For p ≠ 1, find the inverse of p under p * q = p + q − pq, where the identity is zero.",
+  "options": [
+   "p",
+   "p − 1",
+   "p/(p − 1)",
+   "p/(p + 1)"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2000,
+  "question": "If x − 1, x + 1 and x − 2 are factors of ax³ + bx² + cx − 1, find a, b and c respectively.",
+  "options": [
+   "−1/2, 1, 1/2",
+   "1/2, 1, 1/2",
+   "1/2, 1, −1/2",
+   "1/2, −1, 1/2"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2000,
+  "question": "Solve 2 − x > x².",
+  "options": [
+   "x < −2 or x > 1",
+   "x > 2 or x < −1",
+   "−1 < x > 2",
+   "−2 < x < 1"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2000,
+  "question": "If α and β are roots of 3x² + 5x − 2 = 0, find 1/α + 1/β.",
+  "options": [
+   "−5/2",
+   "−2/3",
+   "1/2",
+   "5/2"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2000,
+  "question": "An equilateral triangle of side √3 cm is inscribed in a circle. Find the circle’s radius.",
+  "options": [
+   "2/3 cm",
+   "2 cm",
+   "1 cm",
+   "3 cm"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2000,
+  "question": "The lines 3y = 4x − 1 and Ky = x + 3 are perpendicular. Find K.",
+  "options": [
+   "−4/3",
+   "−3/4",
+   "3/4",
+   "4/3"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2000,
+  "question": "In a circle centred at O, diameter FH meets chord EG at right angles at N. If NH = 8 cm and EG = 24 cm, find FH.",
+  "options": [
+   "16 cm",
+   "20 cm",
+   "26 cm",
+   "32 cm"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2000,
+  "question": "For distinct fixed points P and Q, which option most precisely describes the complete locus of X such that XP = XQ?",
+  "options": [
+   "A straight line",
+   "A circle",
+   "The bisector of angle PXQ",
+   "The perpendicular bisector of PQ"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2000,
+  "question": "The expression ax² + bx + c equals 5 when x = 1, and its derivative is 2x + 1. Find a, b and c respectively.",
+  "options": [
+   "1, 3, 1",
+   "1, 2, 1",
+   "2, 1, 1",
+   "1, 1, 3"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2000,
+  "question": "How many distinct arrangements can be made using all the letters of MATHEMATICS?",
+  "options": [
+   "11!/(9! × 2!)",
+   "11!/(9! × 2! × 2!)",
+   "11!/(2! × 2! × 2!)",
+   "11!/(2! × 2!)"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2000,
+  "question": "An integer is chosen uniformly at random from 1 through 20. Find the probability that it is not a multiple of 4.",
+  "options": [
+   "3/4",
+   "3/10",
+   "1/4",
+   "1/20"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2000,
+  "question": "Find the population variance of x, 2x, 3x, 4x and 5x.",
+  "options": [
+   "x√2",
+   "2x²",
+   "x²",
+   "3x"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2000,
+  "question": "Pupils’ ages in years are grouped as 10–12, 13–15, 16–18, 19–20 and 21–23, with frequencies 6, 14, 15, 10 and 5 respectively. What percentage are over 15 but under 21?",
+  "options": [
+   "35%",
+   "45%",
+   "50%",
+   "60%"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2001,
+  "question": "Evaluate 21.05347 − 1.6324 × 0.43 to three decimal places.",
+  "options": [
+   "20.351",
+   "20.352",
+   "20.980",
+   "20.981"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2001,
+  "question": "Evaluate (0.14² × 0.275)/(7 × 0.02), correct to three decimal places.",
+  "options": [
+   "0.033",
+   "0.039",
+   "0.308",
+   "0.358"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2001,
+  "question": "Given p = 1 + √2 and q = 1 − √2, evaluate (p² − q²)/(2pq).",
+  "options": [
+   "−2(2 + √2)",
+   "2(2 + √2)",
+   "−2√2",
+   "2√2"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2001,
+  "question": "Solve m² + n² = 29 and m + n = 7. Give the ordered pairs (m,n).",
+  "options": [
+   "(5,2) and (5,3)",
+   "(5,3) and (3,5)",
+   "(2,3) and (3,5)",
+   "(2,5) and (5,2)"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2001,
+  "question": "Divide a^(3x) − 26a^(2x) + 156a^x − 216 by a^(2x) − 24a^x + 108, where the divisor is nonzero and a > 0.",
+  "options": [
+   "a^x − 18",
+   "a^x − 6",
+   "a^x − 2",
+   "a^x + 2"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2001,
+  "question": "Find all integer pairs (x,y) satisfying 3y + 5x ≤ 15, with 0 < y < 3 and x > 0.",
+  "options": [
+   "(1,1), (2,1), (1,3)",
+   "(1,1), (1,2), (1,3)",
+   "(1,1), (1,2), (2,1)",
+   "(1,1), (3,1), (2,2)"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2001,
+  "question": "For K = [[2,1],[3,4]], find K² + K + I, where I is the 2 × 2 identity matrix.",
+  "options": [
+   "[[9,8],[22,23]]",
+   "[[10,7],[21,24]]",
+   "[[7,2],[12,21]]",
+   "[[6,3],[13,20]]"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2001,
+  "question": "A chord ST is equal in length to the radius r of its circle. Find the length of the minor arc ST.",
+  "options": [
+   "πr/2",
+   "πr/3",
+   "πr/6",
+   "πr/12"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2001,
+  "question": "Find the complete locus of a point whose perpendicular distance from y = 4 is a constant k ≥ 0.",
+  "options": [
+   "y = 4 + k",
+   "y = k − 4",
+   "y = k ± 4",
+   "y = 4 ± k"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2001,
+  "question": "P(−6,1) and Q(6,6) are the endpoints of a circle’s diameter. Calculate its radius.",
+  "options": [
+   "3.5 units",
+   "6.5 units",
+   "7.0 units",
+   "13.0 units"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2001,
+  "question": "Differentiate (2x + 5)²(x − 4) with respect to x.",
+  "options": [
+   "(2x + 5)(6x − 11)",
+   "(2x + 5)(2x − 13)",
+   "4(2x + 5)(x − 4)",
+   "4(2x + 5)(4x − 3)"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2001,
+  "question": "Find dV/dr for a sphere when its radius r = 1.",
+  "options": [
+   "4π",
+   "8π",
+   "12π",
+   "24π"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2001,
+  "question": "Find the dimensions of the rectangle with greatest area for a fixed positive perimeter p.",
+  "options": [
+   "A square of side p/4",
+   "A square of side p/2",
+   "A square of side p",
+   "A square of side 2p"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2001,
+  "question": "Evaluate ∫2(2x − 3)^(2/3) dx.",
+  "options": [
+   "2x − 3 + k",
+   "2(2x − 3) + k",
+   "(6/5)(2x − 3)^(5/3) + k",
+   "(3/5)(2x − 3)^(5/3) + k"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2001,
+  "question": "Cars counted by colour were: yellow 3, white 4, red 8, green 2, blue 6 and black 2. What fraction of the cars were yellow?",
+  "options": [
+   "4/15",
+   "1/5",
+   "3/25",
+   "2/25"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2001,
+  "question": "Scores 4, 7, 8, 11, 13 and 8 have respective frequencies 3, 5, 2, 7, 2 and 1. Find the mean score.",
+  "options": [
+   "11.0",
+   "9.5",
+   "8.7",
+   "7.0"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2001,
+  "question": "If Q₁, Q₂ and Q₃ denote the lower quartile, median and upper quartile of a distribution, which expression gives its interquartile range?",
+  "options": [
+   "Q₃ − Q₁",
+   "Q₃ − Q₂",
+   "Q₂ − Q₁",
+   "(Q₃ − Q₁)/2"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2001,
+  "question": "A bowl contains 1 blue, 2 black, 4 yellow, 5 white and 3 brown beads. A bead is chosen uniformly at random. Find the probability it is blue or white.",
+  "options": [
+   "1/15",
+   "1/3",
+   "2/5",
+   "7/15"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2002,
+  "question": "Simplify (√0.7 + √70)².",
+  "options": [
+   "217.7",
+   "168.7",
+   "84.7",
+   "70.7"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2002,
+  "question": "Evaluate (0.21 × 0.072 × 0.0054)/(0.006 × 1.68 × 0.063), correct to four significant figures.",
+  "options": [
+   "0.1286",
+   "0.1285",
+   "0.01286",
+   "0.01285"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2002,
+  "question": "Simplify 52.4 − 5.7 − 3.45 − 1.75.",
+  "options": [
+   "42.2",
+   "42.1",
+   "41.5",
+   "41.4"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2002,
+  "question": "XZ is a diameter of a circle of radius 15/2 cm. Point Y lies on the circle and XY = 12 cm. Find the area of triangle XYZ.",
+  "options": [
+   "75 cm²",
+   "54 cm²",
+   "45 cm²",
+   "27 cm²"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2002,
+  "question": "Find the midpoint of the segment joining the x- and y-intercepts of 2y = 4x − 8.",
+  "options": [
+   "(−1,−2)",
+   "(1,2)",
+   "(2,0)",
+   "(1,−2)"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2002,
+  "question": "If tan θ = 4/3, calculate sin²θ − cos²θ.",
+  "options": [
+   "7/25",
+   "9/25",
+   "16/25",
+   "24/25"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2002,
+  "question": "Which option precisely identifies the complete locus of points P equidistant from distinct fixed points S and T?",
+  "options": [
+   "A perpendicular to ST",
+   "A line parallel to ST",
+   "The angle bisector of PS and ST",
+   "The perpendicular bisector of ST"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2002,
+  "question": "Triangle PQR has angle PQR = 50° and an exterior angle at R of 128°. Classify the triangle.",
+  "options": [
+   "A scalene triangle",
+   "An isosceles triangle",
+   "An equilateral triangle",
+   "An obtuse-angled triangle"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2002,
+  "question": "Find the locus of points equidistant from the parallel lines x = 1 and x = 7.",
+  "options": [
+   "y = 4",
+   "y = 3",
+   "x = 3",
+   "x = 4"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2002,
+  "question": "In a class of 80 students, 30 offer Music, 40 offer History and 20 offer neither. Find the probability that a randomly chosen student offers Music only.",
+  "options": [
+   "0.13",
+   "0.25",
+   "0.38",
+   "0.50"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2002,
+  "question": "Calculate the mean absolute deviation about the mean of 7, 3, 14, 9, 7 and 8.",
+  "options": [
+   "2½",
+   "2⅓",
+   "2⅙",
+   "1⅙"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2002,
+  "question": "Find the maximum value of y = 1 − 2x − 3x².",
+  "options": [
+   "5/3",
+   "4/3",
+   "5/4",
+   "3/4"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2002,
+  "question": "The ninth term of an arithmetic progression is five times its fifth term. Find the relationship between first term a and common difference d.",
+  "options": [
+   "a + 2d = 0",
+   "a + 3d = 0",
+   "3a + 5d = 0",
+   "2a + d = 0"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2002,
+  "question": "Time is inversely proportional to the number of workers. If 45 workers complete a job in 5 days, how long will 25 workers take?",
+  "options": [
+   "5 days",
+   "9 days",
+   "12 days",
+   "15 days"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2002,
+  "question": "The boundary of px + qy < 4 crosses the axes at (−4,0) and (0,2). Find p and q.",
+  "options": [
+   "p = 1, q = 2",
+   "p = 2, q = 1",
+   "p = −1, q = 2",
+   "p = 2, q = −1"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2002,
+  "question": "Find the inverse function of f(x) = 3x + 4.",
+  "options": [
+   "(x + 4)/3",
+   "(x + 3)/4",
+   "(x − 5)/5",
+   "(x − 4)/3"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2002,
+  "question": "Solve x³ − 5x² − x + 5 = 0.",
+  "options": [
+   "1, 1 or 5",
+   "−1, 1 or −5",
+   "1, 1 or −5",
+   "1, −1 or 5"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2002,
+  "question": "Find the sum to infinity of 1 + 1/3 + 1/9 + 1/27 + … .",
+  "options": [
+   "3/2",
+   "5/2",
+   "10/3",
+   "11/3"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2002,
+  "question": "Evaluate ∫sin(3x) dx.",
+  "options": [
+   "−(2/3)cos(3x) + c",
+   "−(1/3)cos(3x) + c",
+   "(1/3)cos(3x) + c",
+   "(2/3)cos(3x) + c"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2002,
+  "question": "Given dy/dx = 2x − 3 and y = 3 when x = 0, find y.",
+  "options": [
+   "x² − 3x",
+   "x² − 3x + 3",
+   "2x² − 3x",
+   "x² − 3x − 3"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2002,
+  "question": "Differentiate y = sin²(5x) with respect to x.",
+  "options": [
+   "2sin(5x)cos(5x)",
+   "5sin(5x)cos(5x)",
+   "10sin(5x)cos(5x)",
+   "15sin(5x)cos(5x)"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2003,
+  "question": "Multiply 213₄ by 23₄, giving the result in base four.",
+  "options": [
+   "13211₄",
+   "10311₄",
+   "10321₄",
+   "12231₄"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2003,
+  "question": "Evaluate log_(√2)(4) + log_(1/2)(16) − log₄(32).",
+  "options": [
+   "−2.5",
+   "5.5",
+   "−5.5",
+   "2.5"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2003,
+  "question": "Let U be the even integers strictly between 0 and 30, P the multiples of 6 in U and Q the multiples of 4 in U. Find the complement of P ∪ Q in U.",
+  "options": [
+   "{0,2,6,22,26}",
+   "{2,4,14,18,26}",
+   "{2,10,14,22,26}",
+   "{0,10,14,22,26}"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2003,
+  "question": "Evaluate [(1/0.06) ÷ (1/0.042)]⁻¹, correct to two decimal places.",
+  "options": [
+   "4.42",
+   "3.14",
+   "1.53",
+   "1.43"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2003,
+  "question": "Factorise completely 4abx − 2axy − 12b²x + 6bxy.",
+  "options": [
+   "2x(3b − a)(2b − y)",
+   "2x(a − 3b)(b − 2y)",
+   "2x(2b − a)(3b − y)",
+   "2x(a − 3b)(2b − y)"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2003,
+  "question": "The graphs of y = x² + 4 and a straight line PQ are used to solve x² − 3x + 2 = 0. Find the equation of PQ.",
+  "options": [
+   "y = 3x + 2",
+   "y = 3x − 4",
+   "y = 3x + 4",
+   "y = 3x − 2"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2003,
+  "question": "Solve 3x − 5y + 5 = 0 and 4x − 7y + 8 = 0 for x and y respectively.",
+  "options": [
+   "−4, −5",
+   "−5, −4",
+   "5, 4",
+   "4, 5"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2003,
+  "question": "Three consecutive terms of a geometric progression are n − 2, n and n + 3. Find its common ratio.",
+  "options": [
+   "2/3",
+   "3/2",
+   "1/2",
+   "1/4"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2003,
+  "question": "A point P lies on one chosen side of the line through distinct fixed points X and Y, with angle XPY = 90°. Which option most precisely describes its locus, excluding X and Y?",
+  "options": [
+   "The perpendicular bisector of XY",
+   "A circle",
+   "A semicircle",
+   "An arc of a circle through X and Y"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2003,
+  "question": "Find the locus of P(x,y) equidistant from Q(0,0) and R(2,1).",
+  "options": [
+   "2x + y = 5",
+   "2x + 2y = 5",
+   "4x + 2y = 5",
+   "4x − 2y = 5"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2003,
+  "question": "An arc subtends 30° at a point on the circumference of a circle of radius 21 cm. Find its length, using π = 22/7.",
+  "options": [
+   "66 cm",
+   "44 cm",
+   "22 cm",
+   "11 cm"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2003,
+  "question": "Differentiate y = 3sin(−4x).",
+  "options": [
+   "−12cos(−4x)",
+   "12sin(−4x)",
+   "12x cos(4x)",
+   "−12x cos(−4x)"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2003,
+  "question": "A pie chart has four sectors, three measuring 45°, 90° and 135°. If the smallest sector represents ₦28, how much does the largest represent?",
+  "options": [
+   "₦48",
+   "₦96",
+   "₦42",
+   "₦84"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2003,
+  "question": "Two fair six-sided dice are thrown independently. Find the probability that their sum is divisible by three.",
+  "options": [
+   "1/2",
+   "1/3",
+   "1/4",
+   "2/3"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2003,
+  "question": "By how much is the mean of 30, 56, 31, 55, 43 and 44 less than their median? Give the answer to two decimal places.",
+  "options": [
+   "0.50",
+   "0.75",
+   "0.17",
+   "0.33"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2004,
+  "question": "Three teachers share a packet of chalk. The first receives 2/5 of the packet; the second receives 2/15 of what remains. What fraction of the original packet does the third receive?",
+  "options": [
+   "11/25",
+   "12/25",
+   "13/25",
+   "8/15"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2004,
+  "question": "Solve 6logₓ2 − 3logₓ3 = 3log₅0.2 for a valid logarithm base x.",
+  "options": [
+   "3/8",
+   "3/4",
+   "4/3",
+   "8/3"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2004,
+  "question": "At what x values does y = x³ + 2x² − 5x − 6 cross the x-axis?",
+  "options": [
+   "−2, −1 and 3",
+   "−2, 1 and −3",
+   "2, −1 and −3",
+   "2, 1 and 3"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2004,
+  "question": "Factorise completely ac − 2bc − a² + 4b².",
+  "options": [
+   "(a − 2b)(c + a − 2b)",
+   "(a − 2b)(c − a − 2b)",
+   "(a − 2b)(c + a + 2b)",
+   "(a − 2b)(c − a + 2b)"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2004,
+  "question": "Pendulum length L varies directly as period T squared. A period of 4 seconds corresponds to length 64 cm. Find the length for a period of 9 seconds.",
+  "options": [
+   "36 cm",
+   "96 cm",
+   "144 cm",
+   "324 cm"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2004,
+  "question": "Find all integers x satisfying −1 < 3 − 2x ≤ 5.",
+  "options": [
+   "−2, 1, 0, −1",
+   "−1, 0, 1, 2",
+   "−1, 0, 1",
+   "0, 1, 2"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2004,
+  "question": "Find the inverse of [[2,1],[1,1]].",
+  "options": [
+   "[[1,1],[−1,2]]",
+   "[[1,−1],[1,2]]",
+   "[[1,1],[1,2]]",
+   "[[1,−1],[−1,2]]"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2004,
+  "question": "The sum of the interior angles of a pentagon is (6x + 6y)°. Express y in terms of x.",
+  "options": [
+   "y = 60 − x",
+   "y = 90 − x",
+   "y = 120 − x",
+   "y = 150 − x"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2004,
+  "question": "A regular hexagon PQRSTV of side 7 cm is inscribed in a circle. Find the circle’s circumference, using π = 22/7.",
+  "options": [
+   "22 cm",
+   "42 cm",
+   "44 cm",
+   "56 cm"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2004,
+  "question": "In trapezium PQRU, PQTU and PQRS are parallelograms. U,T,S,R lie in that order on the lower parallel side. If PQ = 4 cm, TS = 6 cm and area PQTU = 32 cm², find area PQRU.",
+  "options": [
+   "24 cm²",
+   "48 cm²",
+   "60 cm²",
+   "72 cm²"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2004,
+  "question": "Inside square PQRS, find the locus equidistant from the adjacent sides PQ and QR.",
+  "options": [
+   "The diagonal PR",
+   "The diagonal QS",
+   "Side SR",
+   "The perpendicular bisector of PQ"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2004,
+  "question": "Describe the complete locus of points at perpendicular distance 5 cm from the straight line LM.",
+  "options": [
+   "Two lines parallel to LM on opposite sides, each 5 cm away",
+   "One line parallel to LM and 5 cm away",
+   "Two parallel lines on the same side of LM",
+   "One line parallel to LM and 10 cm away"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2004,
+  "question": "Find the midpoint of the segment joining P(−3,5) and Q(5,−3).",
+  "options": [
+   "(4,−4)",
+   "(4,4)",
+   "(2,2)",
+   "(1,1)"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2004,
+  "question": "A triangle has a 15 cm side opposite a 60° angle. Its side x is opposite a 45° angle. Find x.",
+  "options": [
+   "20√6 cm",
+   "15√6 cm",
+   "5√6 cm",
+   "3√6 cm"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2004,
+  "question": "Find the rate of change of a hemisphere’s volume V with respect to its radius r when r = 2.",
+  "options": [
+   "2π",
+   "4π",
+   "8π",
+   "16π"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2004,
+  "question": "Evaluate ∫₁³(x² − 1) dx.",
+  "options": [
+   "6⅔",
+   "2/3",
+   "−2/3",
+   "−6⅔"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2004,
+  "question": "A crop pie chart has angles: millet 150°, maize 90°, others 60°, with the remainder representing beans. If millet weighs 3000 tonnes, find the weight of beans.",
+  "options": [
+   "9000 tonnes",
+   "6000 tonnes",
+   "1500 tonnes",
+   "1200 tonnes"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2004,
+  "question": "For a histogram with equal-width class intervals, consider: I. Rectangular bars have equal width. II. Their heights are proportional to class frequencies. III. Adjacent class bars meet without gaps. Which statements apply?",
+  "options": [
+   "I and II",
+   "I and III",
+   "I, II and III",
+   "II and III"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2004,
+  "question": "Find the mean absolute deviation about the mean of 1, 2, 3 and 4.",
+  "options": [
+   "1.0",
+   "1.5",
+   "2.0",
+   "2.5"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2004,
+  "question": "In how many ways can two students be selected from five for a debating competition?",
+  "options": [
+   "10 ways",
+   "15 ways",
+   "20 ways",
+   "25 ways"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2021,
+  "question": "For real x, determine the maximum value of y=3x²+5x−3.",
+  "options": [
+   "6",
+   "0",
+   "2",
+   "No correct option"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2021,
+  "question": "Find the derivative of y=2x²(2x���1) at x=−1.",
+  "options": [
+   "18",
+   "16",
+   "−4",
+   "−6"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2021,
+  "question": "Evaluate 241.34(3×10⁻³)², correct to four significant figures.",
+  "options": [
+   "0.0014",
+   "0.001448",
+   "0.0022",
+   "0.002172"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2021,
+  "question": "Three children share a basket of mangoes. The first takes 1/4 of the mangoes, and the second takes 3/4 of the remainder. What fraction of all the mangoes does the third receive?",
+  "options": [
+   "3/16",
+   "7/16",
+   "9/16",
+   "13/16"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2021,
+  "question": "Simplify (0.00275×0.00640)/(0.025×0.08) and express the result in standard form.",
+  "options": [
+   "8.8×10⁻¹",
+   "8.8×10⁻²",
+   "8.8×10⁻³",
+   "8.8×10³"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2021,
+  "question": "Three brothers share a profit. The first receives 1/3 of the total, and the second receives 2/3 of the remainder. The third receives the remaining ₦12,000. Find the total profit.",
+  "options": [
+   "₦60,000",
+   "₦54,000",
+   "₦48,000",
+   "₦42,000"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2021,
+  "question": "Each interior angle of a regular polygon is 140°. How many sides does it have?",
+  "options": [
+   "9",
+   "8",
+   "7",
+   "5"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2021,
+  "question": "A metal pipe is 3 cm thick and has an internal radius of 10 cm. Find the volume of metal in a 3 m length of pipe.",
+  "options": [
+   "153π cm³",
+   "207π cm³",
+   "15,300π cm³",
+   "20,700π cm³"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2021,
+  "question": "The values 4, 16, 30, 20, 10, 14 and 26 are represented on a pie chart. Find the sum of the sector angles for values greater than or equal to 16.",
+  "options": [
+   "48°",
+   "84°",
+   "92°",
+   "276°"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2021,
+  "question": "The mean of ten positive numbers is 16. After another number is added, the mean becomes 18. Find the eleventh number.",
+  "options": [
+   "3",
+   "16",
+   "38",
+   "30"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2021,
+  "question": "A car travels P km from Calabar to Enugu at an average speed of U km/h, then Q km to Benin at an average speed of W km/h. Find its average speed for the complete journey.",
+  "options": [
+   "(P+Q)/(PW+QU)",
+   "UW(P+Q)/(PW+QU)",
+   "UW(P+Q)/(PW)",
+   "UW/(PW+QU)"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2021,
+  "question": "If g(x)=x²+3x, find g(x+1)−g(x).",
+  "options": [
+   "x+2",
+   "2(x+2)",
+   "2x+1",
+   "x²+4"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2021,
+  "question": "Factorize m³ − m² + 2m − 2.",
+  "options": [
+   "(m² + 1)(m − 2)",
+   "(m − 1)(m + 1)(m + 2)",
+   "(m − 2)(m + 1)(m − 1)",
+   "(m² + 2)(m − 1)"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2021,
+  "question": "Find the set of all integers x satisfying −2 < 2x − 6 < 4.",
+  "options": [
+   "{2, 3, 4, 5}",
+   "{2, 3}",
+   "{2, 5}",
+   "{3, 4}"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2021,
+  "question": "X is due east of Y. Z is 6 km due south of Y, and XZ is 12 km. What is the bearing of Z from X?",
+  "options": [
+   "240°",
+   "150°",
+   "60°",
+   "270°"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2021,
+  "question": "A group of market sellers each sells at least one of maize, yam and plantain. In the group, 12 sell maize, 10 sell yam and 14 sell plantain. 5 sell both plantain and maize, 4 sell both yam and maize, 2 sell yam and plantain only, and 3 sell all three. How many sellers are in the group?",
+  "options": [
+   "25",
+   "19",
+   "18",
+   "17"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2021,
+  "question": "Let P(x) = Lx + 2kx² + 24. If x + 2 and x − 1 are factors of P(x), find L and k.",
+  "options": [
+   "L = −12, k = −6",
+   "L = −2, k = 1",
+   "L = −2, k = −1",
+   "L = 0, k = 1"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "For real k, (1/8)^(k+2)=1. Find k.",
+  "options": [
+   "−3",
+   "−2",
+   "2",
+   "0"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "Cube the binary number 101₂ and express the result in base two.",
+  "options": [
+   "1111011₂",
+   "111101₂",
+   "1111101₂",
+   "1111111₂"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "A fair coin is tossed twice. What is the probability of at least one head?",
+  "options": [
+   "1/4",
+   "1/2",
+   "3/4",
+   "1"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "Six numbers are 2, 5, x+1, x+2, 7 and 9. Their mean is 6. Find their median.",
+  "options": [
+   "5.5",
+   "6",
+   "6.5",
+   "7"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "If sin θ=−3/5 and θ lies in the third quadrant, find cos θ.",
+  "options": [
+   "4/5",
+   "−5/4",
+   "5/4",
+   "−4/5"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "Simplify 1/(3−√2) in the form p+q√2.",
+  "options": [
+   "7/3−1/(7√2)",
+   "7/3+1/(7√2)",
+   "3/7−1/(7√2)",
+   "3/7+√2/7"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "Find the length of a chord 3 cm from the centre of a circle of radius 5 cm.",
+  "options": [
+   "8 cm",
+   "5.6 cm",
+   "7 cm",
+   "6.5 cm"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "Mr Adu spends his annual salary on food (28%), rent (15%), car maintenance (20%), gifts (14%), savings (10%) and miscellaneous expenses (13%). If these amounts are represented on a pie chart, what angle represents food?",
+  "options": [
+   "108.5°",
+   "100.8°",
+   "98.8°",
+   "120.5°"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "The tenth term of an arithmetic progression is 32 and the first term is 3/2. Find its fourth term.",
+  "options": [
+   "35/3",
+   "64",
+   "16",
+   "35/2"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "L, N and Z lie on a straight line. Rays NM and NY lie on the same side of that line, in the order NL, NM, NY, NZ. If angle LNM is g degrees and angle YNZ is h degrees, find angle MNY.",
+  "options": [
+   "180°−g°−h°",
+   "360°−(g−h)°",
+   "180°−(g−h)°",
+   "360°−g°−h°"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "How many different arrangements use all seven letters of ZOOLOGY?",
+  "options": [
+   "420",
+   "840",
+   "2520",
+   "5040"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "Which expression is an antiderivative of (2x+1)^3?",
+  "options": [
+   "(2x+1)^4/8+C",
+   "(2x+1)^4/4+C",
+   "(2x+1)^4/6+C",
+   "(2x+1)^3/6+C"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "Matrix A has rows (2,1), (2,3), (1,2), and matrix B has rows (3,2), (4,2). Find AB.",
+  "options": [
+   "Rows (18,6), (12,10), (10,6)",
+   "Rows (10,6), (13,10), (12,6)",
+   "Rows (10,6), (12,10), (11,6)",
+   "Rows (10,6), (18,10), (11,6)"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "For h>0, r=√(3V/(πh)). Make V the subject of the formula.",
+  "options": [
+   "3πhr²",
+   "πhr²/3",
+   "πhr/3",
+   "3πhr"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "Find the determinant of the matrix with rows (2, 3) and (1, 3).",
+  "options": [
+   "9",
+   "6",
+   "3",
+   "−3"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "What is the value of log₂(8√2)?",
+  "options": [
+   "2.5",
+   "3",
+   "3.5",
+   "4"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "What is the new value of 96/50 when its numerator is decreased by 37.5% and its denominator by 20%?",
+  "options": [
+   "1.5",
+   "5/2",
+   "96/48",
+   "0.5"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "Find the limit of (x³+6x−7)/(x−1) as x approaches 1.",
+  "options": [
+   "7",
+   "8",
+   "9",
+   "10"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "Find the median of 14, 17, 10, 13, 18 and 10.",
+  "options": [
+   "12.5",
+   "13",
+   "13.5",
+   "14"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "Convert 10110.011₂ to a decimal number.",
+  "options": [
+   "22.125",
+   "22.375",
+   "22.75",
+   "26.375"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "A school's running cost varies directly with student count. If 20 students cost ₦10,000, how many students correspond to ₦1,000,000 at the same rate?",
+  "options": [
+   "1000",
+   "2000",
+   "3000",
+   "4000"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "What is the midpoint of the points (−3, 5) and (2, 10)?",
+  "options": [
+   "(1/2, 15/2)",
+   "(−1/2, 15/2)",
+   "(−1/2, 5/2)",
+   "(1/2, 5/2)"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "Evaluate C(n²+1, n+5) when n=3.",
+  "options": [
+   "25",
+   "35",
+   "45",
+   "55"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "A particle has displacement s=3t²+5t−10 metres. What is its velocity at t=0?",
+  "options": [
+   "3 m/s",
+   "5 m/s",
+   "6 m/s",
+   "10 m/s"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "An operation is defined by a*b=a−b+(ab)². Find 3*5.",
+  "options": [
+   "223",
+   "232",
+   "32",
+   "−232"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "If y varies inversely as x, and x=3 when y=4, find x when y=12.",
+  "options": [
+   "4",
+   "1",
+   "2",
+   "3"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "The numbers 8,p,q,26 form an arithmetic progression. Find p and q.",
+  "options": [
+   "p=14,q=14",
+   "p=20,q=14",
+   "p=20,q=20",
+   "p=14,q=20"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "Factorize the expression 4a²−9b².",
+  "options": [
+   "(2a−3b)(2a+3b)",
+   "(2a−b)(2a+3b)",
+   "(2a−3b)(a+3b)",
+   "(a−3b)(a+3b)"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "If n(P)=20, n(Q)=30 and n(P∪Q)=40, find n(P∩Q).",
+  "options": [
+   "10",
+   "30",
+   "15",
+   "40"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "Three times a number x, minus 2, is less than that number minus 6. Find the possible values of x.",
+  "options": [
+   "x<−2",
+   "x>2",
+   "x>−2",
+   "x<2"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2022,
+  "question": "A dress sells for ₦3,800 after a 20% discount. What was its original price?",
+  "options": [
+   "₦3,000",
+   "₦4,000",
+   "₦5,000",
+   "₦4,750"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Count the distinct arrangements of all eight letters in SYLLABUS. Arrangements need not form dictionary words.",
+  "options": [
+   "(8 − 1)!",
+   "8!/2!",
+   "8!/(2! × 2!)",
+   "8!"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Find the value of 16^0.16 × 16^0.04 × 2^0.2.",
+  "options": [
+   "2",
+   "0",
+   "2^0",
+   "1/2"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "For a ★ b = a²b and a ◇ b = 2a + b, compute (−4 ★ 2) ◇ (7 ★ −1).",
+  "options": [
+   "−49",
+   "64",
+   "113",
+   "15"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Calculate the definite integral from 0 to 1 of (4x − 6x^(2/3)) dx.",
+  "options": [
+   "−5/8",
+   "−8/5",
+   "8/5",
+   "5/8"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "A population changes from 1,230 to 1,040. Find its percentage decrease, rounded to two decimal places.",
+  "options": [
+   "15.44%",
+   "15.43%",
+   "15.42%",
+   "15.45%"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "A regular polygon has an interior angle five times its exterior angle. Which polygon is it?",
+  "options": [
+   "dodecagon",
+   "enneadecagon",
+   "icosagon",
+   "hendecagon"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "The area of a circular region increases at 1.5 cm² per second. When its area is 2 cm², how fast is its radius increasing, to three significant figures?",
+  "options": [
+   "0.239 cm/s",
+   "0.399 cm/s",
+   "0.798 cm/s",
+   "0.299 cm/s"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Rearrange y = (3x − 9c)/(4x + 5d) to make x the subject, where the required denominators are nonzero.",
+  "options": [
+   "x = −(9c − 5dy)/(4y − 3)",
+   "x = (9c + 5dy)/(4y − 3)",
+   "x = (9c − 5dy)/(4y − 3)",
+   "x = −(9c + 5dy)/(4y − 3)"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Find the values of x satisfying 3(x − 1) ≤ 2(x − 3).",
+  "options": [
+   "x ≤ −3",
+   "x ≥ −3",
+   "x ≤ 3",
+   "x ≥ 3"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "From a point S outside a circle, tangents SP and SR touch it at P and R. If ∠PSR=36° and Q is on the major arc PR, what is ∠PQR?",
+  "options": [
+   "72°",
+   "36°",
+   "144°",
+   "54°"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "A car covers 225 km in 4.5 hours at steady speed. How many hours does it need for 150 km at that speed?",
+  "options": [
+   "2 hours",
+   "4 hours",
+   "3 hours",
+   "1 hour"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Calculate 1101001₂ ÷ 101₂, giving the answer in base two.",
+  "options": [
+   "11101₂",
+   "111₂",
+   "10111₂",
+   "10101₂"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Write (3 − √3)/(2 + √3) as a + b√3. Find a and b.",
+  "options": [
+   "a = 9, b = −5",
+   "a = 5, b = 9",
+   "a = 9, b = 5",
+   "a = −5, b = 9"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Points P(−3, −14) and Q(t, −5) are 9 units apart. Determine t.",
+  "options": [
+   "3",
+   "2",
+   "−3",
+   "−2"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "At a fixed simple-interest rate, a deposit becomes three times its principal after 10 years. When will its amount reach five times the principal?",
+  "options": [
+   "15 years",
+   "25 years",
+   "20 years",
+   "30 years"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Evaluate the limit as x approaches 2 of (x² + 4x − 12)/(x² − 2x).",
+  "options": [
+   "4",
+   "8",
+   "0",
+   "2"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Estimate the mean age when the age groups 5–6, 7–8 and 9–10 years have frequencies 29, 40 and 38 respectively.",
+  "options": [
+   "7.7 years",
+   "7.5 years",
+   "7.8 years",
+   "7.6 years"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "A five-member committee is chosen from six men and four women. How many choices contain more women than men?",
+  "options": [
+   "60",
+   "15",
+   "66",
+   "4"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Find the determinant of the matrix with rows (2, −1, 3), (4, 1, 2) and (1, −3, 1).",
+  "options": [
+   "16",
+   "14",
+   "−23",
+   "−37"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "A boat goes 8 km north and then 6 km west. Find the bearing of its final position from its start, to the nearest degree.",
+  "options": [
+   "217°",
+   "323°",
+   "037°",
+   "053°"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "A fair coin is tossed three times. What is the probability of getting at least one head?",
+  "options": [
+   "7/8",
+   "3/8",
+   "None of these",
+   "1/8"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Find the line through (2, 3) perpendicular to 3x + 2y + 4 = 0.",
+  "options": [
+   "3y = 5x − 2",
+   "y = 5x/3 − 2",
+   "None of these",
+   "3y = 2x + 5"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Differentiate y = x^(2/3)(2x − x²).",
+  "options": [
+   "(10/3)x^(5/3) − (8/3)x^(2/3)",
+   "(10/3)x^(2/3) − (8/3)x^(5/3)",
+   "(10/3)x^(5/3) − (8/3)x^(5/3)",
+   "(2/3)x^(2/3)"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Calculate the mean absolute deviation of the first five prime numbers.",
+  "options": [
+   "2.72",
+   "5.6",
+   "5.25",
+   "13.6"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Find the area enclosed by y = 2x² + 10 and y = 4x + 16.",
+  "options": [
+   "18",
+   "−10/3",
+   "44/3",
+   "64/3"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "The base-y numeral 402ᵧ equals 102 in base ten. Find y.",
+  "options": [
+   "4",
+   "2",
+   "5",
+   "3"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "For real y, solve log₁₀(y+8)+log₁₀(y−8)=2log₁₀3+2log₁₀5. Which value satisfies the equation?",
+  "options": [
+   "−17",
+   "17",
+   "8",
+   "15"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Factor 16x⁴ − y⁴ completely.",
+  "options": [
+   "(2x − y)(2x + y)(4x² + y²)",
+   "(2x + y)²(4x² + y²)",
+   "(2x − y)²(4x² + y²)",
+   "(2x − y)(2x + y)(4x² − y²)"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "For A = {1,2,3,4,5,6} and B = {2,4,6,8}, find (A − B) ∪ (B − A).",
+  "options": [
+   "{1,3,5,8}",
+   "{8}",
+   "{1,2,3,4,5,6,8}",
+   "{1,3,5}"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "A bag has eight red balls and some white balls. On one draw, a white ball is half as likely as a red ball. If two balls are drawn without replacement, what is the probability of one red and one white in either order?",
+  "options": [
+   "8/33",
+   "1/3",
+   "16/33",
+   "2/9"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Estimate the median age when the age groups 5–6, 7–8 and 9–10 years have frequencies 29, 40 and 38 respectively.",
+  "options": [
+   "7.725 years",
+   "6.225 years",
+   "7.5 years",
+   "6.5 years"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Find A if A[[0,1],[2,−1]] = [[2,−1],[1,0]].",
+  "options": [
+   "[[2,1],[−1/2,−1/2]]",
+   "[[0,1],[1/2,1/2]]",
+   "[[2,1],[0,−1]]",
+   "[[2,1],[1/2,−2]]"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "A class has 3 students in the score band [0%,25%), 5 in [25%,50%), 3 in [50%,75%), and 8 in [75%,100%]. How many scored at least 25%?",
+  "options": [
+   "16",
+   "11",
+   "19",
+   "8"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Find the remainder when −2x³ + 6x² + 17x − 21 is divided by x + 1.",
+  "options": [
+   "32",
+   "30",
+   "−30",
+   "−32"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "For a binary operation * on a set, which condition states that * is commutative?",
+  "options": [
+   "a*b = b*a",
+   "(a*b)*c = a*(b*c)",
+   "(b∘c)*a = (b*a)∘(c*a)",
+   "None of these"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Solve x² − x − 4 ≤ 2.",
+  "options": [
+   "−3 < x < 2",
+   "−2 ≤ x ≤ 3",
+   "x ≤ −2 or x ≤ 3",
+   "−2 < x < 3"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Give the nth term of 3, 8, 13, 18, …, taking n = 1 for the first term.",
+  "options": [
+   "5n − 2",
+   "5n + 2",
+   "5",
+   "5n"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "What is the locus of points at equal perpendicular distances from two intersecting straight lines?",
+  "options": [
+   "An ellipse",
+   "A parabola",
+   "The perpendicular bisector of the lines",
+   "The two angle bisectors"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Two quantities are 35% and 80% greater than the same reference quantity. Find their ratio in that order.",
+  "options": [
+   "7:16",
+   "3:4",
+   "16:7",
+   "4:3"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "From the top of a 24 m building, the top of a second building is seen at 30° elevation and its base at 60° depression. How tall is the second building?",
+  "options": [
+   "24 m",
+   "32√3 m",
+   "24√3 m",
+   "32 m"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "In triangle ABC, ∠A=82°, ∠C=56°, and BC=43.2 cm. Find AB to three significant figures.",
+  "options": [
+   "43.5 cm",
+   "28.3 cm",
+   "36.2 cm",
+   "51.5 cm"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "An article sells for ₦230 at a 15% profit. What percentage gain or loss would a selling price of ₦180 produce?",
+  "options": [
+   "10% gain",
+   "10% loss",
+   "12% loss",
+   "12% gain"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "A circle has radius 13 cm and a chord 24 cm long. Find the length of the minor arc subtended by this chord, to three significant figures.",
+  "options": [
+   "24.0 cm",
+   "30.6 cm",
+   "18.5 cm",
+   "61.2 cm"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "A rectangle's sides are reported as 38 m and 52 m, each rounded to the nearest metre. Which interval contains every possible area?",
+  "options": [
+   "1931.25 m² ≤ A < 2021.25 m²",
+   "1950 m² ≤ A < 2002 m²",
+   "1957 m² ≤ A < 1995 m²",
+   "1931.25 m² ≥ A > 2021.25 m²"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "One ninth of a shop's items are brand A. Of the remainder, five eighths are brand B; the rest are brand C. If brand C has 81 items, how many more brand B items are there than C items?",
+  "options": [
+   "243",
+   "108",
+   "54",
+   "135"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "A triangle's sides have ratio 2:3:4 and perimeter 180 cm. Find its area to the nearest square centimetre.",
+  "options": [
+   "1162 cm²",
+   "1163 cm²",
+   "1160 cm²",
+   "1161 cm²"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Calculate interest only on ₦15,700 invested for two years at 8% per year, compounded annually.",
+  "options": [
+   "₦6,212.48",
+   "₦2,834.48",
+   "₦18,312.48",
+   "₦2,612.48"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "An arithmetic progression has third term 6 and fifth term 12. What is the sum of its first twelve terms?",
+  "options": [
+   "201",
+   "144",
+   "198",
+   "72"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Evaluate 16.54×10⁻⁵ − 6.76×10⁻⁸ + 0.23×10⁻⁶. Give the result in standard form to three significant figures.",
+  "options": [
+   "1.66×10⁻⁴",
+   "1.66×10⁻⁵",
+   "1.65×10⁻⁵",
+   "1.65×10⁻⁴"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "A student reads 18 mL from a cylinder, while the accepted reading is 18.4 mL. Find the percentage error relative to the accepted reading.",
+  "options": [
+   "2.17%",
+   "1.73%",
+   "2.23%",
+   "1.96%"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "The exterior angles of regular polygons with n−1 and n+2 sides differ by 6°. Find n.",
+  "options": [
+   "11",
+   "13",
+   "12",
+   "14"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Two fair six-sided dice are rolled. What is the probability that their sum is prime?",
+  "options": [
+   "5/12",
+   "5/9",
+   "1/6",
+   "1/3"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "An L-shaped solid has a constant width of 6 cm. Its lower beam is 36 cm long and 8 cm high. Over the final 10 cm of its length, the solid rises to a total height of 22 cm. What is its volume?",
+  "options": [
+   "2048 cm³",
+   "2568 cm³",
+   "2672 cm³",
+   "1320 cm³"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "A square has diagonal 20√2 cm. Find its area and perimeter in that order.",
+  "options": [
+   "800 cm², 80 cm",
+   "400 cm, 80 cm²",
+   "80 cm, 800 cm²",
+   "400 cm², 80 cm"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "A bicycle costs ₦9,200 and repairs cost ₦1,500. It then sells for ₦13,400. What percentage gain is made, to two decimal places?",
+  "options": [
+   "25.23%",
+   "31.34%",
+   "88.81%",
+   "42.54%"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Evaluate 5/8 − 3/4 ÷ 5/12 × 1/4, applying division and multiplication from left to right.",
+  "options": [
+   "−3/40",
+   "3/40",
+   "7/40",
+   "−263/40"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "A rectangle's shorter side is 6 cm less than its longer side. Adding 2 cm to both dimensions raises its area by 68 cm². Find the shorter side.",
+  "options": [
+   "15 cm",
+   "19 cm",
+   "13 cm",
+   "21 cm"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "An infinite geometric series has second term −2/3 and sum 3/2. Find its common ratio.",
+  "options": [
+   "−1/3",
+   "2",
+   "4/3",
+   "2/9"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "The line 3y + 6x = 48 contains A(−2,k). Find k.",
+  "options": [
+   "16",
+   "20",
+   "8",
+   "−2"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Adult tickets cost ₦520 and child tickets ₦250. Five times as many adult tickets as child tickets bring in ₦171,000. How many child tickets were sold?",
+  "options": [
+   "20",
+   "300",
+   "50",
+   "60"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Solve log₂(6−x) = 3 − log₂(x) over its real domain.",
+  "options": [
+   "x = 2 or 4",
+   "x = −4 or −2",
+   "x = −4 or 2",
+   "x = 4 or −2"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "A cone has base radius 5 cm and slant height 13 cm. Find its volume.",
+  "options": [
+   "300π cm³",
+   "325π cm³",
+   "(325/3)π cm³",
+   "100π cm³"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "A trapezium has area 200 cm² and height 16 cm. Its parallel sides are in the ratio 2:3. Find their lengths.",
+  "options": [
+   "10 cm and 15 cm",
+   "8 cm and 12 cm",
+   "6 cm and 9 cm",
+   "12 cm and 18 cm"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "A pilot flies to an airport at 120 km/h and returns over the same distance at 150 km/h. Both legs take three hours in total. Find the one-way distance.",
+  "options": [
+   "270 km",
+   "200 km",
+   "360 km",
+   "450 km"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "An isosceles right triangle has perimeter 2 m. What is the length of its longest side?",
+  "options": [
+   "2 − √2 m",
+   "−4 + 3√2 m",
+   "It cannot be determined",
+   "−2 + 2√2 m"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "A ship travels from (86°N,56°W) to nearby (86°N,64°W) along the same parallel. Find the distance to the nearest kilometre, using π=3.142 and Earth radius 6370 km.",
+  "options": [
+   "62 km",
+   "97 km",
+   "389 km",
+   "931 km"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "A circle has radius 13 cm, and a chord is 12 cm from its centre. How long is the chord?",
+  "options": [
+   "16 cm",
+   "8 cm",
+   "5 cm",
+   "10 cm"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "A show sells 200 tickets: VIP at ₦1,200 and regular at ₦700. Total sales are ₦180,000. How many of each type sold?",
+  "options": [
+   "80 VIP, 100 regular",
+   "60 VIP, 120 regular",
+   "60 VIP, 100 regular",
+   "80 VIP, 120 regular"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2023,
+  "question": "Twelve workers at eight hours per day finish a job in four days. At the same rate, how many days would four workers at sixteen hours per day need?",
+  "options": [
+   "6 days",
+   "8 days",
+   "10 days",
+   "12 days"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "Find the determinant of [[3,4,6],[2,1,−1],[−1,3,5]].",
+  "options": [
+   "20",
+   "25",
+   "30",
+   "35"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "Find the total amount after three years on ₦200,000 at 5% annual simple interest.",
+  "options": [
+   "₦23,000",
+   "₦30,000",
+   "₦300,000",
+   "₦230,000"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "If y varies inversely with x and y=4 when x=1/2, find x when y=10.",
+  "options": [
+   "2",
+   "10",
+   "1/5",
+   "1/10"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "Using π=22/7, find the central angle of a 33 cm arc in a circle of diameter 28 cm.",
+  "options": [
+   "105°",
+   "115°",
+   "120°",
+   "135°"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "Solve 16^x = 0.25.",
+  "options": [
+   "−1/2",
+   "1/4",
+   "−1/4",
+   "1/2"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "A 20-person committee has men and women in the ratio 3:1. How many women must join to make the ratio 3:2?",
+  "options": [
+   "2",
+   "5",
+   "7",
+   "8"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "Define p*q=2p+pq+q. Find p if (p*2)−(p*1)=40.",
+  "options": [
+   "39",
+   "40",
+   "41",
+   "42"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "Which listed statistic is a measure of central tendency?",
+  "options": [
+   "Standard deviation",
+   "Range",
+   "Variance",
+   "Mean"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "In a circle of radius 9 cm, a perpendicular from the centre meets chord PQ at its midpoint T. If the angle between OT and radius OQ is 30°, how long is chord PQ?",
+  "options": [
+   "9 cm",
+   "18 cm",
+   "4.5 cm",
+   "9√3 cm"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "A Cartesian graph shades the region to the right of the dashed vertical line x=1. Which inequality describes the shaded region?",
+  "options": [
+   "x>1",
+   "x≥1",
+   "x<1",
+   "x≤1"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "Six distinct people sit around a round table. If rotations count as the same arrangement, how many seatings are possible?",
+  "options": [
+   "120",
+   "240",
+   "60",
+   "30"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "A graph shades the first-quadrant region on or above both coordinate axes and below a dashed line 3x+4y=12. Which inequalities describe it?",
+  "options": [
+   "3x+4y<12, x≥0, y≥0",
+   "3x+4y≤12, x≥0, y≥0",
+   "3x+4y>12, x≥0, y≥0",
+   "3x+4y<12, x>0, y>0"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "Let A=[[2,−4,3],[5,1,0]] and B=[[1,4,−2],[−3,3,−1]]. Find A+2B.",
+  "options": [
+   "[[4,4,−1],[−1,7,−2]]",
+   "[[−1,4,−1],[4,7,−2]]",
+   "[[4,4,−1],[7,7,−2]]",
+   "[[−1,7,−2],[4,4,−2]]"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "An infinite geometric series has sum 100 and common ratio −1/2. Find its first term.",
+  "options": [
+   "150",
+   "155",
+   "160",
+   "165"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "Triangle PQR has PQ=QR=8 cm and angle QPR=60°. What is the area of the triangle?",
+  "options": [
+   "16√3 cm²",
+   "16√2 cm²",
+   "8√3 cm²",
+   "32√3 cm²"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "A 25 m tree is viewed from the top of a 10 m building at 30° elevation. Find their horizontal separation.",
+  "options": [
+   "15√3 m",
+   "5√3 m",
+   "25√3 m",
+   "30√3 m"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "Oranges cost ₦24 for five and sell for ₦30 for four. What is the profit on four oranges?",
+  "options": [
+   "₦24.00",
+   "₦30.00",
+   "₦10.80",
+   "₦20.00"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "Differentiate y=(5x+1)^4 with respect to x.",
+  "options": [
+   "20(5x+1)^3",
+   "4(5x+1)^3",
+   "5(5x+1)^3",
+   "(5x)^3"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "Simplify (5+√7)/(3+√7).",
+  "options": [
+   "17−√7",
+   "4−√7",
+   "7−√7",
+   "15−√7"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "Find the exact perimeter of the triangle with vertices (3,2), (4,5) and (6,2).",
+  "options": [
+   "3+√12+√13",
+   "3−√10−√13",
+   "3+√10+√13",
+   "3−√12−√13"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "Find the seventh term of the geometric sequence −10, 50, −250, …",
+  "options": [
+   "165250",
+   "156250",
+   "−156250",
+   "−165250"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "Find the mode of the scores 4, 3, 3, 2, 1, 2, 5, 7, 8, 3, 5.",
+  "options": [
+   "2",
+   "3",
+   "4",
+   "5"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "The midpoint of P(x,4) and Q(10,8) is (9,6). Find x.",
+  "options": [
+   "12",
+   "9",
+   "8",
+   "7"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "Solve 16^(2+x)/4 = 64^x.",
+  "options": [
+   "3",
+   "−3",
+   "5",
+   "−5"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "Let P={2,3,5,7} and Q={1,3,5,7,9}. Which set contains the elements that belong to exactly one of P and Q?",
+  "options": [
+   "{2,9}",
+   "{9}",
+   "{1,9}",
+   "{1,2,9}"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "Write the binary number 10111.11₂ as a mixed number in base ten.",
+  "options": [
+   "23¼",
+   "23¾",
+   "22¼",
+   "24¾"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "Calculate 20045₇ − 14256₇ and give the result in base seven.",
+  "options": [
+   "1256₇",
+   "2456₇",
+   "1356₇",
+   "2465₇"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "Four teachers have an average age of 40 years, and eight other teachers average 25 years. What is the average age of all twelve teachers?",
+  "options": [
+   "20 years",
+   "31 years",
+   "32 years",
+   "30 years"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "How many subsets, including the empty set and the set itself, does a set of five distinct elements have?",
+  "options": [
+   "10",
+   "25",
+   "32",
+   "50"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "The mean of 13, 16, x, 18, 21, 2x and 35 is 22. Find x.",
+  "options": [
+   "16",
+   "17",
+   "23",
+   "25"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "A data set has a standard deviation of 12.34. What is its variance to the nearest whole number?",
+  "options": [
+   "150",
+   "151",
+   "152",
+   "153"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "Find the population standard deviation of the values 5, 4, 6, 7 and 8.",
+  "options": [
+   "√2",
+   "√3",
+   "2",
+   "3"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "A class has five girls and seven boys. In how many ways can a committee of two girls and three boys be chosen?",
+  "options": [
+   "350",
+   "420",
+   "550",
+   "720"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "In how many ways can a committee of five be selected from seven men and three women if it must contain exactly one woman?",
+  "options": [
+   "105",
+   "135",
+   "210",
+   "231"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "A bag has seven red and four black balls. Two independent draws are made with replacement. What is the probability of drawing the same colour twice?",
+  "options": [
+   "54/121",
+   "65/121",
+   "29/55",
+   "27/55"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "U varies directly with √V. If U=24 when V=9, what is V when U=16?",
+  "options": [
+   "0.32",
+   "4",
+   "6",
+   "0.25"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "B varies inversely with the cube root of C. If B=2 when C=27, find the constant of proportionality.",
+  "options": [
+   "3",
+   "6",
+   "9",
+   "12"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "Find all real roots of x³−19x−30=0.",
+  "options": [
+   "−5, 3, and 2",
+   "5, 3, and −2",
+   "5, −3, and −2",
+   "−5, −3, and 2"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "If x varies inversely with y and x=9 when y=4, which equation relates x and y?",
+  "options": [
+   "x=16/y",
+   "x=36/y",
+   "x=y/36",
+   "x=13/y"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "Let P=[[1,2],[2,3]] and I be the 2×2 identity matrix. What is P²−4P−I?",
+  "options": [
+   "[[1,0],[0,1]]",
+   "[[0,0],[0,0]]",
+   "[[−1,0],[0,−1]]",
+   "[[0,1],[1,0]]"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "Let A=[[3,2,1],[4,2,−1]] and B=[[1,4],[0,1],[3,2]]. What is Aᵀ+B?",
+  "options": [
+   "[[4,8],[3,2],[4,1]]",
+   "[[4,−8],[3,2],[4,1]]",
+   "[[4,8],[4,−2],[3,1]]",
+   "[[4,8],[2,3],[4,1]]"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "Let θ be an acute angle with tan θ=8/15. Evaluate (sin θ−cos θ)/(sin² θ−sin θ).",
+  "options": [
+   "−119/72",
+   "119/72",
+   "−7/17",
+   "8/17"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "An operation on real numbers is defined by x*y=xʸ. Find all real x for which x*2=x.",
+  "options": [
+   "0 and 2",
+   "1 and 2",
+   "0 and 1",
+   "2 only"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "For the listed weights 25, 30, 32, 30, 42, 45, 48, 50, 52, 51, 42, 38, 40 and 42 kg, what is the mode?",
+  "options": [
+   "51 kg",
+   "45 kg",
+   "42 kg",
+   "25 kg"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "All 144 students took at least one of Mathematics (M), Chemistry (C) and Physics (P). The Venn regions are: M only 42−x, C only 34, P only 30−x, M∩C only 6+x, M∩P only 4x, C∩P only 3x, and all three 2x. How many took both M and P?",
+  "options": [
+   "16",
+   "24",
+   "62",
+   "4"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "Given t=√(pq/r−r²q), make q the subject, assuming r≠0 and p≠r³.",
+  "options": [
+   "q=rt²/(p−r³)",
+   "q=(p−r³)/(rt²)",
+   "q=t²/(p−r³)",
+   "q=rt/(p−r³)"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2024,
+  "question": "If (√a+√(8a))²=54+b√2 for positive integers a and b, find a and b.",
+  "options": [
+   "a=24, b=6",
+   "a=6, b=2",
+   "a=6, b=24",
+   "a=2, b=6"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "In triangle PQR, S lies on QR with QS=11 cm and SR=9 cm. If PS=13 cm and PS is perpendicular to QR, what is the area of triangle PQR?",
+  "options": [
+   "143 cm²",
+   "120 cm²",
+   "130 cm²",
+   "117 cm²"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "Which set is equivalent to {1,2,3,4,5}, meaning it has exactly five distinct elements?",
+  "options": [
+   "{2,3,1,4}",
+   "{1,2,3,4,5,6}",
+   "{1,2,3,4}",
+   "{4,3,1,5,2}"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "Solve x/2−y/5=1 and y−x/3=8 simultaneously.",
+  "options": [
+   "x=10, y=−6",
+   "x=10, y=6",
+   "x=6, y=10",
+   "x=−6, y=10"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "Solve 2x+3>5x+8.",
+  "options": [
+   "x>5/3",
+   "x>−5/3",
+   "x<−5/3",
+   "x<5/3"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "Define a*b=(a+b)/(ab)+(a−b). Find 3*2.",
+  "options": [
+   "−6",
+   "11/6",
+   "6/11",
+   "−11/6"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "Simplify 125^(−1/3) × 49^(−1/2) × 10^0.",
+  "options": [
+   "1/35",
+   "1/350",
+   "350",
+   "35"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "Find the midpoint of P(−3,4) and Q(5,6).",
+  "options": [
+   "(1,4)",
+   "(4,1)",
+   "(5,1)",
+   "(1,5)"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "If cos A=12/13 and A is acute, find tan A.",
+  "options": [
+   "5/12",
+   "12/13",
+   "5/13",
+   "13/12"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "How many distinct arrangements can be made from the letters of SCHOOL?",
+  "options": [
+   "600",
+   "360",
+   "480",
+   "300"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "Suppose y=a+bx. Given (x,y)=(3,7) and (5,11), find (a,b) in that order.",
+  "options": [
+   "(2,3)",
+   "(1,2)",
+   "(3,2)",
+   "(3,4)"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "Fifteen iron bars average 1000 kg. Removing the heaviest lowers the remaining fourteen-bar average by 5 kg. Find the removed bar's weight.",
+  "options": [
+   "1170 kg",
+   "1270 kg",
+   "1070 kg",
+   "1370 kg"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "Find the sum of all entries of the inverse of [[1,2],[3,5]].",
+  "options": [
+   "1",
+   "−1",
+   "2",
+   "0.5"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "A varies directly as b². If A=4 when b=1, find A when b=2.",
+  "options": [
+   "12",
+   "14",
+   "16",
+   "11"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "What is the determinant of a 2×2 identity matrix?",
+  "options": [
+   "1",
+   "2",
+   "−1",
+   "0"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "The determinant of [[−2,3,1],[p,2,1],[1,4,2]] is −5. Find p.",
+  "options": [
+   "0",
+   "2",
+   "3",
+   "1"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "The mean of 0, x+2, 3x+6 and 4x+8 is 4. Find x.",
+  "options": [
+   "2/5",
+   "2/9",
+   "0",
+   "4"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "Find the equation of the line through (3,15) with slope 16/5.",
+  "options": [
+   "5y+16x+27=0",
+   "5y−16x+27=0",
+   "5y−16x−27=0",
+   "5y+16x−27=0"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "A dealer pays ₦270,000 for a car and ₦70,000 to refurbish it, then sells it for ₦490,000. What is the profit as a percentage of total cost, to two decimal places?",
+  "options": [
+   "30.00%",
+   "35.00%",
+   "44.12%",
+   "45.00%"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "Evaluate (3/4 ÷ 2¼) × 1 7/11 × (3⅔ − 15/6).",
+  "options": [
+   "7/11",
+   "11/7",
+   "5/11",
+   "11/5"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "A basket contains 6 grapes, 11 bananas and 13 oranges. If one fruit is drawn at random, what is the probability that it is a grape or banana?",
+  "options": [
+   "17/30",
+   "11/30",
+   "6/30",
+   "5/30"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "Find one interior angle of a regular pentagon.",
+  "options": [
+   "120°",
+   "90°",
+   "108°",
+   "180°"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "A worker spends 1/5 of a salary on shirts, then 1/3 of the remainder on transport. What fraction of the original salary remains?",
+  "options": [
+   "6/15",
+   "8/15",
+   "7/15",
+   "4/5"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "What is the probability of rolling an even number on a fair six-sided die?",
+  "options": [
+   "1/4",
+   "1/5",
+   "1/2",
+   "1/3"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "Find an antiderivative of 4x³+2x+cos x.",
+  "options": [
+   "x⁴−x²−sin x+C",
+   "x⁴+x²+sin x+C",
+   "x⁴−x²+sin x+C",
+   "x⁴+x²−sin x+C"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "Evaluate −log₁₀(0.00001).",
+  "options": [
+   "−5",
+   "−4",
+   "5",
+   "4"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "A 30 cm chord lies in a circle of radius 17 cm. Find the shortest distance from the chord to the centre.",
+  "options": [
+   "15 cm",
+   "47 cm",
+   "8 cm",
+   "169 cm"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "Evaluate the limit as x approaches 2 of (x³−2x²+6x−12)/(x−2).",
+  "options": [
+   "Infinity",
+   "10",
+   "0",
+   "12"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "The second term of a geometric progression is 1 and its fifth term is 1/8. Find the common ratio.",
+  "options": [
+   "1/4",
+   "1/5",
+   "1/2",
+   "1/3"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "A savings balance reaches ₦600,000 after four years at 5% annual simple interest. Find the principal.",
+  "options": [
+   "₦570,000",
+   "₦500,000",
+   "₦300,000",
+   "₦400,000"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "For the arithmetic sequence 3, 5, 7, 9, …, what is the (n−2)th term for n at least 3?",
+  "options": [
+   "2n−1",
+   "2n+1",
+   "2n+3",
+   "2n−3"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "Differentiate y=sin(4x) with respect to x.",
+  "options": [
+   "−4sin x",
+   "−4cos x",
+   "4sin(4x)",
+   "4cos(4x)"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "A circular sector has area A=(θ/360)πr², where θ is in degrees. Make θ the subject.",
+  "options": [
+   "360πr²/A",
+   "A/(360πr²)",
+   "360A/(πr²)",
+   "Aπr²/360"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "For real x, what is the maximum value of y=2−4x−2x²?",
+  "options": [
+   "4",
+   "5",
+   "3",
+   "2"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "For each of two independent people, the probability of survival is p and the probability of death is q. What is the probability that exactly one survives?",
+  "options": [
+   "pq",
+   "2pq",
+   "p−q",
+   "p+q"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "Convert 137 in base ten to base five.",
+  "options": [
+   "1022₅",
+   "2102₅",
+   "2210₅",
+   "2201₅"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "Suppose P=a+bQ. If P=32 when Q=16 and P=20 when Q=12, find P when Q=28.",
+  "options": [
+   "68",
+   "64",
+   "66",
+   "62"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "How many distinct arrangements can be made from all the letters of HANDIER?",
+  "options": [
+   "3080",
+   "2650",
+   "4050",
+   "5040"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "A grouped distribution has class intervals 0–9, 10–19, 20–29, 30–39, 40–49 and 50–59, with respective frequencies 1, 5, 6, 12, 8 and 3. Estimate its mode using class boundaries.",
+  "options": [
+   "37.8",
+   "38.5",
+   "35.5",
+   "34.5"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "Solve (1/2)^(t−1)=64 for t.",
+  "options": [
+   "−6",
+   "−5",
+   "−7",
+   "−4"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "Convert 54 in base ten to a numeral in base four.",
+  "options": [
+   "132₄",
+   "312₄",
+   "123₄",
+   "321₄"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "Find an antiderivative of 3x²+2x−5.",
+  "options": [
+   "x³+x²−5x+C",
+   "x³−x²−5x+C",
+   "3x³+x²−5x+C",
+   "x³+2x²−5x+C"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "Which expression equals the positive fourth root of 0.16?",
+  "options": [
+   "2×10^(−1/2)",
+   "2×10²",
+   "2×10⁻²",
+   "2×10^(1/2)"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "Find all real numbers x satisfying x²+3x−4≤0.",
+  "options": [
+   "x≤−4 or x≥1",
+   "−1≤x≤4",
+   "1≤x≤4",
+   "−4≤x≤1"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "If √75−√12+√27=y√3, what is the value of y?",
+  "options": [
+   "4",
+   "5",
+   "3",
+   "6"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "Let θ be acute and 0<x<y. If cos θ=x/y, express tan θ in terms of x and y.",
+  "options": [
+   "√(y²−x²)/x",
+   "√(y²+x²)/x",
+   "√(y+x)/x",
+   "√(x²−y²)/x"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "Let P be the 2×2 matrix with rows (1, 3) and (2, −5), and Q have rows (3, −7) and (1, 2). What is P+2Q?",
+  "options": [
+   "[[7, −11], [4, −1]]",
+   "[[7, −11], [4, −9]]",
+   "[[−7, 11], [−4, −1]]",
+   "[[11, −7], [4, −1]]"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "A pie chart represents 16 doctors, 8 engineers, 24 lawyers, 21 information technologists and 27 teachers. What central angle represents the doctors?",
+  "options": [
+   "60°",
+   "72°",
+   "90°",
+   "84°"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "In a three-set Venn diagram, only the part of Q outside both P and R is shaded. Which expression describes the shaded region?",
+  "options": [
+   "(P∩Q)'∩R",
+   "(P∩Q)∪R",
+   "(P∪Q)∩R",
+   "Q∩(P∪R)'"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "Twelve students have weights 54, 56, 58, 60 and 62 kg with respective frequencies x, 1, 2x, 2 and 3. What is the modal weight?",
+  "options": [
+   "54 kg",
+   "58 kg",
+   "60 kg",
+   "62 kg"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "For integers a and b, define a*b=ab+a+b. Find 1*3.",
+  "options": [
+   "14",
+   "4",
+   "7",
+   "5"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "A grouped table has classes 1–10, 11–20, 21–30, 31–40 and 41–50, with frequencies 2, 7, 10, 3 and 1 respectively. What is the upper class boundary of the modal class?",
+  "options": [
+   "21.5",
+   "30.5",
+   "20.5",
+   "10.5"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "A bird travels 200 km from P to Q on a bearing of N60°E, then travels from Q to R on a bearing of S30°E. If R is due east of P, how far is Q from R?",
+  "options": [
+   "200√3 km",
+   "100√3 km",
+   "100 km",
+   "200/√3 km"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "mathematics",
+  "year": 2025,
+  "question": "Triangle XYZ is right-angled at Y. If YZ=11 cm, XZ=13 cm and θ is at X, find cot θ and XY respectively.",
+  "options": [
+   "√48/13 and √48 cm",
+   "√48/11 and √48 cm",
+   "√13/11 and √13 cm",
+   "13/√48 and √48 cm"
+  ],
+  "correct_answer": "B"
+ }
+]

@@ -6,6 +6,7 @@ import { Play, Zap, BookOpen, Target,  Lock, Award } from 'lucide-react';
 import { Sparkles } from 'lucide-react';
 import { HomeSummary } from '@/components/HomeSummary';
 import { StudyPlanTodayCard } from '@/components/StudyPlanTodayCard';
+import { MasteryOverview } from '@/components/MasteryOverview';
 import { RenewalNudge } from '@/components/RenewalNudge';
 import { GoogleAdSense } from '@/components/GoogleAdSense';
 import type { DashboardContext } from '@/types/dashboard';
@@ -28,7 +29,9 @@ export const HomeTab = ({
   handleGenerateStudyPlan,
   handleStartQuiz,
   handleTabChange,
-  
+  setPracticeSubjectOverride,
+  setQuizType,
+  effectiveSubjects,
   hasFeature,
 }: HomeTabProps) => {
   return (
@@ -64,6 +67,19 @@ export const HomeTab = ({
         userEmail={userEmail}
         onOpenCalendar={handleOpenStudyCalendar}
         onGenerate={handleGenerateStudyPlan}
+      />
+
+      {/* Topic mastery at a glance */}
+      <MasteryOverview
+        userEmail={userEmail}
+        subjects={effectiveSubjects}
+        canPractice={hasFeature('practiceQuiz') || isTrialActive}
+        onPracticeSubject={(subject) => {
+          setPracticeSubjectOverride(subject);
+          setQuizType('subject');
+          handleStartQuiz('subject');
+        }}
+        onUpgrade={() => handleUpgradeClick()}
       />
 
       {/* Quick Actions */}

@@ -14,6 +14,7 @@ export interface MockQuestion {
   year?: number | null;
   explanation?: string | null;
   image_url?: string | null;
+  is_ai_generated?: boolean | null;
 }
 
 export interface MockSection {

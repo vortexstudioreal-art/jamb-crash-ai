@@ -98,5 +98,11 @@ verify_jwt = true
 [functions.import-aloc-questions]
 verify_jwt = true
 
+[functions.generate-question-batch]
+verify_jwt = true
+
+[functions.import-scraped-questions]
+verify_jwt = true
+
 [functions.send-test-email]
 verify_jwt = true

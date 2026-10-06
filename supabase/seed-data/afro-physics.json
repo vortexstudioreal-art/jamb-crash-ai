@@ -1,0 +1,5270 @@
+[
+ {
+  "subject": "physics",
+  "year": 1983,
+  "question": "Which of the following arrangements in the sequence shown can be used to obtain a pure spectrum of white light?",
+  "options": [
+   "Source, slit, converging lens, prism, converging lens, screen.",
+   "Source, slit, diverging lens, screen.",
+   "Source, converging lens, prism, diverging lens, screen.",
+   "Source, slit, prism, diverging lens, screen"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1986,
+  "question": "Which of the following is a derived unit?",
+  "options": [
+   "Kilogramme",
+   "Metre",
+   "Kelvin",
+   "Newton"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1986,
+  "question": "Two objects, one with three times the mass of the other, are dropped together from the same height. Neglect air resistance. While falling above the ground, they have the same",
+  "options": [
+   "Momentum",
+   "Kinetic energy",
+   "Potential energy",
+   "Acceleration."
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1986,
+  "question": "A uniform metre rule QR is horizontal, with Q at 0 cm and R at 100 cm. It balances on a knife edge 55 cm from R. A 10 g mass hangs at P, 10 cm from Q. What is the mass of the metre rule?",
+  "options": [
+   "550 g",
+   "350 g",
+   "70 g",
+   "35 g"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1986,
+  "question": "Three forces F₁, F₂ and F₃ act at O in equilibrium. F₂ = 5.0 N points horizontally right. F₁ = 10.0 N points at 60° above F₂. What is the magnitude of F₃, to one decimal place?",
+  "options": [
+   "26.4 N",
+   "15.0 N",
+   "13.2 N",
+   "10.0 N"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1986,
+  "question": "When a box of mass 400g is given an initial speed of 5m s-1, it slides along a horizontal floor a distance of 3m before coming to rest. What is the coefficient of the kinetic friction between the box and the floor? (g = 10m s-2)",
+  "options": [
+   "5/6",
+   "5/12",
+   "1/3",
+   "2/3"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1986,
+  "question": "A 1000 kg elevator descends with a downward acceleration of 1.0 m/s². If g = 10.0 m/s², what is the tension in its suspending cable?",
+  "options": [
+   "1.0 N",
+   "10.0 N",
+   "9000.0 N",
+   "11000.0 N"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1986,
+  "question": "Which mode of heat transfer does not require a material medium?",
+  "options": [
+   "Conduction",
+   "Radiation",
+   "Convection",
+   "Propagation"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1986,
+  "question": "Thermal expansion of solids can be a disadvantage in the",
+  "options": [
+   "Balance wheel of a watch",
+   "Fitting of wheels on rims",
+   "Fire alarm",
+   "Thermostat."
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1986,
+  "question": "The specific latent heat of fusion of lead is the amount of heat required to",
+  "options": [
+   "Melt lead at its melting point",
+   "Heat unit mass of lead through 1 °C",
+   "Change unit mass of lead from solid to liquid at its melting point",
+   "Change the state of unit mass of lead at its boiling point"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1986,
+  "question": "Which of the following is common to evaporation and boiling? They",
+  "options": [
+   "Take place at any temperature.",
+   "Are surface phenomena.",
+   "Involve change of state",
+   "Take place at a definite pressure."
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1986,
+  "question": "Mercury is suitable as a barometric fluid because it",
+  "options": [
+   "Expands uniformly",
+   "Is opaque",
+   "Is several times denser than water",
+   "Is a good conductor of heat"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1986,
+  "question": "Which of the following properties makes metals ideal for cooking utensils?",
+  "options": [
+   "High coefficient of expansion",
+   "Good conduction of heat",
+   "Low specific heat capacity",
+   "Poor radiation of heat."
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1986,
+  "question": "When two objects P and Q are supplied with the same quantity of heat, the temperature change in P is observed to be twice that of Q. The mass of P is half that of Q the ratio of the specific heat capacity of P to Q is",
+  "options": [
+   "1 : 4",
+   "4 : 1",
+   "1 : 1",
+   "2 : 1"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1986,
+  "question": "A ray travelling in air strikes a glass surface at an incidence angle of 60°, measured from the normal. The reflected and refracted rays are perpendicular. Taking the refractive index of air as 1, what is the refractive index of the glass, to two decimal places?",
+  "options": [
+   "1.73",
+   "1.50",
+   "0.87",
+   "0.57"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1986,
+  "question": "In which of the following arrangements is the wavelength in an increasing order?",
+  "options": [
+   "Gamma rays, infra-red rays, X-rays, radiowaves.",
+   "Gamma rays, X-rays, infra-red rays, radiowaves.",
+   "Radiowaves, X-rays, gamma rays, infra-red rays.",
+   "Infra-red rays, radiowaves, X-rays, gamma rays."
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1986,
+  "question": "For light travelling from glass of refractive index 1.5 into air, what is the critical angle?",
+  "options": [
+   "sin⁻¹(1/2)",
+   "sin⁻¹(2/3)",
+   "sin⁻¹(3/4)",
+   "sin⁻¹(8/9)"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1986,
+  "question": "In the geometrical ray model of a pinhole camera, what happens to image sharpness when the hole is enlarged?",
+  "options": [
+   "Gives a blurred image.",
+   "Corrects for chromatic aberration",
+   "Magnifies the image",
+   "Brings the image into the sharper focus."
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1986,
+  "question": "Which of the following is true of the loudness of sound? It",
+  "options": [
+   "Depends on the square of the amplitude of the vibrating body.",
+   "Is proportional to the distance of the observer from the source of the sound.",
+   "Is greatest in vacuum",
+   "Is independent of frequency."
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1986,
+  "question": "The vibration of an air column produces the sound in the",
+  "options": [
+   "Piano",
+   "Guitar",
+   "Flute",
+   "School handbell."
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1986,
+  "question": "A 9.0 V accumulator with negligible internal resistance drives a 5 Ω resistor in series with a parallel pair of 5 Ω and 20 Ω resistors. What is the total current supplied by the accumulator?",
+  "options": [
+   "0.3 A",
+   "0.8 A",
+   "1.0 A",
+   "1.8 A"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1986,
+  "question": "Which is NOT a part of a simple brushed DC electric motor?",
+  "options": [
+   "Field magnet",
+   "Armature",
+   "Commutator",
+   "Transformer"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1986,
+  "question": "Which of the following is stored by a dry Leclanche cell?",
+  "options": [
+   "Electrical power",
+   "Kinetic energy",
+   "Electric current",
+   "Chemical energy."
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1986,
+  "question": "Which of the following is true of magnetism?",
+  "options": [
+   "Iron filings cling mainly around the ends of a bar magnet",
+   "A freely suspended bar magnet always comes to rest in the geographic north–south direction",
+   "Like poles attract",
+   "Lodestone is a non-magnetic oxide"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1986,
+  "question": "The angle between the magnetic meridian and the geographic meridian at a locality on the earth is the",
+  "options": [
+   "Longitude of the locality.",
+   "Angle of inclination at the locality",
+   "Latitude of the locality",
+   "Angle of declination of the locality."
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1986,
+  "question": "Radiation has wavelength 400 nm. Taking the speed of light in air as 3 × 10⁸ m/s, what is its frequency?",
+  "options": [
+   "1.3 × 10⁻¹⁵ Hz",
+   "7.5 × 10⁵ Hz",
+   "1.2 × 10¹¹ Hz",
+   "7.5 × 10¹⁴ Hz"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1987,
+  "question": "Which unit is equivalent to kg·m·s⁻¹?",
+  "options": [
+   "N·s⁻¹",
+   "N·m·s",
+   "N·s",
+   "J·s⁻¹"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1987,
+  "question": "A 4800 kg elevator is supported by a cable whose maximum safe tension is 60000 N. What is the maximum upward acceleration? Take g = 10 m/s².",
+  "options": [
+   "2.5 m/s²",
+   "5.0 m/s²",
+   "7.5 m/s²",
+   "10.0 m/s²"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1987,
+  "question": "If a beaker is filled with water, it is observed that the surface of the water is not horizontal at the glass-water interface. This behaviour is due to",
+  "options": [
+   "Friction",
+   "Viscosity",
+   "Surface tension",
+   "Evaporation."
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1987,
+  "question": "The ideal mechanical advantage of a frictionless inclined plane depends on",
+  "options": [
+   "Its length alone",
+   "Its height alone",
+   "The product of its length and height",
+   "The ratio of its length to its height"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1987,
+  "question": "The 0 °C and 100 °C fixed points of a centigrade thermometer are 20 cm apart. What temperature is indicated when mercury is 4.5 cm above the lower mark?",
+  "options": [
+   "22.5 °C",
+   "29.0 °C",
+   "90.0 °C",
+   "100.0 °C"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1987,
+  "question": "A metallic cube has side 5.0 cm at 20 °C and linear expansivity 4.0 × 10⁻⁵ K⁻¹. Using the first-order thermal expansion approximation, find its volume at 120 °C.",
+  "options": [
+   "126.50 cm³",
+   "126.25 cm³",
+   "126.00 cm³",
+   "125.00 cm³"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1987,
+  "question": "Air trapped above a mercury barometer makes it read 73.5 cm when the true height is 75.0 cm. The trapped air volume is 8.0 cm³. At the same temperature, it later reads 74.0 cm and the trapped volume is 6.0 cm³. Find the true barometric height.",
+  "options": [
+   "72.0 cm",
+   "74.5 cm",
+   "75.1 cm",
+   "76.0 cm"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1987,
+  "question": "Hot water is mixed with three times its mass of water at 10 °C, giving a final temperature of 20 °C. Neglect heat loss. What was the hot water’s initial temperature?",
+  "options": [
+   "100 °C",
+   "80 °C",
+   "50 °C",
+   "40 °C"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1987,
+  "question": "Calculate the heat required to convert 2 kg of ice at −2 °C to water at 0 °C. The specific heat capacity of ice is 2090 J/(kg·°C), and its specific latent heat of fusion is 333 kJ/kg.",
+  "options": [
+   "666 J",
+   "8360 J",
+   "666000 J",
+   "674360 J"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1987,
+  "question": "In which of the following are the substances arranged in descending order of their thermal conductivities?",
+  "options": [
+   "Copper, steel, glass",
+   "Steel, copper, glass",
+   "Steel, glass, copper",
+   "Copper, glass, steel."
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1987,
+  "question": "The vacuum in the Thermos flask helps to reduce heat transfer by",
+  "options": [
+   "Convection and radiation",
+   "Convection and conduction",
+   "Conduction and radiation",
+   "Radiation only."
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1987,
+  "question": "Why is a house with a white-painted roof generally cooler in hot sunshine than an otherwise similar house with a black-painted roof?",
+  "options": [
+   "Conduction",
+   "Convection",
+   "Refraction",
+   "Reflection."
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1987,
+  "question": "Which instrument is commonly used to produce a nearly pure tone?",
+  "options": [
+   "Guitar",
+   "Vibrating string",
+   "Tuning fork",
+   "Siren"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1987,
+  "question": "An object is placed between two plane mirrors inclined at 90°. How many images are formed?",
+  "options": [
+   "Five",
+   "Four",
+   "Three",
+   "Two."
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1987,
+  "question": "An object 3.0cm high is placed 60.0cm from a converging lens whose focal length is 20.0cm. Calculate the size of the image formed.",
+  "options": [
+   "0.5 cm",
+   "1.5 cm",
+   "2.0 cm",
+   "6.0 cm"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1987,
+  "question": "Four lenses are being considered for use as a microscope objective. Which of the following focal lengths is most suitable?",
+  "options": [
+   "-5mm",
+   "+5mm",
+   "–5cm",
+   "+5cm"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1987,
+  "question": "At a place with magnetic declination 10°E, a compass reads N40°E. What is the true geographic bearing?",
+  "options": [
+   "N50°E",
+   "N40°E",
+   "N30°E",
+   "N25°E"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1987,
+  "question": "Capacitors of 6 μF and 8 μF are in series. What additional capacitor, connected in series with them, gives a total capacitance of 3 μF?",
+  "options": [
+   "3 μF",
+   "16 μF",
+   "24 μF",
+   "30 μF"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1987,
+  "question": "An ideal transformer operating with a load has more turns on its secondary than its primary. It",
+  "options": [
+   "Has a smaller secondary current than primary current",
+   "Has greater output power than input power",
+   "Is a step-down transformer",
+   "Increases the total energy output above its input"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1987,
+  "question": "The direction of the magnetic field at a point in the vicinity of a bar magnet is",
+  "options": [
+   "Always towards the north pole of the magnet",
+   "Always away from the south pole of the magnet",
+   "Along the line joining the point to the neutral point",
+   "In the direction the north pole of a compass needle would point."
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1987,
+  "question": "When two parallel wires carry currents in opposite directions, the force on either wire is",
+  "options": [
+   "Away from the other wire",
+   "Zero, because the currents cancel each other",
+   "Twice as much as when the currents are in the same direction",
+   "Towards the other wire."
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1987,
+  "question": "Which statement is true of the ordinary single-photon photoelectric effect?",
+  "options": [
+   "It cannot occur in liquids",
+   "The maximum emitted-electron energy is independent of the surface work function",
+   "The maximum emitted-electron energy depends on the incident wavelength",
+   "At fixed wavelength, greater light intensity necessarily gives greater maximum emitted-electron energy"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1987,
+  "question": "Isotopes are nuclei which have",
+  "options": [
+   "The same number of neutrons and electrons",
+   "Equal number of electrons and protons",
+   "The same atomic number but different number of neutrons",
+   "The same number of total particles."
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1988,
+  "question": "Which SI units are correctly matched? I. N for force. II. N·m⁻¹ for torque. III. W for power. IV. kg·m·s⁻² for momentum.",
+  "options": [
+   "I and II only",
+   "I. II and III only",
+   "I, II and IV only",
+   "I and III only."
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1988,
+  "question": "Two perpendicular forces have resultant 100 N. One force makes 30° with the resultant. Find that force’s magnitude to one decimal place.",
+  "options": [
+   "8.66 N",
+   "50.0 N",
+   "57.7 N",
+   "86.6 N"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1988,
+  "question": "Which of the following quantities are scalars? I Electrical potential II Torque III Momentum IV Kinetic energy",
+  "options": [
+   "II and III only",
+   "I and II only",
+   "III and IV only",
+   "I and IV only"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1988,
+  "question": "A footballer applies an average force of 30.0 N to a stationary ball for 0.05 s. If the ball’s mass is 0.075 kg, what is its speed as it moves off?",
+  "options": [
+   "4.50m s-1",
+   "11.25m s-1",
+   "20.00m s-1",
+   "45.00m s-1"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1988,
+  "question": "A 20-tooth gear drives a 60-tooth gear. If the smaller gear rotates at 120 rev/s, what is the angular speed of the larger gear?",
+  "options": [
+   "3 rev s-1",
+   "40 rev s-1",
+   "360 rev s –1",
+   "2 400 rev s-1"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1988,
+  "question": "A 60 kg man climbs through a vertical height of 22 m with useful lifting power 0.25 kW. How long does the climb take? Use g = 10 m/s².",
+  "options": [
+   "5.3 s",
+   "34.5 s",
+   "41.6 s",
+   "52.8 s"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1988,
+  "question": "The product PV where P is pressure and V is volume has the same unit as",
+  "options": [
+   "Force",
+   "Power",
+   "Energy",
+   "Acceleration"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1988,
+  "question": "The amount of heat needed to raise the temperature of 10kg of copper by1K is its",
+  "options": [
+   "Specific heat capacity",
+   "Heat capacity",
+   "Latent heat",
+   "Internal heat."
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1988,
+  "question": "Heating one end of a metal rod causes lattice particles at the other end to vibrate more vigorously. Heat has been transferred through the rod by",
+  "options": [
+   "Radiation",
+   "Convection",
+   "Conduction",
+   "Evaporation."
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1988,
+  "question": "Which of the following media allow the transmission of sound waves through them? I Air II Liquids III Solids",
+  "options": [
+   "I and II only",
+   "I and III only",
+   "II and III only",
+   "I, II and III."
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1988,
+  "question": "Which behaviours can both mechanical and electromagnetic waves exhibit under suitable conditions? I. Diffraction. II. Refraction. III. Interference.",
+  "options": [
+   "I only",
+   "III only",
+   "I and III only",
+   "I, II and III."
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1988,
+  "question": "In the usual nondispersive ideal-gas model for air of fixed composition, which factor independently affects sound speed? I. Temperature. II. Pressure at fixed temperature. III. Frequency.",
+  "options": [
+   "I only",
+   "II only",
+   "I and II only",
+   "II and III only."
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1988,
+  "question": "The speed of sound in air at sea-level is 340m s-1 while that of light is 300,000km s-1. How far (to the nearest metre) from the center of thunderstorm is an observer who hears a thunder 2s after a lightning flash?",
+  "options": [
+   "170m",
+   "340m",
+   "600m",
+   "680m."
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1988,
+  "question": "Two uniform strings of equal length and equal tension sound their fundamental notes in frequency ratio 4:1. What is their corresponding mass ratio?",
+  "options": [
+   "2:1",
+   "1:2",
+   "1:4",
+   "1:16"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1988,
+  "question": "An object is placed 10 cm in front of a concave mirror of focal length 15 cm. What is the position and nature of the image?",
+  "options": [
+   "30 cm behind the mirror, virtual",
+   "6 cm in front of the mirror, real",
+   "6 cm behind the mirror, virtual",
+   "30 cm in front of the mirror, real"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1988,
+  "question": "When white light is dispersed by a spectrometer, the component having the shortest wavelength is",
+  "options": [
+   "Orange",
+   "Green",
+   "Violet",
+   "Red."
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1988,
+  "question": "Which of the following statements is TRUE of ultra- violet, visible and infra-red rays?",
+  "options": [
+   "They are all electromagnetic waves with the same wavelength",
+   "Ultraviolet rays have shorter wavelengths than infrared rays and can produce fluorescence",
+   "Infrared rays have shorter wavelengths than visible light and produce a sensation of heat",
+   "Wavelengths increase in the order visible, ultraviolet, infrared"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1988,
+  "question": "Connecting a resistance R across a cell reduces its terminal voltage to two-thirds of its open-circuit emf. What is the cell’s internal resistance?",
+  "options": [
+   "R/3",
+   "R/2",
+   "2R/3",
+   "R"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1988,
+  "question": "At the given voltage and power ratings, which instrument draws the highest current?",
+  "options": [
+   "Electric iron 250V 1kW",
+   "Television set 220V 110W",
+   "Torch light 6V 30W",
+   "Immersion heater 110V 500W"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1988,
+  "question": "Which instruments can directly measure ordinary alternating current without an added rectifier? I. Permanent-magnet moving-coil ammeter. II. Moving-iron ammeter. III. Hot-wire ammeter.",
+  "options": [
+   "I and II only",
+   "II and III only",
+   "I and III only",
+   "I, II and III."
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1988,
+  "question": "The principle of operation of an induction coil is based on",
+  "options": [
+   "Ohm’s law",
+   "Ampere’s law",
+   "Faraday’s law",
+   "Coulomb’s law."
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1988,
+  "question": "Which notation represents a neutral atom X with 22 electrons and 43 neutrons?",
+  "options": [
+   "⁴³₂₂X",
+   "²²₄₃X",
+   "⁶⁵₄₂X",
+   "⁶⁵₂₂X"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1989,
+  "question": "Which of the following is a set of vectors?",
+  "options": [
+   "Force, mass and moment of force",
+   "Acceleration, velocity and moment of force",
+   "Mass, weight and density",
+   "Mass, volume and density"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1989,
+  "question": "The magnitude of the resultant of two mutually perpendicular forces, F1 and F2 is 13N. If the magnitude of F1 is 5N, what is the magnitude of F2?",
+  "options": [
+   "2.6 N",
+   "8.0 N",
+   "12.0 N",
+   "18.0 N"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1989,
+  "question": "A velocity–time graph contains points (5 s, 10 m/s) and (20 s, 20 m/s). Find the mean acceleration between them to two decimal places.",
+  "options": [
+   "0.67 m/s²",
+   "0.83 m/s²",
+   "1.50 m/s²",
+   "2.00 m/s²"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1989,
+  "question": "Which of the following devices are used to measure pressure? I Aneroid barometer II Hydrometer III Hygrometer IV Manometer.",
+  "options": [
+   "I and III",
+   "II and III",
+   "III and IV",
+   "I and IV."
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1989,
+  "question": "An electric heater melts 1.5 kg of ice initially at 0 °C. It draws 20 A from a 12 V battery. Assuming all its heat melts the ice, find the time taken. Use specific latent heat of fusion 336 × 10³ J/kg.",
+  "options": [
+   "76.0 min",
+   "35.0 min",
+   "21.0 min",
+   "2.9 min."
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1989,
+  "question": "In the kinetic theory of an ideal gas, absolute temperature is a",
+  "options": [
+   "Form of energy proportional to the total kinetic energy of its molecules",
+   "Form of energy proportional to the average kinetic energy of its molecules",
+   "Physical property proportional to the total kinetic energy of its molecules",
+   "Physical property proportional to the average translational kinetic energy of its molecules"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1989,
+  "question": "In a sound wave in air, the adjacent rarefactions and compressions are separated by a distance of 17cm. If the velocity of the sound wave is 340ms-1, determine the frequency.",
+  "options": [
+   "10 Hz",
+   "20 Hz",
+   "1 000 Hz",
+   "5 780 Hz"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1989,
+  "question": "Light of free-space wavelength 5000 × 10⁻⁸ cm enters glass of refractive index 1.5. Find its wavelength in glass, rounding the coefficient of 10⁻⁸ cm to the nearest integer.",
+  "options": [
+   "3333 × 10⁻⁸ cm",
+   "5000 × 10⁻⁸ cm",
+   "6666 × 10⁻⁸ cm",
+   "7500 × 10⁻⁸ cm"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1989,
+  "question": "The magnification of the image of an object placed in front of a convex mirror is 1/3. If the radius of curvature of the mirror is 24cm, what is the distance between the object and its image?",
+  "options": [
+   "8 cm",
+   "16 cm",
+   "24 cm",
+   "32 cm"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1989,
+  "question": "In a common three-mirror kaleidoscope with an equilateral triangular cross-section, adjacent plane mirrors are placed",
+  "options": [
+   "At 60°",
+   "Parallel to one another",
+   "Perpendicular to one another",
+   "At 45°"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1989,
+  "question": "Under white light, an ideal yellow card is viewed through an ideal blue filter. What colour does the card appear?",
+  "options": [
+   "Black",
+   "Green",
+   "Red",
+   "White"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1989,
+  "question": "Dispersion of light by a glass prism is due to the",
+  "options": [
+   "Different hidden colours of the glass",
+   "Different speeds of the various colours in glass",
+   "Defects in the glass",
+   "High density of glass."
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1989,
+  "question": "Which of the following pairs is NOT part of the electromagnetic spectrum? I Radio waves II Beta rays III Gamma rays IV Alpha rays",
+  "options": [
+   "I and II",
+   "III and IV",
+   "I and III",
+   "II and IV."
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1989,
+  "question": "Two insulated conducting spheres of different sizes carry opposite charges. They are connected by a metal wire. Charge flows until both spheres",
+  "options": [
+   "Carry the same magnitude and sign of charge.",
+   "Are at the same potential.",
+   "Are at the same temperature.",
+   "Are of the same size."
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1989,
+  "question": "A uniform wire 5 m long has cross-sectional area 0.2 × 10⁻⁶ m² and resistance 0.425 Ω. Find its resistivity.",
+  "options": [
+   "1.10 × 10⁻⁶ Ω·m",
+   "4.25 × 10⁻⁶ Ω·m",
+   "2.40 × 10⁻⁷ Ω·m",
+   "1.70 × 10⁻⁸ Ω·m"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1989,
+  "question": "Resistors of 250 Ω, 500 Ω and 1 kΩ are connected in series across a 6 V battery. Find the voltage across the 250 Ω resistor to two decimal places.",
+  "options": [
+   "0.20V",
+   "0.86V",
+   "1.71V",
+   "3.43V."
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1989,
+  "question": "An ammeter of resistance 0.1 Ω has full-scale current 50 mA. A 0.0111 Ω shunt is connected across it. Find the new full-scale total current to the nearest milliampere.",
+  "options": [
+   "400 mA",
+   "450 mA",
+   "500 mA",
+   "550 mA."
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1989,
+  "question": "The electrochemical equivalent of silver is 0.0012 g/C. What steady current deposits 36.0 g in 5.0 minutes?",
+  "options": [
+   "6000 A",
+   "100 A",
+   "10 A",
+   "1 A"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1989,
+  "question": "For a fixed metal surface in the ordinary single-photon photoelectric effect, the maximum kinetic energy of an emitted electron depends on the",
+  "options": [
+   "Intensity of the radiation",
+   "Source of the radiation",
+   "Wavelength of the radiation",
+   "Detection device for the electron."
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1990,
+  "question": "Which of the following is a fundamental unit?",
+  "options": [
+   "Newton",
+   "Watt",
+   "Joule",
+   "Second"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1990,
+  "question": "An engine supplies useful mechanical power P to keep a vehicle moving at constant speed v. What driving force does it provide?",
+  "options": [
+   "P/v",
+   "v/2",
+   "Pv",
+   "P/v²"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1990,
+  "question": "What liquid-column height supports atmospheric pressure 102000 N/m² if liquid density is 2600 kg/m³ and g = 10 m/s²? Give the answer to two decimal places.",
+  "options": [
+   "0.75m",
+   "0.76m",
+   "3.92m",
+   "39.23m."
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1990,
+  "question": "A platinum wire has resistance 0.75 Ω at 0 °C and 1.05 Ω at 100 °C. Assuming linear variation, find its temperature when resistance is 0.90 Ω.",
+  "options": [
+   "43.0 °C",
+   "50.0 °C",
+   "69.9 °C",
+   "87.0 °C"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1990,
+  "question": "A fixed amount of gas is cooled at constant volume without condensation. Its pressure decreases because its molecules",
+  "options": [
+   "Collide less frequently with the walls of the container.",
+   "Have the same average kinetic energy",
+   "Break up into smaller molecules",
+   "Decrease in number."
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1990,
+  "question": "A 1 kg copper block at 100 °C is placed on ice at 0 °C. Neglect heat loss. Find the mass melted to the nearest gram, using copper’s specific heat capacity 400 J/(kg·K) and ice’s latent heat of fusion 333 × 10³ J/kg.",
+  "options": [
+   "60g",
+   "67g",
+   "120g",
+   "133g"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1990,
+  "question": "At external pressure 750 mmHg, what change is needed to make pure water boil at 100 °C?",
+  "options": [
+   "Increase the external pressure",
+   "Reduce the external pressure",
+   "Heat more rapidly at the same pressure",
+   "Reduce the external pressure by a quarter"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1990,
+  "question": "In ordinary heat-transfer experiments, which statements are correct? I. Land and sea breezes are natural convection currents. II. Convection occurs in liquids or gases, rather than solids retaining their fixed shape. III. The vacuum gap in a thermos flask prevents heat transfer by convection only.",
+  "options": [
+   "I and II only",
+   "II and III only",
+   "I and III only",
+   "I, II and III."
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1990,
+  "question": "Geometrical shadows and eclipses result primarily from the",
+  "options": [
+   "Refraction of light",
+   "Rectilinear propagation of light",
+   "Diffraction of light",
+   "Reflection of light"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1990,
+  "question": "An object 3 cm high is placed vertically 10 cm in front of a concave mirror. Its image is 40 cm from the mirror. Find the magnitude of the image height.",
+  "options": [
+   "0.75 cm",
+   "4.00 cm",
+   "8.00 cm",
+   "12.00 cm"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1990,
+  "question": "What must be the distance between an object and a converging lens of focal length 20cm to produce an erect image two times the object height?",
+  "options": [
+   "20cm",
+   "15cm",
+   "10cm",
+   "5cm"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1990,
+  "question": "In an uncorrected short-sighted eye, light rays from a point on a very distant object are focused",
+  "options": [
+   "In front of the retina",
+   "On the retina by a converging lens",
+   "Behind the retina by a diverging lens",
+   "In front of the retina a distance 2F from the lens."
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1990,
+  "question": "Under white illumination, which primary colour does an ideal magenta surface absorb?",
+  "options": [
+   "Red and blue",
+   "Green only",
+   "Red and green",
+   "Red only."
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1990,
+  "question": "In a resonance tube closed at one end, the first resonant air-column length is 20 cm for a 480 Hz tuning fork. Neglect end correction and find the speed of sound.",
+  "options": [
+   "96 m/s",
+   "255 m/s",
+   "340 m/s",
+   "384 m/s"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1990,
+  "question": "An organ pipe closed at one end is 80 cm long. Neglect end correction. Find its fundamental frequency to the nearest hertz if sound speed is 340 m/s.",
+  "options": [
+   "106 Hz",
+   "213 Hz",
+   "318 Hz",
+   "425 Hz"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1990,
+  "question": "An insulated body is at rest in electrostatic equilibrium with positive net charge. Which statements are true? I. Positive charge exceeds negative charge. II. It creates an electric field. III. It stores electrostatic energy relative to its discharged state. IV. It carries a steady electric current.",
+  "options": [
+   "I and IV only",
+   "I and II only",
+   "I, II and III only",
+   "I, II, III and IV"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1990,
+  "question": "Which of the following is a vector?",
+  "options": [
+   "Electric charge",
+   "Electric field",
+   "Electric potential difference",
+   "Electric capacitance."
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1990,
+  "question": "Three identical cells, each of emf 1.5 V and internal resistance 1.0 Ω, are connected in parallel with matching polarity across a 2.67 Ω load. Find the load current to two decimal places.",
+  "options": [
+   "0.26A",
+   "0.41A",
+   "0.50A",
+   "0.79A."
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1990,
+  "question": "In a uniform metre bridge, a 2.0 Ω standard resistor occupies the gap beside the 0 cm end. The balance point is 55.0 cm from that end. Find the resistance in the other gap to two decimal places.",
+  "options": [
+   "1.10 Ohms",
+   "1.64 Ohms",
+   "2.44 Ohms",
+   "27.50 Ohms"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1990,
+  "question": "The energy supplied by an electrical source per unit positive charge for a complete circuit is its",
+  "options": [
+   "Kinetic energy",
+   "Potential difference",
+   "Electromotive force",
+   "Electrical energy"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1990,
+  "question": "Which of the following is an essential physical property of the wires used for making fuses?",
+  "options": [
+   "Low density",
+   "High thermal conductivity",
+   "Low electrical resistivity",
+   "Low melting point."
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1990,
+  "question": "For the same transmitted power, using a higher voltage reduces energy lost in the transmission wires through",
+  "options": [
+   "Heat dissipation",
+   "Production of eddy currents",
+   "Excessive current discharged",
+   "Excessive voltage discharged."
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1990,
+  "question": "A galvanometer with full-scale current 10 mA and coil resistance 30 Ω is converted to a 10 A ammeter. Which approximate resistor and connection are required?",
+  "options": [
+   "0.03 ohms series resistor",
+   "0.03 ohms shunt resistor",
+   "9.99 ohms shunt resistor",
+   "9.99 ohms series resistor"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1990,
+  "question": "What precaution should a manufacturer take to ensure that energy loss in a transformer is minimized?",
+  "options": [
+   "Make the windings from high-resistance wire",
+   "Make the magnetic core from thin, electrically insulated metal sheets",
+   "Use no magnetic material in the core",
+   "Minimize flux linking the primary and secondary coils"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1990,
+  "question": "A photoemissive photocell works on the principle of",
+  "options": [
+   "A voltaic cell",
+   "Emission of electrons by incident radiation",
+   "Emission of protons by incident electrons",
+   "A photographic plate"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1991,
+  "question": "An object moves with uniform speed round a circle. Its acceleration has",
+  "options": [
+   "Constant magnitude and constant direction.",
+   "Constant magnitude and varying direction.",
+   "Varying magnitude and constant direction",
+   "Varying magnitude and varying direction."
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1991,
+  "question": "A 20 kg load is pulled at constant speed along a plane inclined at 30° to the horizontal. If the plane’s efficiency is 75%, find the pulling force parallel to the plane to one decimal place. Use g = 10 m/s².",
+  "options": [
+   "13.3 N",
+   "73.5 N",
+   "133.3 N",
+   "533.2 N"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1991,
+  "question": "The spiral spring of a spring balance is 25.0cm long when 5N hangs on it and 30.0cm long, when the weight is 10N. What is the length of the spring if the weight is 3N assuming Hooke’s Law is obeyed?",
+  "options": [
+   "15.0 cm",
+   "17.0 cm",
+   "20.0 cm",
+   "23.0cm"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1991,
+  "question": "A stone gives an apparent mass reading of 15.0 g when fully immersed in water and 10.0 g when fully immersed in a liquid of relative density 2.0. Neglect air buoyancy. Find its mass in air.",
+  "options": [
+   "5.0g",
+   "12.0g",
+   "20.0g",
+   "25.0g"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1991,
+  "question": "In which of the following is surface tension important?",
+  "options": [
+   "The floating of a ship in water",
+   "The floating of a dry needle in water",
+   "The floating of a balloon in air",
+   "The diffusion of a sugar solution across membrane."
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1991,
+  "question": "At normal atmospheric pressure, how much more heat is released by 4 kg of steam at 100 °C than by 4 kg of water at 100 °C when each ends as water at 80 °C? Use latent heat 2260000 J/kg and water specific heat 4200 J/(kg·K).",
+  "options": [
+   "4,200J",
+   "2,260,000J",
+   "9,040,000J",
+   "9,380,000J"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1991,
+  "question": "How long does a 750 W heater take to raise 1 kg of water from 20 °C to 50 °C, neglecting heat losses? Use specific heat capacity 4200 J/(kg·K).",
+  "options": [
+   "84s",
+   "112s",
+   "168s",
+   "280s"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1991,
+  "question": "For a pure liquid in equilibrium with its vapour, the saturated vapour pressure increases as the",
+  "options": [
+   "Volume of the liquid increases at fixed temperature",
+   "Volume of the liquid decreases at fixed temperature, with liquid still present",
+   "Temperature of the liquid increases",
+   "Temperature of the liquid decreases"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1991,
+  "question": "The absolute temperature of a perfect gas is proportional to the average",
+  "options": [
+   "Potential energy of the molecules",
+   "Separation between the molecules",
+   "Translational kinetic energy of the molecules",
+   "Velocity of the molecules"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1991,
+  "question": "Which statement is true of light waves and sound waves in air?",
+  "options": [
+   "They both transmit energy",
+   "They both need a material medium for propagation",
+   "They are both transverse waves",
+   "Their speeds in air are equal"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1991,
+  "question": "The image in pin-hole camera is",
+  "options": [
+   "Erect and formed by refraction through a lens",
+   "Virtual and formed by dispersion",
+   "Erect and gets sharper as the hole becomes larger",
+   "Inverted and formed by the light from each point traveling in a straight line."
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1991,
+  "question": "A plane mirror is rotated through a small angle Q in the plane of incidence while the incident ray remains fixed. Through what angle does the reflected ray rotate?",
+  "options": [
+   "½Q",
+   "Q",
+   "2Q",
+   "3Q"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1991,
+  "question": "In a ray diagram for a thin converging lens, a ray that is not parallel to the optic axis but passes through the optic center will",
+  "options": [
+   "Pass through undeviated",
+   "Pass through the center of curvature after refraction",
+   "Emerge parallel to the principal axis",
+   "Pass through the principal focus after refraction."
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1991,
+  "question": "Which of the following correctly describes the image of an object, 4cm from a diverging lens of focal length –12cm?",
+  "options": [
+   "The image is virtual, 3cm in front of the lens",
+   "The image is real, 6cm behind the lens",
+   "The image is virtual, 6cm in front of the lens",
+   "The image is real, 3cm in front of the lens."
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1991,
+  "question": "Two tuning forks of frequencies 256Hz and 260 Hz are sounded close to each other. What is the frequency of the beats produced?",
+  "options": [
+   "2 Hz",
+   "4 Hz",
+   "8 Hz",
+   "258 Hz"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1991,
+  "question": "Which of the following statements is CORRECT about the earth’s magnetic field?",
+  "options": [
+   "The angle of dip is the angle which a free suspended magnet makes with the vertical",
+   "The angle of declination is the angle between the magnetic meridian and the geographic meridian",
+   "The angle of declination is the angle which a magnetic compass makes with the magnetic meridian.",
+   "The angle of inclination is the difference between the angle of dip and the angle of declination."
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1991,
+  "question": "The function of the system of granulated carbon mixed with manganese (IV) oxide in a Leclanche cell is to",
+  "options": [
+   "Increase the emf of the cell to 2.0 V",
+   "Prevent local action in the cell",
+   "Prevent polarization in the cell",
+   "Make the cell black and hence a good radiator"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1991,
+  "question": "A resistive device dissipates 1500 W and has resistance 375 Ω. What current does it draw?",
+  "options": [
+   "0.10 A",
+   "2.00 A",
+   "4.00 A",
+   "77.5 A."
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1991,
+  "question": "To convert an alternating current dynamo into a direct current dynamo, the",
+  "options": [
+   "Number of turns in the coil is increased",
+   "Strength of the field magnet is increased",
+   "Slip rings are replaced with a split-ring commutator",
+   "Coil is wound on a soft-iron armature"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1991,
+  "question": "The electrochemical equivalent of platinum is 5.0 × 10⁻⁷ kg/C. How long must a 100 A current flow to deposit 1.0 kg of platinum, to one decimal place in hours?",
+  "options": [
+   "5.6 hours",
+   "56 hours",
+   "1.4 × 10⁴ hours",
+   "2.0 × 10⁴ hours"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1991,
+  "question": "Which statements are true of isotopes of an element? I. Their neutral atoms have the same electron configuration and very similar chemical properties. II. They can be separated using differences in physical properties such as mass. III. Their nuclei have the same number of protons.",
+  "options": [
+   "I and II only",
+   "I and III only",
+   "II and III only",
+   "I, II and III."
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1991,
+  "question": "A 4.0 g sample of a radioactive isotope has a half-life of 10 days. How long does it take for 3.5 g of the original isotope to decay?",
+  "options": [
+   "1¼ days",
+   "8¾ days",
+   "30 days",
+   "80 days."
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1991,
+  "question": "In the energy-releasing proton-proton fusion chain, four protons, each of rest mass Mp, are converted into a helium nucleus X of rest mass Mx, along with other reaction products. Which relation is correct?",
+  "options": [
+   "4 Mp > Mx",
+   "4 Mp = Mx",
+   "4 Mp < Mx",
+   "Mp = Mx"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1991,
+  "question": "Which statements are true for alpha decay? I. Mass number decreases by four. II. Atomic number decreases by two. III. Mass number does not change.",
+  "options": [
+   "I and II only",
+   "II and III only",
+   "I and III only",
+   "I, II and III"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1992,
+  "question": "A ruler has divisions 1 cm apart. A single reading is rounded to the nearest division. What is the maximum magnitude of rounding error? Ignore other measurement errors.",
+  "options": [
+   "0.1 cm",
+   "0.5 cm",
+   "1.0 cm",
+   "2.0 cm"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1992,
+  "question": "For a simple pendulum undergoing small oscillations, which quantities affect its period? I. Bob mass. II. Pendulum length. III. Gravitational acceleration.",
+  "options": [
+   "I, II and III",
+   "II and III only",
+   "I and III only",
+   "I and II only"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1992,
+  "question": "In an experiment measuring Young’s modulus of a circular wire, the tensile stress depends on the",
+  "options": [
+   "Load and extension",
+   "Load and radius of the wire",
+   "Radius of the wire and extension",
+   "Extension and original length of the wire"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1992,
+  "question": "If a plastic sphere floats in water (density = 1000 kg m-3) with 0.5 of its volume submerged and floats in oil with 0.4 volume submerged, the density of the oil is",
+  "options": [
+   "800 kg m-3",
+   "1 200 kg m-3",
+   "1 250 kg m-3",
+   "2 000 kg m-3"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1992,
+  "question": "At constant pressure, the density of a fixed mass of ideal gas is",
+  "options": [
+   "Constant as temperature changes",
+   "Proportional to its volume",
+   "Inversely proportional to its absolute temperature",
+   "Independent of its volume"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1992,
+  "question": "How much heat is absorbed by 0.05 kg of copper, of specific heat capacity 390 J/(kg·K), when heated from 20 °C to 70 °C?",
+  "options": [
+   "3.98 ×10⁻¹ J",
+   "9.75 ×10² J",
+   "3.98 ×10³ J",
+   "9.75 ×10³ J"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1992,
+  "question": "Which of the following characteristics of a wave is used in the measurement of the depth of the sea?",
+  "options": [
+   "Diffraction",
+   "Interference",
+   "Refraction",
+   "Reflection"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1992,
+  "question": "A siren disc has 32 equally spaced holes in one ring. A single air jet produces one pulse per passing hole. If the disc rotates at 25 revolutions per second, what is the sound frequency?",
+  "options": [
+   "80 Hz",
+   "600 Hz",
+   "800 Hz",
+   "1 600 Hz"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1992,
+  "question": "Which of the following properties make the convex mirror useful as a driving mirror? I The image is real II The image is erect III It has a wide field of view IV The image is magnified",
+  "options": [
+   "I, II and IV",
+   "I, II and III",
+   "II and III",
+   "I and III."
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1992,
+  "question": "An object is placed between the pole and focus of a concave mirror. The virtual image obtained is",
+  "options": [
+   "Diminished and upright",
+   "Diminished and inverted",
+   "Enlarged and inverted",
+   "Enlarged and upright."
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1992,
+  "question": "The speed of light in air is 3.0 ×10⁸ m/s. Find its speed in glass of refractive index 1.50 relative to air.",
+  "options": [
+   "1.5 ×10⁸ m/s",
+   "3.0 ×10⁸ m/s",
+   "2.0 ×10⁸ m/s",
+   "6.0 ×10⁸ m/s"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1992,
+  "question": "Which arrangement gives the conventional order of these electromagnetic bands from shorter to longer typical wavelengths?",
+  "options": [
+   "Gamma rays, ultraviolet rays, x-rays, infra-red rays.",
+   "Gamma rays, x-rays, ultraviolet rays, infra-red rays",
+   "Infra-red rays, ultraviolet rays, x-rays, gamma rays.",
+   "Gamma rays, ultraviolet rays, infra-red rays, x- rays."
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1992,
+  "question": "The angle between the direction of the earth’s magnetic field and the horizontal is called the",
+  "options": [
+   "Angle of deviation",
+   "Magnetic declination",
+   "Magnetic meridian",
+   "Angle of dip"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1992,
+  "question": "Find the magnitude of the force on an electron of charge−1.6 ×10⁻¹⁹ C in an electric field of magnitude 10⁸ V/m.",
+  "options": [
+   "1.6 ×10⁻¹¹ N",
+   "1.6 ×10⁻¹⁴ N",
+   "1.6 ×10⁻¹⁶ N",
+   "1.0 ×10⁻¹⁶ N"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1992,
+  "question": "Which change does not alter the equilibrium emf of a primary cell, with chemistry and other conditions otherwise unchanged?",
+  "options": [
+   "Changing temperature",
+   "Changing the cell’s physical size",
+   "Changing the electrode materials",
+   "Changing the electrolyte"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1992,
+  "question": "A 5 V battery is connected across an initially uncharged 2.0 μF capacitor. After a long time, what is the magnitude of charge on either plate?",
+  "options": [
+   "1.5 μC",
+   "10.0 μC",
+   "20.0 μC",
+   "50.0 μC"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1992,
+  "question": "For resistive devices with the same proportional protection margin, which has the smallest operating current and therefore needs the lowest fuse current rating?",
+  "options": [
+   "60 W, 240 V",
+   "60 W, 40 V",
+   "40 W, 12 V",
+   "40 W, 5 V"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1992,
+  "question": "For steady current I through a constant resistance R for time t, the heat produced is",
+  "options": [
+   "Inversely proportional to the current and the resistance",
+   "Directly proportional to the current, resistance and the time.",
+   "Inversely proportional to the square of the resistance, current and the time.",
+   "Directly proportional to the square of the current, the resistance and the time."
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1992,
+  "question": "A galvanometer has resistance 10 Ω and full-scale current 0.05 A. What added resistance converts it into a 100 V voltmeter, and how is it connected?",
+  "options": [
+   "20000 Ω in parallel",
+   "19990 Ω in series",
+   "1990 Ω in series",
+   "100 Ω in series"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1992,
+  "question": "The units of impedance, RMS voltage and resonance frequency are respectively",
+  "options": [
+   "Volt, ampere and hertz",
+   "Ohm, volt and hertz",
+   "Watt, ohm and radian",
+   "Ohm, hertz and joule."
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1992,
+  "question": "For a sinusoidal alternating current with peak I₀, which relation gives its RMS current Iᵣₘₛ?",
+  "options": [
+   "I₀ = Iᵣₘₛ/√2",
+   "Iᵣₘₛ = I₀/√2",
+   "Iᵣₘₛ = √2/I₀",
+   "I₀ = √2/Iᵣₘₛ"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1992,
+  "question": "In the ordinary photoelectric effect, the threshold frequency depends on the",
+  "options": [
+   "Intensity of incident light",
+   "Frequency of incident light",
+   "Material of the photocathode",
+   "Collecting potential difference between cathode and anode"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1992,
+  "question": "After three half-lives, what fraction of the original radioactive isotope has decayed?",
+  "options": [
+   "1/8",
+   "1/3",
+   "2/3",
+   "7/8"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1993,
+  "question": "Which of the following quantities has the same unit as the watt?",
+  "options": [
+   "Force x time",
+   "Force x distance",
+   "Force x acceleration",
+   "Force x velocity"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1993,
+  "question": "Two forces of 7 N and 3 N act at right angles. If θ is the angle between the resultant and the 7 N force, which relation holds?",
+  "options": [
+   "cos θ =3/7",
+   "sin θ =3/7",
+   "tan θ =3/7",
+   "cot θ =3/7"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1993,
+  "question": "An aeroplane lands at 180 km/h and slows uniformly to rest in 30 s. What distance does it cover before stopping?",
+  "options": [
+   "360 m",
+   "540 m",
+   "750 m",
+   "957 m"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1993,
+  "question": "Starting with water stored at height, which sequence describes the main energy conversions when a hydroelectric station powers a lamp?",
+  "options": [
+   "Electrical → mechanical → potential → light",
+   "Gravitational potential → mechanical → electrical → light",
+   "Mechanical → sound → electrical → light",
+   "Kinetic → mechanical → electrical → light"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1993,
+  "question": "An object of mass 400 g and density 600 kg/m³ hangs at rest from a string with half its volume immersed in paraffin of density 900 kg/m³. Find the string tension. Use g =10 m/s².",
+  "options": [
+   "1.0 N",
+   "3.0 N",
+   "4.0 N",
+   "5.0 N"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1993,
+  "question": "With its reference-junction temperature fixed, a thermocouple measures temperature through changes in its",
+  "options": [
+   "e.m.f. changes with temperature",
+   "Resistance changes with temperature",
+   "Volume changes with temperature",
+   "Pressure changes with resistance."
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1993,
+  "question": "A fixed mass of ideal gas has its volume halved and absolute temperature doubled. What happens to its pressure?",
+  "options": [
+   "Remains constant",
+   "Increases by a factor of 4",
+   "Increases by a factor of 3",
+   "Decreases by a factor of 4"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1993,
+  "question": "Mix 200 g of water at 90 °C with 100 g of water at 30 °C. Neglect heat loss and the container’s heat capacity. What is the final temperature?",
+  "options": [
+   "50 °C",
+   "60 °C",
+   "70 °C",
+   "80 °C"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1993,
+  "question": "A solid melts at 80 °C. At that temperature,10⁵ J melts 10 g of the solid. Find its specific latent heat of fusion.",
+  "options": [
+   "1.00 ×10³ J/kg",
+   "1.25 ×10⁵ J/kg",
+   "1.00 ×10⁷ J/kg",
+   "8.00 ×10⁸ J/kg"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1993,
+  "question": "A stationary wave has wavelength 60 cm. Find the distance between consecutive antinodes.",
+  "options": [
+   "15 cm",
+   "30 cm",
+   "60 cm",
+   "120 cm"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1993,
+  "question": "Which of the following waves can propagate through a vacuum?",
+  "options": [
+   "High velocity sound waves",
+   "Ultrasonic waves",
+   "Acoustic waves",
+   "Infra-red waves"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1993,
+  "question": "A radar pulse returns to its transmitting antenna 4 ×10⁻³ s after reflection from an aircraft. How far away is the aircraft? Use c =3 ×10⁸ m/s.",
+  "options": [
+   "6.0 ×10² km",
+   "1.2 ×10³ km",
+   "3.0 ×10³ km",
+   "6.0 ×10⁵ km"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1993,
+  "question": "A concave mirror of radius r forms a real image. Let u and v be the positive object and image distances. Which expression gives the magnitude of linear magnification?",
+  "options": [
+   "v/r −1",
+   "2 v/r −1",
+   "u/r −1",
+   "2 u/r −1"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1993,
+  "question": "A thin camera lens has focal length 20 cm. An object is 100 cm from the lens. What lens-to-film distance gives a sharp image?",
+  "options": [
+   "17 cm",
+   "20 cm",
+   "25 cm",
+   "100 cm"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1993,
+  "question": "The property of the eye known as its power of accommodation is controlled by the",
+  "options": [
+   "Pupil",
+   "Vitreous humour",
+   "Iris",
+   "Ciliary muscles"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1993,
+  "question": "Which of the following correctly explain(s) why soft iron is preferred to steel in electromagnets? I Soft iron is more readily magnetized than steel. II Soft iron is more readily demagnetized than steel. III Soft iron retains magnetism more than steel.",
+  "options": [
+   "I only",
+   "II and III only",
+   "I and II only",
+   "I, II and III."
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1993,
+  "question": "The terminal voltage of a battery is 4.0 V when supplying a current of 2.0 A, and 2.0 V when supplying a current of 3.0 A. The internal resistance of the battery is",
+  "options": [
+   "0.5 Ω",
+   "1.0 Ω",
+   "2.0 Ω",
+   "4.0 Ω"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1993,
+  "question": "A 12 V ideal battery supplies a 1 Ω resistor in series with two parallel branches. Each branch contains two 2 Ω resistors in series. What is the total current supplied by the battery?",
+  "options": [
+   "4.00 A",
+   "1.30 A",
+   "0.80 A",
+   "0.75 A"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1993,
+  "question": "A 24 V ideal battery is connected across two parallel branches. One branch contains 5 μF and 15 μF capacitors in series; the other contains a 20 μF capacitor. All are initially uncharged. After charging, what is the voltage across the 5 μF capacitor?",
+  "options": [
+   "3 V",
+   "6 V",
+   "12 V",
+   "18 V"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1993,
+  "question": "A resistive instrument rated 40 W has resistance 90 Ω. What operating voltage gives its rated power?",
+  "options": [
+   "60 V",
+   "150 V",
+   "225 V",
+   "3 600 V"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1993,
+  "question": "For a fixed transmitted power, the primary aim of high-voltage transmission is to",
+  "options": [
+   "Minimize electrical energy losses due to heat production",
+   "Increase the rate of energy transfer by using high voltage",
+   "Increase the current in the wires.",
+   "Generate electricity at high current and low voltage."
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1993,
+  "question": "Find the inductive reactance of a 30.0 mH inductor at 1.30 ×10³ Hz, to one decimal place.",
+  "options": [
+   "39.0 Ω",
+   "122.5 Ω",
+   "245.0 Ω",
+   "39000.0 Ω"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1993,
+  "question": "Which statements correctly describe cathode rays? I. They consist of small negatively charged particles. II. They can be deflected magnetically but not electrically. III. They consist of fast neutrons deflected by an electric field.",
+  "options": [
+   "I only",
+   "III only",
+   "I and II only",
+   "II and III only"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1993,
+  "question": "A nucleus has atomic number 88 and mass number 226. After two beta-minus decays and one alpha decay, which notation represents the final nucleus?",
+  "options": [
+   "²²²₈₂Z",
+   "²²²₈₈Z",
+   "²²⁶₈₆Z",
+   "²²⁶₈₀Z"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1993,
+  "question": "For a fixed metal surface in the ordinary photoelectric effect, the maximum kinetic energy of emitted photoelectrons depends on the",
+  "options": [
+   "Intensity of incident radiation",
+   "Duration of illumination",
+   "Temperature of the radiation source alone",
+   "Frequency of incident radiation"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1994,
+  "question": "An object is projected at 80 m/s,30° above horizontal. Neglect air resistance and use g =10 m/s². Find its maximum height above the launch point.",
+  "options": [
+   "20 m",
+   "80 m",
+   "160 m",
+   "320 m"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1994,
+  "question": "A particle moves in a fixed horizontal circle at constant angular velocity. Which statement is true?",
+  "options": [
+   "Kinetic energy is constant but linear momentum varies",
+   "Linear momentum is constant but kinetic energy varies",
+   "Kinetic energy and linear momentum are both constant",
+   "Speed and linear velocity are both constant"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1994,
+  "question": "A uniform horizontal beam of weight 200 N and length 50 m is pivoted at one end. A cord at the other end makes 30° above the beam and holds it in equilibrium. Find the cord tension.",
+  "options": [
+   "10 N",
+   "20 N",
+   "100 N",
+   "200 N"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1994,
+  "question": "A 50 kg object is released from rest 2 m above the ground. Neglect air resistance and use g =10 m/s². Find its kinetic energy just before impact.",
+  "options": [
+   "250 J",
+   "1 000 J",
+   "10 000 J",
+   "100 000 J"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1994,
+  "question": "A horizontal force just starts a 20 kg object sliding on a horizontal surface. The coefficient of static friction is 0.2. Find the force, using g = 10 m/s².",
+  "options": [
+   "400.0 N",
+   "40.0 N",
+   "4.0 N",
+   "0.4 N"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1994,
+  "question": "For a connected liquid of uniform density at rest, neglecting capillary effects, which statements are true? I. Pressure acts equally in all directions at a point. II. Pressure decreases with depth. III. Pressure at the same horizontal level is the same. IV. Pressure depends on the cross-sectional area of a barometer tube.",
+  "options": [
+   "I and III only.",
+   "I, II and III only.",
+   "I, II and IV only.",
+   "I, II, III and IV."
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1994,
+  "question": "The mass of a specific gravity bottle is 15.2 g when it is empty. It is 24.8 g when filled with kerosene and 27.2 g when filled with distilled water. Calculate the relative density of kerosene.",
+  "options": [
+   "1.25",
+   "1.10",
+   "0.90",
+   "0.80"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1994,
+  "question": "If a solid X floats in liquid P of relative density 2.0 and in liquid Q of relative density 1.5, it can be inferred that the",
+  "options": [
+   "Weight of P displaced is greater than that of Q",
+   "Weight of P displaced is less than that of Q",
+   "Volume of P displaced is greater than that of Q",
+   "Volume of P displaced is less than that of Q"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1994,
+  "question": "Convert 78 °C to kelvin, to the nearest kelvin.",
+  "options": [
+   "100 K",
+   "351 K",
+   "378 K",
+   "444 K"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1994,
+  "question": "Mix 100 g of liquid L₁ at 78 °C with X grams of liquid L₂ at 50 °C. The final temperature is 66 °C. The specific heat capacity of L₂ is half that of L₁. Neglect heat loss and container heat capacity. Find X.",
+  "options": [
+   "50 g",
+   "100 g",
+   "150 g",
+   "200 g"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1994,
+  "question": "A heater melts 100 g of ice at its melting point in 1 minute. Neglect heat losses and the test tube’s heat capacity. Find its power. Use latent heat of fusion 336 J/g.",
+  "options": [
+   "336 W",
+   "450 W",
+   "560 W",
+   "600 W"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1994,
+  "question": "A transverse wave is y = 0.3 sin(0.5 x − 50 t), where x and y are in centimetres, t is in seconds, and the phase is in radians. What is the maximum displacement magnitude?",
+  "options": [
+   "50.0 cm",
+   "2.5 cm",
+   "0.5 cm",
+   "0.3 cm"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1994,
+  "question": "Sound travels from the surface to the sea bottom and returns after 4 s. If its speed is 1500 m/s, find the depth.",
+  "options": [
+   "6000 m",
+   "3000 m",
+   "1500 m",
+   "375 m"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1994,
+  "question": "Which change halves the fundamental frequency of a stretched sonometer wire, with other relevant quantities held constant?",
+  "options": [
+   "Double its vibrating length at fixed tension and mass per unit length",
+   "Double its mass at fixed vibrating length and tension",
+   "Halve its tension at fixed length and mass per unit length",
+   "Halve its absolute temperature"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1994,
+  "question": "A stretched string has fundamental frequency 400 Hz. Its vibrating length is doubled and its tension quadrupled, with mass per unit length unchanged. Find the new frequency.",
+  "options": [
+   "200 Hz",
+   "400 Hz",
+   "800 Hz",
+   "1600 Hz"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1994,
+  "question": "To produce a parallel paraxial beam from a concave mirror, where should a small lamp be placed on its principal axis?",
+  "options": [
+   "One focal length from the mirror",
+   "Two focal lengths from the mirror",
+   "At the image distance for an arbitrary object",
+   "Two radii of curvature from the mirror"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1994,
+  "question": "Light of frequency 6.0 × 10¹⁴ Hz enters stationary glass of refractive index 1.5 from air. Find its frequency in the glass.",
+  "options": [
+   "4.0 × 10¹⁴ Hz",
+   "6.0 × 10¹⁴ Hz",
+   "7.5 × 10¹⁴ Hz",
+   "9.0 × 10¹⁴ Hz"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1994,
+  "question": "A converging thin lens of focal length 20 cm forms a virtual image with magnification 2. Find the object distance.",
+  "options": [
+   "5 cm",
+   "10 cm",
+   "30 cm",
+   "40 cm"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1994,
+  "question": "An object touches the bottom of a glass block 3.0 cm thick, with refractive index 1.5. Viewed from air nearly normally through the top face, by how much does the object appear raised?",
+  "options": [
+   "1.0 cm",
+   "1.5 cm",
+   "2.0 cm",
+   "2.5 cm"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1994,
+  "question": "A projection lantern uses a converging lens of focal length f to make a real enlarged image on a screen. Its object distance u must satisfy",
+  "options": [
+   "u > 2 f > f",
+   "u < f < 2 f",
+   "u = f < 2 f",
+   "f < u < 2 f"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1994,
+  "question": "A plastic pen rubbed with dry silk attracts a small piece of paper. What happens to the pen and cloth during rubbing?",
+  "options": [
+   "Both the pen and the cloth are magnetized",
+   "The pen is magnetized but the cloth is not",
+   "The pen is charged while the cloth is magnetized",
+   "Both the pen and the cloth are charged."
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1994,
+  "question": "Resistors R₁ =4 Ω and R₂ =5 Ω are in parallel across the same voltage. Find P₁:P₂.",
+  "options": [
+   "4:5",
+   "5:4",
+   "16:25",
+   "25:16"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1994,
+  "question": "A cell of emf 12 V and internal resistance 1 Ω supplies two parallel resistors, 12 Ω and 6 Ω. Find the magnitude of current in the 12 Ω resistor.",
+  "options": [
+   "0.8 A",
+   "1.0 A",
+   "1.6 A",
+   "2.4 A"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1994,
+  "question": "If two parallel conductors carry currents flowing in the same direction, the conductors will",
+  "options": [
+   "Attract each other",
+   "Repel each other",
+   "Both move in the same direction",
+   "Have no effect on each other."
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1994,
+  "question": "A sinusoidal alternating voltage has frequency 50 Hz. P is an upward zero crossing and R is the immediately following downward zero crossing. Find the time from P to R.",
+  "options": [
+   "25 s",
+   "1/50 s",
+   "1/100 s",
+   "1/200 s"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1994,
+  "question": "In the ordinary single-photon photoelectric effect, light of photon energy 2 eV falls on a metal of work function 3 eV. What happens?",
+  "options": [
+   "No photoelectron is emitted",
+   "A few electrons emerge with maximum kinetic energy 1 eV",
+   "A few electrons emerge with maximum kinetic energy 3 eV",
+   "Many photoelectrons are emitted"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1995,
+  "question": "Which of the following is the dimension of pressure?",
+  "options": [
+   "ML⁻¹T⁻²",
+   "MLT⁻²",
+   "ML²T⁻³",
+   "ML⁻³"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1995,
+  "question": "A simple pendulum at small amplitude passes its lowest point twice per second. Find its length to two decimal places, using g =10 m/s².",
+  "options": [
+   "0.25 m",
+   "0.45 m",
+   "0.58 m",
+   "1.00 m"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1995,
+  "question": "Three non-collinear points are O, A and B. Vector P runs from O to A, Q from O to B, and R from B to A. Which relation is correct?",
+  "options": [
+   "P = Q + R",
+   "P = Q – R",
+   "P = R – Q",
+   "P + Q + R = 0"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1995,
+  "question": "A 20 N load is held at rest by two symmetric cords, each making 30° above horizontal. Find the tension T in each cord.",
+  "options": [
+   "10.0 N",
+   "11.8 N",
+   "20.0 N",
+   "40.0 N"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1995,
+  "question": "When a ball rolls on a smooth level ground, the motion of its centre is",
+  "options": [
+   "Translational",
+   "Oscillatory",
+   "Random",
+   "Rotational"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1995,
+  "question": "A 20 kg block on a smooth 30° incline is joined by a light inextensible string over a frictionless massless pulley to a hanging 30 kg mass. Use g =10 m/s². Find the acceleration magnitude.",
+  "options": [
+   "2 m/s²",
+   "4 m/s²",
+   "6 m/s²",
+   "8 m/s²"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1995,
+  "question": "Approximate lunar surface gravity as one-sixth of Earth’s. If Earth’s gravity is 10 m/s², find lunar gravity to two decimal places.",
+  "options": [
+   "0.10 m/s²",
+   "0.74 m/s²",
+   "1.67 m/s²",
+   "10.00 m/s²"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1995,
+  "question": "A wire obeying Hooke’s law is extended by 0.02 m from its unstretched length by a final force of 500 N. Find its stored elastic energy.",
+  "options": [
+   "5 J",
+   "10 J",
+   "10³ J",
+   "10⁴ J"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1995,
+  "question": "A fixed amount of air in a bubble rises slowly through a lake at constant temperature. Neglect surface-tension effects. Its volume increases because",
+  "options": [
+   "Atmospheric pressure acts on the surface of the lake.",
+   "Pressure increases with depth of the lake.",
+   "Density remains constant with pressure",
+   "The bubble experiences an upthrust."
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1995,
+  "question": "In the classical ideal-gas model, absolute temperature is a measure of the",
+  "options": [
+   "Total heat transferred to the gas",
+   "Mean translational kinetic energy per molecule",
+   "Kinetic energy of one particular molecule",
+   "Total work done by the molecules"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1995,
+  "question": "An ideal 2000 W kettle heats 2.0 kg of water from 20 °C to 100 °C. Neglect kettle heat capacity and heat loss. With water’s specific heat capacity 4200 J/(kg·K), how long does this take?",
+  "options": [
+   "420 s",
+   "336 s",
+   "168 s",
+   "84 s"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1995,
+  "question": "Which of the following is the exclusive property of a transverse wave?",
+  "options": [
+   "Diffraction",
+   "Refraction",
+   "Compression",
+   "Polarization"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1995,
+  "question": "A radio signal has wavelength 1500 m and frequency 200 kHz. At the same wave speed, what wavelength corresponds to 1000 kHz?",
+  "options": [
+   "7 500 m",
+   "300 m",
+   "75 m",
+   "15 m"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1995,
+  "question": "The difference between sound waves and light waves is that sound waves",
+  "options": [
+   "Are transverse while light waves are longitudinal.",
+   "Require a medium to travel while light waves do not.",
+   "Can be diffracted but light waves cannot",
+   "Cannot be reflected but light waves can."
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1995,
+  "question": "For a steady simple acoustic tone, its pitch is increased primarily by",
+  "options": [
+   "Increasing the frequency",
+   "Increasing the amplitude",
+   "Decreasing the loudness",
+   "Decreasing the intensity"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1995,
+  "question": "During a total solar eclipse observed from Earth, which arrangement holds?",
+  "options": [
+   "Earth is between the Moon and Sun",
+   "Sun is between the Moon and Earth",
+   "Moon is between the Sun and Earth",
+   "The ozone layer is threatened"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1995,
+  "question": "Which of the following pairs of colours gives the widest separation in the spectrum of white light?",
+  "options": [
+   "Red and violet",
+   "Green and yellow",
+   "Red and indigo",
+   "Yellow and violet."
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1995,
+  "question": "Parallel plates are 8.0 ×10⁻³ m apart at a potential difference of 600 V, with the negative plate earthed. Neglect edge effects. Find the electric-field magnitude.",
+  "options": [
+   "4.8 V/m",
+   "75.0 V/m",
+   "4800.0 V/m",
+   "75000.0 V/m"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1995,
+  "question": "Which statement best describes Earth’s magnetic field at different surface locations?",
+  "options": [
+   "The same in magnitude and direction",
+   "The same in magnitude but different in direction",
+   "Different in both magnitude and direction",
+   "Different in magnitude but not in direction."
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1995,
+  "question": "A resistor’s resistance is halved and its applied voltage tripled. Find the ratio of its new current to its original current.",
+  "options": [
+   "1:6",
+   "1:3",
+   "2:1",
+   "6:1"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1995,
+  "question": "A battery of emf 12 V and internal resistance 0.5 Ω is connected across a cable of resistance 1.0 Ω. Find the current.",
+  "options": [
+   "16.0 A",
+   "8.0 A",
+   "0.8 A",
+   "0.4 A"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1995,
+  "question": "A capacitor network between two terminals has these sections in series: 2 μF, 3 μF, a parallel pair of 2 μF and 4 μF, then 4 μF. Find the equivalent capacitance.",
+  "options": [
+   "15.0 μF",
+   "9.8 μF",
+   "1.3 μF",
+   "0.8 μF"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1995,
+  "question": "The maximum voltage magnitude across a 100 Ω resistor is 20 V. Find its maximum instantaneous power.",
+  "options": [
+   "5.00 W",
+   "4.00 W",
+   "2.00 W",
+   "0.25 W"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1995,
+  "question": "An ideal transformer has 400 primary turns and 100 secondary turns. With 12 V AC applied to the primary, what is the secondary voltage, using the same voltage convention?",
+  "options": [
+   "3 V",
+   "6 V",
+   "24 V",
+   "48 V"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "For force with dimensions MˣLʸTᶻ, what are x, y and z respectively?",
+  "options": [
+   "−1, 1, 2",
+   "1, 1, −2",
+   "1, −1, 2",
+   "−1, 1, −2"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "A particle’s position is x =10 +12 t² metres, with time t in seconds. Find its average speed from t =2 s to t =5 s.",
+  "options": [
+   "60 m/s",
+   "72 m/s",
+   "84 m/s",
+   "108 m/s"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "A 5 kg block is released on a smooth plane inclined at 30° to horizontal. Find its downslope acceleration using g =10 m/s².",
+  "options": [
+   "5.0 m/s²",
+   "5.8 m/s²",
+   "8.7 m/s²",
+   "25.0 m/s²"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "An arrow of mass 0.1 kg travelling horizontally at 15 m/s embeds in a stationary 0.4 kg block on a smooth horizontal surface. Find their common speed.",
+  "options": [
+   "15.0 m/s",
+   "7.5 m/s",
+   "3.8 m/s",
+   "3.0 m/s"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "For a body in simple harmonic motion, which quantities are in phase?",
+  "options": [
+   "Displacement and velocity",
+   "Displacement and net restoring force",
+   "Velocity and acceleration",
+   "Net force and acceleration"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "Three forces act on a particle at rest: 6 N vertically downward, 6√3 N horizontally right, and 12 N upward-left along a cord. The cord makes angle θ with the vertical. Find θ.",
+  "options": [
+   "15°",
+   "30°",
+   "45°",
+   "60°"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "A block of mass m slides down a rough plane inclined at θ to horizontal, with no other applied forces. Which force component and force act along the plane?",
+  "options": [
+   "mg sinθ and normal reaction",
+   "mg sinθ and friction",
+   "mg cosθ and normal reaction",
+   "mg cosθ and friction"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "A 100 g object projected upward has speed 20 m/s at height 10 m. Neglect air resistance and use g =10 m/s². Find its initial kinetic energy at ground level.",
+  "options": [
+   "10 J",
+   "20 J",
+   "30 J",
+   "50 J"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "A water pump draws 1.5 kW of electrical power while lifting 200 kg of water through 6 m in 10 s. Use g =10 m/s². Find its efficiency.",
+  "options": [
+   "90.0%",
+   "85.0%",
+   "80.0%",
+   "65.0%"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "A block of weight W rests on a rough plane inclined at θ to horizontal. When it is just about to slide under its weight, which relation holds?",
+  "options": [
+   "tanθ = coefficient of static friction",
+   "cosθ = coefficient of dynamic friction",
+   "sinθ = coefficient of sliding friction",
+   "secθ = limiting frictional force"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "An empty 60 litre tank has mass 10 kg. Find its mass when full of fuel of relative density 0.72. Use water density 1000 kg/m³.",
+  "options": [
+   "7.2 kg",
+   "33.2 kg",
+   "43.2 kg",
+   "53.2 kg"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "A mercury thermometer’s thread lengths at 0 °C, 100 °C and an unknown temperature are 25 mm, 225 mm and 175 mm respectively. Assuming linear calibration, find the unknown temperature.",
+  "options": [
+   "85.0 °C",
+   "80.0 °C",
+   "75.0 °C",
+   "70.0 °C"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "A fixed amount of ideal gas in a tyre has absolute pressure 3 ×10⁵ Pa at 27 °C. At constant volume its absolute pressure rises to 4 ×10⁵ Pa. Find the final Celsius temperature, using K = °C +273.",
+  "options": [
+   "400 °C",
+   "300 °C",
+   "273 °C",
+   "127 °C"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "At ordinary atmospheric pressure, a fixed mass of pure ice melts completely to water at 0 °C. Which description is correct?",
+  "options": [
+   "Latent heat is absorbed, the mass remains constant and the volume decreases.",
+   "Latent heat is given out, the mass remains constant and the volume decreases.",
+   "Latent heat is given out, the mass increases and the volume remains constant.",
+   "Latent heat is absorbed, the mass decreases and the volume increases."
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "Neglect supercooling. Which temperature-time description represents a pure molten substance cooling through complete solidification and then cooling further?",
+  "options": [
+   "Temperature falls continuously with an increasingly steep downward curve",
+   "Temperature falls steadily along a straight line",
+   "Temperature remains constant throughout",
+   "Temperature falls, remains constant for an interval, then falls again"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "Ripples on water and light waves are similar because both",
+  "options": [
+   "have the same frequency",
+   "can be refracted and diffracted",
+   "are longitudinal waves",
+   "have the same velocity."
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "A plucked string’s fundamental frequency is 500 Hz at length 0.90 m. At unchanged tension and mass per unit length, what length gives fundamental frequency 150 Hz?",
+  "options": [
+   "3 m",
+   "4 m",
+   "5 m",
+   "6 m"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "The colours seen in thin films of oil on the road and in soap bubbles are due to",
+  "options": [
+   "Reflection",
+   "Interference",
+   "Diffraction",
+   "Polarization."
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "At a particular instant, two sinusoidal wave profiles P and Q of the same wavelength have positive crests, negative troughs and zero crossings at matching positions. When superposed at that instant, they interfere",
+  "options": [
+   "destructively to produce a wave of a larger amplitude",
+   "destructively to produce a wave of a smaller amplitude",
+   "constructively to produce a wave of a larger amplitude",
+   "constructively to produce a wave of a smaller amplitude."
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "A sonometer’s hanging load is immersed in water without touching the bucket, reducing the wire tension. With water conditions and the wire’s mass per unit length fixed, how can its original fundamental frequency be restored?",
+  "options": [
+   "Decrease the vibrating length of the wire",
+   "Increase the vibrating length of the wire",
+   "Increase the mass per unit length of the wire",
+   "Change the water temperature alone"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "Light travels at 3.0 ×10⁸ m/s in vacuum and 2.4 ×10⁸ m/s in a material. Find the material’s refractive index.",
+  "options": [
+   "2.33",
+   "2.25",
+   "1.33",
+   "1.25"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "Which electromagnetic band is commonly used to detect temperature differences in objects near ordinary environmental temperatures?",
+  "options": [
+   "X-rays",
+   "Gamma rays",
+   "Ultraviolet",
+   "Infrared"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "Three identical cells, each of emf 1.5 V and internal resistance 1 Ω, are connected in parallel with matching polarities across a 2/3 Ω resistor. Find the resistor current.",
+  "options": [
+   "0.5 A",
+   "0.9 A",
+   "1.5 A",
+   "4.5 A"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "Moving 100 μC of charge between two points requires 8 ×10⁻² J of work. Find the magnitude of their potential difference.",
+  "options": [
+   "4.0 ×10² V",
+   "4.0 ×10⁴ V",
+   "8.0 ×10² V",
+   "8.0 ×10⁴ V"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "In a working metre bridge with uniform wire, resistors 2 Ω and 3 Ω occupy the left and right gaps. Find the balance position measured from the left end.",
+  "options": [
+   "20 cm",
+   "40 cm",
+   "60 cm",
+   "80 cm"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "Two initially uncharged 50 μF capacitors are connected in series across a 100 V battery. Find the final charge magnitude on each capacitor plate.",
+  "options": [
+   "5.00 ×10⁻⁵ C",
+   "2.50 ×10⁻³ C",
+   "1.25 ×10⁻³ C",
+   "1.00 ×10⁻² C"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "An electric cooker operates continuously at 1000 W for 5 hours. Find the electrical energy consumed.",
+  "options": [
+   "5.3 ×10³ J",
+   "6.5 ×10³ J",
+   "1.8 ×10⁷ J",
+   "2.3 ×10⁷ J"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "An AC voltage is V =311 sin(314.2 t), with t in seconds and phase in radians. Find the frequency using π =3.142.",
+  "options": [
+   "50.0 Hz",
+   "100.0 Hz",
+   "311.0 Hz",
+   "314.2 Hz"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "In sinusoidal steady state in a purely inductive circuit, the current",
+  "options": [
+   "Lags the voltage by 90°",
+   "Leads the voltage by 90°",
+   "Is in phase with the voltage",
+   "Leads the voltage by 180°"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "A characteristic of neutron-induced uranium fission is that it can",
+  "options": [
+   "Produce only non-radioactive products",
+   "Sustain a chain reaction under suitable conditions",
+   "Occur without releasing any neutrons in its usual reactor process",
+   "Release energy while leaving the total rest mass exactly unchanged"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1997,
+  "question": "In a graphite-moderated uranium reactor, graphite surrounding the fuel is used mainly to",
+  "options": [
+   "Absorb neutrons to halt the reaction",
+   "Create the neutrons that initiate the reaction",
+   "Slow fast neutrons to help sustain the fission chain reaction",
+   "Speed up neutrons to accelerate the reaction"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1998,
+  "question": "The physical quantity that has the same dimensions as impulse is",
+  "options": [
+   "Energy",
+   "Momentum",
+   "Surface tension",
+   "Pressure."
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1998,
+  "question": "Two point masses attract with force 10⁻⁴ N at separation 0.18 m. Find the force when their separation is 0.06 m.",
+  "options": [
+   "1.1 ×10⁻⁵ N",
+   "3.3 ×10⁻⁵ N",
+   "3.0 ×10⁻⁴ N",
+   "9.0 ×10⁻⁴ N"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1998,
+  "question": "A fixed net force F is applied to different masses. Which graphs correctly show acceleration a? I. a versus m: straight increasing line through the origin. II. a versus 1/m: straight decreasing line. III. a versus 1/m: straight increasing line through the origin. IV. a versus m: decreasing inverse curve.",
+  "options": [
+   "III and IV only",
+   "II and IV only",
+   "I and III only",
+   "I and II only"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1998,
+  "question": "In a wheel and axle mechanism, the diameters of the wheel and axle are 40 cm and 8 cm respectively. Given that the machine is 80% efficient, what effort is required to lift a load of 100 N?",
+  "options": [
+   "20 N",
+   "25 N",
+   "50 N",
+   "80 N"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1998,
+  "question": "A tendon of original length 0.01 m extends by 2.0 ×10⁻⁵ m under a 5 N force. Find its longitudinal strain.",
+  "options": [
+   "5 ×10⁶",
+   "5 ×10²",
+   "2 ×10⁻³",
+   "2 ×10⁻⁷"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1998,
+  "question": "For uniform liquids at rest, consider pressure measured above each liquid’s free-surface pressure. Which statements are correct? I. Pressure acts equally in all directions at a point. II. Pressure increases with depth. III. Pressure at a given depth depends on container shape. IV. At equal depths, pressure rises are proportional to liquid density.",
+  "options": [
+   "I, II and III only",
+   "I, II and IV only",
+   "I, III and IV only",
+   "II, III and IV only"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1998,
+  "question": "Water has surface pressure 1.3 ×10⁶ Pa. Find the total pressure 10 m below the surface, using density 1000 kg/m³ and g =10 m/s².",
+  "options": [
+   "1.3 ×10⁷ Pa",
+   "1.4 ×10⁶ Pa",
+   "1.4 ×10⁵ Pa",
+   "1.0 ×10⁵ Pa"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1998,
+  "question": "Brass has linear expansivity 2 ×10⁻⁵ °C⁻¹ and volume 15.00 cm³ at 0 °C. Use the first-order isotropic expansion approximation to find its volume at 100 °C.",
+  "options": [
+   "16.03 cm³",
+   "16.00 cm³",
+   "15.09 cm³",
+   "15.03 cm³"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1998,
+  "question": "What minimum mass of water at 17 °C melts 42 g of ice initially at 0 °C? Neglect heat loss and container heat capacity. Use L =3.4 ×10⁵ J/kg and cwater =4200 J/(kg·K).",
+  "options": [
+   "200 g",
+   "300 g",
+   "320 g",
+   "400 g"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1998,
+  "question": "Which is an assumption of the elementary kinetic theory for a pure ideal gas?",
+  "options": [
+   "Molecules move constantly and their collision rate can never change",
+   "Molecule number must increase whenever pressure increases",
+   "Collision rate remains fixed as temperature increases",
+   "Molecules are identical and very small compared with their separation"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1998,
+  "question": "Which pair describes behaviours of ordinary longitudinal sound waves in air?",
+  "options": [
+   "Reflection and diffraction",
+   "Polarization and reflection",
+   "Polarization and diffraction",
+   "Polarization and refraction"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1998,
+  "question": "Sound travels at 360 m/s in a gas at 27 °C. With unchanged gas composition and heat-capacity ratio, find its speed at 127 °C. Use K = °C +273.",
+  "options": [
+   "120√3 m/s",
+   "240 m/s",
+   "240√3 m/s",
+   "720√3 m/s"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1998,
+  "question": "In an ideal organ pipe closed at one end, neglect end correction. An air-displacement antinode occurs at",
+  "options": [
+   "The closed end",
+   "The open end",
+   "The middle",
+   "All the parts of the pipe."
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1998,
+  "question": "A real object is between a concave mirror and its principal focus. Which description applies to its image?",
+  "options": [
+   "Virtual and diminished",
+   "Magnified and erect",
+   "Real and inverted",
+   "Diminished and erect."
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1998,
+  "question": "Which specific mirror shape is most suitable for collimating light from a small source into a narrow searchlight beam?",
+  "options": [
+   "Concave mirror",
+   "Convex mirror",
+   "Spherical mirror",
+   "Parabolic mirror."
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1998,
+  "question": "An object touches the bottom of a glass block of thickness t and refractive index n>1. Viewed nearly normally from air through the top face, its apparent upward shift d is",
+  "options": [
+   "t − n",
+   "t(1 + 1/n)",
+   "t(1 − 1/n)",
+   "t(1/n − 1)"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1998,
+  "question": "Which statements describe infrared radiation? I. It is invisible to the human eye. II. It is commonly called heat radiation. III. Its frequency is higher than blue light. IV. In free space it is transverse.",
+  "options": [
+   "I, II, III and IV",
+   "I, II and IV only",
+   "I, III and IV only",
+   "II, III and IV only"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1998,
+  "question": "In vacuum, point charges +5 μC and +8 μC are 0.02 m apart. Find their repulsive force using k =9 ×10⁹ N·m²/C².",
+  "options": [
+   "1.8 ×10⁻¹⁰ N",
+   "9.0 ×10⁻⁸ N",
+   "9.0 ×10² N",
+   "4.5 ×10³ N"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1998,
+  "question": "In the standard dry electrostatic experiment, an ebonite rod rubbed with fur attracts a glass rod rubbed with silk because",
+  "options": [
+   "Ebonite has a negative charge while glass has a positive charge",
+   "Ebonite has a positive charge while glass has a negative charge",
+   "Both have negative charges",
+   "Both have positive charges."
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1998,
+  "question": "Terminal P connects through 1 Ω to node A, and terminal Q through 1 Ω to node B. Between A and B are two parallel paths: one 3 Ω resistor, and three 2 Ω resistors in series. Find the resistance between P and Q.",
+  "options": [
+   "18.0 Ω",
+   "11.0 Ω",
+   "4.0 Ω",
+   "2.0 Ω"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1998,
+  "question": "Find the external work required to move a +2 C charge slowly from X to Y when Y is 100 V above X.",
+  "options": [
+   "50 J",
+   "100 J",
+   "200 J",
+   "400 J"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1998,
+  "question": "An induction-coil iron core is subdivided into bundles of electrically insulated wires mainly to",
+  "options": [
+   "Minimize eddy-currents",
+   "Generate eddy-currents",
+   "Prevent sparking at the contact breaker",
+   "Get the greatest possible secondary voltage."
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1998,
+  "question": "A supply cable has total resistance 0.5 Ω. Its maximum RMS current is 100 A. Find the maximum heat dissipated in one hour if that current is maintained.",
+  "options": [
+   "3.6 ×10³ J",
+   "5.0 ×10³ J",
+   "3.0 ×10⁵ J",
+   "1.8 ×10⁷ J"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1998,
+  "question": "A sinusoidal source supplies a series circuit containing a 15 Ω resistor, 5 μF capacitor and 8 mH ideal inductor. Find the current-resonance frequency.",
+  "options": [
+   "5000π Hz",
+   "2500π Hz",
+   "5000/π Hz",
+   "2500/π Hz"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1998,
+  "question": "A metal has electrochemical equivalent 1.3 ×10⁻⁷ kg/C. What mass is deposited by 2.0 ×10⁴ C through a suitable electrolyte?",
+  "options": [
+   "6.5 ×10⁻² kg",
+   "2.6 ×10⁻² kg",
+   "6.5 ×10⁻³ kg",
+   "2.6 ×10⁻³ kg"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1998,
+  "question": "A fusion reaction has a decrease in total rest mass of 1.0 ×10⁻⁶ kg. Find the released energy using c =3.0 ×10⁸ m/s.",
+  "options": [
+   "3.0 ×10⁻⁴ J",
+   "3.0 ×10⁻¹ J",
+   "9.0 ×10⁴ J",
+   "9.0 ×10¹⁰ J"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1999,
+  "question": "A rigid solid with base PQ rests on a slope, with enough friction to prevent sliding and no external support. G is its centre of gravity. Which statement describes when gravity makes it tip?",
+  "options": [
+   "It tips if the vertical line through G falls outside its base of support",
+   "It tips if the vertical line through G lies inside its base",
+   "It does not tip if the vertical line through G lies outside its base",
+   "It can never tip"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1999,
+  "question": "Two bodies have masses in the ratio 3:1 and accelerations in the ratio 2:9, respectively. Find the ratio of the resultant forces acting on them.",
+  "options": [
+   "1 : 4",
+   "2 : 1",
+   "2 : 3",
+   "2 : 5."
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1999,
+  "question": "A vehicle’s velocity-time graph consists of straight segments joining (0 s,0 m/s), (20 s,80 m/s), (50 s,80 m/s) and (90 s,0 m/s). Find its acceleration during the first segment and retardation magnitude during the last.",
+  "options": [
+   "8 m/s², 4 m/s²",
+   "4 m/s², 8 m/s²",
+   "4 m/s², 2 m/s²",
+   "2 m/s², 4 m/s²"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1999,
+  "question": "The inner diameter of a small test tube can be measured accurately using a",
+  "options": [
+   "Ordinary outside micrometer screw gauge",
+   "Pair of dividers",
+   "Metre rule",
+   "Vernier calipers with inside jaws"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1999,
+  "question": "A lift pump has valve P in its moving piston and inlet valve Q at the bottom of the cylinder. Both admit upward flow. During the downward stroke of the piston, which valves are open?",
+  "options": [
+   "Both valves are open",
+   "P is open while Q is closed",
+   "P is closed while Q is open",
+   "Both valves are closed."
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1999,
+  "question": "Within the elastic range, a wire under stress 10⁷ Pa stretches from 10.00 cm to 10.05 cm. Find its Young’s modulus.",
+  "options": [
+   "5.0 ×10⁴ Pa",
+   "5.0 ×10⁵ Pa",
+   "2.0 ×10⁸ Pa",
+   "2.0 ×10⁹ Pa"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1999,
+  "question": "For boiling and a dilute aqueous solution with a nonvolatile solute, which statements are correct? I. A liquid boils when its saturated vapour pressure equals external pressure. II. Dissolving the solute raises water’s boiling point. III. Increasing external pressure raises the boiling point. IV. Dissolving the solute lowers water’s boiling point.",
+  "options": [
+   "I, II and III",
+   "I, II, III and IV",
+   "I, II and IV",
+   "II, III and IV."
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1999,
+  "question": "As the temperature of a pure liquid such as water rises while it remains liquid, its surface tension generally",
+  "options": [
+   "Decreases",
+   "Increases",
+   "Remains constant",
+   "Increase then decreases."
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1999,
+  "question": "A sound wave passes from colder air into hotter air of the same composition across a stationary boundary. Its wavelength",
+  "options": [
+   "Increases",
+   "Decreases",
+   "Decreases then increases",
+   "Remains constant"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1999,
+  "question": "A wave is described in SI units by y =0.25 ×10⁻³ sin(500 t −0.025 x). Find its angular frequency.",
+  "options": [
+   "0.25 ×10⁻³ rad/s",
+   "0.25 ×10⁻¹ rad/s",
+   "5.00 ×10² rad/s",
+   "2.50 ×10² rad/s"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1999,
+  "question": "A 2 kg copper block at 100°C is placed on ice at 0°C without heat loss. Find the mass of ice melted. Take copper’s specific heat capacity as 400 J/(kg·K) and ice’s latent heat of fusion as 3.3 ×10⁵ J/kg.",
+  "options": [
+   "8/33 kg",
+   "33/80 kg",
+   "80/33 kg",
+   "33/8 kg"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1999,
+  "question": "A spatial snapshot of a transverse electromagnetic wave contains three complete cycles over 0.30 m, from an upward zero crossing to the third following upward zero crossing. Its speed is 3.0 ×10⁸ m/s. Find its frequency.",
+  "options": [
+   "3.0 ×10⁷ Hz",
+   "90 ×10⁷ Hz",
+   "1.0 ×10⁹ Hz",
+   "3.0 ×10⁹ Hz"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1999,
+  "question": "The ends of a 0.02 m length of copper are maintained at 20°C and 80°C. Find the magnitude of the temperature gradient.",
+  "options": [
+   "3.0 ×10² K/m",
+   "3.0 ×10³ K/m",
+   "5.0 ×10³ K/m",
+   "3.0 ×10⁴ K/m"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1999,
+  "question": "Four identical cells, each of emf 1.5 V and internal resistance 4 Ω, are connected in parallel with matching polarities. Find the effective emf and internal resistance.",
+  "options": [
+   "6.0 V, 16 Ω",
+   "6.0 V, 1 Ω",
+   "1.5 V, 4 Ω",
+   "1.5 V, 1 Ω"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1999,
+  "question": "An astronomical telescope is said to be in normal adjustment when the",
+  "options": [
+   "Eye is accommodated",
+   "Focal length of objective lens is longer than that of eye piece",
+   "Final image is at the near point of eye",
+   "Final image is at infinity."
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1999,
+  "question": "Hardened steel is more suitable than soft iron for a permanent magnet because it",
+  "options": [
+   "Is easily demagnetized by vigorous shaking",
+   "Is an alloy of many metals",
+   "Is easily magnetized by alternating current through one cycle",
+   "Retains magnetism more strongly"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1999,
+  "question": "Two right-angle prisms are vertically separated. Light travels horizontally into the upper prism, turns 90° downward, then turns 90° in the lower prism and emerges horizontally in its original direction at a lower level. This is the basic prism arrangement in a",
+  "options": [
+   "Binocular",
+   "Spectrometer",
+   "Periscope",
+   "Projector"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1999,
+  "question": "Light travels from air into glass. Its speeds are 3.0 ×10⁸ m/s in air and 2.0 ×10⁸ m/s in glass. If the angle of refraction is 30°, find the sine of the angle of incidence.",
+  "options": [
+   "0.33",
+   "0.50",
+   "0.67",
+   "0.75"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1999,
+  "question": "A sinusoidal source supplies one series loop containing an ideal inductor L and a resistor R. Their RMS voltages are V_L =8 V and V_R =6 V. Find the source RMS voltage.",
+  "options": [
+   "2 V",
+   "10 V",
+   "14 V",
+   "48 V"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1999,
+  "question": "A transformer core is made from thin insulated metal laminations mainly to",
+  "options": [
+   "Increase the heat produced by increasing the eddy current",
+   "Increase the heat produced by reducing the eddy current",
+   "Reduce the heat produced by increasing the eddy current",
+   "Reduce the heat produced by reducing the eddy current."
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 1999,
+  "question": "In Fleming’s right-hand rule, the thumb, the forefinger and the middle finger if held mutually at right angles represent respectively, the",
+  "options": [
+   "Motion, magnetic field and induced current",
+   "Induced current, motion and magnetic field",
+   "Magnetic field, induced current and motion",
+   "Induced current, magnetic field and motion"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1999,
+  "question": "A 2 μF capacitor and a 3 μF capacitor are connected in parallel across 100 V, with their marked positive plates at the same terminal. Find their total stored energy.",
+  "options": [
+   "3.0 ×10⁴ J",
+   "3.0 ×10² J",
+   "2.5 ×10⁻² J",
+   "6.0 ×10⁻³ J"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1999,
+  "question": "At what frequency would a 10 H inductor have a reactance of 2000 ohms?",
+  "options": [
+   "π/200 Hz",
+   "π/100 Hz",
+   "100/π Hz",
+   "100π Hz"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 1999,
+  "question": "Two resistors R₁ and R₂ are connected in separate parallel branches across a cell of emf E and zero internal resistance. If their powers are P₁ and P₂, respectively, find P₁/P₂.",
+  "options": [
+   "R₂/R₁",
+   "R₁/R₂",
+   "(R₁ + R₂)/R₁",
+   "(R₁ + R₂)/R₂"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 1999,
+  "question": "In an ordinary crystalline semiconductor at room temperature, the mobile carriers of electric current are",
+  "options": [
+   "Electrons only",
+   "Electrons and holes",
+   "Holes only",
+   "Electrons and ions"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1999,
+  "question": "Find the speed of a particle with mass 10⁻²⁷ kg and de Broglie wavelength 10⁻⁸ m. Use h =6.63 ×10⁻³⁴ J·s.",
+  "options": [
+   "6.63 m/s",
+   "66.30 m/s",
+   "663.00 m/s",
+   "6630.00 m/s"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1999,
+  "question": "In a series circuit containing R and ideal L and C at resonance, the RMS voltages across R and L are 30 V and 40 V. What is the RMS voltage across C?",
+  "options": [
+   "30 V",
+   "40 V",
+   "50 V",
+   "70 V"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 1999,
+  "question": "In nuclear gamma emission, the radiation is produced when",
+  "options": [
+   "Fast electrons are abruptly stopped in a metal",
+   "An excited nucleus changes to a lower energy state",
+   "Electrons change energy levels within an atom",
+   "Electrons are deflected by a strong magnetic field"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 2000,
+  "question": "In the simple model of dry sliding friction, which statements are approximately correct? I. Friction is independent of apparent contact area. II. It depends on the nature of the surfaces. III. It depends on sliding speed. IV. It is directly proportional to normal reaction.",
+  "options": [
+   "I, II and IV",
+   "I, II and III",
+   "I, III and IV",
+   "II, III and IV"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2000,
+  "question": "A ship of unchanged mass sails from salt water into less-dense fresh water and remains afloat. The fraction of its volume above the water surface will",
+  "options": [
+   "Remain the same",
+   "Increase",
+   "Decrease",
+   "Increase then decrease."
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 2000,
+  "question": "For a body moving at constant speed around a circle, which statements are true? I. Its velocity is constant. II. The net work done on it is zero. III. It has constant acceleration away from the centre. IV. The centripetal force points toward the centre.",
+  "options": [
+   "I and III",
+   "I and IV",
+   "II and III",
+   "II and IV"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2000,
+  "question": "A particle has velocity v =10 +2 t² in m/s, with t in seconds. Find its instantaneous acceleration at t =5 s.",
+  "options": [
+   "10 m/s²",
+   "15 m/s²",
+   "20 m/s²",
+   "60 m/s²"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 2000,
+  "question": "A force acts parallel to velocity. If both force and speed are halved, with direction unchanged, the mechanical power is",
+  "options": [
+   "Doubled",
+   "Constant",
+   "Reduced to a quarter",
+   "Reduced by half."
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 2000,
+  "question": "The velocity ratio of a machine is 5 its efficiency is 75%. What effort would be needed to lift a load of 150 N with the machine?",
+  "options": [
+   "50 N",
+   "40 N",
+   "30 N",
+   "20 N"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 2000,
+  "question": "In a traditional mercury-and-alcohol Six maximum-minimum thermometer, P labels the sensing reservoir, Q the liquid in the bottom U-bend, and R the liquid above Q in the opposite limb, below the expansion space. Identify P, Q and R.",
+  "options": [
+   "Alcohol, mercury and alcohol",
+   "Air, alcohol and mercury",
+   "Mercury, alcohol and mercury",
+   "Air, mercury and alcohol."
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2000,
+  "question": "White light passes obliquely from air into a transparent medium with normal dispersion. Three refracted rays a, b and c lie in order from closest to farthest from the normal. Which colours could a, b and c represent?",
+  "options": [
+   "Blue, yellow and red",
+   "Green, red and blue",
+   "Red, green and blue",
+   "Yellow, blue and red"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2000,
+  "question": "Capacitors P =5 μF and Q =10 μF are connected in parallel across a 20 V d.c. source. Find their stored charge magnitudes, P then Q.",
+  "options": [
+   "200 μC and 100 μC",
+   "100 μC and 200 μC",
+   "4 μC and 2 μC",
+   "2 μC and 4 μC"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 2000,
+  "question": "Which basic two-lens instrument is best constructed using only converging lenses of focal lengths 500 cm and 5 cm?",
+  "options": [
+   "Compound microscope",
+   "Terrestrial telescope",
+   "Astronomical telescope",
+   "Galileo’s telescope"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 2000,
+  "question": "A cell of emf 2 V and internal resistance 1 Ω supplies 3 Ω and 2 Ω resistors in series. Ideal voltmeters V₁ and V₂ measure across the 3 Ω and 2 Ω resistors respectively. Find their readings.",
+  "options": [
+   "1 V and 1/3 V",
+   "1/3 V and 1 V",
+   "1/3 V and 2/3 V",
+   "1 V and 2/3 V"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2000,
+  "question": "An ideal 2 H inductor is connected to a sinusoidal supply of frequency 50/π Hz. Find its reactance.",
+  "options": [
+   "200 Ω",
+   "50 Ω",
+   "100/π Ω",
+   "25/π Ω"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2000,
+  "question": "A radioactive sample has 1/64 of its original undecayed atoms remaining after 120 years. Find its half-life.",
+  "options": [
+   "2 years",
+   "10 years",
+   "20 years",
+   "24 years"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 2000,
+  "question": "In a pure intrinsic semiconductor in thermal equilibrium, the number of conduction-band electrons is",
+  "options": [
+   "Equal to the number of holes in the valence band",
+   "Greater than the number of holes in the valence band",
+   "Less than the number of holes in the valence band",
+   "Twice the number of holes in the valence band."
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2000,
+  "question": "Photons of energy 5 eV strike a metal with work function 3 eV. Find the stopping potential magnitude.",
+  "options": [
+   "15.0 V",
+   "8.0 V",
+   "2.0 V",
+   "1.7 V"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 2000,
+  "question": "A 200-turn coil has the magnetic flux through each turn changing at 0.08 Wb/s. Find the induced emf magnitude.",
+  "options": [
+   "1.6 V",
+   "16.0 V",
+   "25.0 V",
+   "250.0 V"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 2000,
+  "question": "In a basic mains-device wiring diagram, P is in the live lead, Q in the neutral lead and S in the protective-earth lead. Which marked position is appropriate for the series fuse?",
+  "options": [
+   "S",
+   "Q",
+   "P",
+   "Between P and Q"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 2000,
+  "question": "A generator delivers 3.0 kW at its 1.5 kV output terminals through cables whose total resistance is 20 Ω. Find the resistive power loss in those cables.",
+  "options": [
+   "0.1 W",
+   "10.0 W",
+   "40.0 W",
+   "80.0 W"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2001,
+  "question": "Simple pendulums P,Q,R,S,T andU hang from a common support. T has the same length asP; R is shorter, while Q,S andU are longer. Which resonates withP whenP oscillates with small amplitude?",
+  "options": [
+   "T",
+   "U",
+   "R and T",
+   "Q and R"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2001,
+  "question": "A metal sphere of radius 3 cm is fully immersed in water in a vertical cylindrical vessel without overflow. The water level rises 1 cm. Find the vessel’s internal radius.",
+  "options": [
+   "12 cm",
+   "1 cm",
+   "3 cm",
+   "6 cm"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2001,
+  "question": "For a real machine with energy losses and efficiency below 100%, which relationship holds?",
+  "options": [
+   "Work output exceeds work input",
+   "Load always exceeds effort",
+   "Effort always exceeds load",
+   "Velocity ratio exceeds mechanical advantage"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2001,
+  "question": "Ice cubes are added to warm water in a glass. Which pair of heat-transfer mechanisms mainly cools the water and glass?",
+  "options": [
+   "Conduction only",
+   "Convection only",
+   "Conduction and convection",
+   "Convection and radiation"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 2001,
+  "question": "Compared with a simple astronomical refracting telescope, a traditional terrestrial telescope includes an extra erecting lens mainly for",
+  "options": [
+   "Improving the sharpness",
+   "Creating an inverted image",
+   "Magnification of the image",
+   "Erection of the image"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2001,
+  "question": "A convex car mirror has radius of curvature 1 m. A vehicle is 4 m in front of it. Using the paraxial mirror formula, find the image distance behind the mirror.",
+  "options": [
+   "8/7 m",
+   "4/9 m",
+   "9/2 m",
+   "4/7 m"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 2001,
+  "question": "A ray enters a transparent medium from air. Its incident ray makes angleα with the surface, while its refracted ray makes angleβ with the normal. Taking air’s refractive index as 1, find the medium’s refractive index.",
+  "options": [
+   "cosα/sinβ",
+   "sinα/sinβ",
+   "cosβ/sinα",
+   "sinβ/sinα"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2001,
+  "question": "Which listed substance is used as the gas in primary gas thermometry to determine thermodynamic temperature?",
+  "options": [
+   "Alcohol",
+   "Mercury",
+   "Helium",
+   "Platinum"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 2001,
+  "question": "A 6 V d.c. supply drives 3 Ω and 1 Ω resistors in series with a parallel pair of 10 Ω and 5 Ω resistors. Find the total currentI before it splits between the parallel branches.",
+  "options": [
+   "3/8 A",
+   "9/11 A",
+   "11/9 A",
+   "8/3 A"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 2001,
+  "question": "Capacitors P =2 μF and Q =4 μF are connected in parallel across the same d.c. voltage. Find the ratio of energy stored inP to that inQ.",
+  "options": [
+   "4 : 1",
+   "2 : 1",
+   "1 : 4",
+   "1 : 2"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2001,
+  "question": "Initially uncharged capacitors C₁ =2 μF,C₂ =6 μF andC₃ =3 μF are connected in one series chain across 12 V. Find their final voltages in that order.",
+  "options": [
+   "4 V, 6 V and 2 V",
+   "2 V, 6 V and 4 V",
+   "6 V, 4 V and 2 V",
+   "6 V, 2 V and 4 V"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2001,
+  "question": "In a Daniell cell, the depolarizing solution, positive electrode and negative electrode are respectively",
+  "options": [
+   "Copper sulfate, copper and zinc",
+   "Manganese dioxide, carbon and zinc",
+   "Sulfuric acid, lead dioxide and lead",
+   "Potassium hydroxide, nickel and iron"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2001,
+  "question": "A closed cube of side 0.5 m lies in a uniform electric fieldE parallel to one pair of opposite-face normals. Find its net outward electric flux.",
+  "options": [
+   "0.5 E",
+   "2.0 E",
+   "0.2 E",
+   "0.0 E"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2001,
+  "question": "A glass dielectric block is inserted into the air gap of a parallel-plate capacitor without changing plate area or separation. Its capacitance will",
+  "options": [
+   "Increase",
+   "Decrease",
+   "Decrease, then increase",
+   "Remain constant"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2001,
+  "question": "Two protons in vacuum, each with charge e and mass m, are separated by distance d. Find the ratio of electric-force magnitude to gravitational-force magnitude.",
+  "options": [
+   "e/(4πε₀Gm)",
+   "e²/(Gm²)",
+   "Gm²/(4πε₀e²)",
+   "e²/(4πε₀Gm²)"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2001,
+  "question": "A 240 V RMS sinusoidal supply is connected across a 4 Ω resistor in series with an ideal inductor of reactance 3 Ω. Find the RMS current.",
+  "options": [
+   "31 A",
+   "48 A",
+   "60 A",
+   "80 A"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 2001,
+  "question": "Current through a resistor is i =2 sin(ωt) A. Find the steady d.c. current that would produce the same average heating.",
+  "options": [
+   "1/√2 A",
+   "2√2 A",
+   "2 A",
+   "√2 A"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2001,
+  "question": "The process of energy production in the sun is",
+  "options": [
+   "Nuclear fission",
+   "Nuclear fusion",
+   "Electron collision",
+   "Radioactive decay"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 2001,
+  "question": "For fixed current, length and uniform magnetic-field strength, the magnetic force on a straight conductor is greatest when it is",
+  "options": [
+   "At 60° to the field",
+   "At any angle, since force is angle-independent",
+   "Parallel to the field",
+   "At right angles to the field"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "In a hydrostatic model, the head-to-feet blood-pressure difference is 1.65 ×10⁴ Pa. Find the vertical height difference using density 1.1 ×10³ kg/m³ and g =10 m/s².",
+  "options": [
+   "1.5 m",
+   "2.0 m",
+   "0.6 m",
+   "0.5 m"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "If the net force acting on a particle remains zero, its linear momentum will",
+  "options": [
+   "Be constant",
+   "Increase",
+   "Increase then decrease",
+   "Decrease"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "On a wire’s elastic loading curve, force rises linearly from 0.10 N at extensionE =0.05 m to 0.20 N at extensionF =0.10 m. Find the additional energy stored fromE toF.",
+  "options": [
+   "1.5 ×10⁻² J",
+   "7.5 ×10⁻³ J",
+   "7.5 ×10⁻¹ J",
+   "2.5 ×10⁻³ J"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "The separation between two 10 kg point masses is tripled. What fraction of their original gravitational attraction remains?",
+  "options": [
+   "One ninth",
+   "One quarter",
+   "One third",
+   "One half"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "The component of force along motion rises linearly from zero at displacement 0 toF newtons at displacementx metres. Find the work done over that interval.",
+  "options": [
+   "F/x J",
+   "Fx² J",
+   "Fx/2 J",
+   "Fx J"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "Two forces act on a body:10 N north and 10 N east. Find the resultant magnitude and its direction measured from north.",
+  "options": [
+   "20 N,45° west of north",
+   "10√2 N,45° west of north",
+   "10√2 N,45° east of north",
+   "20 N,45° east of north"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "Which eye defect is commonly corrected by adding cylindrical power to a spectacle lens?",
+  "options": [
+   "Presbyopia",
+   "Chromatic aberration",
+   "Myopia",
+   "Astigmatism"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "Which listed quantity is transported from place to place by a travelling wave?",
+  "options": [
+   "Amplitude",
+   "Wavelength",
+   "Frequency",
+   "Energy"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "A 0.6 m stretched string fixed at both ends has fundamental frequency 220 Hz. Find the transverse-wave speed.",
+  "options": [
+   "264 ms-1",
+   "132 ms-1",
+   "66 ms-1",
+   "528 ms-1"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "Heat is carried away from a motor-car radiator’s fins by air flowing over them mainly through",
+  "options": [
+   "Radiation and conduction",
+   "Radiation",
+   "Conduction",
+   "Convection"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "At fixed liquid temperature, blowing relatively dry air across its surface aids evaporation mainly by",
+  "options": [
+   "Reducing vapour partial pressure in the air just above the liquid",
+   "Reducing the liquid’s density",
+   "Increasing the liquid’s exposed surface area",
+   "Increasing the liquid’s temperature"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "Find the pressure of 3 mol of ideal gas at 27°C in volume 10⁻³ m³. Use R =8.3 J/(mol·K) and 27°C ≈300 K.",
+  "options": [
+   "7.47 ×10⁵ Pa",
+   "2.49 ×10⁶ Pa",
+   "7.47 ×10⁶ Pa",
+   "2.49 ×10⁵ Pa"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "To produce an enlarged and erect image with a concave mirror, the object must be positioned",
+  "options": [
+   "Between the principal focus and the pole",
+   "Between the principal focus and centre of curvature",
+   "Beyond the centre of curvature",
+   "At the principal focus"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "The colours seen in soap bubbles are due to",
+  "options": [
+   "Refraction",
+   "Diffraction",
+   "Interference",
+   "Dispersion"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "The fading persistence of sound in a room through many overlapping reflections after the source stops is called",
+  "options": [
+   "Reverberation",
+   "Acoustic vibration",
+   "Rarefaction",
+   "Echo"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "Under Newton’s law of cooling with a constant heat-transfer coefficient, the heat-loss rate of a warmer body is proportional to",
+  "options": [
+   "Temperature of its surroundings",
+   "Difference in temperature between the body and its surrounding",
+   "Temperature of the body",
+   "Ratio of the temperature of the body to that of its surrounding."
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "An electric iron’s resistive element is rated 1000 W at 230 V. Find its resistance at the rated operating condition.",
+  "options": [
+   "57.6 Ohms",
+   "55.9 Ohms",
+   "51.9 Ohms",
+   "52.9 Ohms"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "An electric-field sketch shows arrows pointing away from each of two point chargesX andY. What are their signs?",
+  "options": [
+   "Both X and Y are positive",
+   "X is positive and Y is negative",
+   "X is negative and Y is positive",
+   "Both X and Y are negative."
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "Which part of the eye changes the pupil’s size to control the amount of light reaching the retina?",
+  "options": [
+   "Iris",
+   "Optic nerve",
+   "Cornea",
+   "Retina"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "A 10 μF capacitor carries charge 100 μC. Find its stored energy.",
+  "options": [
+   "5 ×10⁻⁴ J",
+   "4 ×10⁻³ J",
+   "4 ×10² J",
+   "5 ×10⁴ J"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "Across 12 V, a circuit draws 2 A through a 2 Ω resistor, a parallel pair of 3 Ω andX, and a 1.5 Ω resistor, in that series order. FindX.",
+  "options": [
+   "15 Ω",
+   "12 Ω",
+   "9 Ω",
+   "6 Ω"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "Which particle normally triggers the fission chain reaction in a nuclear fission reactor?",
+  "options": [
+   "Electron",
+   "Neutron",
+   "Photon",
+   "Proton"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "At what frequency does a 2.5 μF capacitor have reactance 250 Ω?",
+  "options": [
+   "200π Hz",
+   "π/800 Hz",
+   "2000π Hz",
+   "800/π Hz"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "What percentage of the original undecayed nuclei remains after five half-lives, rounded to the nearest whole percent?",
+  "options": [
+   "1 %",
+   "3 %",
+   "5 %",
+   "8 %"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "In the nuclear reaction ²³₁₁Na +X → ²⁰₉F +⁴₂He, identify particleX.",
+  "options": [
+   "Neutron",
+   "Alpha",
+   "Gamma",
+   "Beta"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "Which feature helps make a moving-coil galvanometer sensitive to small currents?",
+  "options": [
+   "Few turns in its coil",
+   "A strong permanent magnet producing a strong field",
+   "A small coil area",
+   "Stiff control springs producing a large restoring couple"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "Pure silicon can be converted to a p-type material by adding a controlled amount of",
+  "options": [
+   "Pentavalent atoms",
+   "Trivalent atoms",
+   "Hexavalent atoms",
+   "Tetravalent atoms"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "For a fixed power transmitted through a line, using a higher voltage mainly reduces",
+  "options": [
+   "Resistive heating in the transmission conductors",
+   "Magnetic flux leakage",
+   "Hysteresis loss",
+   "Eddy-current loss"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "Find the energy of a photon of frequency 3.0 ×10⁵ Hz to two significant figures. Use h =6.63 ×10⁻³⁴ J·s.",
+  "options": [
+   "2.0 ×10⁻²⁹ J",
+   "2.0 ×10⁻²⁸ J",
+   "1.3 ×10⁻²⁹ J",
+   "1.3 ×10⁻²⁸ J"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 2002,
+  "question": "The carbon-granule microphone works on the principle of change in",
+  "options": [
+   "Capacitance",
+   "Voltage",
+   "Inductance",
+   "Resistance"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2003,
+  "question": "Which property of water helps prevent droplets passing through the small gaps of a tightly woven silk umbrella until the inside is touched?",
+  "options": [
+   "Osmotic pressure",
+   "Capillarity",
+   "Surface tension",
+   "Viscosity"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 2003,
+  "question": "A uniform 90 cm lever is pivoted at its centre. A 30 N load hangs 15 cm from its left end. What downward force at the right end maintains horizontal equilibrium?",
+  "options": [
+   "20 N",
+   "30 N",
+   "60 N",
+   "15 N"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2003,
+  "question": "An aluminium bar has Young’s modulus 7.0 ×10¹⁰ Pa and density 2.7 ×10³ kg/m³. Estimate its longitudinal bar-wave speed using v =√(Y/ρ), to two significant figures.",
+  "options": [
+   "3.6 ×10³ m/s",
+   "5.1 ×10³ m/s",
+   "2.8 ×10³ m/s",
+   "4.2 ×10³ m/s"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 2003,
+  "question": "Thermal equilibrium between two objects exists when",
+  "options": [
+   "The heat capacities of both objects are the same",
+   "One objects loses heat continuously to the other",
+   "The temperatures of both objects are equal",
+   "The quantity of heat in both objects is the same."
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 2003,
+  "question": "At twice the distance from an isotropic point source of sound in a lossless medium, what factor multiplies the original sound intensity?",
+  "options": [
+   "2.00",
+   "0.25",
+   "4.00",
+   "0.50"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 2003,
+  "question": "In the ideal model of two sufficiently large parallel plane mirrors with reflecting faces toward one another, how many images can repeated reflection form of an object between them?",
+  "options": [
+   "Four",
+   "Two",
+   "Eight",
+   "Infinitely many"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2003,
+  "question": "A 2000 W heater warms a 5 kg metal object initially at 10°C. Its temperature rises 30°C in 10 minutes. Assuming all supplied heat warms the object, find its total heat capacity.",
+  "options": [
+   "1.2 ×10⁴ J/K",
+   "6.0 ×10⁴ J/K",
+   "8.0 ×10³ J/K",
+   "4.0 ×10⁴ J/K"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2003,
+  "question": "An object is 10 cm from a convex lens and forms a real image on a screen 25 cm from the lens. Find the magnitude of its linear magnification.",
+  "options": [
+   "2.5",
+   "1.5",
+   "0.4",
+   "15.0"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2003,
+  "question": "A vessel wall conducts 1.2 ×10⁶ J in 1 s with a uniform temperature gradient 30 K/m and thermal conductivity 400 W/(m·K). Find the area normal to heat flow.",
+  "options": [
+   "1.0 ×10³ m²",
+   "1.0 ×10² m²",
+   "9.0 ×10⁴ m²",
+   "9.0 ×10² m²"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 2003,
+  "question": "A saturation-pressure table gives 17.50 mmHg at 20°C. Actual water-vapour pressure is 10 mmHg at 20°C. Find relative humidity to the nearest whole percent.",
+  "options": [
+   "57%",
+   "17.5%",
+   "10%",
+   "170%"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2003,
+  "question": "In the paraxial model, where must an object be placed in front of a concave mirror to produce an image at infinity?",
+  "options": [
+   "At centre of curvature",
+   "Between the principal focus and the centre of curvature",
+   "At the pole of the mirror",
+   "At the principal focus"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2003,
+  "question": "Neglecting end correction, a pipe of lengthl is closed at one end and open at the other. If sound speed isv, find its fundamental frequency.",
+  "options": [
+   "v/(2 l)",
+   "2 v/l",
+   "v/(5 l)",
+   "v/(4 l)"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2003,
+  "question": "Two 2 Ω resistors in parallel are connected in series with a third 2 Ω resistor. Each resistor has a maximum allowed dissipation 18 W. Find the maximum total dissipation without exceeding any resistor’s limit.",
+  "options": [
+   "9 W",
+   "27 W",
+   "5 W",
+   "18 W"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 2003,
+  "question": "Which listed pair spans the widest interval in the usual visible spectrum ordering?",
+  "options": [
+   "Green and yellow",
+   "Indigo and violet",
+   "Orange and red",
+   "Blue and red"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2003,
+  "question": "Which traditional primary cell was commonly used for brief intermittent operation of electric bells?",
+  "options": [
+   "Nickel-iron accumulator",
+   "Lead-acid accumulator",
+   "Daniell cell",
+   "Leclanché cell"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2003,
+  "question": "When a semiconductor p–n junction diode is forward biased normally, its depletion layer",
+  "options": [
+   "Narrows",
+   "Remains constant",
+   "Widens then narrows",
+   "Widens"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2003,
+  "question": "A nucleus has less mass than the sum of its separated constituent protons and neutrons. What is the energy equivalent of this mass defect called?",
+  "options": [
+   "Stability",
+   "Lost energy",
+   "Work function",
+   "Binding energy"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2003,
+  "question": "An electron drops from an excited level to the ground state, emitting light of frequency 8.0 ×10¹⁴ Hz. Find the emitted photon energy using h =6.6 ×10⁻³⁴ J·s.",
+  "options": [
+   "5.28 ×10¹⁹ J",
+   "8.25 ×10¹⁹ J",
+   "5.28 ×10⁻¹⁹ J",
+   "8.25 ×10⁻¹⁹ J"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 2003,
+  "question": "Fission converts 0.01% of a 1.0 g sample’s mass into released energy. Find that energy using c =3.0 ×10⁸ m/s.",
+  "options": [
+   "9.0 ×10¹⁰ J",
+   "6.3 ×10¹¹ J",
+   "9.0 ×10¹¹ J",
+   "9.0 ×10⁹ J"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2003,
+  "question": "A sinusoidal current with peak 10 A passes through a 12 Ω resistor. Find its average power dissipation over a complete cycle.",
+  "options": [
+   "120 W",
+   "20 W",
+   "600 W",
+   "1200 W"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 2003,
+  "question": "Over an ordinary temperature range near room temperature, which statement usually distinguishes a pure metal from an intrinsic semiconductor?",
+  "options": [
+   "Metal resistance increases with temperature, while intrinsic semiconductor resistance decreases",
+   "Metals are always harder than semiconductors",
+   "Metals have forbidden band gaps but semiconductors do not",
+   "Metal resistance decreases with temperature, while intrinsic semiconductor resistance increases"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2003,
+  "question": "An ammeter reads 1.20 A steadily while 0.990 g of copper is deposited in 40 minutes. The electrochemical equivalent of copper is 3.3 × 10⁻⁴ g C⁻¹. What correction must be added to the ammeter reading?",
+  "options": [
+   "0.05 A",
+   "0.06 A",
+   "0.03 A",
+   "0.04 A"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2003,
+  "question": "The maximum kinetic energy of photoelectrons emitted from a metal surface is 0.34 eV. The work function is 1.83 eV. Find the magnitude of the stopping potential.",
+  "options": [
+   "1.09 V",
+   "2.17 V",
+   "0.34 V",
+   "1.49 V"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 2003,
+  "question": "At which of the listed angles between velocity v and a nonzero magnetic field B is the force on a moving charge half its maximum magnitude?",
+  "options": [
+   "0°",
+   "90°",
+   "45°",
+   "30°"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2003,
+  "question": "The background-subtracted count rate of a radioactive sample is 800 counts per minute. Its half-life is 4 days. With unchanged detection conditions, what will the sample count rate be 16 days later?",
+  "options": [
+   "50 counts/min",
+   "25 counts/min",
+   "200 counts/min",
+   "100 counts/min"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2004,
+  "question": "A convex thin lens of focal length f forms a real image of an object beyond its focal point. Let u and v be the positive object and image distances. Which expression gives the magnitude of linear magnification?",
+  "options": [
+   "u/v + f",
+   "u/f − f",
+   "v/f − 1",
+   "v/f + 1"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 2004,
+  "question": "The pitch of a pure sound tone is primarily determined by its",
+  "options": [
+   "Timbre",
+   "Harmonics",
+   "Quality",
+   "Frequency"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2004,
+  "question": "If the angle between two nonzero vectors P and Q is 0°, the vectors are said to",
+  "options": [
+   "Be perpendicular",
+   "Be parallel",
+   "Intersect at 60°",
+   "Intersect at 45°"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 2004,
+  "question": "I. Jet-propelled aircraft II Rocket propulsion III The recoil of a gun IV A person walking Which of the above is based on Newton’s third law of motion?",
+  "options": [
+   "I, II, III and IV",
+   "I and III only",
+   "I and II only",
+   "I, II and III only"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2004,
+  "question": "In an ideal hydraulic press with pistons at the same level, a force of 40 N acts on an effort piston of area 0.4 m². The load force is 400 N. What is the load piston area?",
+  "options": [
+   "8 m²",
+   "4 m²",
+   "2 m²",
+   "1 m²"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 2004,
+  "question": "Four forces act at O: 4 N horizontally left, 10 N horizontally right, 8 N at 60° above the rightward horizontal, and 6 N at 60° below it. What is the net horizontal force?",
+  "options": [
+   "7√3 N rightwards",
+   "17 N rightwards",
+   "√3 N rightwards",
+   "13 N rightwards"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2004,
+  "question": "At resonance in a series RLC radio tuning circuit, how are the positive inductive and capacitive reactances X_L and X_C related?",
+  "options": [
+   "X_L = 1/X_C",
+   "X_L = X_C/2",
+   "X_L = X_C",
+   "X_L = 2X_C"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 2004,
+  "question": "Which is the de Broglie equation relating a material particle’s wavelength λ to its momentum p? Here h is Planck’s constant, c the speed of light, f frequency, E energy and d lattice spacing.",
+  "options": [
+   "λ = h/p",
+   "λ = c/f",
+   "λ = 2d sin θ",
+   "λ = hc/E"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2004,
+  "question": "Which option states the direction of resistance change implied by a semiconductor having a negative temperature coefficient?",
+  "options": [
+   "They have electrons and holes at high temperatures",
+   "Their resistance is constantly changing with temperature",
+   "Their resistance increases with temperature",
+   "Their resistance decreases with temperature"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2004,
+  "question": "Which process produces light in a conventional fluorescent tube?",
+  "options": [
+   "Refraction of light by gas molecules",
+   "Excitation of the gas followed by fluorescence of the phosphor coating",
+   "Conduction of solar energy",
+   "Thermal agitation of electrons in the tube"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 2004,
+  "question": "Before breakdown, the small reverse current in a reverse-biased p–n junction diode is carried by",
+  "options": [
+   "Electrons alone",
+   "Majority carriers",
+   "Minority carriers",
+   "Positive holes alone"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 2004,
+  "question": "What energy is stored in a linear inductor of inductance 5 mH carrying a current of 6 A?",
+  "options": [
+   "1.8 × 10⁻² J",
+   "9.0 × 10⁻³ J",
+   "1.4 × 10⁻² J",
+   "9.0 × 10⁻² J"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2004,
+  "question": "X-rays can reveal crystal structures by diffraction chiefly because they",
+  "options": [
+   "Have wavelengths comparable to atomic-plane spacings",
+   "Have very long wavelengths",
+   "Are very fast",
+   "Are invisible"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2004,
+  "question": "A series AC circuit has an rms source voltage of 12 V, resistance 8 Ω, inductive reactance 16 Ω and capacitive reactance 10 Ω. What is its rms current?",
+  "options": [
+   "1.4 A",
+   "14.0 A",
+   "1.2 A",
+   "12.0 A"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 2004,
+  "question": "Transverse waves can be distinguished from longitudinal waves using the characteristic of",
+  "options": [
+   "Diffraction",
+   "Polarization",
+   "Reflection",
+   "Refraction."
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 2004,
+  "question": "When left in a freezer, a bottle full of water cracks on freezing into ice because of the",
+  "options": [
+   "Decreases in the volume of water",
+   "Contraction of the bottle",
+   "Expansion of the bottle",
+   "Increase in the volume of water"
+  ],
+  "correct_answer": "D"
+ },
+ {
+  "subject": "physics",
+  "year": 2004,
+  "question": "By how much does the volume decrease when 450 kg of ice melts completely? Use ice density 900 kg m⁻³ and water density 1000 kg m⁻³.",
+  "options": [
+   "0.05 m³",
+   "0.45 m³",
+   "4.50 m³",
+   "0.50 m³"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2004,
+  "question": "Within its Hooke’s-law range, a 50 N force stretches a wire from 20.00 m to 20.01 m. What force stretches the same wire from 20.00 m to 20.05 m?",
+  "options": [
+   "100 N",
+   "50 N",
+   "250 N",
+   "200 N"
+  ],
+  "correct_answer": "C"
+ },
+ {
+  "subject": "physics",
+  "year": 2004,
+  "question": "A shiny silver coating on the outside of a teapot primarily reduces heat loss by",
+  "options": [
+   "Convection and conduction",
+   "Radiation",
+   "Conduction",
+   "Convection"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 2004,
+  "question": "A 50 W heater raises the temperature of a 5 kg metal block by 12°C in 10 minutes. Assuming all heater energy heats the block, what is its specific heat capacity?",
+  "options": [
+   "500 J kg⁻¹ K⁻¹",
+   "130 J kg⁻¹ K⁻¹",
+   "390 J kg⁻¹ K⁻¹",
+   "400 J kg⁻¹ K⁻¹"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2004,
+  "question": "Which instrument is designed to obtain repeated charges of the same sign by electrostatic induction?",
+  "options": [
+   "Capacitor",
+   "Electrophorus",
+   "Electroscope",
+   "Proof-plane"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 2004,
+  "question": "Which statement distinguishes characteristic atomic X-rays from nuclear gamma rays?",
+  "options": [
+   "Characteristic X-rays arise from electronic transitions; nuclear gamma rays arise from nuclear transitions",
+   "X-rays are electromagnetic radiation; gamma rays are negatively charged radiation",
+   "X-rays always have higher frequencies than gamma rays",
+   "X-rays are always more penetrating than gamma rays"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2004,
+  "question": "A 6 Ω resistor and a 3 Ω resistor are connected in parallel across an ideal 12 V source. What is the ratio of power dissipated in the 6 Ω resistor to that in the 3 Ω resistor?",
+  "options": [
+   "2 : 3",
+   "1 : 2",
+   "1 : 3",
+   "2 : 1"
+  ],
+  "correct_answer": "B"
+ },
+ {
+  "subject": "physics",
+  "year": 2004,
+  "question": "Which sample contains mobile ions and acts as an electrolytic solution?",
+  "options": [
+   "Grape juice",
+   "Pure sugar dissolved in pure water",
+   "Pure alcohol",
+   "Paraffin"
+  ],
+  "correct_answer": "A"
+ },
+ {
+  "subject": "physics",
+  "year": 2004,
+  "question": "Three capacitors of 0.3 μF, 0.5 μF and 0.2 μF are all used in a series/parallel combination between two terminals. What is the minimum equivalent capacitance, rounded to one decimal place in μF?",
+  "options": [
+   "0.3 μF",
+   "1.0 μF",
+   "0.1 μF",
+   "0.5 μF"
+  ],
+  "correct_answer": "C"
+ }
+]

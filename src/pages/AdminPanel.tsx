@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Crown, Users, CreditCard, TrendingUp, Plus, Trash2, ArrowLeft, RefreshCw, Mail,
-  CheckCircle, AlertCircle, Settings, Send, Key, Activity, Database, Zap, Ticket, UserCog, Bell, DollarSign, BarChart3
+  CheckCircle, AlertCircle, Settings, Send, Key, Activity, Database, Zap, Ticket, UserCog, Bell, DollarSign, BarChart3, Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -690,6 +690,48 @@ const AdminPanel = () => {
                           <Database className="w-4 h-4" />
                           Import Real UTME
                         </Button>
+                        <Button
+                          onClick={async () => {
+                            toast.loading('Importing scraped Maths + Physics banks (background, dedupes automatically)...', { id: 'import-scraped' });
+                            try {
+                              const { error } = await supabase.functions.invoke('import-scraped-questions');
+                              if (error) throw error;
+                              toast.success('Import started! ~980 real questions landing over the next minutes.', { id: 'import-scraped' });
+                              setTimeout(() => fetchData(), 60000);
+                            } catch (err: unknown) {
+                              toast.error('Import failed: ' + (err instanceof Error ? err.message : 'Unknown error'), { id: 'import-scraped' });
+                            }
+                          }}
+                          size="sm"
+                          className="gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                        >
+                          <Database className="w-4 h-4" />
+                          Import Maths+Physics
+                        </Button>
+                        {['mathematics', 'physics', 'geography', 'irs'].map((subj) => (
+                          <Button
+                            key={subj}
+                            onClick={async () => {
+                              toast.loading(`Generating 100 AI likely-questions for ${subj} (background)...`, { id: `gen-${subj}` });
+                              try {
+                                const { error } = await supabase.functions.invoke('generate-question-batch', {
+                                  body: { subject: subj, count: 100 },
+                                });
+                                if (error) throw error;
+                                toast.success(`Generation started for ${subj}! New questions land over the next minutes.`, { id: `gen-${subj}` });
+                                setTimeout(() => fetchData(), 60000);
+                              } catch (err: unknown) {
+                                toast.error('Generation failed: ' + (err instanceof Error ? err.message : 'Unknown error'), { id: `gen-${subj}` });
+                              }
+                            }}
+                            size="sm"
+                            variant="outline"
+                            className="gap-2"
+                          >
+                            <Sparkles className="w-4 h-4" />
+                            AI Batch: {subj === 'irs' ? 'IRS' : subj.charAt(0).toUpperCase() + subj.slice(1)}
+                          </Button>
+                        ))}
                       </div>
                     )}
                   </CardTitle>

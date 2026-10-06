@@ -22,6 +22,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { errorLogger } from '@/services/errorLogger';
+import {
+  computeMastery,
+  type MasteryTrend,
+  type MasterySample,
+} from '@/lib/mastery';
 
 interface TopicMasteryTrackerProps {
   userEmail: string;
@@ -50,6 +55,9 @@ export interface TopicStats {
   lastAttempted: Date;
   isHighWeight?: boolean;
   aiTip?: string;
+  samples: number;
+  lowData: boolean;
+  trend: MasteryTrend;
 }
 
 interface SubjectTopics {
@@ -57,135 +65,6 @@ interface SubjectTopics {
   topics: TopicStats[];
   overallMastery: number;
 }
-
-// Topics known to carry high frequency / weight in JAMB UTME exams
-const HIGH_WEIGHT_TOPICS: Record<string, string[]> = {
-  english: ['Vocabulary', 'Grammar', 'Oral English', 'Sentence Structure', 'Comprehension'],
-  mathematics: ['Algebra', 'Geometry', 'Trigonometry', 'Statistics', 'Calculus'],
-  physics: ['Mechanics', 'Waves & Optics', 'Electricity', 'Heat & Thermodynamics'],
-  chemistry: ['Organic Chemistry', 'Physical Chemistry', 'Electrochemistry', 'Atomic Structure'],
-  biology: ['Genetics', 'Cell Biology', 'Human Physiology', 'Ecology'],
-  literature: ['Prose & Fiction', 'Poetry', 'Literary Devices'],
-  government: ['Political Systems', 'Public Administration'],
-  economics: ['Microeconomics', 'Macroeconomics', 'International Trade'],
-};
-
-// Topic keywords mapping for automatic topic classification
-const TOPIC_KEYWORDS: Record<string, Record<string, string[]>> = {
-  english: {
-    'Vocabulary': ['synonym', 'antonym', 'meaning', 'nearest', 'opposite', 'word'],
-    'Grammar': ['tense', 'verb', 'noun', 'adjective', 'adverb', 'pronoun', 'preposition'],
-    'Comprehension': ['passage', 'author', 'context', 'infer', 'implies'],
-    'Oral English': ['stress', 'pronunciation', 'syllable', 'vowel', 'consonant'],
-    'Sentence Structure': ['sentence', 'clause', 'phrase', 'subject', 'predicate'],
-  },
-  mathematics: {
-    'Algebra': ['equation', 'solve', 'variable', 'expression', 'polynomial', 'quadratic'],
-    'Geometry': ['triangle', 'circle', 'angle', 'area', 'perimeter', 'volume'],
-    'Trigonometry': ['sin', 'cos', 'tan', 'sine', 'cosine', 'tangent'],
-    'Statistics': ['mean', 'median', 'mode', 'probability', 'standard deviation'],
-    'Calculus': ['differentiate', 'integrate', 'derivative', 'limit'],
-    'Number Theory': ['prime', 'factor', 'multiple', 'divisible', 'integer'],
-  },
-  physics: {
-    'Mechanics': ['force', 'motion', 'velocity', 'acceleration', 'momentum', 'mass'],
-    'Waves & Optics': ['wave', 'light', 'lens', 'mirror', 'reflection', 'refraction'],
-    'Electricity': ['current', 'voltage', 'resistance', 'circuit', 'capacitor'],
-    'Heat & Thermodynamics': ['heat', 'temperature', 'thermal', 'entropy', 'gas law'],
-    'Modern Physics': ['quantum', 'atom', 'nuclear', 'radioactive', 'electron'],
-  },
-  chemistry: {
-    'Organic Chemistry': ['alkane', 'alkene', 'benzene', 'carbon', 'hydrocarbon', 'organic'],
-    'Inorganic Chemistry': ['metal', 'non-metal', 'periodic table', 'element', 'compound'],
-    'Physical Chemistry': ['equilibrium', 'rate', 'kinetics', 'thermochemistry'],
-    'Electrochemistry': ['electrolysis', 'electrode', 'redox', 'oxidation', 'reduction'],
-    'Atomic Structure': ['atom', 'electron', 'proton', 'neutron', 'orbital'],
-  },
-  biology: {
-    'Cell Biology': ['cell', 'membrane', 'organelle', 'mitosis', 'meiosis'],
-    'Genetics': ['gene', 'chromosome', 'DNA', 'heredity', 'mutation', 'allele'],
-    'Ecology': ['ecosystem', 'habitat', 'food chain', 'biodiversity', 'environment'],
-    'Human Physiology': ['blood', 'heart', 'kidney', 'liver', 'respiration', 'digestion'],
-    'Plant Biology': ['photosynthesis', 'plant', 'leaf', 'root', 'stem', 'flower'],
-  },
-  literature: {
-    'Poetry': ['poem', 'stanza', 'rhyme', 'verse', 'meter', 'sonnet'],
-    'Prose & Fiction': ['novel', 'story', 'character', 'plot', 'setting', 'theme'],
-    'Drama': ['play', 'act', 'scene', 'dialogue', 'tragedy', 'comedy'],
-    'Literary Devices': ['metaphor', 'simile', 'irony', 'symbolism', 'personification'],
-  },
-  government: {
-    'Political Systems': ['democracy', 'government', 'constitution', 'parliament'],
-    'Public Administration': ['civil service', 'bureaucracy', 'local government'],
-    'International Relations': ['foreign policy', 'diplomacy', 'international'],
-    'Political Parties': ['party', 'election', 'voting', 'campaign'],
-  },
-  economics: {
-    'Microeconomics': ['demand', 'supply', 'price', 'market', 'consumer'],
-    'Macroeconomics': ['GDP', 'inflation', 'unemployment', 'fiscal', 'monetary'],
-    'International Trade': ['export', 'import', 'trade', 'tariff', 'exchange rate'],
-    'Development Economics': ['development', 'poverty', 'growth', 'industrialization'],
-  },
-  geography: {
-    'Physical Geography': ['climate', 'weather', 'landform', 'erosion', 'river'],
-    'Human Geography': ['population', 'urbanization', 'migration', 'settlement'],
-    'Map Reading': ['map', 'scale', 'contour', 'bearing', 'coordinate'],
-    'Nigerian Geography': ['Nigeria', 'Lagos', 'Niger', 'vegetation'],
-  },
-  accounting: {
-    'Financial Accounting': ['balance sheet', 'income statement', 'ledger', 'journal'],
-    'Cost Accounting': ['cost', 'budget', 'variance', 'overhead'],
-    'Auditing': ['audit', 'internal control', 'verification'],
-  },
-  commerce: {
-    'Business Organization': ['partnership', 'company', 'sole trader', 'corporation'],
-    'Trade': ['wholesale', 'retail', 'commerce', 'distribution'],
-    'Banking': ['bank', 'loan', 'credit', 'interest', 'deposit'],
-  },
-  crs: {
-    'Old Testament': ['Moses', 'Abraham', 'David', 'prophet', 'covenant'],
-    'New Testament': ['Jesus', 'apostle', 'gospel', 'resurrection', 'salvation'],
-    'Christian Ethics': ['ethics', 'moral', 'sin', 'righteousness'],
-  },
-  irs: {
-    'Quran Studies': ['Quran', 'surah', 'ayat', 'revelation'],
-    'Hadith': ['hadith', 'sunnah', 'prophet Muhammad'],
-    'Islamic History': ['caliphate', 'hijrah', 'jihad'],
-  },
-  agricultural_science: {
-    'Crop Production': ['crop', 'seed', 'fertilizer', 'harvest', 'cultivation'],
-    'Animal Husbandry': ['livestock', 'poultry', 'cattle', 'breeding'],
-    'Soil Science': ['soil', 'nutrient', 'erosion', 'irrigation'],
-    'Farm Management': ['farm', 'profit', 'mechanization', 'marketing'],
-  },
-};
-
-const identifyTopic = (question: QuestionData): string => {
-  const subject = question.subject.toLowerCase();
-  const questionText = question.question.toLowerCase();
-  
-  if (question.topics && question.topics.length > 0) {
-    return question.topics[0];
-  }
-  
-  const subjectTopics = TOPIC_KEYWORDS[subject];
-  if (!subjectTopics) return 'General Concepts';
-  
-  for (const [topic, keywords] of Object.entries(subjectTopics)) {
-    if (keywords.some(keyword => questionText.includes(keyword.toLowerCase()))) {
-      return topic;
-    }
-  }
-  
-  return 'General Concepts';
-};
-
-const getMasteryLevel = (percentage: number): TopicStats['masteryLevel'] => {
-  if (percentage >= 80) return 'mastered';
-  if (percentage >= 60) return 'proficient';
-  if (percentage >= 40) return 'learning';
-  return 'weak';
-};
 
 const getAiRecommendation = (topic: string, level: TopicStats['masteryLevel']): string => {
   if (level === 'weak') {
@@ -226,71 +105,43 @@ export const TopicMasteryTracker = ({
 
       if (error) throw error;
 
-      const topicMap = new Map<string, TopicStats>();
-      
+      const samples: MasterySample[] = [];
       data?.forEach(attempt => {
         const questions = attempt.questions_data as unknown as QuestionData[] | null;
         if (!questions || !Array.isArray(questions)) return;
-        
         questions.forEach(q => {
-          const subj = (q.subject || '').toLowerCase();
-          if (allowedSubjects && allowedSubjects.length > 0 && !allowedSubjects.map(s => s.toLowerCase()).includes(subj)) {
-            return;
-          }
-          const topic = identifyTopic(q);
-          const subject = q.subject.toLowerCase();
-          const key = `${subject}:${topic}`;
-          const isCorrect = q.userAnswer === q.correct_answer;
-          
-          if (!topicMap.has(key)) {
-            const highWeightList = HIGH_WEIGHT_TOPICS[subject] || [];
-            const isHighWeight = highWeightList.some(hw => hw.toLowerCase() === topic.toLowerCase());
-            
-            topicMap.set(key, {
-              topic,
-              subject,
-              correct: 0,
-              total: 0,
-              percentage: 0,
-              masteryLevel: 'weak',
-              lastAttempted: new Date(attempt.created_at || ''),
-              isHighWeight,
-            });
-          }
-          
-          const stats = topicMap.get(key)!;
-          stats.total++;
-          if (isCorrect) stats.correct++;
-          stats.percentage = Math.round((stats.correct / stats.total) * 100);
-          stats.masteryLevel = getMasteryLevel(stats.percentage);
-          stats.aiTip = getAiRecommendation(topic, stats.masteryLevel);
+          samples.push({
+            subject: q.subject || '',
+            text: q.question || '',
+            storedTopics: q.topics,
+            correct: q.userAnswer === q.correct_answer,
+            at: attempt.created_at || new Date().toISOString(),
+          });
         });
       });
 
-      const subjectMap = new Map<string, TopicStats[]>();
-      topicMap.forEach(stats => {
-        if (!subjectMap.has(stats.subject)) {
-          subjectMap.set(stats.subject, []);
-        }
-        subjectMap.get(stats.subject)!.push(stats);
-      });
+      const computed = computeMastery(samples, allowedSubjects);
+      const result: SubjectTopics[] = computed.map(s => ({
+        subject: s.subject,
+        overallMastery: s.overall,
+        topics: s.topics.map(t => ({
+          topic: t.topic,
+          subject: t.subject,
+          correct: t.rawCorrect,
+          total: t.rawTotal,
+          percentage: t.percentage,
+          masteryLevel: t.level as TopicStats['masteryLevel'],
+          lastAttempted: new Date(t.lastAttempted),
+          isHighWeight: t.isHighWeight,
+          aiTip: t.lowData
+            ? `Early days — answer ${Math.max(1, 3 - t.samples)}+ more ${t.topic} questions to confirm your level.`
+            : getAiRecommendation(t.topic, t.level),
+          samples: t.samples,
+          lowData: t.lowData,
+          trend: t.trend,
+        })),
+      }));
 
-      const result: SubjectTopics[] = [];
-      subjectMap.forEach((topics, subject) => {
-        const totalCorrect = topics.reduce((sum, t) => sum + t.correct, 0);
-        const totalQuestions = topics.reduce((sum, t) => sum + t.total, 0);
-        const overallMastery = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
-        
-        topics.sort((a, b) => a.percentage - b.percentage);
-        
-        result.push({
-          subject,
-          topics,
-          overallMastery,
-        });
-      });
-
-      result.sort((a, b) => a.overallMastery - b.overallMastery);
       setSubjectTopics(result);
       
       // Auto-expand subjects on initial load
