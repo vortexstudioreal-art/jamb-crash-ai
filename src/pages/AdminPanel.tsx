@@ -708,6 +708,40 @@ const AdminPanel = () => {
                           <Database className="w-4 h-4" />
                           Import Maths+Physics
                         </Button>
+                        <Button
+                          onClick={async () => {
+                            toast.loading('Scanning for broken questions...', { id: 'prune' });
+                            try {
+                              const { data, error } = await supabase.functions.invoke('prune-questions');
+                              if (error) throw error;
+                              const cands = (data?.candidates || []) as { id: string; subject: string; question: string; reason: string }[];
+                              if (cands.length === 0) {
+                                toast.success(`Bank is clean! ${data?.backticks || 0} rows have stray backticks (auto-fixed on prune).`, { id: 'prune' });
+                                return;
+                              }
+                              const preview = cands.slice(0, 3).map((c) => `• [${c.subject}] ${c.question} (${c.reason})`).join('\n');
+                              const ok = window.confirm(`${cands.length} broken questions found:\n${preview}${cands.length > 3 ? `\n…+${cands.length - 3} more` : ''}\n\nDelete them?`);
+                              if (!ok) {
+                                toast.info('Prune cancelled — nothing deleted.', { id: 'prune' });
+                                return;
+                              }
+                              const { data: res2, error: err2 } = await supabase.functions.invoke('prune-questions', {
+                                body: { execute: true, ids: cands.map((c) => c.id) },
+                              });
+                              if (err2) throw err2;
+                              toast.success(`Deleted ${res2?.deleted || 0}, cleaned ${res2?.cleaned || 0} backtick rows.`, { id: 'prune' });
+                              fetchData();
+                            } catch (err: unknown) {
+                              toast.error('Prune failed: ' + (err instanceof Error ? err.message : 'Unknown error'), { id: 'prune' });
+                            }
+                          }}
+                          size="sm"
+                          variant="outline"
+                          className="gap-2 border-red-500/50 text-red-500 hover:bg-red-500/10"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Audit Bad Questions
+                        </Button>
                         {['mathematics', 'physics', 'geography', 'irs'].map((subj) => (
                           <Button
                             key={subj}

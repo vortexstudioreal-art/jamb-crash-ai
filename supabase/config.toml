@@ -104,5 +104,8 @@ verify_jwt = true
 [functions.import-scraped-questions]
 verify_jwt = true
 
+[functions.prune-questions]
+verify_jwt = true
+
 [functions.send-test-email]
 verify_jwt = true

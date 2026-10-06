@@ -28,6 +28,9 @@ function validQ(q: GenQ): boolean {
   if (![q.option_a, q.option_b, q.option_c, q.option_d].every((o) => o?.trim())) return false;
   if (!/^[a-dA-D]$/.test((q.correct_answer || "").trim())) return false;
   if (!q.explanation?.trim()) return false;
+  if (/[<>`]/.test(q.question)) return false;
+  if (/: *$/.test(q.question.trim())) return false;
+  if (/spell the word\s*$/i.test(q.question)) return false;
   return true;
 }
 
@@ -56,6 +59,7 @@ async function genBatch(
 ${topicLine}
 These are "likely questions" for practice — in the style and difficulty of real JAMB questions, but newly written. Do NOT copy known past questions verbatim.
 Avoid repeating these already-covered questions: ${avoid.slice(0, 20).join(" || ").substring(0, 800) || "none"}.
+RULES: every question must be fully self-contained — never end a question with a bare colon, never reference a missing passage/word ("the word" must appear with the word), never use markdown or HTML markup.
 
 Return ONLY a valid JSON array, no other text. Each item exactly:
 {"question": "...", "option_a": "...", "option_b": "...", "option_c": "...", "option_d": "...", "correct_answer": "A|B|C|D", "explanation": "2-3 sentence reason the answer is correct", "topic": "short sub-topic name"}`;

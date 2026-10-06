@@ -36,6 +36,7 @@ const stripHtml = (s: string): string =>
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
+    .replace(/`/g, "")
     .replace(/\s+/g, " ")
     .trim();
 
@@ -46,6 +47,12 @@ const clean = (q: Scraped): boolean => {
   // Drop rows with leftover markup/entities the scraper couldn't decode
   if (/[<>]/.test(q.question) || q.options.some((o) => /[<>]/.test(o))) return false;
   if (/&(nbsp|amp|lt|gt|quot);/.test(q.question)) return false;
+  // Drop dangling references (empty targets, missing words)
+  if (/: *$/.test(q.question) && q.question.length < 120) {
+    const tail = q.question.slice(-60);
+    if (!/[A-Z]{3,}/.test(tail) && !/["']/.test(tail)) return false;
+  }
+  if (/spell the word\s*$/i.test(q.question)) return false;
   if (typeof q.year !== "number" || q.year < 1978 || q.year > 2026) return false;
   return true;
 };
