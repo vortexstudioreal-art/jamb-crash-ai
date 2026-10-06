@@ -27,6 +27,7 @@ import { useFeatureAccess } from '@/components/FeatureGate';
 import type { Step, QuizType } from '@/types/dashboard';
 import { errorLogger } from '@/services/errorLogger';
 import { HomeTab } from '@/components/dashboard/HomeTab';
+import { reconcileReminder, parseReminderTime } from '@/lib/reminders';
 import { StudyTab } from '@/components/dashboard/StudyTab';
 import { AiTab } from '@/components/dashboard/AiTab';
 import { CommunityTab } from '@/components/dashboard/CommunityTab';
@@ -381,6 +382,22 @@ const Index = () => {
     window.addEventListener('online', flushPendingSubjects);
     return () => window.removeEventListener('online', flushPendingSubjects);
   }, []);
+
+  // Silently re-arm the daily study reminder (no permission prompt here —
+  // only schedules if the OS already granted permission).
+  useEffect(() => {
+    if (!userEmail) return;
+    try {
+      const raw = localStorage.getItem(`jamb_user_settings_${userEmail}`);
+      if (!raw) return;
+      const s = JSON.parse(raw) as { notificationsEnabled?: boolean; reminderTime?: string };
+      if (!s?.notificationsEnabled) return;
+      const { hour, minute } = parseReminderTime(s.reminderTime || '19:30');
+      void reconcileReminder(true, hour, minute);
+    } catch {
+      // corrupted settings — user can re-enable from Settings
+    }
+  }, [userEmail]);
 
   // Handle URL params
   useEffect(() => {

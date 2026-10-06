@@ -14,6 +14,11 @@ import { toast } from 'sonner';
 import { AdminCouponDashboard } from '@/components/AdminCouponDashboard';
 import { ChangePasswordModal } from '@/components/ChangePasswordModal';
 import { DownloadManager } from '@/components/DownloadManager';
+import {
+  scheduleDailyReminder,
+  cancelDailyReminder,
+  parseReminderTime,
+} from '@/lib/reminders';
 import { useSeo } from '@/hooks/useSeo';
 import { errorLogger } from '@/services/errorLogger';
 const THEME_STORAGE_KEY = 'jamb_theme';
@@ -25,14 +30,15 @@ interface UserSettings {
   whatsappEnabled: boolean;
   notificationsEnabled: boolean;
   emailNotifications: boolean;
+  reminderTime: string;
 }
 
 const loadSettings = (email: string): UserSettings => {
-  const defaults: UserSettings = { fullName: '', whatsappNumber: '', whatsappEnabled: false, notificationsEnabled: true, emailNotifications: true };
+  const defaults: UserSettings = { fullName: '', whatsappNumber: '', whatsappEnabled: false, notificationsEnabled: true, emailNotifications: true, reminderTime: '19:30' };
   const stored = localStorage.getItem(`${SETTINGS_STORAGE_KEY}_${email}`);
   if (stored) {
     try {
-      return JSON.parse(stored);
+      return { ...defaults, ...JSON.parse(stored) };
     } catch {
       return defaults;
     }
@@ -64,6 +70,7 @@ export default function Settings() {
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const [whatsappEnabled, setWhatsappEnabled] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [reminderTime, setReminderTime] = useState('19:30');
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [emailVerified, setEmailVerified] = useState<boolean | null>(null);
@@ -116,6 +123,7 @@ export default function Settings() {
       setWhatsappEnabled(savedSettings.whatsappEnabled);
       setNotificationsEnabled(savedSettings.notificationsEnabled ?? true);
       setEmailNotifications(savedSettings.emailNotifications ?? true);
+      setReminderTime(savedSettings.reminderTime || '19:30');
 
       try {
         // Load profile from Supabase (as backup)
@@ -288,11 +296,35 @@ export default function Settings() {
     }
   };
 
-  const handleNotificationsToggle = (enabled: boolean) => {
+  const handleNotificationsToggle = async (enabled: boolean) => {
     setNotificationsEnabled(enabled);
     const currentSettings = loadSettings(userEmail);
     saveSettings(userEmail, { ...currentSettings, notificationsEnabled: enabled });
-    toast.success(enabled ? 'Notifications enabled' : 'Notifications disabled');
+    if (enabled) {
+      const { hour, minute } = parseReminderTime(reminderTime);
+      const ok = await scheduleDailyReminder(hour, minute);
+      if (ok) {
+        toast.success(`Daily reminders on — every day at ${reminderTime} ⏰`);
+      } else {
+        setNotificationsEnabled(false);
+        saveSettings(userEmail, { ...currentSettings, notificationsEnabled: false });
+        toast.error('Permission denied. Enable notifications for this app/browser first.');
+      }
+    } else {
+      await cancelDailyReminder();
+      toast.success('Notifications disabled');
+    }
+  };
+
+  const handleReminderTimeChange = async (time: string) => {
+    setReminderTime(time);
+    const currentSettings = loadSettings(userEmail);
+    saveSettings(userEmail, { ...currentSettings, reminderTime: time });
+    if (notificationsEnabled) {
+      const { hour, minute } = parseReminderTime(time);
+      const ok = await scheduleDailyReminder(hour, minute);
+      toast.success(ok ? `Reminder moved to ${time} ⏰` : 'Could not reschedule reminder');
+    }
   };
 
   const handleEmailNotificationsToggle = (enabled: boolean) => {
@@ -708,11 +740,26 @@ export default function Settings() {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-foreground">Push Notifications</p>
-                  <p className="text-sm text-muted-foreground">Get reminders and updates</p>
+                  <p className="font-medium text-foreground">Daily Study Reminder</p>
+                  <p className="text-sm text-muted-foreground">A nudge to practice every day — works offline</p>
                 </div>
                 <Switch checked={notificationsEnabled} onCheckedChange={handleNotificationsToggle} />
               </div>
+              {notificationsEnabled && (
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-foreground text-sm">Reminder time</p>
+                    <p className="text-xs text-muted-foreground">When should we ping you?</p>
+                  </div>
+                  <Input
+                    type="time"
+                    value={reminderTime}
+                    onChange={(e) => void handleReminderTimeChange(e.target.value)}
+                    className="w-28"
+                    aria-label="Daily reminder time"
+                  />
+                </div>
+              )}
               <Separator />
               <div className="flex items-center justify-between">
                 <div>
