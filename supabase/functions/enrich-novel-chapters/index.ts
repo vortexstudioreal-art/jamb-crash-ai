@@ -20,6 +20,7 @@ interface ChapterLike {
   chapter_number: number;
   title: string;
   content: string;
+  word_count?: number | null;
 }
 
 interface ExtractedQuestion {
@@ -77,7 +78,7 @@ serve(async (req) => {
 
     let query = supabase
       .from("novel_chapters")
-      .select("id, chapter_number, title, content")
+      .select("id, chapter_number, title, content, word_count")
       .eq("novel_id", novel.id)
       .order("chapter_number");
 
@@ -113,7 +114,11 @@ serve(async (req) => {
 });
 
 async function enrichProseChapters(supabase: SupabaseClient, apiKey: string, novel: NovelLike, chapters: ChapterLike[]) {
-  for (const chapter of chapters) {
+  // Gap-fill only: chapters already rich are skipped, so re-running is
+  // cheap and safe (a killed run can simply be started again).
+  const pending = chapters.filter((c) => (c.word_count || 0) < 500);
+  console.log(`${novel.title}: ${pending.length}/${chapters.length} chapters need enrichment`);
+  for (const chapter of pending) {
     try {
       console.log(`Enriching: ${novel.title} - Ch ${chapter.chapter_number}`);
       const isPoetry = (novel.category || "").includes("poetry");

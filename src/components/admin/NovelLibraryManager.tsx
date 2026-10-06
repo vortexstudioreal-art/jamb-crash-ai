@@ -80,31 +80,34 @@ export function NovelLibraryManager() {
       const prose = novels.filter((n) => !(n.category || '').includes('poetry'));
       const poems = novels.filter((n) => (n.category || '').includes('poetry'));
 
-      // Prose: one invoke per chapter (each runs briefly in background)
+      // One quick invoke per novel/poem — each runs in the background on
+      // the server, so closing this tab mid-run no longer kills the job.
+      // The function only enriches thin chapters (<500 words): re-running
+      // fills whatever a previous run missed.
+      let i = 0;
+      const total = prose.length + poems.length;
       for (const novel of prose) {
-        const total = novel.total_chapters || novel.count;
-        for (let ch = 1; ch <= total; ch++) {
-          setStatus(`Enriching ${novel.title} — ch ${ch}/${total}…`);
-          const { error } = await supabase.functions.invoke('enrich-novel-chapters', {
-            body: { novel_title: novel.title, chapter_number: ch },
-          });
-          if (error) throw error;
-          await sleep(800);
-        }
+        i++;
+        setStatus(`Queued ${i}/${total}: ${novel.title}…`);
+        const { error } = await supabase.functions.invoke('enrich-novel-chapters', {
+          body: { novel_title: novel.title },
+        });
+        if (error) throw error;
+        await sleep(500);
       }
 
-      // Poetry: one invoke per poem (splits into 4 guide chapters)
       for (const poem of poems) {
-        setStatus(`Enriching ${poem.title}…`);
+        i++;
+        setStatus(`Queued ${i}/${total}: ${poem.title}…`);
         const { error } = await supabase.functions.invoke('enrich-novel-chapters', {
           body: { enrich_all_poetry: true, poem_title: poem.title },
         });
         if (error) throw error;
-        await sleep(800);
+        await sleep(500);
       }
 
-      setStatus('All enrichment jobs started — guides fill in over the next minutes. Refresh counts below to watch.');
-      toast.success('Enrichment started for the whole library 🎉');
+      setStatus('All enrichment jobs queued — guides fill in over the next minutes. Come back and hit “Refresh counts”.');
+      toast.success('Enrichment queued for the whole library 🎉');
     } catch (err) {
       errorLogger.error(err, { component: 'NovelLibraryManager', action: 'enrich' });
       toast.error(err instanceof Error ? err.message : 'Enrichment failed');
