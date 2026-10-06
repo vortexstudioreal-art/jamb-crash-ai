@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { startPeriodicSync, stopPeriodicSync } from '@/services/syncService';
+import { clearPushTokens } from '@/hooks/usePushNotifications';
 import { errorLogger } from '@/services/errorLogger';
 
 // Package feature limits
@@ -480,8 +481,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const signOut = async () => {
     // Clear trial data and cached access from localStorage
-    const email = user?.email?.toLowerCase();
-    localStorage.removeItem('jamb_trial_start');
+    const email = user?.email?.toLowerCase();    localStorage.removeItem('jamb_trial_start');
     localStorage.removeItem('jamb_trial_subjects');
     localStorage.removeItem('jamb_user_email');
     localStorage.removeItem('jamb_supabase_session');
@@ -492,6 +492,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     
     // Use local scope to avoid issues with stale refresh tokens
     await supabase.auth.signOut({ scope: 'local' });
+
+    // Stop push notifications reaching this device as an ex-user
+    if (email) {
+      await clearPushTokens(email);
+    }
     
     // Immediately clear all state
     setUser(null);

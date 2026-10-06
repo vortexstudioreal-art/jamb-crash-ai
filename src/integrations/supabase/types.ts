@@ -769,8 +769,34 @@ export type Database = {
         }
         Relationships: []
       }
-      payout_requests: {
+      push_tokens: {
         Row: {
+          created_at: string
+          email: string
+          id: string
+          platform: string
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          platform?: string
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          platform?: string
+          token?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      payout_requests: {        Row: {
           account_name: string | null
           account_number: string | null
           amount: number

@@ -28,6 +28,7 @@ import type { Step, QuizType } from '@/types/dashboard';
 import { errorLogger } from '@/services/errorLogger';
 import { HomeTab } from '@/components/dashboard/HomeTab';
 import { reconcileReminder, parseReminderTime } from '@/lib/reminders';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { StudyTab } from '@/components/dashboard/StudyTab';
 import { AiTab } from '@/components/dashboard/AiTab';
 import { CommunityTab } from '@/components/dashboard/CommunityTab';
@@ -382,6 +383,19 @@ const Index = () => {
     window.addEventListener('online', flushPendingSubjects);
     return () => window.removeEventListener('online', flushPendingSubjects);
   }, []);
+
+  // Push opt-in mirrors the Settings notifications toggle (read on mount;
+  // Settings is a separate route so this re-reads on every return).
+  const [pushOptIn] = useState(() => {
+    try {
+      const lastEmail = localStorage.getItem('jamb_last_email') || '';
+      const raw = localStorage.getItem(`jamb_user_settings_${lastEmail}`);
+      return !!JSON.parse(raw || '{}')?.notificationsEnabled;
+    } catch {
+      return false;
+    }
+  });
+  usePushNotifications({ userEmail, enabled: pushOptIn });
 
   // Silently re-arm the daily study reminder (no permission prompt here —
   // only schedules if the OS already granted permission).
