@@ -187,6 +187,8 @@ export default function Settings() {
 
   // Email verification status — resolved from the live session, not the
   // cached context user, so "Refresh" picks up a just-clicked email link.
+  // Honest rule: "Verified" only counts if the user clicked a link from an
+  // email we actually sent (tracked below) — never auto-verified.
   useEffect(() => {
     const checkVerification = async () => {
       if (!user) {
@@ -194,16 +196,19 @@ export default function Settings() {
         return;
       }
       try {
+        const sentAt = Number(localStorage.getItem(`jamb_verify_sent_${userEmail}`) || 0);
         const { data } = await supabase.auth.getUser();
         const u = data.user ?? user;
-        setEmailVerified(Boolean(u?.email_confirmed_at || (u as { confirmed_at?: string })?.confirmed_at));
+        const confirmedAt = (u as { email_confirmed_at?: string })?.email_confirmed_at;
+        setEmailVerified(
+          Boolean(sentAt && confirmedAt && new Date(confirmedAt).getTime() > sentAt - 60000)
+        );
       } catch {
-        const u = user as { email_confirmed_at?: string; confirmed_at?: string };
-        setEmailVerified(Boolean(u?.email_confirmed_at || u?.confirmed_at));
+        setEmailVerified(false);
       }
     };
     checkVerification();
-  }, [user]);
+  }, [user, userEmail]);
 
   const handleResendVerification = async () => {
     if (!userEmail) return;
@@ -215,6 +220,7 @@ export default function Settings() {
         options: { emailRedirectTo: window.location.origin },
       });
       if (error) throw error;
+      localStorage.setItem(`jamb_verify_sent_${userEmail}`, String(Date.now()));
       toast.success('Verification email sent! Check your inbox (and spam). 📧');
     } catch (error) {
       errorLogger.error(error, { component: 'Settings', action: 'resend verification' });
@@ -229,8 +235,10 @@ export default function Settings() {
     try {
       const { data, error } = await supabase.auth.getUser();
       if (error) throw error;
-      const u = data.user as unknown as { email_confirmed_at?: string; confirmed_at?: string } | null;
-      const verified = Boolean(u?.email_confirmed_at || u?.confirmed_at);
+      const u = data.user as unknown as { email_confirmed_at?: string } | null;
+      const sentAt = Number(localStorage.getItem(`jamb_verify_sent_${userEmail}`) || 0);
+      const confirmedAt = u?.email_confirmed_at;
+      const verified = Boolean(sentAt && confirmedAt && new Date(confirmedAt).getTime() > sentAt - 60000);
       setEmailVerified(verified);
       toast.success(verified ? 'Email verified! ✅' : 'Still unverified — click the link in your inbox, then refresh again.');
     } catch (error) {
@@ -690,7 +698,10 @@ export default function Settings() {
           <DownloadManager userEmail={userEmail} subjects={userSubjects.length > 0 ? userSubjects : ['english', 'mathematics']} />
         </motion.div>
 
-        {/* WhatsApp Reminders Card - Always visible */}
+        {/* WhatsApp Reminders Card - paid plans only (free users get
+            in-app + browser reminders instead; WhatsApp delivery is a
+            premium feature and isn't wired for free accounts) */}
+        {effectiveAccess && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -723,6 +734,7 @@ export default function Settings() {
             </CardContent>
           </Card>
         </motion.div>
+        )}
 
         {/* Notifications Card */}
         <motion.div

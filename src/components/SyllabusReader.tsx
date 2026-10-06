@@ -431,7 +431,24 @@ export const SyllabusReader = ({ userEmail, subjects, onBack, initialSubject, in
     }
     
     setGeneratingContent(type);
-    
+
+    // One automatic retry — the shared AI key is often briefly rate-limited
+    const invokeTopicContent = async (body: {
+      topic: string;
+      subject: string;
+      type: string;
+      additionalPrompt?: string;
+    }) => {
+      const first = await supabase.functions.invoke('generate-topic-content', {
+        body,
+      });
+      if (!first.error && first.data?.content) return first;
+      await new Promise((r) => setTimeout(r, 2500));
+      return supabase.functions.invoke('generate-topic-content', {
+        body,
+      });
+    };
+
     try {
       // For summarize/expand, use existing content
       let requestBody: {
@@ -463,9 +480,7 @@ export const SyllabusReader = ({ userEmail, subjects, onBack, initialSubject, in
         requestBody.additionalPrompt = STUDY_FORMAT_INSTRUCTIONS;
       }
 
-      const { data, error } = await supabase.functions.invoke('generate-topic-content', {
-        body: requestBody
-      });
+      const { data, error } = await invokeTopicContent(requestBody);
 
       if (error || !data?.content) {
         if (type === 'explanation') {

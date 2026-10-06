@@ -38,6 +38,17 @@ describe('computeMastery', () => {
     expect(res[0].topics[0].lowData).toBe(true);
   });
 
+  it('demands six samples plus a 3-streak for mastered', () => {
+    const five = Array.from({ length: 5 }, () => mk(true, 0));
+    expect(computeMastery(five)[0].topics[0].level).toBe('proficient');
+    const six = [...five, mk(true, 0)];
+    expect(computeMastery(six)[0].topics[0].level).toBe('mastered');
+    // broken streak at the end -> back to proficient
+    const older = [2, 3, 4, 5, 6].map((d) => mk(true, d));
+    const broken = [...older, mk(false, 0)];
+    expect(computeMastery(broken)[0].topics[0].level).not.toBe('mastered');
+  });
+
   it('weights recent attempts more than old ones', () => {
     const samples = [
       ...Array.from({ length: 5 }, () => mk(false, 90)),

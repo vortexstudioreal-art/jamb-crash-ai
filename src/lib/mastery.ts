@@ -195,7 +195,7 @@ const levelFor = (percentage: number): MasteryLevel => {
   return 'weak';
 };
 
-const MIN_SAMPLES = 3;
+const MIN_SAMPLES = 5;
 const DECAY_DAYS = 30;
 
 export const computeMastery = (
@@ -237,11 +237,25 @@ export const computeMastery = (
     }
     const percentage = totalW > 0 ? Math.round((correctW / totalW) * 100) : 0;
 
-    // Confidence: thin samples can't claim mastery
+    // Confidence gates: small samples can't claim high levels, and
+    // 'mastered' additionally demands a recent 3-in-a-row streak —
+    // understanding is proven by consistency, not one lucky quiz.
     let level = levelFor(percentage);
     const lowData = items.length < MIN_SAMPLES;
-    if (lowData && (level === 'mastered' || level === 'proficient')) {
-      level = 'learning';
+    if (lowData) {
+      if (level !== 'weak') level = 'learning';
+    } else {
+      if (level === 'proficient' && items.length < 4) level = 'learning';
+      if (level === 'mastered') {
+        if (items.length < 6) {
+          level = 'proficient';
+        } else {
+          const recent3 = [...items]
+            .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
+            .slice(0, 3);
+          if (!recent3.every((s) => s.correct)) level = 'proficient';
+        }
+      }
     }
 
     // Trend: recent half vs older half (weighted)

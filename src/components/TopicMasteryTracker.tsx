@@ -134,7 +134,7 @@ export const TopicMasteryTracker = ({
           lastAttempted: new Date(t.lastAttempted),
           isHighWeight: t.isHighWeight,
           aiTip: t.lowData
-            ? `Early days — answer ${Math.max(1, 3 - t.samples)}+ more ${t.topic} questions to confirm your level.`
+            ? `Early days — answer ${Math.max(1, 5 - t.samples)}+ more ${t.topic} questions to confirm your level.`
             : getAiRecommendation(t.topic, t.level),
           samples: t.samples,
           lowData: t.lowData,
