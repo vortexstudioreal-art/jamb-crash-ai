@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Crown, Users, CreditCard, TrendingUp, Plus, Trash2, ArrowLeft, RefreshCw, Mail,
-  CheckCircle, AlertCircle, Settings, Send, Key, Activity, Database, Zap, Ticket, UserCog, Bell, DollarSign, BarChart3, BookOpen
+  CheckCircle, AlertCircle, Settings, Send, Key, Activity, Database, Zap, Ticket, UserCog, Bell, DollarSign, BarChart3
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -59,9 +59,9 @@ const CouponManager = lazy(() => import('@/components/CouponManager').then(m => 
 const UserManagement = lazy(() => import('@/components/admin/UserManagement').then(m => ({ default: m.UserManagement })));
 const NotificationManager = lazy(() => import('@/components/admin/NotificationManager').then(m => ({ default: m.NotificationManager })));
 const PayoutManagement = lazy(() => import('@/components/admin/PayoutManagement').then(m => ({ default: m.PayoutManagement })));
-const BookPdfManager = lazy(() => import('@/components/admin/BookPdfManager').then(m => ({ default: m.BookPdfManager })));
 const QuestionReportsManager = lazy(() => import('@/components/admin/QuestionReportsManager').then(m => ({ default: m.QuestionReportsManager })));
 const B2BManagement = lazy(() => import('@/components/admin/B2BManagement').then(m => ({ default: m.B2BManagement })));
+const NovelLibraryManager = lazy(() => import('@/components/admin/NovelLibraryManager').then(m => ({ default: m.NovelLibraryManager })));
 
 const AdminPanel = () => {
   const navigate = useNavigate();
@@ -480,10 +480,6 @@ const AdminPanel = () => {
               <BarChart3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="hidden xs:inline">Ads</span>
             </TabsTrigger>
-            <TabsTrigger value="books" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
-              <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span className="hidden xs:inline">Books</span>
-            </TabsTrigger>
             <TabsTrigger value="b2b" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
               <Key className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="hidden xs:inline">B2B Pins</span>
@@ -506,18 +502,6 @@ const AdminPanel = () => {
             >
               <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
                 <AppHealthCheck />
-              </Suspense>
-            </motion.div>
-          </TabsContent>
-
-          {/* Book PDFs Tab */}
-          <TabsContent value="books">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
-                <BookPdfManager />
               </Suspense>
             </motion.div>
           </TabsContent>
@@ -909,6 +893,17 @@ const AdminPanel = () => {
                   </div>
                 </CardContent>
               </Card>
+            </motion.div>
+
+            {/* Recent Payments */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+            >
+              <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
+                <NovelLibraryManager />
+              </Suspense>
             </motion.div>
 
             {/* Recent Payments */}
