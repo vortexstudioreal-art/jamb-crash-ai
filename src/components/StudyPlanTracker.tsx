@@ -3,8 +3,6 @@ import { motion } from 'framer-motion';
 import {
   Bell,
   BellOff,
-  BookMarked,
-  
   Calendar,
   CheckCircle2,
   ChevronLeft,
@@ -37,7 +35,7 @@ interface StudyPlanTrackerProps {
   onBack: () => void;
   onGenerateNew: () => void;
   onStartPractice: (subject: string) => void;
-  onOpenSyllabus: (subject: string) => void;
+  onOpenLesson: (subject: string, topic?: string) => void;
   onOpenFlashcards: (subject: string) => void;
 }
 
@@ -109,7 +107,7 @@ export const StudyPlanTracker = ({
   onBack,
   onGenerateNew,
   onStartPractice,
-  onOpenSyllabus,
+  onOpenLesson,
   onOpenFlashcards,
 }: StudyPlanTrackerProps) => {
   const [plan, setPlan] = useState<{ id: string; plan_data: PlanDay[]; target_score: number; hours_per_day: number; status: string } | null>(null);
@@ -686,9 +684,9 @@ export const StudyPlanTracker = ({
                             <Play className="w-3.5 h-3.5 mr-1" />
                             Practice
                           </Button>
-                          <Button size="sm" variant="outline" onClick={() => onOpenSyllabus(task.subject)}>
-                            <BookMarked className="w-3.5 h-3.5 mr-1" />
-                            Syllabus
+                          <Button size="sm" variant="outline" onClick={() => onOpenLesson(task.subject, task.topics?.[0])}>
+                            <Sparkles className="w-3.5 h-3.5 mr-1" />
+                            Lesson
                           </Button>
                           <Button size="sm" variant="outline" onClick={() => onOpenFlashcards(task.subject)}>
                             <Layers className="w-3.5 h-3.5 mr-1" />

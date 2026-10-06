@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft, BookOpen, Search, Clock, Loader2, CheckCircle2,
@@ -67,6 +67,10 @@ interface LessonLibraryProps {
   onBack: () => void;
   /** Deep-link straight into a lesson, e.g. from a syllabus topic. */
   initialLessonId?: string | null;
+  /** Deep-link by subject (+ optional topic): filters the library and
+   * opens the best-matching lesson. Used by study-plan + mastery links. */
+  initialSubject?: string | null;
+  initialTopic?: string | null;
 }
 
 /**
@@ -82,6 +86,8 @@ export function LessonLibrary({
   subjects,
   onBack,
   initialLessonId,
+  initialSubject,
+  initialTopic,
 }: LessonLibraryProps) {
   const [lessons, setLessons] = useState<LessonSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -169,6 +175,35 @@ export function LessonLibrary({
   useEffect(() => {
     if (initialLessonId) openLessonById(initialLessonId);
   }, [initialLessonId, openLessonById]);
+
+  // Subject/topic deep-link (study calendar, topic mastery): filter to the
+  // subject and open the best match. Falls back to the filtered list when
+  // no lesson matches — the library still shows relevant lessons.
+  const deepLinkConsumed = useRef<string | null>(null);
+  useEffect(() => {
+    if (loading || lessons.length === 0) return;
+    const subj = initialSubject?.toLowerCase() || null;
+    if (!subj) return;
+    const key = `${subj}::${initialTopic?.toLowerCase() || ''}`;
+    if (deepLinkConsumed.current === key) return;
+    deepLinkConsumed.current = key;
+
+    setSubjectFilter(subj);
+    const inSubject = lessons.filter((l) => l.subject.toLowerCase() === subj);
+    if (inSubject.length === 0) return;
+    const topic = initialTopic?.toLowerCase().trim();
+    const match =
+      (topic &&
+        (inSubject.find((l) => l.topic.toLowerCase() === topic) ||
+          inSubject.find(
+            (l) =>
+              l.topic.toLowerCase().includes(topic) ||
+              topic.includes(l.topic.toLowerCase()) ||
+              l.title.toLowerCase().includes(topic)
+          ))) ||
+      inSubject[0];
+    if (match) void openLessonById(match.id);
+  }, [loading, lessons, initialSubject, initialTopic, openLessonById]);
 
   const availableSubjects = useMemo(() => {
     const seen = new Set(lessons.map((l) => l.subject));

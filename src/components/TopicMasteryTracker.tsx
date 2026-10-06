@@ -33,7 +33,7 @@ interface TopicMasteryTrackerProps {
   refreshTrigger?: number;
   allowedSubjects?: string[];
   onStartPracticeTopic?: (subject: string, topic?: string) => void;
-  onGoToSyllabusTopic?: (subject: string, topic: string) => void;
+  onGoToLesson?: (subject: string, topic: string) => void;
 }
 
 interface QuestionData {
@@ -84,7 +84,7 @@ export const TopicMasteryTracker = ({
   refreshTrigger, 
   allowedSubjects,
   onStartPracticeTopic,
-  onGoToSyllabusTopic
+  onGoToLesson
 }: TopicMasteryTrackerProps) => {
   const [loading, setLoading] = useState(true);
   const [subjectTopics, setSubjectTopics] = useState<SubjectTopics[]>([]);
@@ -748,14 +748,14 @@ export const TopicMasteryTracker = ({
                                       Practice 🎯
                                     </Button>
                                   )}
-                                  {onGoToSyllabusTopic && (
+                                  {onGoToLesson && (
                                     <Button
                                       size="sm"
                                       variant="ghost"
-                                      onClick={() => onGoToSyllabusTopic(subjectData.subject, topic.topic)}
+                                      onClick={() => onGoToLesson(subjectData.subject, topic.topic)}
                                       className="h-8 px-3 text-xs font-extrabold shrink-0 text-primary hover:bg-primary/10 transition-colors"
                                     >
-                                      Study 📖
+                                      Lesson ✨
                                     </Button>
                                   )}
                                 </div>

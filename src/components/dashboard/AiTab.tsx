@@ -8,6 +8,7 @@ import type { DashboardContext } from '@/types/dashboard';
 
 interface AiTabProps extends DashboardContext {
   handleUpgradeClick: (plan?: string) => void;
+  onOpenLesson?: (subject: string, topic?: string) => void;
 }
 
 export const AiTab = ({
@@ -20,9 +21,8 @@ export const AiTab = ({
   handleUpgradeClick,
   setPracticeSubjectOverride,
   setQuizType,
-  setSyllabusTargetSubject,
-  setSyllabusTargetTopic,
   navigateStep,
+  onOpenLesson,
 }: AiTabProps) => {
   return (
     <motion.div key="ai" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
@@ -76,10 +76,12 @@ export const AiTab = ({
                 setQuizType('mini');
               }
             }}
-            onGoToSyllabusTopic={(subject, topic) => {
-              setSyllabusTargetSubject(subject);
-              setSyllabusTargetTopic(topic);
-              navigateStep('syllabus');
+            onGoToLesson={(subject, topic) => {
+              if (onOpenLesson) {
+                onOpenLesson(subject, topic);
+              } else {
+                navigateStep('lessons');
+              }
             }}
           />
         </Suspense>

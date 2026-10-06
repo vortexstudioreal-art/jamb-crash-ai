@@ -153,9 +153,9 @@ const Index = () => {
   const [highlightStandard, setHighlightStandard] = useState(false);
   const [weakSubjectFromQuiz, setWeakSubjectFromQuiz] = useState<string | null>(null);
   const [showSubjectChanger, setShowSubjectChanger] = useState(false);
-  const [syllabusTargetSubject, setSyllabusTargetSubject] = useState<string | null>(null);
-  const [flashcardsTargetSubject, setFlashcardsTargetSubject] = useState<string | null>(null);
+  const [syllabusTargetSubject, setSyllabusTargetSubject] = useState<string | null>(null);  const [flashcardsTargetSubject, setFlashcardsTargetSubject] = useState<string | null>(null);
   const [syllabusTargetTopic, setSyllabusTargetTopic] = useState<string | null>(null);
+  const [lessonDeepLink, setLessonDeepLink] = useState<{ subject: string; topic: string | null } | null>(null);
   
 
   const [selectedNovelId, setSelectedNovelId] = useState<string | null>(null);
@@ -610,6 +610,7 @@ const Index = () => {
     setSyllabusTargetSubject(null);
     setSyllabusTargetTopic(null);
     setFlashcardsTargetSubject(null);
+    setLessonDeepLink(null);
     startTransition(() => setCurrentStep('dashboard'));
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
@@ -621,11 +622,17 @@ const Index = () => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
-  const handleStudyPlanSyllabus = (subject: string) => {
-    setSyllabusTargetSubject(subject);
-    setSyllabusTargetTopic(null);
-    navigateStep('syllabus');
+  // Calendar / mastery -> interactive lesson (lessons own the teaching;
+  // syllabus stays the official read-only outline).
+  const handleOpenLesson = (subject: string, topic?: string | null) => {
+    setLessonDeepLink({ subject, topic: topic ?? null });
+    navigateStep('lessons');
     window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
+  const handleLessonsBack = () => {
+    setLessonDeepLink(null);
+    handleBackToDashboard();
   };
 
   const handleStudyPlanFlashcards = (subject: string) => {
@@ -810,7 +817,7 @@ const Index = () => {
             onBack={handleBackToDashboard}
             onGenerateNew={handleGenerateStudyPlan}
             onStartPractice={handleStudyPlanPractice}
-            onOpenSyllabus={handleStudyPlanSyllabus}
+            onOpenLesson={handleOpenLesson}
             onOpenFlashcards={handleStudyPlanFlashcards}
           />
         </div>
@@ -860,7 +867,9 @@ const Index = () => {
             <LessonLibrary
               userEmail={userEmail}
               subjects={effectiveSubjects}
-              onBack={handleBackToDashboard}
+              onBack={handleLessonsBack}
+              initialSubject={lessonDeepLink?.subject}
+              initialTopic={lessonDeepLink?.topic}
             />
           </Suspense>
         </div>
@@ -1208,6 +1217,7 @@ const Index = () => {
                   setSyllabusTargetTopic={setSyllabusTargetTopic}
                   setFlashcardsTargetSubject={setFlashcardsTargetSubject}
                   setShowSubjectChanger={setShowSubjectChanger}
+                  onOpenLesson={handleOpenLesson}
                 />
               )}
 
