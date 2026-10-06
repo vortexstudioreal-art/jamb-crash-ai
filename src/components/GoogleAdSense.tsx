@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AD_CONFIG } from '@/config/ads';
+import { useAuth } from '@/contexts/AuthContext';
 
 declare global {
   interface Window {
@@ -11,6 +12,12 @@ interface GoogleAdSenseProps {
   className?: string;
   format?: string;
   responsive?: boolean;
+  /**
+   * Who sees ads. Default 'free' = only users without paid access
+   * (paying users, admins and owners never see ads). Pass 'all' to
+   * override for a specific slot.
+   */
+  audience?: 'free' | 'all';
 }
 
 // The committed publisher ID is an AdMob *app* ID (ca-app-pub-…), which
@@ -24,13 +31,20 @@ export const GoogleAdSense = ({
   className = '',
   format = 'auto',
   responsive = true,
+  audience = 'free',
 }: GoogleAdSenseProps) => {
   const adRef = useRef<HTMLModElement>(null);
   const pushed = useRef(false);
   const [visible, setVisible] = useState(isAdSenseConfigured);
+  const { hasAccess, isAdmin, isOwner, roleResolved } = useAuth();
+
+  // Paying users never see ads. Wait for the role lookup so paid users
+  // don't flash an ad while access is still resolving.
+  const isPaying = hasAccess || isAdmin || isOwner;
+  const allowed = audience === 'all' || (roleResolved && !isPaying);
 
   useEffect(() => {
-    if (!isAdSenseConfigured) return;
+    if (!isAdSenseConfigured || !allowed) return;
     if (!adRef.current || pushed.current) return;
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
@@ -47,9 +61,9 @@ export const GoogleAdSense = ({
       if (!filled) setVisible(false);
     }, 4000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [allowed]);
 
-  if (!visible) return null;
+  if (!visible || !allowed) return null;
 
   return (
     <div className={`overflow-hidden ${className}`}>

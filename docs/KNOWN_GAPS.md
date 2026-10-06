@@ -16,14 +16,15 @@ removed only where they were provably unreachable from `src/main.tsx`.
 
 - `src/config/admob.ts` and `src/config/ads.ts` hold valid, committed ad unit
   IDs, and `index.html` loads the AdSense script.
-- The component that would display a banner (`BannerAd.tsx`, 211 LOC) had **no
-  importers** — it was unreachable, so no banner was ever mounted.
-- **Consequence:** ad impressions were not being served through the app.
-- **To restore:** re-create the banner component and mount it in the app shell,
-  keeping the existing IDs from `src/config/admob.ts` / `src/config/ads.ts`.
-- Also worth verifying: `index.html` passes `ca-app-pub-…` (an AdMob-style ID)
-  as the AdSense `client` parameter, where AdSense normally expects `ca-pub-…`.
-  Left untouched deliberately — the IDs belong to the project owner.
+- The committed publisher ID is an AdMob **app** ID (`ca-app-pub-…`), which
+  AdSense for web can never fill — rendering the slot only produced a broken
+  grey box. `GoogleAdSense` therefore renders nothing until a real AdSense
+  publisher ID (`ca-pub-…`) is configured, collapses unfilled slots, and
+  (since Oct 2026) only serves free users — paying users/admins never see ads.
+- `public/ads.txt` authorizes `pub-3175040135445213` (same publisher number).
+- **To earn:** paste the real `ca-pub-…` ID + slot into `src/config/ads.ts`
+  (and the `?client=` param in `index.html`), after the site domain itself is
+  AdSense-approved.
 
 ### 1.2 Free trial can be read, but never started
 
