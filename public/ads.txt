@@ -1,2 +1,2 @@
 # jamb-crash-ai.vercel.app — AdSense authorization
-google.com, pub-3175040135445213, DIRECT, f08c47fec0942fa
+google.com, pub-3175040135445213, DIRECT, f08c47fec0942fa0
