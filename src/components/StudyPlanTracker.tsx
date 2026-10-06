@@ -23,6 +23,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { showLocalNotification } from '@/lib/notify';
 import {
   loadLocalPlan,
   loadProgress,
@@ -239,13 +240,11 @@ export const StudyPlanTracker = ({
 
     if (todayTasks.length > 0 && todayTasks.some((t) => !t.completed)) {
       void insertNotification('Study time!', `You have ${todayTasks.length} study session${todayTasks.length > 1 ? 's' : ''} planned today. Check your calendar.`);
-      if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-        const subjects = todayTasks.map((t) => t.subject.replace('_', ' ')).join(', ');
-        new Notification("It's study time!", {
-          body: `Today: ${subjects}`,
-          tag: `study-reminder-${today}`,
-        });
-      }
+      const subjects = todayTasks.map((t) => t.subject.replace('_', ' ')).join(', ');
+      void showLocalNotification("It's study time!", {
+        body: `Today: ${subjects}`,
+        tag: `study-reminder-${today}`,
+      });
     }
   }, [plan, tasks, tasksByDate, insertNotification]);
 
@@ -336,7 +335,7 @@ export const StudyPlanTracker = ({
     const permission = await Notification.requestPermission();
     setNotifState(permission);
     if (permission === 'granted') {
-      new Notification('Jamb Crash AI', { body: 'We will remind you when it is study time!' });
+      await showLocalNotification('Jamb Crash AI', { body: 'We will remind you when it is study time!' });
       toast.success('Study reminders enabled!');
     } else {
       toast.error('Notifications blocked — enable them in your browser settings');
