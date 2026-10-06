@@ -31,7 +31,8 @@ interface ExtractedQuestion {
 interface PoetryResult {
   title: string;
   status: string;
-  chaptersCreated: number;
+  chaptersCreated?: number;
+  reason?: string;
 }
 
 serve(async (req) => {
@@ -155,15 +156,20 @@ async function enrichAllPoetry(supabase: SupabaseClient, apiKey: string, onlyTit
   const results: PoetryResult[] = [];
 
   for (const poem of poems) {
-    // Only process poems with 1 chapter (not yet enriched)
-    if (poem.total_chapters > 1) {
-      results.push({ title: poem.title, status: "skipped", reason: "already has multiple chapters" });
+    // Only process poems with fewer than 4 guide chapters (resumable —
+    // a failed run can be retried without losing anything).
+    const { count: chapterCount } = await supabase
+      .from("novel_chapters")
+      .select("id", { count: "exact", head: true })
+      .eq("novel_id", poem.id);
+    if ((chapterCount || 0) >= 4) {
+      results.push({ title: poem.title, status: "skipped", reason: "already has guide chapters" });
       continue;
     }
 
     console.log(`Enriching poetry: ${poem.title}`);
 
-    // Get existing chapter
+    // Get existing chapter (kept until replacements are safely stored)
     const { data: existingChapters } = await supabase
       .from("novel_chapters")
       .select("id, content")
@@ -179,12 +185,14 @@ async function enrichAllPoetry(supabase: SupabaseClient, apiKey: string, onlyTit
       { num: 4, title: "Practice Questions", focus: "10 JAMB-style multiple choice questions with options A-D, correct answers, and explanations" },
     ];
 
-    // Delete existing single chapter
-    if (existingChapters?.[0]?.id) {
-      await supabase.from("novel_chapters").delete().eq("novel_id", poem.id);
-    }
-
-    let chaptersCreated = 0;
+    // Generate everything BEFORE deleting anything — an AI failure must
+    // never wipe the existing chapter (that data loss already happened once).
+    const built: {
+      plan: { num: number; title: string };
+      content: string;
+      wordCount: number;
+      questions: ExtractedQuestion[] | null;
+    }[] = [];
 
     for (const plan of chapterPlans) {
       const prompt = `You are a JAMB exam preparation expert. Create a detailed study guide section for the poem "${poem.title}" by ${poem.author}.
@@ -205,22 +213,33 @@ IMPORTANT: Be factually accurate about this poem. This is a JAMB 2025 prescribed
 
         const wordCount = content.split(/\s+/).length;
         const questions = plan.num === 4 ? extractQuestions(content) : null;
-
-        await supabase.from("novel_chapters").insert({
-          novel_id: poem.id,
-          chapter_number: plan.num,
-          title: plan.title,
-          content,
-          word_count: wordCount,
-          estimated_reading_time: Math.ceil(wordCount / 200),
-          likely_questions: questions,
-        });
-
-        chaptersCreated++;
+        built.push({ plan, content, wordCount, questions });
         await new Promise(r => setTimeout(r, 2000));
       } catch (err) {
         console.error(`Error creating chapter ${plan.num} for ${poem.title}:`, err);
       }
+    }
+
+    if (built.length === 0) {
+      results.push({ title: poem.title, status: "failed", reason: "AI returned nothing — existing content kept" });
+      continue;
+    }
+
+    // Replace old chapters only now that replacements exist
+    await supabase.from("novel_chapters").delete().eq("novel_id", poem.id);
+
+    let chaptersCreated = 0;
+    for (const b of built) {
+      const { error } = await supabase.from("novel_chapters").insert({
+        novel_id: poem.id,
+        chapter_number: b.plan.num,
+        title: b.plan.title,
+        content: b.content,
+        word_count: b.wordCount,
+        estimated_reading_time: Math.ceil(b.wordCount / 200),
+        likely_questions: b.questions,
+      });
+      if (!error) chaptersCreated++;
     }
 
     // Update total_chapters

@@ -25,6 +25,20 @@ interface Scraped {
 const normalize = (q: string) =>
   q.toLowerCase().replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
 
+// Imported banks carry markup (<i>, &nbsp;) — strip before storing so it
+// never renders raw in quiz cards.
+const stripHtml = (s: string): string =>
+  s
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+
 const clean = (q: Scraped): boolean => {
   if (!q.question?.trim() || q.options?.length !== 4) return false;
   if (q.options.some((o) => !o?.trim())) return false;
@@ -67,16 +81,19 @@ async function doImport(supabase: ReturnType<typeof createClient>) {
       fetched++;
       if (!clean(q)) continue;
       const subject = q.subject.toLowerCase();
-      const key = `${subject}::${normalize(q.question)}`;
+      const question = stripHtml(q.question);
+      const options = q.options.map((o) => stripHtml(o));
+      if (!question || options.some((o) => !o)) continue;
+      const key = `${subject}::${normalize(question)}`;
       if (seen.has(key)) continue;
       seen.add(key);
       fresh.push({
         subject,
-        question: q.question.trim(),
-        option_a: q.options[0].trim(),
-        option_b: q.options[1].trim(),
-        option_c: q.options[2].trim(),
-        option_d: q.options[3].trim(),
+        question,
+        option_a: options[0],
+        option_b: options[1],
+        option_c: options[2],
+        option_d: options[3],
         correct_answer: q.correct_answer.trim().toUpperCase(),
         explanation: null,
         topics: null,

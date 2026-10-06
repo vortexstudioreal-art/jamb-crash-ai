@@ -110,6 +110,20 @@ function cell(raw: string): string | null {
 const normalize = (q: string) =>
   q.toLowerCase().replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
 
+// Imported banks carry markup (<i>, &nbsp;) — strip before storing so it
+// never renders raw in quiz cards.
+const stripHtml = (s: string): string =>
+  s
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+
 async function doImport(supabase: ReturnType<typeof createClient>) {
   console.log("[import-aloc] downloading dump…");
   const res = await fetch(DUMP_URL);
@@ -150,9 +164,9 @@ async function doImport(supabase: ReturnType<typeof createClient>) {
       if ((cell(c[10]) || "").toLowerCase() !== "utme") continue;
       const ans = (cell(c[8]) || "").trim().toLowerCase();
       if (!/^[a-d]$/.test(ans)) continue;
-      const question = (cell(c[1]) || "").trim();
+      const question = stripHtml(cell(c[1]) || "");
       if (!question) continue;
-      const opts = [cell(c[2]), cell(c[3]), cell(c[4]), cell(c[5])].map((o) => (o || "").trim());
+      const opts = [cell(c[2]), cell(c[3]), cell(c[4]), cell(c[5])].map((o) => stripHtml(o || ""));
       if (opts.some((o) => !o)) continue;
       const yearRaw = (cell(c[11]) || "").trim();
       const yearNum = parseInt(yearRaw, 10);
@@ -160,7 +174,7 @@ async function doImport(supabase: ReturnType<typeof createClient>) {
       const key = `${subject}::${normalize(question)}`;
       if (seen.has(key)) continue;
       seen.add(key);
-      const solution = (cell(c[9]) || "").trim();
+      const solution = stripHtml(cell(c[9]) || "");
       fresh.push({
         subject,
         question,

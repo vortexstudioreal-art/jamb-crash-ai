@@ -18,7 +18,7 @@ export const useAiExplanation = () => {
   const [error, setError] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const getExplanation = useCallback(async (q: UseAiExplanationProps) => {
+  const getExplanation = useCallback(async (q: UseAiExplanationProps, retries = 1) => {
     setIsLoading(true);
     setExplanation('');
     setError(null);
@@ -105,6 +105,11 @@ Keep it short and focused: Just explain why the correct answer is right and very
     } catch (err: unknown) {
       if (err instanceof Error && err.name === 'AbortError') {
         return;
+      }
+      // One automatic retry — the shared AI key is often briefly rate-limited
+      if (retries > 0) {
+        await new Promise((r) => setTimeout(r, 2000));
+        return getExplanation(q, retries - 1);
       }
       errorLogger.error(err, { component: 'useAiExplanation', action: 'generate AI explanation' });
       setError(err instanceof Error ? err.message : 'An unexpected error occurred');

@@ -18,6 +18,7 @@ import { useFeatureUsage } from '@/hooks/useFeatureUsage';
 import { FeatureLimitReached } from '@/components/FeatureLimitReached';
 import { ReportQuestionButton } from '@/components/ReportQuestionButton';
 import { pickAdaptive, collectWeakQuestionCounts } from '@/lib/adaptive';
+import { stripQuestionHtml } from '@/lib/sanitize';
 import { errorLogger } from '@/services/errorLogger';
 
 interface Question {
@@ -967,7 +968,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
               </div>
             </div>
             <p className="text-lg font-medium text-foreground leading-relaxed">
-              {currentQuestion.question}
+              {stripQuestionHtml(currentQuestion.question)}
             </p>
             {currentQuestion.image_url && (
               <div className="mt-4 flex justify-center">
@@ -1035,7 +1036,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
                        isWrong && isFeedbackActive ? <XCircle className="w-4 h-4" /> : letter}
                     </span>
                     <span className="text-foreground text-sm leading-relaxed">
-                      {currentQuestion[optionKey] as string}
+                      {stripQuestionHtml(currentQuestion[optionKey] as string)}
                     </span>
                   </div>
                 </motion.button>
@@ -1055,7 +1056,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
                   ✓ Correct Answer: {showAnswerFeedback || currentQuestion.correct_answer}
                 </p>
                 {currentQuestion.explanation && (
-                  <p className="text-muted-foreground text-sm">{currentQuestion.explanation}</p>
+                  <p className="text-muted-foreground text-sm">{stripQuestionHtml(currentQuestion.explanation)}</p>
                 )}
                 {currentQuestion.is_ai_generated && (
                   <p className="text-xs text-violet-500/80 italic">AI-generated likely question — explanation written by AI, not from a past paper.</p>

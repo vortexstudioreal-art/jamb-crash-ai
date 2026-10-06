@@ -9,6 +9,7 @@ import type { Database } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 import { buildMockSections, gradeMock, scoreBand, type MockQuestion, type MockSection, type MockResults } from '@/lib/mockExam';
 import { ReportQuestionButton } from '@/components/ReportQuestionButton';
+import { stripQuestionHtml } from '@/lib/sanitize';
 import { downloadScorecard, shareScorecard, type ScorecardData } from '@/lib/scorecard';
 import { pickAdaptive, collectWeakQuestionCounts } from '@/lib/adaptive';
 
@@ -391,7 +392,7 @@ export const MockExam = ({ userEmail, subjects, onExit }: MockExamProps) => {
                             <div className="flex items-start gap-2">
                               {correct ? <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" /> : <XCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />}
                               <div>
-                                <p className="font-medium text-foreground">{qi + 1}. {q.question}</p>
+                                <p className="font-medium text-foreground">{qi + 1}. {stripQuestionHtml(q.question)}</p>
                                 {q.is_ai_generated && (
                                   <span className="inline-block mt-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-violet-500/10 text-violet-500">AI Practice</span>
                                 )}
@@ -399,7 +400,7 @@ export const MockExam = ({ userEmail, subjects, onExit }: MockExamProps) => {
                                   Your answer: <span className={correct ? 'text-emerald-600 font-medium' : 'text-red-500 font-medium'}>{userAnswer ? `Option ${userAnswer.toUpperCase()}` : 'Not answered'}</span>
                                   {!correct && <> · Correct: <span className="text-emerald-600 font-medium">Option {q.correct_answer.toUpperCase()}</span></>}
                                 </p>
-                                {q.explanation && <p className="text-xs text-muted-foreground mt-1">{q.explanation}</p>}
+                                {q.explanation && <p className="text-xs text-muted-foreground mt-1">{stripQuestionHtml(q.explanation)}</p>}
                               </div>
                             </div>
                             <ReportQuestionButton questionId={q.id} userEmail={userEmail} compact />
@@ -471,7 +472,7 @@ export const MockExam = ({ userEmail, subjects, onExit }: MockExamProps) => {
                         <Badge className="bg-violet-500/10 text-violet-500 border-violet-500/30 mb-2">AI Practice</Badge>
                       )}
                       <p className="font-semibold text-foreground text-base leading-relaxed">
-                        {currentQIdx + 1}. {currentQuestion.question}
+                        {currentQIdx + 1}. {stripQuestionHtml(currentQuestion.question)}
                       </p>
                     </div>
                     <ReportQuestionButton questionId={currentQuestion.id} userEmail={userEmail} compact />
@@ -488,7 +489,7 @@ export const MockExam = ({ userEmail, subjects, onExit }: MockExamProps) => {
                             selected ? 'border-primary bg-primary/10 text-primary font-semibold' : 'border-border hover:border-primary/40'
                           }`}
                         >
-                          <span className="inline-block w-6 font-bold uppercase">{opt}.</span> {currentQuestion[optionKey]}
+                          <span className="inline-block w-6 font-bold uppercase">{opt}.</span> {stripQuestionHtml(currentQuestion[optionKey])}
                         </button>
                       );
                     })}

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import confetti from 'canvas-confetti';
 import { useAiExplanation } from '@/hooks/useAiExplanation';
 import { downloadScorecard, shareScorecard, type ScorecardData } from '@/lib/scorecard';
+import { stripQuestionHtml } from '@/lib/sanitize';
 
 interface Question {
   id: string;
@@ -313,7 +314,7 @@ export const QuizResults = ({ results, quizType, userEmail, onRetry, onHome, onU
                       {isCorrect ? <CheckCircle className="w-5 h-5" /> : isSkipped ? <MinusCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
                     </div>
                     <div className="flex-1">
-                      <p className="text-foreground font-medium line-clamp-2">{q.question}</p>
+                      <p className="text-foreground font-medium line-clamp-2">{stripQuestionHtml(q.question)}</p>
                       <div className="flex items-center gap-2 mt-1 flex-wrap">
                         <span className={`text-sm font-medium ${isCorrect ? 'text-green-500' : isSkipped ? 'text-muted-foreground' : 'text-destructive'}`}>
                           {isSkipped ? 'You skipped this question' : `Your answer: ${q.userAnswer}. ${userAnswerText || ''}`}
@@ -371,7 +372,7 @@ export const QuizResults = ({ results, quizType, userEmail, onRetry, onHome, onU
                                 {letter}.
                               </span>
                               <span className={isCorrectAnswer ? 'font-bold underline text-green-600' : ''}>
-                                {q[`option_${letter.toLowerCase()}` as keyof Question] as string}
+                                {stripQuestionHtml(q[`option_${letter.toLowerCase()}` as keyof Question] as string)}
                               </span>
                               {isCorrectAnswer && <span className="ml-2">✓ Correct</span>}
                               {isWrongUserAnswer && <span className="ml-2">✗ Your answer</span>}
@@ -383,7 +384,7 @@ export const QuizResults = ({ results, quizType, userEmail, onRetry, onHome, onU
                       {q.explanation && (
                         <div className="bg-primary/10 rounded-lg p-3 mb-3">
                           <p className="text-sm font-medium text-primary mb-1">💡 Why this is right:</p>
-                          <p className="text-sm text-muted-foreground">{q.explanation}</p>
+                          <p className="text-sm text-muted-foreground">{stripQuestionHtml(q.explanation)}</p>
                         </div>
                       )}
 
