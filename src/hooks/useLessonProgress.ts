@@ -10,6 +10,7 @@ interface UseLessonProgressReturn {
   submitPrediction: (sectionId: string, prediction: string, correct: boolean) => Promise<void>;
   submitPracticeAttempt: (questionIdx: number, answer: string, correct: boolean, hintsUsed: number) => Promise<void>;
   calculateMastery: (requiredSections: string[], minScore: number) => number;
+  updateMasteryLevel: (level: 'not_started' | 'learning' | 'reviewing' | 'mastered') => Promise<void>;
   refresh: () => Promise<void>;
 }
 
@@ -190,6 +191,25 @@ export function useLessonProgress(
     await fetchProgress();
   }, [fetchProgress]);
 
+  const updateMasteryLevel = useCallback(async (
+    level: 'not_started' | 'learning' | 'reviewing' | 'mastered'
+  ): Promise<void> => {
+    if (!progress) return;
+    try {
+      const { error } = await supabase
+        .from('lesson_progress')
+        .update({
+          mastery_level: level,
+          last_accessed_at: new Date().toISOString(),
+        })
+        .eq('id', progress.id);
+      if (error) throw error;
+      setProgress((prev) => (prev ? { ...prev, mastery_level: level } : prev));
+    } catch (err) {
+      errorLogger.error(err, { component: 'useLessonProgress', action: 'update mastery' });
+    }
+  }, [progress]);
+
   return {
     progress,
     loading,
@@ -197,6 +217,7 @@ export function useLessonProgress(
     submitPrediction,
     submitPracticeAttempt,
     calculateMastery,
+    updateMasteryLevel,
     refresh,
   };
 }

@@ -470,7 +470,7 @@ function SummaryStep({ content }: { content: Record<string, unknown> }) {
 // Sections that would render empty are dropped entirely so they never
 // occupy a step (no blank cards, no question-less "Quick Check" steps,
 // no "coming soon" placeholders inside the lesson flow).
-const isSectionRenderable = (s: { type: string; content: unknown }): boolean => {
+export const isSectionRenderable = (s: { type: string; content: unknown }): boolean => {
   const c = (s.content || {}) as Record<string, unknown>;
   switch (s.type) {
     case 'practice':

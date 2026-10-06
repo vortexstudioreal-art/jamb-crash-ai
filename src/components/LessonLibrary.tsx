@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
-import { InteractiveLesson } from '@/components/InteractiveLesson';
+import { InteractiveLesson, isSectionRenderable } from '@/components/InteractiveLesson';
 import { useLessonProgress } from '@/hooks/useLessonProgress';
 import { errorLogger } from '@/services/errorLogger';
 import type { Lesson, MasteryLevel } from '@/types/lesson';
@@ -422,12 +422,24 @@ function LessonReader({
   userEmail: string;
   onExit: () => void;
 }) {
-  const { progress, markSectionViewed } = useLessonProgress(lesson.id, userEmail);
+  const { progress, markSectionViewed, updateMasteryLevel } = useLessonProgress(lesson.id, userEmail);
   const sectionsViewed = progress?.sections_viewed ?? [];
 
-  const totalSections = lesson.content_sections?.length ?? 0;
+  // Same denominator the player actually steps through (mastery_check and
+  // empty sections are filtered there too) — otherwise % never reaches 100.
+  const renderableCount = useMemo(
+    () =>
+      (lesson.content_sections || []).filter(
+        (s) => s.type !== 'mastery_check' && isSectionRenderable(s)
+      ).length,
+    [lesson]
+  );
   const percent =
-    totalSections > 0 ? Math.round((sectionsViewed.length / totalSections) * 100) : 0;
+    renderableCount > 0 ? Math.round((Math.min(sectionsViewed.length, renderableCount) / renderableCount) * 100) : 0;
+
+  const handleComplete = useCallback(() => {
+    void updateMasteryLevel('mastered');
+  }, [updateMasteryLevel]);
 
   return (
     <div className="mx-auto max-w-3xl px-4 pb-24">
@@ -452,9 +464,11 @@ function LessonReader({
       </div>
 
       <InteractiveLesson
+        key={lesson.id}
         lesson={lesson}
         sectionsViewed={sectionsViewed}
         onSectionComplete={markSectionViewed}
+        onLessonComplete={handleComplete}
       />
     </div>
   );
