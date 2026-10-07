@@ -49,9 +49,9 @@ const clean = (q: Scraped): boolean => {
   if (/<\/?[a-zA-Z]/.test(q.question) || q.options.some((o) => /<\/?[a-zA-Z]/.test(o))) return false;
   if (/&(nbsp|amp|lt|gt|quot);/.test(q.question)) return false;
   // Drop dangling references (empty targets, missing words)
-  if (/: *$/.test(q.question) && q.question.length < 120) {
+  if (/: *$/.test(q.question) && q.question.length < 80) {
     const tail = q.question.slice(-60);
-    if (!/[A-Z]{3,}/.test(tail) && !/["']/.test(tail)) return false;
+    if (!/[A-Z]{3,}/.test(tail) && !/["']/.test(tail) && !/\b(which|who|what|whom|whose)\b/i.test(tail)) return false;
   }
   if (/spell the word\s*$/i.test(q.question)) return false;
   if (typeof q.year !== "number" || q.year < 1978 || q.year > 2026) return false;

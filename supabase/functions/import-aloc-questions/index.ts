@@ -170,9 +170,9 @@ async function doImport(supabase: ReturnType<typeof createClient>) {
       // Reject dangling references: empty targets ("…syllable:") and
       // missing words ("…spell the word"). Unfixable rows are pruned,
       // never imported.
-      if (/: *$/.test(question) && question.length < 120) {
+      if (/: *$/.test(question) && question.length < 80) {
         const tail = question.slice(-60);
-        if (!/[A-Z]{3,}/.test(tail) && !/["']/.test(tail)) continue;
+        if (!/[A-Z]{3,}/.test(tail) && !/["']/.test(tail) && !/\b(which|who|what|whom|whose)\b/i.test(tail)) continue;
       }
       if (/spell the word\s*$/i.test(question)) continue;
       const opts = [cell(c[2]), cell(c[3]), cell(c[4]), cell(c[5])].map((o) => stripHtml(o || ""));

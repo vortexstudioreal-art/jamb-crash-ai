@@ -15,14 +15,23 @@ interface Candidate {
   reason: string;
 }
 
-// Ends with a bare colon and no visible target (no ALLCAPS word or quoted
-// segment near the end). e.g. "Choose the word with stress on the first
-// syllable:" — versus valid "…nearest in meaning to ELATED:".
+// Ends with a bare colon AND a short question AND no visible target.
+// NOTE: narrowed after an over-broad version deleted valid
+// "Which of the following...:" questions. Only flag when the tail has
+// neither an ALLCAPS token, a quoted segment, nor a "which/who/what"
+// clause — i.e. genuinely nothing to answer about.
 const hasEmptyTarget = (q: string): boolean => {
-  if (!/:\s*$/.test(q) || q.length >= 120) return false;
+  if (!/:\s*$/.test(q) || q.length >= 80) return false;
   const tail = q.slice(-60);
-  return !/[A-Z]{3,}/.test(tail) && !/["']/.test(tail);
+  if (/[A-Z]{3,}/.test(tail) || /["']/.test(tail)) return false;
+  if (/\b(which|who|what|whom|whose)\b/i.test(tail)) return false;
+  return true;
 };
+
+// Truncated mid-phrase can no longer be detected safely — valid JAMB
+// phrasing ("…based on", "…used as an anaesthetic is") ends the same way.
+// Truncation is caught at import time by length sanity + human review;
+// the auditor no longer auto-flags it.
 
 // The target word itself is missing, e.g. "…how to spell the word".
 const missingWord = (q: string): boolean => /spell the word\s*$/i.test(q);
