@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { usePaystack } from '@/hooks/usePaystack';
+import { trackFunnel } from '@/lib/funnel';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { errorLogger } from '@/services/errorLogger';
@@ -155,9 +156,10 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
       return;
     }
 
+    trackFunnel(email, 'checkout_started', { plan: plan.name, amount: finalPrice });
+
     // If final price is 0 (100% discount), skip Paystack and grant access directly
-    if (finalPrice === 0) {
-      const freeReference = `FREE_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    if (finalPrice === 0) {      const freeReference = `FREE_${Date.now()}_${Math.random().toString(36).substring(7)}`;
       
       const attemptFreePayment = async (isRetry = false) => {
         // If retrying, sign out first to clear stale session
@@ -227,6 +229,7 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
 
         toast.success('100% discount applied! Access granted! 🎉');
         await redeemReferral(email);
+        trackFunnel(email, 'paid', { plan: plan.name, amount: 0 });
         onSuccess(freeReference, email);
       } catch (err) {
         errorLogger.error(err, { component: 'PaymentModal', action: 'free transaction' });
@@ -271,6 +274,7 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
           }
         }
         await redeemReferral(email);
+        trackFunnel(email, 'paid', { plan: plan.name, amount: finalPrice });
         onSuccess(reference, email);
       },
       () => {

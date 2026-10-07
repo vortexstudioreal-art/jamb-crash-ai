@@ -3,6 +3,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { startPeriodicSync, stopPeriodicSync } from '@/services/syncService';
 import { clearPushTokens } from '@/hooks/usePushNotifications';
+import { trackFunnel } from '@/lib/funnel';
 import { errorLogger } from '@/services/errorLogger';
 
 // Package feature limits
@@ -454,6 +455,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (signInError) {
         return { error: new Error('email_not_confirmed') };
       }
+      trackFunnel(email, 'signup');
+    } else if (!error && data?.session) {
+      trackFunnel(email, 'signup');
     }
     
     return { error: error as Error | null };

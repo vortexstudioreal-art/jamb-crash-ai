@@ -62,6 +62,7 @@ const PayoutManagement = lazy(() => import('@/components/admin/PayoutManagement'
 const QuestionReportsManager = lazy(() => import('@/components/admin/QuestionReportsManager').then(m => ({ default: m.QuestionReportsManager })));
 const B2BManagement = lazy(() => import('@/components/admin/B2BManagement').then(m => ({ default: m.B2BManagement })));
 const NovelLibraryManager = lazy(() => import('@/components/admin/NovelLibraryManager').then(m => ({ default: m.NovelLibraryManager })));
+const FunnelStats = lazy(() => import('@/components/admin/FunnelStats').then(m => ({ default: m.FunnelStats })));
 
 const AdminPanel = () => {
   const navigate = useNavigate();
@@ -997,6 +998,17 @@ const AdminPanel = () => {
             >
               <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
                 <NovelLibraryManager />
+              </Suspense>
+            </motion.div>
+
+            {/* Conversion Funnel */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.18 }}
+            >
+              <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
+                <FunnelStats />
               </Suspense>
             </motion.div>
 

@@ -862,7 +862,32 @@ export type Database = {
         }
         Relationships: []
       }
-      push_tokens: {        Row: {
+      funnel_events: {
+        Row: {
+          created_at: string
+          email: string
+          event: string
+          id: string
+          meta: Json | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          event: string
+          id?: string
+          meta?: Json | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          event?: string
+          id?: string
+          meta?: Json | null
+        }
+        Relationships: []
+      }
+      push_tokens: {
+        Row: {
           created_at: string
           email: string
           id: string

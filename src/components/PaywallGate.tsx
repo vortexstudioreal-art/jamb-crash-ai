@@ -1,16 +1,28 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Lock, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { trackFunnel } from '@/lib/funnel';
 
 interface PaywallGateProps {
   hasAccess: boolean;
   isLoading: boolean;
   onUpgrade: () => void;
   children: ReactNode;
+  userEmail?: string | null;
 }
 
-export const PaywallGate = ({ hasAccess, isLoading, onUpgrade, children }: PaywallGateProps) => {
+export const PaywallGate = ({ hasAccess, isLoading, onUpgrade, children, userEmail }: PaywallGateProps) => {
+  const trackedRef = useRef(false);
+  useEffect(() => {
+    if (!isLoading && !hasAccess && userEmail && !trackedRef.current) {
+      trackedRef.current = true;
+      trackFunnel(userEmail, 'paywall_seen');
+    }
+    if (hasAccess) {
+      trackedRef.current = false;
+    }
+  }, [isLoading, hasAccess, userEmail]);
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">

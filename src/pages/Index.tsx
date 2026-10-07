@@ -28,6 +28,7 @@ import type { Step, QuizType } from '@/types/dashboard';
 import { errorLogger } from '@/services/errorLogger';
 import { HomeTab } from '@/components/dashboard/HomeTab';
 import { reconcileReminder, parseReminderTime } from '@/lib/reminders';
+import { trackFunnel } from '@/lib/funnel';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { StudyTab } from '@/components/dashboard/StudyTab';
 import { AiTab } from '@/components/dashboard/AiTab';
@@ -534,8 +535,7 @@ const Index = () => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
-  const handleSubjectsSelected = async (subjects: string[]) => {
-    // Enforce subject_change limit for returning users (not initial setup)
+  const handleSubjectsSelected = async (subjects: string[]) => {    // Enforce subject_change limit for returning users (not initial setup)
     if (userSubjects.length > 0 && userPackage === 'basic' && !canUseFeature('subject_change')) {
       setShowSubjectChangeLimitModal(true);
       return;
@@ -549,6 +549,7 @@ const Index = () => {
     }
 
     setUserSubjects(subjects);
+    trackFunnel(userEmail, 'subjects_selected', { count: subjects.length });
     
     // Refresh access to get latest payment status
     await refreshAccess();
@@ -611,6 +612,7 @@ const Index = () => {
 
   const handleStartQuiz = async (type: QuizType) => {
     setQuizType(type);
+    trackFunnel(userEmail, 'quiz_started', { type });
     navigateStep('quiz');
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
@@ -624,6 +626,8 @@ const Index = () => {
   const handleUpgradeClick = (plan?: string) => {
     setSelectedPlan((plan && plans[plan as keyof typeof plans] ? plan : 'pro') as keyof typeof plans);
     setIsPlanSelectionOpen(true);
+    // Every upgrade CTA funnels through here = paywall impression
+    trackFunnel(userEmail, 'paywall_seen', plan ? { plan } : undefined);
   };
 
   const handleSignOut = async () => {
@@ -1124,7 +1128,7 @@ const Index = () => {
   // Dashboard step
   if (currentStep === 'dashboard' && userEmail) {
     return (
-      <PaywallGate hasAccess={true} isLoading={isFullyLoading} onUpgrade={handleUpgradeClick}>
+      <PaywallGate hasAccess={true} isLoading={isFullyLoading} onUpgrade={handleUpgradeClick} userEmail={userEmail}>
         <div className="min-h-screen bg-background">
           {/* Desktop Sidebar */}
           <DesktopSidebar
