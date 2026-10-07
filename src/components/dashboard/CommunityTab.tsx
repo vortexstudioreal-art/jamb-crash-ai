@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Users, Trophy, GraduationCap, Newspaper, Gamepad2, MessageCircle, Youtube, Flame } from 'lucide-react';
 import { LiveCounter } from '@/components/LiveCounter';
 import { ReferralSystem } from '@/components/ReferralSystem';
+import { StudyBoard } from '@/components/StudyBoard';
 import type { DashboardContext } from '@/types/dashboard';
 
 interface CommunityTabProps extends DashboardContext {
@@ -12,6 +13,8 @@ interface CommunityTabProps extends DashboardContext {
 
 export const CommunityTab = ({
   userEmail,
+  effectiveAdmin,
+  effectiveSubjects,
   navigateStep,
   navigate,
 }: CommunityTabProps) => {
@@ -73,6 +76,13 @@ export const CommunityTab = ({
       {userEmail && (
         <Suspense fallback={null}>
           <ReferralSystem userEmail={userEmail} />
+        </Suspense>
+      )}
+
+      {/* Anonymous study board */}
+      {userEmail && (
+        <Suspense fallback={null}>
+          <StudyBoard userEmail={userEmail} isAdmin={effectiveAdmin} subjects={effectiveSubjects} />
         </Suspense>
       )}
     </motion.div>

@@ -769,8 +769,82 @@ export type Database = {
         }
         Relationships: []
       }
-      push_tokens: {
+      board_replies: {
         Row: {
+          alias: string
+          body: string
+          created_at: string
+          email: string
+          id: string
+          image_url: string | null
+          is_deleted: boolean
+          thread_id: string
+        }
+        Insert: {
+          alias: string
+          body: string
+          created_at?: string
+          email: string
+          id?: string
+          image_url?: string | null
+          is_deleted?: boolean
+          thread_id: string
+        }
+        Update: {
+          alias?: string
+          body?: string
+          created_at?: string
+          email?: string
+          id?: string
+          image_url?: string | null
+          is_deleted?: boolean
+          thread_id?: string
+        }
+        Relationships: []
+      }
+      board_threads: {
+        Row: {
+          alias: string
+          body: string
+          created_at: string
+          email: string
+          id: string
+          image_url: string | null
+          is_deleted: boolean
+          reply_count: number
+          subject: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          alias: string
+          body: string
+          created_at?: string
+          email: string
+          id?: string
+          image_url?: string | null
+          is_deleted?: boolean
+          reply_count?: number
+          subject?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          alias?: string
+          body?: string
+          created_at?: string
+          email?: string
+          id?: string
+          image_url?: string | null
+          is_deleted?: boolean
+          reply_count?: number
+          subject?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      push_tokens: {        Row: {
           created_at: string
           email: string
           id: string
