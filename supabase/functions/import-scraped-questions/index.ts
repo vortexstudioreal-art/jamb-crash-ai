@@ -54,6 +54,11 @@ const clean = (q: Scraped): boolean => {
     if (!/[A-Z]{3,}/.test(tail) && !/["']/.test(tail) && !/\b(which|who|what|whom|whose)\b/i.test(tail)) return false;
   }
   if (/spell the word\s*$/i.test(q.question)) return false;
+  // Orphan bare words ("Unfair" with unrelated options)
+  if (!/[\s:]/.test(q.question.trim())) {
+    const norm = (s: string) => s.toLowerCase().replace(/[^a-z]/g, '');
+    if (!q.options.some((o) => norm(o) === norm(q.question))) return false;
+  }
   if (typeof q.year !== "number" || q.year < 1978 || q.year > 2026) return false;
   return true;
 };

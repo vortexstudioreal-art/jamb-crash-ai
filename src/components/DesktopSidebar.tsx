@@ -26,7 +26,7 @@ const mainNav: { id: DashboardTab; label: string; Icon: typeof Home; description
   { id: 'home', label: 'Dashboard', Icon: Home, description: 'Overview & quick actions' },
   { id: 'study', label: 'Study Hub', Icon: BookOpen, description: 'Subjects & materials' },
   { id: 'ai', label: 'AI Tutor', Icon: Sparkles, description: 'Ask anything' },
-  { id: 'community', label: 'Community', Icon: Trophy, description: 'Leaderboard & chat' },
+  { id: 'community', label: 'Community', Icon: Trophy, description: 'Board, leaderboard & rewards' },
   { id: 'profile', label: 'Profile', Icon: User, description: 'Account & stats' },
 ];
 

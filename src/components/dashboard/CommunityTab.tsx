@@ -36,32 +36,32 @@ export const CommunityTab = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Button variant="outline" className="h-auto py-5 flex flex-col gap-1 hover:border-yellow-500 hover:bg-yellow-500/5" onClick={() => navigateStep('leaderboard' as never)}>
           <Trophy className="w-6 h-6 text-yellow-500" />
           <span className="font-bold text-sm">Leaderboard</span>
-        </Button>
-        <Button variant="outline" className="h-auto py-5 flex flex-col gap-1 hover:border-amber-500 hover:bg-amber-500/5" onClick={() => navigateStep('scholarships' as never)}>
-          <GraduationCap className="w-6 h-6 text-amber-500" />
-          <span className="font-bold text-sm">Scholarships</span>
-        </Button>
-        <Button variant="outline" className="h-auto py-5 flex flex-col gap-1 hover:border-cyan-500 hover:bg-cyan-500/5" onClick={() => navigateStep('news' as never)}>
-          <Newspaper className="w-6 h-6 text-cyan-500" />
-          <span className="font-bold text-sm">JAMB News</span>
         </Button>
         <Button variant="outline" className="h-auto py-5 flex flex-col gap-1 hover:border-primary hover:bg-primary/5" onClick={() => navigate('/games')}>
           <Gamepad2 className="w-6 h-6 text-primary" />
           <span className="font-bold text-sm">Challenges</span>
         </Button>
-        <Button variant="outline" className="h-auto py-5 flex flex-col gap-1 hover:border-green-500 hover:bg-green-500/5" onClick={() => window.open('https://whatsapp.com/channel/0029VbAqCkeGehEHAIYD1s2y', '_blank')}>
-          <MessageCircle className="w-6 h-6 text-green-500" />
-          <span className="font-bold text-sm">WhatsApp</span>
+        <Button variant="outline" className="h-auto py-5 flex flex-col gap-1 hover:border-cyan-500 hover:bg-cyan-500/5" onClick={() => navigateStep('news' as never)}>
+          <Newspaper className="w-6 h-6 text-cyan-500" />
+          <span className="font-bold text-sm">JAMB News</span>
         </Button>
-        <Button variant="outline" className="h-auto py-5 flex flex-col gap-1 hover:border-pink-500 hover:bg-pink-500/5" onClick={() => window.open('https://www.tiktok.com/@jambcrashai', '_blank')}>
-          <Youtube className="w-6 h-6 text-pink-500" />
-          <span className="font-bold text-sm">TikTok</span>
+        <Button variant="outline" className="h-auto py-5 flex flex-col gap-1 hover:border-amber-500 hover:bg-amber-500/5" onClick={() => navigateStep('scholarships' as never)}>
+          <GraduationCap className="w-6 h-6 text-amber-500" />
+          <span className="font-bold text-sm">Scholarships</span>
         </Button>
       </div>
+
+      {/* Anonymous study board — the heart of the tab */}
+      {userEmail && (
+        <Suspense fallback={null}>
+          <StudyBoard userEmail={userEmail} isAdmin={effectiveAdmin} subjects={effectiveSubjects} />
+        </Suspense>
+      )}
+
       <div className="rounded-2xl p-5 bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/30">
         <div className="flex items-center gap-3">
           <Flame className="w-8 h-8 text-orange-500" />
@@ -79,12 +79,17 @@ export const CommunityTab = ({
         </Suspense>
       )}
 
-      {/* Anonymous study board */}
-      {userEmail && (
-        <Suspense fallback={null}>
-          <StudyBoard userEmail={userEmail} isAdmin={effectiveAdmin} subjects={effectiveSubjects} />
-        </Suspense>
-      )}
+      {/* Follow us elsewhere */}
+      <div className="grid grid-cols-2 gap-3">
+        <Button variant="ghost" className="h-auto py-3 flex items-center justify-center gap-2 text-muted-foreground" onClick={() => window.open('https://whatsapp.com/channel/0029VbAqCkeGehEHAIYD1s2y', '_blank')}>
+          <MessageCircle className="w-4 h-4 text-green-500" />
+          <span className="text-xs font-medium">WhatsApp Channel</span>
+        </Button>
+        <Button variant="ghost" className="h-auto py-3 flex items-center justify-center gap-2 text-muted-foreground" onClick={() => window.open('https://www.tiktok.com/@jambcrashai', '_blank')}>
+          <Youtube className="w-4 h-4 text-pink-500" />
+          <span className="text-xs font-medium">TikTok</span>
+        </Button>
+      </div>
     </motion.div>
   );
 };

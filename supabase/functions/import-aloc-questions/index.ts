@@ -175,6 +175,12 @@ async function doImport(supabase: ReturnType<typeof createClient>) {
         if (!/[A-Z]{3,}/.test(tail) && !/["']/.test(tail) && !/\b(which|who|what|whom|whose)\b/i.test(tail)) continue;
       }
       if (/spell the word\s*$/i.test(question)) continue;
+      // Orphan bare words ("Unfair" with unrelated options): a single-token
+      // question is only valid if an option is the same word (stress marks).
+      if (!/[\s:]/.test(question)) {
+        const norm = (s: string) => s.toLowerCase().replace(/[^a-z]/g, '');
+        if (!opts.some((o) => norm(o) === norm(question))) continue;
+      }
       const opts = [cell(c[2]), cell(c[3]), cell(c[4]), cell(c[5])].map((o) => stripHtml(o || ""));
       if (opts.some((o) => !o)) continue;
       const yearRaw = (cell(c[11]) || "").trim();

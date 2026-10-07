@@ -28,10 +28,18 @@ const hasEmptyTarget = (q: string): boolean => {
   return true;
 };
 
-// Truncated mid-phrase can no longer be detected safely — valid JAMB
-// phrasing ("…based on", "…used as an anaesthetic is") ends the same way.
-// Truncation is caught at import time by length sanity + human review;
-// the auditor no longer auto-flags it.
+// Orphan bare word: single-token question (no instruction, no colon)
+// where no option is the same word in different casing. Stress-marked
+// rows ("ceremoniously" -> "CEremoniously") match and survive; rows like
+// "Unfair" -> insight/first-class (no relation at all) do not.
+const isOrphanWord = (q: string, opts: string[]): boolean => {
+  const t = q.trim();
+  if (!t || /\s/.test(t) || /:/.test(t)) return false;
+  const norm = (s: string) => s.toLowerCase().replace(/[^a-z]/g, '');
+  const target = norm(t);
+  if (!target) return false;
+  return !opts.some((o) => norm(o) === target);
+};
 
 // The target word itself is missing, e.g. "…how to spell the word".
 const missingWord = (q: string): boolean => /spell the word\s*$/i.test(q);
@@ -56,6 +64,10 @@ async function audit(supabase: ReturnType<typeof createClient>) {
         candidates.push({ id: r.id, subject: r.subject, year: r.year, question: q.slice(0, 120), reason: "empty target" });
       } else if (missingWord(q)) {
         candidates.push({ id: r.id, subject: r.subject, year: r.year, question: q.slice(0, 120), reason: "missing word" });
+      } else if (
+        isOrphanWord(q, [r.option_a, r.option_b, r.option_c, r.option_d])
+      ) {
+        candidates.push({ id: r.id, subject: r.subject, year: r.year, question: q.slice(0, 120), reason: "orphan word" });
       }
       const opts = [r.option_a, r.option_b, r.option_c, r.option_d].join(" ");
       if (q.includes("`") || opts.includes("`")) backticks++;
