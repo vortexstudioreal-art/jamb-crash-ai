@@ -140,8 +140,11 @@ export function LessonLibrary({
       }
     } catch (err) {
       errorLogger.error(err, { component: 'LessonLibrary', action: 'load lessons' });
+      const offline = typeof navigator !== 'undefined' && !navigator.onLine;
       setLoadError(
-        err instanceof Error ? err.message : 'Could not load lessons.'
+        offline
+          ? 'You are offline. Lessons need a connection — your downloaded novels, syllabus and quizzes still work.'
+          : err instanceof Error ? err.message : 'Could not load lessons.'
       );
       setLessons([]);
     } finally {

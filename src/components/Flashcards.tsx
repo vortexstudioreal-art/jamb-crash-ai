@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
+import { getFlashcards, saveFlashcards, updateFlashcard, addToSyncQueue } from '@/services/offlineStorage';
 import { toast } from 'sonner';
 import { useFeatureUsage } from '@/hooks/useFeatureUsage';
 import { FeatureLimitReached } from '@/components/FeatureLimitReached';
@@ -85,32 +86,62 @@ export const Flashcards = ({ userEmail, subjects, onBack, initialSubject }: Flas
 
   const loadFlashcards = useCallback(async () => {
     setLoading(true);
-    
-    let query = supabase
-      .from('flashcards')
-      .select('*')
-      .eq('email', userEmail)
-      .order('next_review_at', { ascending: true, nullsFirst: true });
+    const isOnline = typeof navigator === 'undefined' || navigator.onLine;
 
-    if (selectedSubject) {
-      query = query.eq('subject', selectedSubject);
-    } else {
-      query = query.in('subject', subjects.map(s => s.toLowerCase()));
+    if (isOnline) {
+      try {
+        let query = supabase
+          .from('flashcards')
+          .select('*')
+          .eq('email', userEmail)
+          .order('next_review_at', { ascending: true, nullsFirst: true });
+
+        if (selectedSubject) {
+          query = query.eq('subject', selectedSubject);
+        } else {
+          query = query.in('subject', subjects.map(s => s.toLowerCase()));
+        }
+
+        if (selectedTopic) {
+          query = query.eq('topic', selectedTopic);
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+
+        if (data) {
+          // Shuffle cards for variety
+          const shuffled = [...data].sort(() => Math.random() - 0.5);
+          setFlashcards(shuffled as Flashcard[]);
+          // Refresh the offline cache while we're online
+          try {
+            await saveFlashcards(shuffled as unknown as Parameters<typeof saveFlashcards>[0]);
+          } catch {
+            // cache is best-effort
+          }
+          setLoading(false);
+          return;
+        }
+      } catch (err) {
+        errorLogger.error(err, { component: 'Flashcards', action: 'load flashcards online' });
+      }
     }
 
-    if (selectedTopic) {
-      query = query.eq('topic', selectedTopic);
+    // Offline (or online fetch failed): fall back to the device cache
+    try {
+      const cached = await getFlashcards(userEmail);
+      let list = cached as unknown as Flashcard[];
+      if (selectedSubject) list = list.filter(c => c.subject === selectedSubject);
+      if (selectedTopic) list = list.filter(c => c.topic === selectedTopic);
+      setFlashcards([...list].sort(() => Math.random() - 0.5));
+      if (!isOnline && list.length > 0) {
+        toast.info('Offline mode — showing downloaded flashcards');
+      }
+    } catch (err) {
+      errorLogger.error(err, { component: 'Flashcards', action: 'load flashcards offline' });
+    } finally {
+      setLoading(false);
     }
-
-    const { data } = await query;
-    
-    if (data) {
-      // Shuffle cards for variety
-      const shuffled = [...data].sort(() => Math.random() - 0.5);
-      setFlashcards(shuffled as Flashcard[]);
-    }
-    
-    setLoading(false);
   }, [userEmail, selectedSubject, selectedTopic, subjects]);
 
   // Load flashcards
@@ -247,6 +278,10 @@ export const Flashcards = ({ userEmail, subjects, onBack, initialSubject }: Flas
   };
 
   const deleteFlashcard = async (id: string) => {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      toast.error('Connect to the internet to delete flashcards');
+      return;
+    }
     try {
       const { error } = await supabase
         .from('flashcards')
@@ -313,17 +348,33 @@ export const Flashcards = ({ userEmail, subjects, onBack, initialSubject }: Flas
     const hoursUntilReview = correct ? Math.pow(2, timesCorrect) * 4 : 1;
     const nextReview = new Date(Date.now() + hoursUntilReview * 60 * 60 * 1000);
 
-    // Update in database
-    await supabase
-      .from('flashcards')
-      .update({
-        times_reviewed: timesReviewed,
-        times_correct: timesCorrect,
-        mastery_level: masteryLevel,
-        last_reviewed_at: new Date().toISOString(),
-        next_review_at: nextReview.toISOString(),
-      })
-      .eq('id', card.id);
+    const updates = {
+      times_reviewed: timesReviewed,
+      times_correct: timesCorrect,
+      mastery_level: masteryLevel,
+      last_reviewed_at: new Date().toISOString(),
+      next_review_at: nextReview.toISOString(),
+    };
+
+    // Persist locally first so offline reviews survive; sync to server
+    // now when online, or queue for later when offline.
+    try {
+      await updateFlashcard({ ...card, ...updates } as unknown as Parameters<typeof updateFlashcard>[0]);
+    } catch {
+      // local cache is best-effort
+    }
+    if (typeof navigator === 'undefined' || navigator.onLine) {
+      const { error } = await supabase
+        .from('flashcards')
+        .update(updates)
+        .eq('id', card.id);
+      if (error) {
+        await addToSyncQueue('flashcard_update', { updates, id: card.id });
+      }
+    } else {
+      await addToSyncQueue('flashcard_update', { updates, id: card.id });
+      toast.info('Offline — review saved, will sync later');
+    }
 
     // Update local state
     setFlashcards(prev => prev.map(f => 

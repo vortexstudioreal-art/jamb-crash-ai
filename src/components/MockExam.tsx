@@ -12,6 +12,7 @@ import { ReportQuestionButton } from '@/components/ReportQuestionButton';
 import { stripQuestionHtml } from '@/lib/sanitize';
 import { downloadScorecard, shareScorecard, type ScorecardData } from '@/lib/scorecard';
 import { pickAdaptive, collectWeakQuestionCounts } from '@/lib/adaptive';
+import { getQuestions, saveQuestions } from '@/services/offlineStorage';
 
 interface MockExamProps {
   userEmail: string;
@@ -78,28 +79,49 @@ export const MockExam = ({ userEmail, subjects, onExit }: MockExamProps) => {
     setLoading(true);
     try {
       const builtSections = buildMockSections(selectedSubjects);
+      const isOnline = typeof navigator === 'undefined' || navigator.onLine;
 
       // Adaptive difficulty: learn which questions the user has missed before
       let weakCounts: Map<string, number> = new Map();
-      const { data: pastAttempts } = await supabase
-        .from('quiz_attempts')
-        .select('questions_data')
-        .eq('email', userEmail)
-        .order('created_at', { ascending: false })
-        .limit(10);
-      if (pastAttempts) {
-        weakCounts = collectWeakQuestionCounts(pastAttempts.map(a => a.questions_data));
+      if (isOnline) {
+        const { data: pastAttempts } = await supabase
+          .from('quiz_attempts')
+          .select('questions_data')
+          .eq('email', userEmail)
+          .order('created_at', { ascending: false })
+          .limit(10);
+        if (pastAttempts) {
+          weakCounts = collectWeakQuestionCounts(pastAttempts.map(a => a.questions_data));
+        }
       }
 
       const loaded: MockQuestion[][] = [];
       for (const section of builtSections) {
-        const { data, error } = await supabase
-          .from('jamb_questions')
-          .select('id, question, option_a, option_b, option_c, option_d, correct_answer, subject, year, explanation, image_url, is_ai_generated')
-          .eq('subject', section.subject as Database['public']['Enums']['jamb_subject'])
-          .limit(200);
-        if (error) throw error;
-        const pool = data || [];
+        let pool: MockQuestion[] = [];
+        if (isOnline) {
+          const { data, error } = await supabase
+            .from('jamb_questions')
+            .select('id, question, option_a, option_b, option_c, option_d, correct_answer, subject, year, explanation, image_url, is_ai_generated')
+            .eq('subject', section.subject as Database['public']['Enums']['jamb_subject'])
+            .limit(200);
+          if (error) throw error;
+          pool = (data || []) as MockQuestion[];
+          // Refresh the offline cache while online
+          if (pool.length > 0) {
+            try {
+              await saveQuestions(pool as unknown as Parameters<typeof saveQuestions>[0]);
+            } catch {
+              // cache is best-effort
+            }
+          }
+        }
+        if (pool.length === 0) {
+          const cached = await getQuestions([section.subject]);
+          pool = cached as unknown as MockQuestion[];
+          if (!isOnline && pool.length > 0) {
+            toast('Offline Mode', { description: `Using cached ${section.title} questions` });
+          }
+        }
         if (pool.length < section.questionCount) {
           toast.error(`Not enough ${section.title} questions in the bank (${pool.length}/${section.questionCount}). Try again later.`);
           setLoading(false);
@@ -200,6 +222,13 @@ export const MockExam = ({ userEmail, subjects, onExit }: MockExamProps) => {
       const questionsData = sections.flatMap((section, idx) =>
         sectionQuestions[idx].map((q) => ({ ...q, userAnswer: sectionAnswers[section.key]?.[q.id] || '' })),
       );
+
+      // Offline mocks can't sync (no queue type for full mocks) — results
+      // still show; the attempt just isn't recorded.
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        toast.info('Offline — mock results shown but not saved');
+        return;
+      }
 
       await supabase.from('mock_attempts').insert({
         email: userEmail,
