@@ -91,8 +91,9 @@ export function NovelLibraryManager() {
       const prose = novels.filter((n) => !(n.category || '').includes('poetry'));
       const poems = novels.filter((n) => (n.category || '').includes('poetry'));
 
-      // One quick invoke per novel/poem — each runs in the background on
-      // the server, so closing this tab mid-run no longer kills the job.
+      // One invoke per book, spaced 30s apart. The jobs run for minutes
+      // each on the server — firing all 19 at once is what triggers
+      // Groq 429s and gets jobs killed mid-run. Slow queueing = finishes.
       // The function only enriches thin chapters (<500 words): re-running
       // fills whatever a previous run missed.
       const failed: string[] = [];
@@ -100,24 +101,24 @@ export function NovelLibraryManager() {
       const total = prose.length + poems.length;
       for (const novel of prose) {
         i++;
-        setStatus(`Queued ${i}/${total}: ${novel.title}…`);
+        setStatus(`Queued ${i}/${total}: ${novel.title}… (pace: 30s apart)`);
         try {
           await invokeWithTimeout({ novel_title: novel.title });
         } catch {
           failed.push(novel.title);
         }
-        await sleep(500);
+        await sleep(30000);
       }
 
       for (const poem of poems) {
         i++;
-        setStatus(`Queued ${i}/${total}: ${poem.title}…`);
+        setStatus(`Queued ${i}/${total}: ${poem.title}… (pace: 30s apart)`);
         try {
           await invokeWithTimeout({ enrich_all_poetry: 'true', poem_title: poem.title });
         } catch {
           failed.push(poem.title);
         }
-        await sleep(500);
+        await sleep(30000);
       }
 
       if (failed.length > 0) {
