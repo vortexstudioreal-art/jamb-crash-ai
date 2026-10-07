@@ -60,12 +60,16 @@ export const StudyStats = ({ userEmail, refreshTrigger, onPracticeSubject, allow
     const cacheKey = `ai_tip_v2_${userEmail}`;
     const cached = sessionStorage.getItem(cacheKey);
     if (cached) {
-      const { tip, timestamp, questionCount } = JSON.parse(cached);
-      // Invalidate cache if 25+ more questions answered
-      if (Date.now() - timestamp < 60 * 60 * 1000 && 
-          Math.abs(prediction.totalQuestions - questionCount) < 25) {
-        setAiTip(tip);
-        return;
+      try {
+        const { tip, timestamp, questionCount } = JSON.parse(cached);
+        // Invalidate cache if 25+ more questions answered
+        if (Date.now() - timestamp < 60 * 60 * 1000 &&
+            Math.abs(prediction.totalQuestions - questionCount) < 25) {
+          setAiTip(tip);
+          return;
+        }
+      } catch {
+        sessionStorage.removeItem(cacheKey);
       }
     }
 

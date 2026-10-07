@@ -14,12 +14,13 @@ interface InitializePaymentRequest {
 }
 
 // Server-side price lookup - NEVER trust client-supplied amounts
+// Must match frontend plans (Basic ₦1,500 / ACE ₦3,500 / SCHOLAR ₦7,500)
 const PACKAGE_PRICES: Record<string, number> = {
-  basic: 5000,
-  pro: 10000,
-  standard: 10000,
-  premium: 15000,
-  ultimate: 15000,
+  basic: 1500,
+  pro: 3500,
+  standard: 3500,
+  premium: 7500,
+  ultimate: 7500,
 };
 
 // Rate limiting - 5 payment initializations per email per hour

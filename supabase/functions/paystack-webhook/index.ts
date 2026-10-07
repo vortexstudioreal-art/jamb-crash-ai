@@ -93,6 +93,17 @@ serve(async (req) => {
       } else {
         console.log("[paystack-webhook] Payment record updated successfully for reference:", reference);
       }
+
+      // Backup referral credit for payments verified only via webhook.
+      const referralCode = metadata?.referralCode;
+      const customerEmail = customer?.email;
+      if (typeof referralCode === "string" && referralCode && customerEmail) {
+        const { error: redeemError } = await supabase.rpc("redeem_referral_code", {
+          p_code: referralCode,
+          p_email: customerEmail,
+        });
+        if (redeemError) console.error("[paystack-webhook] referral redeem error:", redeemError.message);
+      }
     } else {
       console.log("[paystack-webhook] Unhandled event type:", event.event);
     }

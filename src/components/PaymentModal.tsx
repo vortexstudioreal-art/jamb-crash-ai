@@ -23,14 +23,17 @@ interface PaymentModalProps {
 
 const emailSchema = z.string().email('Please enter a valid email address');
 
-// Map frontend plan names to database-valid package codes
+// Map frontend plan display names to canonical database package codes
 const getPackageCode = (planName: string): string => {
   const mapping: Record<string, string> = {
     'basic': 'basic',
+    'ace': 'pro',
+    'scholar': 'premium',
     'pro': 'pro',
-    'premium': 'ultimate', // DB constraint requires 'ultimate' not 'premium'
+    'premium': 'premium',
+    'ultimate': 'ultimate',
   };
-  return mapping[planName.toLowerCase()] || planName.toLowerCase();
+  return mapping[planName.toLowerCase()] || 'basic';
 };
 
 export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }: PaymentModalProps) => {

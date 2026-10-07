@@ -85,6 +85,29 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const packageName = paystackData.data.metadata?.package || "basic";
+    // Server-side price check: the amount Paystack actually collected must
+    // cover list price minus any coupon/referral discount the client claimed.
+    // Without this, any ₦1 payment would grant full access.
+    const PACKAGE_PRICES: Record<string, number> = {
+      basic: 1500,
+      pro: 3500,
+      standard: 3500,
+      premium: 7500,
+      ultimate: 7500,
+    };
+    const expectedPrice = PACKAGE_PRICES[String(packageName).toLowerCase()] ?? 1500;
+    const claimedDiscount = Number(paystackData.data.metadata?.discountApplied) || 0;
+    const paidNaira = (paystackData.data.amount || 0) / 100;
+    if (paidNaira + 1 < expectedPrice - Math.min(claimedDiscount, expectedPrice)) {
+      console.error(
+        "[paystack-verify] Underpaid:",
+        { paid: paidNaira, expected: expectedPrice, claimedDiscount, package: packageName }
+      );
+      return new Response(
+        JSON.stringify({ success: false, error: "Amount paid does not match the plan price" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
     // Access duration: every plan grants ~1 year.
     // NOTE: Must match paystack-webhook/index.ts durations
     const accessDays = 365;
