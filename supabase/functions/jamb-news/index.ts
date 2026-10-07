@@ -47,10 +47,14 @@ Deno.serve(async (req) => {
     for (const feed of FEEDS) {
       try {
         const res = await fetch(feed, {
-          headers: { 'User-Agent': 'JambCrashAI/1.0' },
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'application/rss+xml, application/xml;q=0.9, */*;q=0.8',
+          },
         });
         if (!res.ok) continue;
         const xml = await res.text();
+        if (!xml.includes('<item>')) continue; // consent wall / empty page
         const items = xml.match(/<item>[\s\S]*?<\/item>/gi) || [];
         for (const item of items) {
           const title = tag(item, 'title');
