@@ -9,7 +9,11 @@ export type FunnelEvent =
   | 'paid';
 
 /** Fire-and-forget funnel logging. Never throws, never blocks UI. */
-export const trackFunnel = (email: string | null | undefined, event: FunnelEvent, meta?: Record<string, unknown>): void => {
+export const trackFunnel = (
+  email: string | null | undefined,
+  event: FunnelEvent,
+  meta?: Record<string, string | number | boolean | null | undefined>
+): void => {
   if (!email) return;
   if (typeof navigator !== 'undefined' && !navigator.onLine) return;
   void supabase
