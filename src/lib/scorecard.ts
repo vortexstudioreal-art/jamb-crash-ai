@@ -52,15 +52,19 @@ const drawBookMark = (ctx: CanvasRenderingContext2D, cx: number, cy: number) => 
   ctx.fillRect(cx - 3, y + 8, 6, h - 16);
 };
 
-// Real logo from public/logo.png (cached). Null when missing so the
-// drawn mark is used instead — never throws, never blocks.
+// Real logo from public/logo.png (cached after first success only — a
+// failed load (offline/slow) must not stick, or the logo never appears).
+// Null means "no logo": draw the fallback mark instead.
 let logoCache: Promise<CanvasImageSource | null> | null = null;
 export const loadScorecardLogo = (): Promise<CanvasImageSource | null> => {
   if (!logoCache) {
     logoCache = new Promise((resolve) => {
       const img = new Image();
       img.onload = () => resolve(img);
-      img.onerror = () => resolve(null);
+      img.onerror = () => {
+        logoCache = null; // allow retry next time
+        resolve(null);
+      };
       img.src = '/logo.png';
     });
   }
