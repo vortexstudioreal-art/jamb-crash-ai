@@ -526,6 +526,7 @@ const TopicQuiz = ({ questions, topicLabel, subject, onExit }: TopicQuizProps) =
                         size="sm"
                         onClick={() =>
                           fetchAiExplanation({
+                            id: currentQuestion.id,
                             question: currentQuestion.question,
                             option_a: currentQuestion.option_a,
                             option_b: currentQuestion.option_b,

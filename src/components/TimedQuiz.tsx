@@ -498,6 +498,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
       if (!currentQuestion.explanation) {
         setTimeout(() => {
           fetchAiExplanation({
+            id: currentQuestion.id,
             question: currentQuestion.question,
             option_a: currentQuestion.option_a,
             option_b: currentQuestion.option_b,
@@ -1087,6 +1088,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
                       variant="link" 
                       size="sm" 
                       onClick={() => fetchAiExplanation({
+                        id: currentQuestion.id,
                         question: currentQuestion.question,
                         option_a: currentQuestion.option_a,
                         option_b: currentQuestion.option_b,
@@ -1107,6 +1109,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
                     className="text-xs bg-transparent border-green-500/30 hover:bg-green-500/10 text-green-700 dark:text-green-400 gap-1.5"
                     disabled={isAiLoading}
                     onClick={() => fetchAiExplanation({
+                      id: currentQuestion.id,
                       question: currentQuestion.question,
                       option_a: currentQuestion.option_a,
                       option_b: currentQuestion.option_b,

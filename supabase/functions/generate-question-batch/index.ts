@@ -81,7 +81,7 @@ Return ONLY a valid JSON array, no other text. Each item exactly:
         { role: "system", content: "You are a JAMB exam setter. You output only valid JSON arrays." },
         { role: "user", content: prompt },
       ],
-      max_tokens: 4096,
+      max_tokens: 3000,
       temperature: 0.8,
     }),
   });

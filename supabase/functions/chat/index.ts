@@ -116,6 +116,8 @@ GUIDELINES:
           ...messages,
         ],
         stream: true,
+        // Capped: chat answers stay short, token burn stays flat
+        max_tokens: 1024,
       }),
     });
 

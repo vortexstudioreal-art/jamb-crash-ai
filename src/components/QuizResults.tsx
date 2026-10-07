@@ -95,6 +95,7 @@ export const QuizResults = ({ results, quizType, userEmail, onRetry, onHome, onU
     }
     setAiQuestionId(q.id);
     getExplanation({
+      id: q.id,
       question: q.question,
       option_a: q.option_a,
       option_b: q.option_b,

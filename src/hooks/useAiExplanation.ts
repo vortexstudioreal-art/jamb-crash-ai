@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { errorLogger } from '@/services/errorLogger';
 
 export interface UseAiExplanationProps {
+  id?: string;
   question: string;
   option_a: string;
   option_b: string;
@@ -11,6 +12,26 @@ export interface UseAiExplanationProps {
   correct_answer: string;
   subject: string;
 }
+
+const cacheKey = (id: string) => `jamb_expl_${id}`;
+
+const readCachedExplanation = (id?: string): string | null => {
+  if (!id) return null;
+  try {
+    return localStorage.getItem(cacheKey(id));
+  } catch {
+    return null;
+  }
+};
+
+const writeCachedExplanation = (id: string | undefined, text: string) => {
+  if (!id || !text) return;
+  try {
+    localStorage.setItem(cacheKey(id), text);
+  } catch {
+    // quota/full — cache is best-effort
+  }
+};
 
 export const useAiExplanation = () => {
   const [explanation, setExplanation] = useState<string>('');
@@ -22,6 +43,14 @@ export const useAiExplanation = () => {
     setIsLoading(true);
     setExplanation('');
     setError(null);
+
+    // Device cache first: repeat views of the same question cost zero calls
+    const cached = readCachedExplanation(q.id);
+    if (cached) {
+      setExplanation(cached);
+      setIsLoading(false);
+      return;
+    }
 
     // Cancel any previous requests
     if (abortControllerRef.current) {
@@ -76,7 +105,6 @@ Keep it short and focused: Just explain why the correct answer is right and very
         if (done) break;
 
         textBuffer += decoder.decode(value, { stream: true });
-
         let newlineIndex: number;
         while ((newlineIndex = textBuffer.indexOf('\n')) !== -1) {
           let line = textBuffer.slice(0, newlineIndex);
@@ -102,6 +130,8 @@ Keep it short and focused: Just explain why the correct answer is right and very
           }
         }
       }
+      // Cache the complete answer for repeat views (zero future calls)
+      writeCachedExplanation(q.id, assistantContent);
     } catch (err: unknown) {
       if (err instanceof Error && err.name === 'AbortError') {
         return;

@@ -291,7 +291,17 @@ async function callAI(apiKey: string, prompt: string, novel: NovelLike): Promise
     }
 
     if (response.status === 429 || response.status === 503) {
-      const wait = Math.min(60000, 5000 * Math.pow(2, attempt - 1));
+      // Honor Groq's Retry-After when present (seconds or ms), else back off
+      const ra = response.headers.get("retry-after");
+      const raMs = response.headers.get("retry-after-ms");
+      let wait = Math.min(60000, 5000 * Math.pow(2, attempt - 1));
+      if (raMs) {
+        const ms = parseInt(raMs, 10);
+        if (Number.isFinite(ms)) wait = Math.min(120000, ms + 1000);
+      } else if (ra) {
+        const secs = parseFloat(ra);
+        if (Number.isFinite(secs)) wait = Math.min(120000, secs * 1000 + 1000);
+      }
       console.warn(`AI ${response.status}, retry ${attempt}/${maxAttempts} after ${wait}ms`);
       await new Promise(r => setTimeout(r, wait));
       continue;
