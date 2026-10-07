@@ -14,6 +14,7 @@ interface NewsItem {
 // Publisher RSS feeds (reliable from edge functions — unlike scraping
 // news sites directly, which bot-block datacenter IPs).
 const FEEDS = [
+  'https://www.bing.com/news/search?format=rss&q=JAMB+UTME+Nigeria',
   'https://punchng.com/feed/',
   'https://www.vanguardngr.com/feed/',
 ];
@@ -58,7 +59,11 @@ Deno.serve(async (req) => {
         const xml = await res.text();
         if (!xml.includes('<item>')) continue;
         const items = xml.match(/<item>[\s\S]*?<\/item>/gi) || [];
-        const sourceName = feed.includes('punch') ? 'Punch' : 'Vanguard';
+        const sourceName = feed.includes('bing.com')
+          ? 'Bing News'
+          : feed.includes('punch')
+            ? 'Punch'
+            : 'Vanguard';
         const primary: NewsItem[] = [];
         const secondary: NewsItem[] = [];
         for (const item of items) {
