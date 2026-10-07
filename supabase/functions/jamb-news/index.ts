@@ -11,13 +11,15 @@ interface NewsItem {
   source: string;
 }
 
-// Google News RSS works reliably from edge functions (unlike scraping
-// news sites directly, which bot-block datacenter IPs and return the
-// same stale nav links forever).
+// Publisher RSS feeds (reliable from edge functions — unlike scraping
+// news sites directly, which bot-block datacenter IPs).
 const FEEDS = [
-  'https://news.google.com/rss/search?q=JAMB%20UTME&hl=en-NG&gl=NG&ceid=NG%3Aen',
-  'https://news.google.com/rss/search?q=JAMB%20admission%20Nigeria&hl=en-NG&gl=NG&ceid=NG%3Aen',
+  'https://punchng.com/feed/',
+  'https://www.vanguardngr.com/feed/',
 ];
+
+const PRIMARY = ['jamb', 'utme', 'post-utme', 'admission'];
+const SECONDARY = ['education', 'university', 'polytechnic', 'school', 'exam', 'student', 'waec', 'neco'];
 
 const tag = (xml: string, name: string): string | null => {
   const m = xml.match(new RegExp(`<${name}[^>]*>([\\s\\S]*?)<\\/${name}>`, 'i'));
@@ -54,28 +56,30 @@ Deno.serve(async (req) => {
         });
         if (!res.ok) continue;
         const xml = await res.text();
-        if (!xml.includes('<item>')) continue; // consent wall / empty page
+        if (!xml.includes('<item>')) continue;
         const items = xml.match(/<item>[\s\S]*?<\/item>/gi) || [];
+        const sourceName = feed.includes('punch') ? 'Punch' : 'Vanguard';
+        const primary: NewsItem[] = [];
+        const secondary: NewsItem[] = [];
         for (const item of items) {
           const title = tag(item, 'title');
           if (!title || title.length < 15 || seen.has(title)) continue;
           seen.add(title);
           const lower = title.toLowerCase();
-          if (
-            !lower.includes('jamb') &&
-            !lower.includes('utme') &&
-            !lower.includes('admission') &&
-            !lower.includes('post-utme')
-          ) {
-            continue;
-          }
-          newsItems.push({
+          const entry: NewsItem = {
             title,
             link: tag(item, 'link'),
             date: fmtDate(tag(item, 'pubDate')),
             summary: null,
-            source: tag(item, 'source') || 'Google News',
-          });
+            source: sourceName,
+          };
+          if (PRIMARY.some((k) => lower.includes(k))) primary.push(entry);
+          else if (SECONDARY.some((k) => lower.includes(k))) secondary.push(entry);
+        }
+        // JAMB-specific first, education filler after so the tab is
+        // never empty in quiet weeks.
+        for (const entry of [...primary, ...secondary]) {
+          newsItems.push(entry);
           if (newsItems.length >= 15) break;
         }
       } catch (feedErr) {
