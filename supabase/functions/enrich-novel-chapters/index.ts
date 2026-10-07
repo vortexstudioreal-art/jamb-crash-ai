@@ -278,6 +278,10 @@ async function callAI(apiKey: string, prompt: string, novel: NovelLike): Promise
           { role: "system", content: "You are an expert literature teacher specializing in JAMB exam preparation for Nigerian students." },
           { role: "user", content: prompt },
         ],
+        // Capped: guides ask for 1500-2500 words; uncapped outputs burn
+        // through the shared key's limits and starve quiz AI for everyone.
+        max_tokens: 3000,
+        temperature: 0.7,
       }),
     });
 

@@ -76,6 +76,17 @@ export function NovelLibraryManager() {
 
   const enrichAll = async () => {
     setEnriching(true);
+    // 30s cap per invoke: a hung request must never freeze the queue at
+    // "Queued x/19" — failures are collected and reported at the end.
+    const invokeWithTimeout = async (body: Record<string, string>) => {
+      const res = await Promise.race([
+        supabase.functions.invoke('enrich-novel-chapters', { body }),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('timeout')), 30000)
+        ),
+      ]);
+      if (res.error) throw res.error;
+    };
     try {
       const prose = novels.filter((n) => !(n.category || '').includes('poetry'));
       const poems = novels.filter((n) => (n.category || '').includes('poetry'));
@@ -84,30 +95,38 @@ export function NovelLibraryManager() {
       // the server, so closing this tab mid-run no longer kills the job.
       // The function only enriches thin chapters (<500 words): re-running
       // fills whatever a previous run missed.
+      const failed: string[] = [];
       let i = 0;
       const total = prose.length + poems.length;
       for (const novel of prose) {
         i++;
         setStatus(`Queued ${i}/${total}: ${novel.title}…`);
-        const { error } = await supabase.functions.invoke('enrich-novel-chapters', {
-          body: { novel_title: novel.title },
-        });
-        if (error) throw error;
+        try {
+          await invokeWithTimeout({ novel_title: novel.title });
+        } catch {
+          failed.push(novel.title);
+        }
         await sleep(500);
       }
 
       for (const poem of poems) {
         i++;
         setStatus(`Queued ${i}/${total}: ${poem.title}…`);
-        const { error } = await supabase.functions.invoke('enrich-novel-chapters', {
-          body: { enrich_all_poetry: true, poem_title: poem.title },
-        });
-        if (error) throw error;
+        try {
+          await invokeWithTimeout({ enrich_all_poetry: 'true', poem_title: poem.title });
+        } catch {
+          failed.push(poem.title);
+        }
         await sleep(500);
       }
 
-      setStatus('All enrichment jobs queued — guides fill in over the next minutes. Come back and hit “Refresh counts”.');
-      toast.success('Enrichment queued for the whole library 🎉');
+      if (failed.length > 0) {
+        setStatus(`Queued with ${failed.length} failures: ${failed.slice(0, 4).join(', ')}${failed.length > 4 ? '…' : ''}. Retry these individually.`);
+        toast.error(`${failed.length} books failed to queue — retry them`);
+      } else {
+        setStatus('All enrichment jobs queued — guides fill in over the next minutes. Come back and hit “Refresh counts”.');
+        toast.success('Enrichment queued for the whole library 🎉');
+      }
     } catch (err) {
       errorLogger.error(err, { component: 'NovelLibraryManager', action: 'enrich' });
       toast.error(err instanceof Error ? err.message : 'Enrichment failed');
