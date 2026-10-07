@@ -29,7 +29,7 @@ const normalize = (q: string) =>
 // never renders raw in quiz cards.
 const stripHtml = (s: string): string =>
   s
-    .replace(/<[^>]+>/g, "")
+    .replace(/<\/?[a-zA-Z][^>]*>/g, "")
     .replace(/&nbsp;/g, " ")
     .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
@@ -44,8 +44,9 @@ const clean = (q: Scraped): boolean => {
   if (!q.question?.trim() || q.options?.length !== 4) return false;
   if (q.options.some((o) => !o?.trim())) return false;
   if (!/^[a-dA-D]$/.test((q.correct_answer || "").trim())) return false;
-  // Drop rows with leftover markup/entities the scraper couldn't decode
-  if (/[<>]/.test(q.question) || q.options.some((o) => /[<>]/.test(o))) return false;
+  // Drop rows with leftover markup/entities the scraper couldn't decode.
+  // Tag-only check: bare "<" in "x < 5" is legitimate maths, not markup.
+  if (/<\/?[a-zA-Z]/.test(q.question) || q.options.some((o) => /<\/?[a-zA-Z]/.test(o))) return false;
   if (/&(nbsp|amp|lt|gt|quot);/.test(q.question)) return false;
   // Drop dangling references (empty targets, missing words)
   if (/: *$/.test(q.question) && q.question.length < 120) {

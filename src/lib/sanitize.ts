@@ -3,14 +3,17 @@
 // otherwise render raw inside quiz cards.
 export const stripQuestionHtml = (s: string | null | undefined): string => {
   if (!s) return '';
-  return s
-    .replace(/<[^>]+>/g, '')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/\s+/g, ' ')
-    .trim();
+  return (
+    s
+      // Tags only (</?letter…>) — bare "<" in "x < 5" is legit maths
+      .replace(/<\/?[a-zA-Z][^>]*>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/\s+/g, ' ')
+      .trim()
+  );
 };

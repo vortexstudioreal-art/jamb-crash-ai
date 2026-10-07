@@ -114,7 +114,7 @@ const normalize = (q: string) =>
 // never renders raw in quiz cards.
 const stripHtml = (s: string): string =>
   s
-    .replace(/<[^>]+>/g, "")
+    .replace(/<\/?[a-zA-Z][^>]*>/g, "")
     .replace(/&nbsp;/g, " ")
     .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
