@@ -1,13 +1,23 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, GraduationCap, Clock, ExternalLink, Star, Bell } from 'lucide-react';
+import { ArrowLeft, GraduationCap, Clock, ExternalLink, Star, Bell, Trophy, CheckCircle2, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { errorLogger } from '@/services/errorLogger';
 import jambCrashLogo from '@/assets/jamb_crash_ai_logo.jpg';
 
 interface ScholarshipPageProps {
   onBack: () => void;
+  userEmail?: string;
+  userId?: string | null;
+  onPracticeQuiz?: () => void;
 }
+
+const QUALIFYING_RANK = 100;
 
 interface Scholarship {
   id: string;
@@ -125,7 +135,76 @@ const SCHOLARSHIPS: Scholarship[] = [
   },
 ];
 
-export const ScholarshipPage = ({ onBack }: ScholarshipPageProps) => {
+export const ScholarshipPage = ({ onBack, userEmail, userId, onPracticeQuiz }: ScholarshipPageProps) => {
+  const [onWaitlist, setOnWaitlist] = useState(false);
+  const [joining, setJoining] = useState(false);
+  const [rank, setRank] = useState<number | null>(null);
+  const [totalPlayers, setTotalPlayers] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!userEmail) return;
+    const emailKey = userEmail.toLowerCase();
+    supabase
+      .from('scholarship_interest')
+      .select('id')
+      .eq('email', emailKey)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setOnWaitlist(true);
+      });
+
+    // Merit rank: position on the leaderboard by total score
+    const loadRank = async () => {
+      try {
+        if (!userId) {
+          setRank(null);
+          return;
+        }
+        const { data: me } = await supabase
+          .from('leaderboard_scores')
+          .select('total_score')
+          .eq('user_id', userId)
+          .maybeSingle();
+        if (!me) {
+          setRank(null);
+          return;
+        }
+        const [{ count: ahead }, { count: total }] = await Promise.all([
+          supabase
+            .from('leaderboard_scores')
+            .select('*', { count: 'exact', head: true })
+            .gt('total_score', me.total_score),
+          supabase
+            .from('leaderboard_scores')
+            .select('*', { count: 'exact', head: true }),
+        ]);
+        setRank((ahead || 0) + 1);
+        setTotalPlayers(total || null);
+      } catch (err) {
+        errorLogger.error(err, { component: 'ScholarshipPage', action: 'load rank' });
+      }
+    };
+    void loadRank();
+  }, [userEmail, userId]);
+
+  const joinWaitlist = async () => {
+    if (!userEmail) return;
+    setJoining(true);
+    try {
+      const { error } = await supabase.from('scholarship_interest').insert({
+        email: userEmail.toLowerCase(),
+      });
+      if (error) throw error;
+      setOnWaitlist(true);
+      toast.success("You're on the list! We'll notify you the moment applications open 🎓");
+    } catch (err) {
+      errorLogger.error(err, { component: 'ScholarshipPage', action: 'join waitlist' });
+      toast.error('Could not join. Try again.');
+    } finally {
+      setJoining(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="pt-20 pb-8 px-4">
@@ -208,10 +287,17 @@ export const ScholarshipPage = ({ onBack }: ScholarshipPageProps) => {
                           3 Full Admission Sponsorships
                         </span>
                       </div>
-                      <Button variant="outline" size="sm" disabled className="gap-2">
-                        <Bell className="w-4 h-4" />
-                        Notify Me When Available
-                      </Button>
+                      {onWaitlist ? (
+                        <span className="flex items-center gap-1.5 text-sm font-medium text-green-600">
+                          <CheckCircle2 className="w-4 h-4" />
+                          You're on the list ✅
+                        </span>
+                      ) : (
+                        <Button variant="outline" size="sm" onClick={joinWaitlist} disabled={joining || !userEmail} className="gap-2">
+                          <Bell className="w-4 h-4" />
+                          {joining ? 'Joining…' : 'Notify Me When Available'}
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -225,6 +311,59 @@ export const ScholarshipPage = ({ onBack }: ScholarshipPageProps) => {
               </div>
             </Card>
           </motion.div>
+
+          {/* Merit qualification — top-100 leaderboard rank */}
+          {userEmail && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="mb-8"
+            >
+              <Card className="p-5 border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-transparent">
+                <div className="flex items-center gap-2 mb-2">
+                  <Trophy className="w-5 h-5 text-amber-500" />
+                  <h2 className="font-bold text-foreground">Earn Your Spot</h2>
+                  <Badge variant="secondary" className="ml-auto">Top {QUALIFYING_RANK} qualify</Badge>
+                </div>
+                {rank === null ? (
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Finalists are picked from the leaderboard top {QUALIFYING_RANK}. Take a quiz to enter the ranking.
+                    </p>
+                    {onPracticeQuiz && (
+                      <Button size="sm" onClick={onPracticeQuiz} className="gap-2">
+                        <Play className="w-4 h-4" />
+                        Take a Quiz
+                      </Button>
+                    )}
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex items-baseline justify-between mb-2">
+                      <p className="text-sm text-muted-foreground">
+                        Your rank{' '}
+                        <span className="text-xl font-extrabold text-foreground">#{rank}</span>
+                        {totalPlayers ? <span> of {totalPlayers}</span> : null}
+                      </p>
+                      {rank <= QUALIFYING_RANK ? (
+                        <Badge className="bg-green-500/20 text-green-600 border-green-500/30">Qualified 🎉</Badge>
+                      ) : (
+                        <Badge variant="outline">{rank - QUALIFYING_RANK} spots to climb</Badge>
+                      )}
+                    </div>
+                    <Progress value={Math.min(100, (QUALIFYING_RANK / Math.max(rank, 1)) * 100)} className="h-2 mb-3" />
+                    {rank > QUALIFYING_RANK && onPracticeQuiz && (
+                      <Button size="sm" onClick={onPracticeQuiz} className="gap-2">
+                        <Play className="w-4 h-4" />
+                        Climb the Rank
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </Card>
+            </motion.div>
+          )}
 
           {/* Other Scholarships */}
           <motion.div

@@ -844,6 +844,24 @@ export type Database = {
         }
         Relationships: []
       }
+      scholarship_interest: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
       push_tokens: {        Row: {
           created_at: string
           email: string

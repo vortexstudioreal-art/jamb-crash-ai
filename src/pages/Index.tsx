@@ -1045,7 +1045,16 @@ const Index = () => {
           userRole={userRole}
           onSignOut={handleSignOut}
         />
-        <ScholarshipPage onBack={handleBackToDashboard} />
+        <ScholarshipPage
+          onBack={handleBackToDashboard}
+          userEmail={userEmail}
+          userId={user?.id}
+          onPracticeQuiz={() => {
+            setQuizType('mini');
+            navigateStep('quiz');
+            window.scrollTo({ top: 0, behavior: 'instant' });
+          }}
+        />
       </div>
     );
   }
