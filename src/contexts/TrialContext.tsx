@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { errorLogger } from '@/services/errorLogger';
 
-const TRIAL_DURATION_MS = 30 * 60 * 1000; // 30 minutes
+const TRIAL_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 const TRIAL_CACHE_PREFIX = 'jamb_trial_cache_';
 
 type CachedTrial = {
@@ -205,6 +205,11 @@ export const TrialProvider = ({ children }: { children: ReactNode }) => {
 
   const formatTime = (ms: number): string => {
     const totalSeconds = Math.floor(ms / 1000);
+    const days = Math.floor(totalSeconds / 86400);
+    if (days >= 1) {
+      const hours = Math.floor((totalSeconds % 86400) / 3600);
+      return `${days}d ${hours}h`;
+    }
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;

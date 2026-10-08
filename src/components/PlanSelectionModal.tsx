@@ -99,7 +99,7 @@ export const PlanSelectionModal = ({
                         <Timer className="w-6 h-6 lg:w-7 lg:h-7 text-primary" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-bold text-foreground text-lg">Try 30 Minutes Free</h3>
+                        <h3 className="font-bold text-foreground text-lg">Try 7 Days Free</h3>
                         <p className="text-sm text-muted-foreground mt-2">
                           Full SCHOLAR access, no card required. One trial per account.
                         </p>

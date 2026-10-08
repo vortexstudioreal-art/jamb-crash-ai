@@ -552,11 +552,11 @@ const Index = () => {
     trackFunnel(userEmail, 'subjects_selected', { count: subjects.length });
 
     // Fulfill the subject-select promise ("Pick your subjects to start your
-    // 30-minute SCHOLAR trial!"): trial entries begin here.
+    // 7-day SCHOLAR trial!"): trial entries begin here.
     if (!effectiveAccess && canStartTrial && !effectiveAdmin && user) {
       const started = await startTrial();
       if (started) {
-        toast.success('30-minute SCHOLAR trial started! Enjoy full access 🎉');
+        toast.success('7-day SCHOLAR trial started! Enjoy full access 🎉');
       }
     }
     
@@ -639,7 +639,7 @@ const Index = () => {
     trackFunnel(userEmail, 'paywall_seen', plan ? { plan } : undefined);
   };
 
-  // Shared trial entry: starts the 30-min SCHOLAR trial and routes into
+  // Shared trial entry: starts the 7-day SCHOLAR trial and routes into
   // the app (dashboard if subjects exist, subject-select otherwise).
   const handleStartTrialFlow = async () => {
     if (!user) {
@@ -655,7 +655,7 @@ const Index = () => {
       return;
     }
     setIsPlanSelectionOpen(false);
-    toast.success('30-minute SCHOLAR trial started! 🎉');
+    toast.success('7-day SCHOLAR trial started! 🎉');
     if (userSubjects.length > 0) {
       startTransition(() => setCurrentStep('dashboard'));
       saveDashboardState('dashboard');
@@ -833,7 +833,7 @@ const Index = () => {
         {isTrialEntry && (
           <div className="fixed bottom-4 left-0 right-0 text-center">
             <p className="text-sm text-muted-foreground">
-              👋 Pick your subjects to start your 30-minute SCHOLAR trial!
+              👋 Pick your subjects to start your 7-day SCHOLAR trial!
             </p>
           </div>
         )}
