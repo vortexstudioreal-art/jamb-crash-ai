@@ -550,6 +550,15 @@ const Index = () => {
 
     setUserSubjects(subjects);
     trackFunnel(userEmail, 'subjects_selected', { count: subjects.length });
+
+    // Fulfill the subject-select promise ("Pick your subjects to start your
+    // 30-minute SCHOLAR trial!"): trial entries begin here.
+    if (!effectiveAccess && canStartTrial && !effectiveAdmin && user) {
+      const started = await startTrial();
+      if (started) {
+        toast.success('30-minute SCHOLAR trial started! Enjoy full access 🎉');
+      }
+    }
     
     // Refresh access to get latest payment status
     await refreshAccess();
@@ -628,6 +637,32 @@ const Index = () => {
     setIsPlanSelectionOpen(true);
     // Every upgrade CTA funnels through here = paywall impression
     trackFunnel(userEmail, 'paywall_seen', plan ? { plan } : undefined);
+  };
+
+  // Shared trial entry: starts the 30-min SCHOLAR trial and routes into
+  // the app (dashboard if subjects exist, subject-select otherwise).
+  const handleStartTrialFlow = async () => {
+    if (!user) {
+      // Signed-out visitors pick a plan first, then sign up — the trial
+      // begins automatically once they finish subject selection.
+      setIsPlanSelectionOpen(false);
+      navigate('/auth', { state: { flow: 'signup' } });
+      return;
+    }
+    const started = await startTrial();
+    if (!started) {
+      toast.error('Could not start trial. Please try again.');
+      return;
+    }
+    setIsPlanSelectionOpen(false);
+    toast.success('30-minute SCHOLAR trial started! 🎉');
+    if (userSubjects.length > 0) {
+      startTransition(() => setCurrentStep('dashboard'));
+      saveDashboardState('dashboard');
+    } else {
+      startTransition(() => setCurrentStep('subject-select'));
+    }
+    window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   const handleSignOut = async () => {
@@ -1338,6 +1373,8 @@ const Index = () => {
             planName={plans[selectedPlan].name}
             planPrice={plans[selectedPlan].price}
             onContinuePayment={handlePaymentFromPlanModal}
+            canStartTrial={canStartTrial}
+            onStartTrial={handleStartTrialFlow}
           />
         )}
 
@@ -1444,6 +1481,33 @@ const Index = () => {
         <HowItWorksSection onStartTrial={startTrial} />
         <PricingSection onSelectPlan={handleSelectPlan} highlightStandard={highlightStandard} />
         </Suspense>
+
+        {/* Plan + payment modals must also render on landing — otherwise
+            signed-out visitors clicking pricing get a dead click. */}
+        {selectedPlan && (
+          <Suspense fallback={null}>
+            <PlanSelectionModal
+              isOpen={isPlanSelectionOpen}
+              onClose={() => setIsPlanSelectionOpen(false)}
+              planName={plans[selectedPlan].name}
+              planPrice={plans[selectedPlan].price}
+              onContinuePayment={handlePaymentFromPlanModal}
+              canStartTrial={canStartTrial}
+              onStartTrial={handleStartTrialFlow}
+            />
+          </Suspense>
+        )}
+        {selectedPlan && user && (
+          <Suspense fallback={null}>
+            <PaymentModal
+              isOpen={isPaymentModalOpen}
+              onClose={handlePaymentModalClose}
+              plan={plans[selectedPlan]}
+              onSuccess={handlePaymentSuccess}
+              initialEmail={userEmail || undefined}
+            />
+          </Suspense>
+        )}
         
       </div>
       <Suspense fallback={null}>

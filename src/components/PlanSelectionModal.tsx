@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Zap, CreditCard } from 'lucide-react';
+import { X, Zap, CreditCard, Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface PlanSelectionModalProps {
@@ -8,6 +8,8 @@ interface PlanSelectionModalProps {
   planName: string;
   planPrice: number;
   onContinuePayment: () => void;
+  canStartTrial?: boolean;
+  onStartTrial?: () => void;
 }
 
 export const PlanSelectionModal = ({
@@ -16,6 +18,8 @@ export const PlanSelectionModal = ({
   planName,
   planPrice,
   onContinuePayment,
+  canStartTrial,
+  onStartTrial,
 }: PlanSelectionModalProps) => {
   if (!isOpen) return null;
 
@@ -82,6 +86,27 @@ export const PlanSelectionModal = ({
                     </div>
                   </div>
                 </motion.button>
+
+                {canStartTrial && onStartTrial && (
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={onStartTrial}
+                    className="w-full p-4 lg:p-6 rounded-xl border-2 border-dashed border-primary/50 hover:border-primary bg-primary/5 hover:bg-primary/10 transition-all text-left h-full"
+                  >
+                    <div className="flex flex-col items-center text-center lg:items-start lg:text-left gap-3">
+                      <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                        <Timer className="w-6 h-6 lg:w-7 lg:h-7 text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-foreground text-lg">Try 30 Minutes Free</h3>
+                        <p className="text-sm text-muted-foreground mt-2">
+                          Full SCHOLAR access, no card required. One trial per account.
+                        </p>
+                      </div>
+                    </div>
+                  </motion.button>
+                )}
               </div>
 
               {/* Footer */}
