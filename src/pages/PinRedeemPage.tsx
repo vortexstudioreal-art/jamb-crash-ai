@@ -19,8 +19,9 @@ const PinRedeemPage = () => {
   } | null>(null);
 
   const handlePinChange = (value: string) => {
-    // Accept formats: JCB-ABCD-1234, JCB-ABCD1234, JCB ABCD 1234, etc.
-    // Normalize to uppercase alphanumeric + hyphens
+    // B2B PINs are 4-segment (JCA-XXXX-XXXX-XXXX / JCS-XXXX-XXXX-XXXX);
+    // legacy 3-segment codes are still accepted. Normalize to uppercase,
+    // stripping spaces so pasted values work.
     const cleaned = value.replace(/[^a-zA-Z0-9-]/g, '').toUpperCase();
     setPinCode(cleaned);
   };
@@ -31,18 +32,26 @@ const PinRedeemPage = () => {
     setPinCode(pasted);
   };
 
-  const handleRedeem = async () => {
-    // Normalize pin: ensure it has proper format (PREFIX-XXXX-XXXX)
-    let normalizedPin = pinCode.trim().toUpperCase().replace(/\s+/g, '');
-    
-    // If user entered without hyphens (e.g., JCBABCD1234), add them
-    if (!normalizedPin.includes('-') && normalizedPin.length >= 11) {
-      // Format: JCB + 4 chars + 4 chars = 11 chars minimum
-      normalizedPin = `${normalizedPin.substring(0, 3)}-${normalizedPin.substring(3, 7)}-${normalizedPin.substring(7, 11)}`;
+  // Accepts 4-segment B2B PINs (XXX-XXXX-XXXX-XXXX) and legacy
+  // 3-segment codes (XXX-XXXX-XXXX), with or without hyphens.
+  const normalizePin = (raw: string): string | null => {
+    const alnum = raw.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (/^[A-Z]{3}[A-Z0-9]{12}$/.test(alnum)) {
+      return `${alnum.substring(0, 3)}-${alnum.substring(3, 7)}-${alnum.substring(7, 11)}-${alnum.substring(11, 15)}`;
     }
-    
-    if (!/^[A-Z]{3}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(normalizedPin)) {
-      toast.error('Invalid PIN format. Expected: JCB-XXXX-XXXX');
+    if (/^[A-Z]{3}[A-Z0-9]{8}$/.test(alnum)) {
+      return `${alnum.substring(0, 3)}-${alnum.substring(3, 7)}-${alnum.substring(7, 11)}`;
+    }
+    return null;
+  };
+
+  const isPinValid = normalizePin(pinCode) !== null;
+
+  const handleRedeem = async () => {
+    const normalizedPin = normalizePin(pinCode);
+
+    if (!normalizedPin) {
+      toast.error('Invalid PIN format. Expected: JCA-XXXX-XXXX-XXXX');
       return;
     }
 
@@ -118,7 +127,7 @@ const PinRedeemPage = () => {
                 maxLength={14}
               />
               <p className="text-xs text-muted-foreground text-center mt-2">
-                Format: JCB-XXXX-XXXX (BASIC), JCP-XXXX-XXXX (ACE), JCS-XXXX-XXXX (SCHOLAR)
+                Format: JCA-XXXX-XXXX-XXXX (ACE) or JCS-XXXX-XXXX-XXXX (SCHOLAR)
               </p>
             </div>
 
@@ -141,7 +150,7 @@ const PinRedeemPage = () => {
               onClick={handleRedeem}
               className="w-full"
               size="lg"
-              disabled={loading || !/^[A-Z]{3}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(pinCode.trim().toUpperCase().replace(/\s+/g, '')) || !email.includes('@')}
+              disabled={loading || !isPinValid || !email.includes('@')}
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />

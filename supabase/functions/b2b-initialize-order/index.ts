@@ -58,7 +58,7 @@ serve(async (req) => {
     const { data: buyer, error: buyerError } = await supabase
       .from("b2b_buyers")
       .select("id")
-      .eq("email", user.email!)
+      .eq("email", user.email!.toLowerCase())
       .single();
 
     if (buyerError || !buyer) {

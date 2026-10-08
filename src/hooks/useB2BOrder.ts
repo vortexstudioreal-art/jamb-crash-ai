@@ -96,7 +96,6 @@ export function useB2BOrder() {
 
   const getPins = async (orderId?: string, status?: string) => {
     const { data, error } = await supabase.functions.invoke('b2b-get-pins', {
-      method: 'POST',
       body: { order_id: orderId, status },
     });
 
@@ -114,8 +113,16 @@ export function useB2BOrder() {
     if (!session?.access_token) throw new Error('Not authenticated');
 
     const response = await fetch(url, {
-      headers: { Authorization: `Bearer ${session.access_token}` },
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      },
     });
+
+    if (!response.ok) {
+      const errBody = await response.json().catch(() => ({}));
+      throw new Error((errBody as { error?: string }).error || 'Export failed');
+    }
 
     const blob = await response.blob();
     const downloadUrl = window.URL.createObjectURL(blob);

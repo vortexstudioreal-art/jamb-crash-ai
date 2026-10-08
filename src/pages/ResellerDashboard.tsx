@@ -69,6 +69,7 @@ const ResellerDashboard = () => {
   const [quantity, setQuantity] = useState(10);
   const [notes, setNotes] = useState('');
   const [showPayment, setShowPayment] = useState(false);
+  const [pendingReference, setPendingReference] = useState<string | null>(null);
 
   // Register form
   const [regForm, setRegForm] = useState({
@@ -112,6 +113,9 @@ const ResellerDashboard = () => {
     try {
       const result = await initializeOrder(selectedPlan, quantity, notes);
       if (result.authorization_url) {
+        // Keep the reference: the buyer needs it to verify (Paystack's
+        // new-tab flow never shows our reference back to them).
+        setPendingReference(result.reference || null);
         window.open(result.authorization_url, '_blank');
         setShowPayment(true);
       }
@@ -126,6 +130,7 @@ const ResellerDashboard = () => {
       if (result.success) {
         toast.success(`Generated ${result.pins?.length || 0} PINs!`);
         setShowPayment(false);
+        setPendingReference(null);
         loadStats();
         setView('pins');
       }
@@ -526,9 +531,15 @@ const ResellerDashboard = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
+            {pendingReference && (
+              <p className="text-xs text-muted-foreground break-all">
+                Order reference: <span className="font-mono font-bold text-foreground">{pendingReference}</span>
+              </p>
+            )}
             <Input
               placeholder="Enter payment reference"
               id="payment-reference"
+              defaultValue={pendingReference || ''}
             />
             <Button
               onClick={() => {

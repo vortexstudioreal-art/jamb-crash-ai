@@ -39,7 +39,7 @@ serve(async (req) => {
     const { data: buyer, error: buyerError } = await supabase
       .from("b2b_buyers")
       .select("id")
-      .eq("email", user.email!)
+      .eq("email", user.email!.toLowerCase())
       .single();
 
     if (buyerError || !buyer) {
@@ -91,7 +91,7 @@ serve(async (req) => {
 
     // Also get stats
     const { data: stats } = await supabase
-      .rpc("get_reseller_dashboard_stats", { p_buyer_email: user.email! })
+      .rpc("get_reseller_dashboard_stats", { p_buyer_email: user.email!.toLowerCase() })
       .single();
 
     // CSV export

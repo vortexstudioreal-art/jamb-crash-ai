@@ -52,13 +52,13 @@ serve(async (req) => {
       });
     }
 
-    // Upsert buyer profile
+    // Upsert buyer profile (emails stored lowercase — matches retail convention)
     const { data, error } = await supabase
       .from("b2b_buyers")
       .upsert(
         {
           auth_user_id: user.id,
-          email: user.email!,
+          email: user.email!.toLowerCase(),
           full_name,
           organization: organization || null,
           buyer_type,

@@ -175,10 +175,11 @@ export const ChatBot = () => {
     }
   };
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+  const handleSend = async (overrideText?: string) => {
+    const text = (overrideText ?? input).trim();
+    if (!text || isLoading) return;
 
-    const userMessage: Message = { role: 'user', content: input.trim() };
+    const userMessage: Message = { role: 'user', content: text };
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     setInput('');
@@ -317,10 +318,7 @@ export const ChatBot = () => {
               {quickQuestions.map((q, i) => (
                 <button
                   key={i}
-                  onClick={() => {
-                    setInput(q);
-                    setTimeout(() => handleSend(), 100);
-                  }}
+                  onClick={() => handleSend(q)}
                   className="text-xs px-3 py-1.5 rounded-full bg-secondary hover:bg-secondary/80 text-secondary-foreground transition-colors"
                 >
                   {q}
@@ -342,7 +340,7 @@ export const ChatBot = () => {
                 className="flex-1 rounded-full bg-muted border-0 focus-visible:ring-1 focus-visible:ring-primary"
               />
               <Button
-                onClick={handleSend}
+                onClick={() => handleSend()}
                 disabled={!input.trim() || isLoading}
                 size="icon"
                 className="rounded-full h-10 w-10 shrink-0"

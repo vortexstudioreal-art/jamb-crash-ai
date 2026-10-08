@@ -69,10 +69,10 @@ serve(async (req) => {
       });
     }
 
-    // Find the order
+    // Find the order (with amount + owner for verification below)
     const { data: order, error: orderError } = await supabase
       .from("b2b_bulk_orders")
-      .select("id, status, plan_type, quantity")
+      .select("id, status, plan_type, quantity, total_amount, buyer_id")
       .eq("paystack_reference", reference)
       .single();
 
@@ -80,6 +80,33 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Order not found" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 404,
+      });
+    }
+
+    // Ownership: only the buyer who placed the order may verify it.
+    const { data: buyer } = await supabase
+      .from("b2b_buyers")
+      .select("id")
+      .eq("email", user.email!.toLowerCase())
+      .single();
+
+    if (!buyer || buyer.id !== order.buyer_id) {
+      return new Response(JSON.stringify({ error: "Order not found" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 404,
+      });
+    }
+
+    // Amount: Paystack must have collected at least the order total.
+    const paidNaira = (paystackData.data.amount || 0) / 100;
+    if (paidNaira + 1 < order.total_amount) {
+      console.error("B2B underpaid:", { reference, paid: paidNaira, due: order.total_amount });
+      return new Response(JSON.stringify({
+        success: false,
+        message: "Amount paid does not match the order total",
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
       });
     }
 

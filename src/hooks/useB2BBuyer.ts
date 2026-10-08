@@ -33,7 +33,7 @@ export function useB2BBuyer() {
       const { data, error: fetchError } = await supabase
         .from('b2b_buyers')
         .select('*')
-        .eq('email', user.email!)
+        .eq('email', user.email!.toLowerCase())
         .maybeSingle();
 
       if (fetchError) {
