@@ -1162,7 +1162,7 @@ const Index = () => {
   // Dashboard step
   if (currentStep === 'dashboard' && userEmail) {
     return (
-      <PaywallGate hasAccess={effectiveAccess} isLoading={isFullyLoading} onUpgrade={handleUpgradeClick} userEmail={userEmail}>
+      <PaywallGate hasAccess={effectiveAccess || isTrialActive} isLoading={isFullyLoading} onUpgrade={handleUpgradeClick} userEmail={userEmail}>
         <div className="min-h-screen bg-background">
           {/* Desktop Sidebar */}
           <DesktopSidebar
