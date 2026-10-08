@@ -41,9 +41,6 @@ const tierColor = (id: BoostTier['id']) =>
       ? 'text-slate-300'
       : 'text-amber-600';
 
-const claimReference = (tierId: string, email: string) =>
-  `BOOST-${tierId.toUpperCase()}-${email.toLowerCase()}`;
-
 export const ReferralSystem = ({ userEmail }: ReferralSystemProps) => {
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [referralCount, setReferralCount] = useState(0);
@@ -119,53 +116,42 @@ export const ReferralSystem = ({ userEmail }: ReferralSystemProps) => {
     if (claimingId) return;
     setClaimingId(tier.id);
     try {
-      const reference = claimReference(tier.id, emailKey);
-
-      // Idempotency: already claimed?
-      const { data: existing } = await supabase
-        .from('payments')
-        .select('id')
-        .eq('email', emailKey)
-        .eq('paystack_reference', reference)
-        .eq('status', 'success')
-        .limit(1);
-      if (existing && existing.length > 0) {
-        setClaimed((prev) => ({ ...prev, [tier.id]: true }));
-        toast.info('Already claimed! ✅');
-        return;
-      }
-
-      // Re-verify eligibility (count may have changed since load)
-      const { count } = await supabase
-        .from('referrals')
-        .select('*', { count: 'exact', head: true })
-        .eq('referrer_email', userEmail)
-        .eq('is_used', true);
-      const freshCount = count || 0;
-      setReferralCount(freshCount);
-      if (freshCount < tier.refsRequired) {
-        toast.error(`You need ${tier.refsRequired - freshCount} more referral${tier.refsRequired - freshCount === 1 ? '' : 's'} to claim ${tier.name}.`);
-        return;
-      }
-
-      // Grant premium days. check_user_access reads the latest-expiring
-      // success row, so a short boost never shadows a longer paid plan.
-      const expires = new Date();
-      expires.setDate(expires.getDate() + tier.rewardDays);
-      const { error } = await supabase.from('payments').insert({
-        email: emailKey,
-        package: 'premium',
-        amount: 0,
-        currency: 'NGN',
-        status: 'success',
-        paystack_reference: reference,
-        access_expires_at: expires.toISOString(),
+      // Eligibility + grant both happen server-side (claim-reward counts
+      // referrals with the service role and requires a matching session,
+      // so DevTools inserts can't fake a boost).
+      const { data, error } = await supabase.functions.invoke('claim-reward', {
+        body: { claim_type: 'referral_boost', email: emailKey, tierId: tier.id },
       });
-      if (error) throw error;
 
+      if (error || !data?.success) {
+        const msg =
+          (data && typeof data.error === 'string' && data.error) ||
+          (error instanceof Error ? error.message : 'Could not claim reward. Try again.');
+        if (msg === 'Not enough referrals yet') {
+          const { count } = await supabase
+            .from('referrals')
+            .select('*', { count: 'exact', head: true })
+            .eq('referrer_email', userEmail)
+            .eq('is_used', true);
+          const freshCount = count || 0;
+          setReferralCount(freshCount);
+          toast.error(`You need ${tier.refsRequired - freshCount} more referral${tier.refsRequired - freshCount === 1 ? '' : 's'} to claim ${tier.name}.`);
+        } else if (data?.already) {
+          setClaimed((prev) => ({ ...prev, [tier.id]: true }));
+          toast.info('Already claimed! ✅');
+        } else {
+          toast.error(msg);
+        }
+        return;
+      }
+
+      if (data.already) {
+        toast.info('Already claimed! ✅');
+      } else {
+        toast.success(`🎉 ${tier.name} claimed! Enjoy ${tier.rewardLabel}!`);
+      }
       setClaimed((prev) => ({ ...prev, [tier.id]: true }));
       await refreshAccess();
-      toast.success(`🎉 ${tier.name} claimed! Enjoy ${tier.rewardLabel}!`);
     } catch (err) {
       errorLogger.error(err, { component: 'ReferralSystem', action: 'claim boost tier' });
       toast.error(err instanceof Error ? err.message : 'Could not claim reward. Try again.');

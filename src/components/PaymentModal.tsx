@@ -168,79 +168,35 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
 
     trackFunnel(email, 'checkout_started', { plan: plan.name, amount: finalPrice });
 
-    // If final price is 0 (100% discount), skip Paystack and grant access directly
-    if (finalPrice === 0) {      const freeReference = `FREE_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-      
-      const attemptFreePayment = async (isRetry = false) => {
-        // If retrying, sign out first to clear stale session
-        if (isRetry) {
-          await supabase.auth.signOut();
-        }
-        
+    // If final price is 0 (100% discount), claim via the server — it
+    // re-validates the coupon, writes the grant + usage with the service
+    // role, and requires a signed-in session. Never insert payments from
+    // the client (DevTools forgery).
+    if (finalPrice === 0) {
+      try {
         const packageCode = getPackageCode(plan.name);
-        // Premium/ultimate gets lifetime access (100 years)
-        const accessDays = packageCode === 'ultimate' ? 36500 : 365;
-        
-        const { error: paymentError } = await supabase.from('payments').insert({
-          email,
-          package: packageCode,
-          amount: 0,
-          status: 'success',
-          paystack_reference: freeReference,
-          access_expires_at: new Date(Date.now() + accessDays * 24 * 60 * 60 * 1000).toISOString(),
+        const { data, error } = await supabase.functions.invoke('claim-reward', {
+          body: {
+            claim_type: 'coupon_free',
+            email: email.toLowerCase(),
+            package: packageCode,
+            couponCode: couponCode.trim() ? couponCode.trim().toUpperCase() : null,
+            referralCode: appliedReferralCode,
+          },
         });
 
-        return paymentError;
-      };
-
-      try {
-        let paymentError = await attemptFreePayment(false);
-        
-        // If failed due to auth issue, retry after clearing session
-        if (paymentError) {
-          const errorMsg = paymentError.message?.toLowerCase() || '';
-          const errorCode = paymentError.code?.toLowerCase() || '';
-          const isAuthError = 
-            errorMsg.includes('refresh token') || 
-            errorMsg.includes('jwt') ||
-            errorMsg.includes('token') ||
-            errorCode.includes('auth') ||
-            errorCode === 'pgrst301';
-          
-          if (isAuthError) {
-            paymentError = await attemptFreePayment(true);
-          }
-        }
-
-        if (paymentError) {
-          errorLogger.error(paymentError, { component: 'PaymentModal', action: 'create free payment record' });
-          toast.error('Failed to claim free access. Please refresh and try again.');
+        if (error || !data?.success) {
+          const msg =
+            (data && typeof data.error === 'string' && data.error) ||
+            (error instanceof Error ? error.message : 'Failed to claim free access');
+          errorLogger.error(msg, { component: 'PaymentModal', action: 'claim free reward' });
+          toast.error(msg);
           return;
         }
 
-        // Record coupon usage if applied
-        if (appliedCouponId && appliedDiscount > 0) {
-          try {
-            const creatorEarning = 0;
-            await supabase.from('coupon_usage').insert({
-              coupon_id: appliedCouponId,
-              used_by_email: email,
-              amount_paid: 0,
-              discount_applied: appliedDiscount,
-              creator_earning: creatorEarning,
-              commission_percentage: commissionPercentage,
-              commission_payable: false,
-            });
-            await supabase.rpc('increment_coupon_usage', { p_coupon_id: appliedCouponId });
-          } catch (err) {
-            errorLogger.error(err, { component: 'PaymentModal', action: 'record coupon usage' });
-          }
-        }
-
         toast.success('100% discount applied! Access granted! 🎉');
-        await redeemReferral(email);
         trackFunnel(email, 'paid', { plan: plan.name, amount: 0 });
-        onSuccess(freeReference, email);
+        onSuccess(data.reference, email);
       } catch (err) {
         errorLogger.error(err, { component: 'PaymentModal', action: 'free transaction' });
         toast.error('Failed to claim free access. Please refresh and try again.');
