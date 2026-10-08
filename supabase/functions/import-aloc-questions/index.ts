@@ -165,8 +165,27 @@ async function doImport(supabase: ReturnType<typeof createClient>) {
       if ((cell(c[10]) || "").toLowerCase() !== "utme") continue;
       const ans = (cell(c[8]) || "").trim().toLowerCase();
       if (!/^[a-d]$/.test(ans)) continue;
-      const question = stripHtml(cell(c[1]) || "");
+      // Preserve the vocab target: ALOC marks it <i>word</i> and the section
+      // tells nearest vs opposite. Rebuild as "instruction + quoted target"
+      // instead of stripping the markup away (which orphaned the question).
+      const sectionText = (cell(c[6]) || "").toLowerCase();
+      const vocabKind = sectionText.includes("opposite in meaning")
+        ? "opposite"
+        : sectionText.includes("nearest in meaning")
+          ? "nearest"
+          : null;
+      const rawTargets = [...(cell(c[1]) || "").matchAll(/<i>(.*?)<\/i>/gi)]
+        .map((m) => m[1].trim())
+        .filter(Boolean);
+      let question = stripHtml(cell(c[1]) || "");
       if (!question) continue;
+      if (vocabKind && rawTargets.length > 0) {
+        let sentence = question;
+        for (const t of rawTargets) {
+          sentence = sentence.replace(t, `"${t}"`);
+        }
+        question = `Choose the option ${vocabKind} in meaning to the word in italics: ${sentence}`;
+      }
       // Reject dangling references: empty targets ("…syllable:") and
       // missing words ("…spell the word"). Unfixable rows are pruned,
       // never imported.
