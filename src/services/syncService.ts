@@ -15,32 +15,43 @@ import {
   type SyncItem 
 } from './offlineStorage';
 
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 10;
+
+// Guard against concurrent sync runs (AuthContext periodic sync +
+// useOfflineStatus online-flush can fire together): without it the same
+// queue items insert twice before either run deletes them.
+let syncInFlight = false;
 
 // Sync pending items when back online
 export const syncPendingItems = async (): Promise<{ synced: number; failed: number }> => {
-  const queue = await getSyncQueue();
-  let synced = 0;
-  let failed = 0;
+  if (syncInFlight) return { synced: 0, failed: 0 };
+  syncInFlight = true;
+  try {
+    const queue = await getSyncQueue();
+    let synced = 0;
+    let failed = 0;
 
-  for (const item of queue) {
-    try {
-      await processSyncItem(item);
-      await removeSyncItem(item.id);
-      synced++;
-    } catch (error) {
-      errorLogger.error(error, { component: 'syncService', action: `sync item ${item.id}` });
-      
-      if (item.retries >= MAX_RETRIES) {
+    for (const item of queue) {
+      try {
+        await processSyncItem(item);
         await removeSyncItem(item.id);
-        failed++;
-      } else {
-        await updateSyncItemRetries(item.id, item.retries + 1);
+        synced++;
+      } catch (error) {
+        errorLogger.error(error, { component: 'syncService', action: `sync item ${item.id}` });
+
+        if (item.retries >= MAX_RETRIES) {
+          await removeSyncItem(item.id);
+          failed++;
+        } else {
+          await updateSyncItemRetries(item.id, item.retries + 1);
+        }
       }
     }
-  }
 
-  return { synced, failed };
+    return { synced, failed };
+  } finally {
+    syncInFlight = false;
+  }
 };
 
 const processSyncItem = async (item: SyncItem): Promise<void> => {
@@ -71,19 +82,23 @@ export const downloadAllForOffline = async (
   onProgress?: (progress: { stage: string; percent: number }) => void
 ): Promise<{ success: boolean; error?: string }> => {
   try {
-    // Stage 1: Download questions
+    // Stage 1: Download questions (per-subject caps — a single global
+    // .limit() lets one subject eat the whole budget and starves the rest).
     onProgress?.({ stage: 'Downloading questions...', percent: 10 });
-    
-    const { data: questions, error: questionsError } = await supabase
-      .from('jamb_questions')
-      .select('*')
-      .in('subject', subjects as Database['public']['Enums']['jamb_subject'][])
-      .limit(2000);
 
-    if (questionsError) throw questionsError;
-    
-    if (questions && questions.length > 0) {
-      await saveQuestions(questions);
+    const PER_SUBJECT_LIMIT = 500;
+    for (const subject of subjects) {
+      const { data: subjectQuestions, error: subjectError } = await supabase
+        .from('jamb_questions')
+        .select('*')
+        .eq('subject', subject as Database['public']['Enums']['jamb_subject'])
+        .limit(PER_SUBJECT_LIMIT);
+
+      if (subjectError) throw subjectError;
+
+      if (subjectQuestions && subjectQuestions.length > 0) {
+        await saveQuestions(subjectQuestions);
+      }
     }
 
     onProgress?.({ stage: 'Questions saved!', percent: 40 });

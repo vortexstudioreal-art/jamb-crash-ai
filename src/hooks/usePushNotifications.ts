@@ -26,6 +26,12 @@ interface UsePushNotificationsOptions {
  */
 export const usePushNotifications = ({ userEmail, enabled }: UsePushNotificationsOptions) => {
   const doneRef = useRef(false);
+  const listenersAddedRef = useRef(false);
+  const registeredEmailRef = useRef<string | null>(null);
+  // The registration listener closes over render state, so it saves through
+  // a ref — otherwise an account switch keeps crediting the previous email.
+  const emailRef = useRef<string | null>(null);
+  emailRef.current = userEmail;
 
   const saveToken = useCallback(async (email: string, token: string) => {
     try {
@@ -45,7 +51,10 @@ export const usePushNotifications = ({ userEmail, enabled }: UsePushNotification
   }, []);
 
   const register = useCallback(async () => {
-    if (!userEmail || !enabled || doneRef.current) return;
+    if (!userEmail || !enabled) return;
+    // Re-register when the account changed (shared devices) — the old
+    // doneRef short-circuit left the new account tokenless.
+    if (doneRef.current && registeredEmailRef.current === userEmail.toLowerCase()) return;
     if (!Capacitor.isNativePlatform()) return;
     try {
       const perm = await PushNotifications.checkPermissions();
@@ -58,34 +67,43 @@ export const usePushNotifications = ({ userEmail, enabled }: UsePushNotification
 
       await PushNotifications.register();
 
-      await PushNotifications.addListener('registration', (t: Token) => {
-        doneRef.current = true;
-        void saveToken(userEmail, t.value);
-      });
+      // Listeners are added once per hook lifetime — re-adding on every
+      // register() call stacked duplicate toasts and local notifications.
+      if (!listenersAddedRef.current) {
+        listenersAddedRef.current = true;
 
-      await PushNotifications.addListener('registrationError', (err) => {
-        // No google-services.json / no Firebase = expected on dev builds.
-        errorLogger.error(err.error, {
-          component: 'usePushNotifications',
-          action: 'registration',
+        await PushNotifications.addListener('registration', (t: Token) => {
+          doneRef.current = true;
+          if (emailRef.current) {
+            registeredEmailRef.current = emailRef.current.toLowerCase();
+            void saveToken(emailRef.current, t.value);
+          }
         });
-      });
 
-      // Foreground push: surface it ourselves (background display is automatic).
-      await PushNotifications.addListener(
-        'pushNotificationReceived',
-        (n: PushNotificationSchema) => {
-          void showLocalNotification(n.title || 'Jamb Crash AI', {
-            body: n.body,
-            tag: n.id,
+        await PushNotifications.addListener('registrationError', (err) => {
+          // No google-services.json / no Firebase = expected on dev builds.
+          errorLogger.error(err.error, {
+            component: 'usePushNotifications',
+            action: 'registration',
           });
-          toast.info(n.title || 'New notification 📢');
-        }
-      );
+        });
+
+        // Foreground push: surface it ourselves (background display is automatic).
+        await PushNotifications.addListener(
+          'pushNotificationReceived',
+          (n: PushNotificationSchema) => {
+            void showLocalNotification(n.title || 'Jamb Crash AI', {
+              body: n.body,
+              tag: n.id,
+            });
+            toast.info(n.title || 'New notification 📢');
+          }
+        );
+      }
     } catch (err) {
       errorLogger.error(err, { component: 'usePushNotifications', action: 'register' });
     }
-  }, [userEmail, enabled, saveToken]);
+  }, [enabled, saveToken]);
 
   useEffect(() => {
     if (userEmail && enabled) {
