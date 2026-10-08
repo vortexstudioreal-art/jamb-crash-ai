@@ -16,7 +16,7 @@ export const collectWeakQuestionCounts = (
     if (!Array.isArray(attempt)) continue;
     for (const q of attempt as AttemptQuestion[]) {
       if (!q.id || !q.userAnswer) continue;
-      if (q.userAnswer !== q.correct_answer) {
+      if ((q.userAnswer || '').toUpperCase() !== (q.correct_answer || '').toUpperCase()) {
         counts.set(q.id, (counts.get(q.id) || 0) + 1);
       }
     }

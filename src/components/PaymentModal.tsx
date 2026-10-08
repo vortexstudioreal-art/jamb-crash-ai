@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Mail, Loader2, Shield, CreditCard, Ticket, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -46,6 +46,13 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
   const [appliedCouponId, setAppliedCouponId] = useState<string | null>(null);
   const { isLoading, initializePayment } = usePaystack();
 
+  // Sync email with initialEmail when it changes (e.g., auth resolves after modal opens)
+  useEffect(() => {
+    if (initialEmail) {
+      setEmail(initialEmail);
+    }
+  }, [initialEmail]);
+
   const finalPrice = Math.max(0, plan.price - appliedDiscount);
   const [couponType, setCouponType] = useState<string | null>(null);
   const [appliedReferralCode, setAppliedReferralCode] = useState<string | null>(null);
@@ -84,13 +91,16 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
       }
 
       // Not a coupon — try a friend's referral code (Refer & Boost)
+      // Validate against initialEmail (the authenticated user's email) to prevent
+      // gaming: apply code with fake email, then change to self.
+      const validationEmail = initialEmail || email;
       const { data: refData, error: refError } = await supabase.rpc('check_referral_code', {
         p_code: couponCode.trim(),
       });
       const row = refData?.[0];
       if (
         !refError && row?.valid &&
-        row.referrer_email?.toLowerCase() !== email.trim().toLowerCase()
+        row.referrer_email?.toLowerCase() !== validationEmail.trim().toLowerCase()
       ) {
         const discount = Math.min(1000, plan.price);
         setCouponStatus('valid');

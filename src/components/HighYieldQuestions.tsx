@@ -358,7 +358,7 @@ const TopicQuiz = ({ questions, topicLabel, subject, onExit }: TopicQuizProps) =
   const handleSubmit = async () => {
     let correctCount = 0;
     shuffledQuestions.forEach(q => {
-      if (answers[q.id] === q.correct_answer) correctCount++;
+      if ((answers[q.id] || '').toUpperCase() === (q.correct_answer || '').toUpperCase()) correctCount++;
     });
 
     // Save quiz attempt
@@ -385,8 +385,8 @@ const TopicQuiz = ({ questions, topicLabel, subject, onExit }: TopicQuizProps) =
   };
 
   if (showResult) {
-    const correctCount = shuffledQuestions.filter(q => answers[q.id] === q.correct_answer).length;
-    const percentage = Math.round((correctCount / shuffledQuestions.length) * 100);
+    const correctCount = shuffledQuestions.filter(q => (answers[q.id] || '').toUpperCase() === (q.correct_answer || '').toUpperCase()).length;
+    const percentage = Math.round((correctCount / Math.max(shuffledQuestions.length, 1)) * 100);
 
     return (
       <motion.div
@@ -910,7 +910,7 @@ const HighYieldQuestions = () => {
                                   </div>
                                   <div className="grid grid-cols-2 gap-2 text-xs">
                                     {['A', 'B', 'C', 'D'].map((opt) => {
-                                      const isCorrect = q.correct_answer === opt;
+                                      const isCorrect = (q.correct_answer || '').toUpperCase() === opt;
                                       const optionKey = `option_${opt.toLowerCase()}` as keyof Question;
                                       return (
                                         <div

@@ -209,7 +209,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
         data.forEach(attempt => {
           if (attempt.questions_data && Array.isArray(attempt.questions_data)) {
             (attempt.questions_data as Array<{ id?: string; userAnswer?: string; correct_answer?: string }>).forEach((q) => {
-              if (q.id && q.userAnswer === q.correct_answer) {
+              if (q.id && (q.userAnswer || '').toUpperCase() === (q.correct_answer || '').toUpperCase()) {
                 // Only exclude questions user got right
                 ids.add(q.id);
               }
@@ -527,7 +527,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
     
     const resultsData = questions.map(q => {
       const userAnswer = answers[q.id] || '';
-      if (userAnswer === q.correct_answer) correctCount++;
+      if ((userAnswer || '').toUpperCase() === (q.correct_answer || '').toUpperCase()) correctCount++;
       return { ...q, userAnswer };
     });
 
@@ -1000,8 +1000,8 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
                   isCorrect = showAnswerFeedback === letter;
                   isWrong = !!showAnswerFeedback && isSelected && !isCorrect;
                 } else if (isAnswered) {
-                  isCorrect = currentQuestion.correct_answer === letter;
-                  isWrong = isSelected && userAnswer !== currentQuestion.correct_answer;
+                  isCorrect = (currentQuestion.correct_answer || '').toUpperCase() === letter.toUpperCase();
+                  isWrong = isSelected && (userAnswer || '').toUpperCase() !== (currentQuestion.correct_answer || '').toUpperCase();
                 }
               }
               

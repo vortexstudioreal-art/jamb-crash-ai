@@ -8,7 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 const PinRedeemPage = () => {
-  const [pinParts, setPinParts] = useState(['', '', '', '']);
+  const [pinCode, setPinCode] = useState('');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{
@@ -18,54 +18,31 @@ const PinRedeemPage = () => {
     access_expires_at?: string;
   } | null>(null);
 
-  const handlePinInput = (index: number, value: string) => {
-    // Only allow alphanumeric
-    const cleaned = value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-    
-    if (cleaned.length <= (index === 0 || index === 1 ? 3 : 4)) {
-      const newParts = [...pinParts];
-      newParts[index] = cleaned;
-      setPinParts(newParts);
-
-      // Auto-advance to next input
-      if (cleaned.length === (index === 0 || index === 1 ? 3 : 4) && index < 3) {
-        const nextInput = document.getElementById(`pin-${index + 1}`);
-        nextInput?.focus();
-      }
-    }
-  };
-
-  const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === 'Backspace' && !pinParts[index] && index > 0) {
-      const prevInput = document.getElementById(`pin-${index - 1}`);
-      prevInput?.focus();
-    }
+  const handlePinChange = (value: string) => {
+    // Accept formats: JCB-ABCD-1234, JCB-ABCD1234, JCB ABCD 1234, etc.
+    // Normalize to uppercase alphanumeric + hyphens
+    const cleaned = value.replace(/[^a-zA-Z0-9-]/g, '').toUpperCase();
+    setPinCode(cleaned);
   };
 
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
-    const pasted = e.clipboardData.getData('text').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-    
-    // Try to parse as PIN format (XXXX-XXXX-XXXX-XXXX or continuous)
-    const parts = pasted.split('-');
-    if (parts.length === 4) {
-      setPinParts(parts.map(p => p.substring(0, p === parts[0] || p === parts[1] ? 3 : 4)));
-    } else if (pasted.length === 15) {
-      // Continuous: 3+3+4+4 = 14 chars + possible separator
-      setPinParts([
-        pasted.substring(0, 3),
-        pasted.substring(3, 7),
-        pasted.substring(7, 11),
-        pasted.substring(11, 15),
-      ]);
-    }
+    const pasted = e.clipboardData.getData('text').replace(/[^a-zA-Z0-9-]/g, '').toUpperCase();
+    setPinCode(pasted);
   };
 
   const handleRedeem = async () => {
-    const fullPin = pinParts.join('-');
+    // Normalize pin: ensure it has proper format (PREFIX-XXXX-XXXX)
+    let normalizedPin = pinCode.trim().toUpperCase().replace(/\s+/g, '');
     
-    if (pinParts.some((p, i) => p.length < (i < 2 ? 3 : 4))) {
-      toast.error('Please enter the complete PIN');
+    // If user entered without hyphens (e.g., JCBABCD1234), add them
+    if (!normalizedPin.includes('-') && normalizedPin.length >= 11) {
+      // Format: JCB + 4 chars + 4 chars = 11 chars minimum
+      normalizedPin = `${normalizedPin.substring(0, 3)}-${normalizedPin.substring(3, 7)}-${normalizedPin.substring(7, 11)}`;
+    }
+    
+    if (!/^[A-Z]{3}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(normalizedPin)) {
+      toast.error('Invalid PIN format. Expected: JCB-XXXX-XXXX');
       return;
     }
 
@@ -79,7 +56,7 @@ const PinRedeemPage = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke('b2b-redeem-pin', {
-        body: { pin_code: fullPin, email },
+        body: { pin_code: normalizedPin, email },
       });
 
       if (error) throw error;
@@ -101,8 +78,6 @@ const PinRedeemPage = () => {
       setLoading(false);
     }
   };
-
-  const fullPin = pinParts.join('-');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
@@ -134,24 +109,16 @@ const PinRedeemPage = () => {
             {/* PIN Input */}
             <div>
               <label className="text-sm font-medium mb-3 block">PIN Code</label>
-              <div className="flex gap-2 justify-center" onPaste={handlePaste}>
-                {pinParts.map((part, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <Input
-                      id={`pin-${i}`}
-                      value={part}
-                      onChange={(e) => handlePinInput(i, e.target.value)}
-                      onKeyDown={(e) => handleKeyDown(i, e)}
-                      className="w-16 text-center font-mono text-lg font-bold tracking-wider"
-                      maxLength={i < 2 ? 3 : 4}
-                      placeholder={i < 2 ? 'XXX' : 'XXXX'}
-                    />
-                    {i < 3 && <span className="text-muted-foreground font-bold">-</span>}
-                  </div>
-                ))}
-              </div>
+              <Input
+                value={pinCode}
+                onChange={(e) => handlePinChange(e.target.value)}
+                onPaste={handlePaste}
+                className="w-full text-center font-mono text-lg font-bold tracking-wider"
+                placeholder="JCB-XXXX-XXXX"
+                maxLength={14}
+              />
               <p className="text-xs text-muted-foreground text-center mt-2">
-                Format: JCA-XXXX-XXXX-XXXX (ACE) or JCS-XXXX-XXXX-XXXX (SCHOLAR)
+                Format: JCB-XXXX-XXXX (BASIC), JCP-XXXX-XXXX (ACE), JCS-XXXX-XXXX (SCHOLAR)
               </p>
             </div>
 
@@ -174,7 +141,7 @@ const PinRedeemPage = () => {
               onClick={handleRedeem}
               className="w-full"
               size="lg"
-              disabled={loading || fullPin.length < 15}
+              disabled={loading || !/^[A-Z]{3}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(pinCode.trim().toUpperCase().replace(/\s+/g, '')) || !email.includes('@')}
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />

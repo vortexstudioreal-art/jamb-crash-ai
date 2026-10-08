@@ -75,7 +75,7 @@ export const useJambScorePredictor = (quizzes: QuizAttempt[]): PredictionResult 
           subjectStats[subject].total += 1;
           // Check both isCorrect flag and userAnswer vs correct_answer comparison
           const isCorrect = q.isCorrect === true || 
-            (q.userAnswer && q.correct_answer && q.userAnswer === q.correct_answer);
+            (q.userAnswer && q.correct_answer && (q.userAnswer || '').toUpperCase() === (q.correct_answer || '').toUpperCase());
           if (isCorrect) {
             subjectStats[subject].correct += 1;
           }

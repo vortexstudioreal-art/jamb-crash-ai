@@ -414,7 +414,7 @@ export const MockExam = ({ userEmail, subjects, onExit }: MockExamProps) => {
                   <div className="space-y-2">
                     {sectionQuestions[idx].map((q, qi) => {
                       const userAnswer = sectionAnswers[section.key]?.[q.id] || '';
-                      const correct = userAnswer === q.correct_answer;
+                      const correct = (userAnswer || '').toUpperCase() === (q.correct_answer || '').toUpperCase();
                       return (
                         <div key={q.id} className={`rounded-lg border p-3 text-sm ${correct ? 'border-emerald-200 bg-emerald-50/50' : 'border-red-200 bg-red-50/40'}`}>
                           <div className="flex items-start justify-between gap-2">

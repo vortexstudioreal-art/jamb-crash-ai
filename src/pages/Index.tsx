@@ -174,7 +174,7 @@ const Index = () => {
     return params.get('openPayment') === 'true';
   });
   
-  const { user, isLoading, hasAccess, isAdmin, isOwner, userRole, userPackage, signOut, refreshAccess } = useAuth();
+  const { user, isLoading, hasAccess, isAdmin, isOwner, userRole, userPackage, signOut, refreshAccess, roleResolved } = useAuth();
   const navigate = useNavigate();
   const { canUseFeature, incrementUsage } = useFeatureUsage();
 
@@ -234,8 +234,8 @@ const Index = () => {
   const effectiveOwner = isOwner;
   const effectiveSubjects = userSubjects.length > 0 ? userSubjects : DEFAULT_SUBJECTS;
 
-  // Combined loading state - include subjects loading
-  const isFullyLoading = isLoading || trialLoading || subjectsLoading;
+  // Combined loading state - include subjects loading and role resolution
+  const isFullyLoading = isLoading || trialLoading || subjectsLoading || !roleResolved;
 
   // Admins/owners can use dashboard normally - no auto-redirect
   // They access admin panel via the gear (Shield) icon in header
@@ -266,8 +266,7 @@ const Index = () => {
     } else {
       setCurrentStep('landing');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userEmail, userSubjects.length, isFullyLoading]);
+  }, [isFullyLoading, userEmail, userSubjects.length, effectiveAdmin]);
 
 
   // Load user subjects - use cache FIRST for instant redirect, then sync from server
@@ -1163,7 +1162,7 @@ const Index = () => {
   // Dashboard step
   if (currentStep === 'dashboard' && userEmail) {
     return (
-      <PaywallGate hasAccess={true} isLoading={isFullyLoading} onUpgrade={handleUpgradeClick} userEmail={userEmail}>
+      <PaywallGate hasAccess={effectiveAccess} isLoading={isFullyLoading} onUpgrade={handleUpgradeClick} userEmail={userEmail}>
         <div className="min-h-screen bg-background">
           {/* Desktop Sidebar */}
           <DesktopSidebar

@@ -83,16 +83,18 @@ export const gradeMock = (
   sectionTimes: Record<string, number>,
 ): MockResults => {
   const sectionResults: MockSectionResult[] = sections.map((section, idx) => {
-    const questions = sectionQuestions[idx];
+    const questions = sectionQuestions[idx] || [];
     const answers = sectionAnswers[section.key] || {};
-    const correct = questions.filter((q) => answers[q.id] === q.correct_answer).length;
+    const correct = questions.filter((q) => (answers[q.id] || '').toUpperCase() === (q.correct_answer || '').toUpperCase()).length;
+    const total = Math.max(questions.length, 1);
+    const score = Math.round((correct / total) * 100);
     return {
       key: section.key,
       title: section.title,
       subject: section.subject,
       correct,
       total: questions.length,
-      score: Math.round((correct / Math.max(questions.length, 1)) * 100),
+      score,
       timeTakenSec: sectionTimes[section.key] || 0,
     };
   });
