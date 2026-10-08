@@ -8,6 +8,7 @@ export interface PaystackConfig {
   amount: number;
   package: string;
   couponId?: string | null;
+  couponCode?: string | null;
   discountApplied?: number;
   referralCode?: string | null;
 }
@@ -106,13 +107,16 @@ export const usePaystack = () => {
         // Get public key from backend
         const publicKey = await getPublicKey();
 
-        // Initialize payment via edge function
+        // Initialize payment via edge function (server re-validates the
+        // amount against list price minus proven coupon/referral discounts)
         const { data, error } = await supabase.functions.invoke('paystack-initialize', {
           body: {
             email: config.email,
             amount: config.amount,
             package: config.package,
             callbackUrl: `${window.location.origin}/payment-success`,
+            couponCode: config.couponCode ?? null,
+            referralCode: config.referralCode ?? null,
           },
         });
 
@@ -120,7 +124,9 @@ export const usePaystack = () => {
           throw new Error(data?.error || 'Failed to initialize payment');
         }
 
-        // Open Paystack popup - amount is already in kobo from initialize response
+        // Open Paystack popup with the SAME amount the server just used to
+        // create the transaction (naira → kobo). Must match or Paystack
+        // rejects the charge against the initialized reference.
         const handler = window.PaystackPop.setup({
           key: publicKey,
           email: config.email,

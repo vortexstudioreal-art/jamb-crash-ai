@@ -85,9 +85,9 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const packageName = paystackData.data.metadata?.package || "basic";
-    // Server-side price check: the amount Paystack actually collected must
-    // cover list price minus any coupon/referral discount the client claimed.
-    // Without this, any ₦1 payment would grant full access.
+    // Defense in depth: the amount Paystack actually collected must cover the
+    // amount this reference was initialized for (server-validated at
+    // initialize time). Never trust client-supplied metadata discounts.
     const PACKAGE_PRICES: Record<string, number> = {
       basic: 1500,
       pro: 3500,
@@ -96,12 +96,22 @@ serve(async (req) => {
       ultimate: 7500,
     };
     const expectedPrice = PACKAGE_PRICES[String(packageName).toLowerCase()] ?? 1500;
-    const claimedDiscount = Number(paystackData.data.metadata?.discountApplied) || 0;
     const paidNaira = (paystackData.data.amount || 0) / 100;
-    if (paidNaira + 1 < expectedPrice - Math.min(claimedDiscount, expectedPrice)) {
+
+    // The pending row stores the lawful initialized amount — compare against it.
+    const { data: pendingRow } = await supabase
+      .from("payments")
+      .select("amount")
+      .eq("paystack_reference", reference)
+      .maybeSingle();
+
+    const floorDue = pendingRow && typeof pendingRow.amount === "number"
+      ? pendingRow.amount
+      : expectedPrice;
+    if (paidNaira + 1 < floorDue) {
       console.error(
         "[paystack-verify] Underpaid:",
-        { paid: paidNaira, expected: expectedPrice, claimedDiscount, package: packageName }
+        { paid: paidNaira, due: floorDue, expected: expectedPrice, package: packageName }
       );
       return new Response(
         JSON.stringify({ success: false, error: "Amount paid does not match the plan price" }),

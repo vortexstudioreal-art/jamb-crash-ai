@@ -254,6 +254,7 @@ export const PaymentModal = ({ isOpen, onClose, plan, onSuccess, initialEmail }:
         amount: finalPrice,
         package: getPackageCode(plan.name),
         couponId: appliedCouponId,
+        couponCode: couponCode.trim() ? couponCode.trim().toUpperCase() : null,
         discountApplied: appliedDiscount,
         referralCode: appliedReferralCode,
       },

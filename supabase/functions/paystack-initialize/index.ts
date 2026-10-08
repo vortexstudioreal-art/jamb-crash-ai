@@ -11,6 +11,8 @@ interface InitializePaymentRequest {
   amount: number;
   package: string;
   callbackUrl: string;
+  couponCode?: string | null;
+  referralCode?: string | null;
 }
 
 // Server-side price lookup - NEVER trust client-supplied amounts
@@ -61,7 +63,7 @@ serve(async (req) => {
 
   try {
     const requestBody = await req.text();
-    const { email, amount, package: packageName, callbackUrl }: InitializePaymentRequest = JSON.parse(requestBody);
+    const { email, amount, package: packageName, callbackUrl, couponCode, referralCode }: InitializePaymentRequest = JSON.parse(requestBody);
 
     console.log("[paystack-initialize] Parsed request:", { email, amount, packageName });
 
@@ -91,12 +93,73 @@ serve(async (req) => {
       );
     }
 
-    // Amount must not exceed expected price (coupons can reduce it, but never below 0)
-    // and must be a positive number
+    // Amount must be a positive number not exceeding list price.
+    // The exact lawful price (list minus PROVEN discounts) is enforced below.
     if (typeof amount !== 'number' || amount <= 0 || amount > expectedPrice) {
       console.error("[paystack-initialize] Invalid amount:", amount, "expected max:", expectedPrice);
       return new Response(
         JSON.stringify({ error: "Invalid amount for selected package" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Server-side discount validation — never trust client-claimed discounts.
+    // Without this, anyone could send amount=100 and buy a ₦7,500 plan.
+    const supabaseUrlEarly = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKeyEarly = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const dbEarly = createClient(supabaseUrlEarly, supabaseServiceKeyEarly);
+
+    let provenDiscount = 0;
+
+    if (couponCode) {
+      const { data: coupon } = await dbEarly
+        .from("coupon_codes")
+        .select("discount_amount, discount_percentage, is_active, expiry_date, usage_limit, times_used")
+        .eq("code", String(couponCode).toUpperCase().trim())
+        .maybeSingle();
+
+      const usable =
+        coupon &&
+        coupon.is_active === true &&
+        (!coupon.expiry_date || new Date(coupon.expiry_date) > new Date()) &&
+        (coupon.usage_limit == null || (coupon.times_used ?? 0) < coupon.usage_limit);
+
+      if (!usable) {
+        return new Response(
+          JSON.stringify({ error: "Coupon is invalid or expired" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const couponDiscount = coupon.discount_percentage && coupon.discount_percentage > 0
+        ? Math.floor(expectedPrice * (coupon.discount_percentage / 100))
+        : (coupon.discount_amount ?? 0);
+      provenDiscount += Math.max(0, Math.min(couponDiscount, expectedPrice));
+    }
+
+    if (referralCode) {
+      const { data: ref } = await dbEarly
+        .from("referrals")
+        .select("referrer_email")
+        .eq("referral_code", String(referralCode).toUpperCase().trim())
+        .is("referred_email", null)
+        .limit(1)
+        .maybeSingle();
+
+      if (!ref || !ref.referrer_email || ref.referrer_email.toLowerCase() === email.toLowerCase()) {
+        return new Response(
+          JSON.stringify({ error: "Referral code is invalid" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      provenDiscount += Math.min(1000, expectedPrice);
+    }
+
+    const lawfulPrice = Math.max(0, expectedPrice - provenDiscount);
+    if (lawfulPrice <= 0 || amount !== lawfulPrice) {
+      console.error("[paystack-initialize] Amount mismatch:", { amount, lawfulPrice, expectedPrice, provenDiscount });
+      return new Response(
+        JSON.stringify({ error: "Amount does not match the plan price after discounts" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }

@@ -75,6 +75,29 @@ serve(async (req) => {
       // All plans grant ~1 year; no duration is shown in the UI.
       const packageName = metadata?.package || "basic";
       const accessDays = 365; // 1 year for every plan
+
+      // Defense in depth: only grant access if Paystack actually collected at
+      // least the lawfully-initialized amount for this reference. The pending
+      // row is written by paystack-initialize after server-side validation.
+      const paidNaira = (amount || 0) / 100;
+      const { data: pendingRow } = await supabase
+        .from("payments")
+        .select("amount")
+        .eq("paystack_reference", reference)
+        .maybeSingle();
+
+      if (pendingRow && typeof pendingRow.amount === "number" && paidNaira + 1 < pendingRow.amount) {
+        console.error("[paystack-webhook] Underpaid, not granting access:", {
+          reference,
+          paid: paidNaira,
+          due: pendingRow.amount,
+        });
+        return new Response(JSON.stringify({ received: true, granted: false }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       const accessExpiresAt = new Date();
       accessExpiresAt.setDate(accessExpiresAt.getDate() + accessDays);
 
