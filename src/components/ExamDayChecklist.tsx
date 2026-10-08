@@ -27,9 +27,21 @@ const ITEMS: ChecklistItem[] = [
 
 const STORAGE_KEY = 'jamb_exam_checklist_v1';
 
+// Next UTME date — TODO(admin): update when JAMB officially announces.
+// The checklist only appears in the run-up so it doesn't clutter the home
+// tab for most of the year.
+const NEXT_JAMB_UTME = '2027-04-19';
+const EXAM_WINDOW_DAYS = 14;
+
 export const ExamDayChecklist = () => {
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [open, setOpen] = useState(false);
+
+  const daysLeft = Math.ceil(
+    (new Date(NEXT_JAMB_UTME).getTime() - Date.now()) / 86400000,
+  );
+  // Outside exam season (or the day after) — stay out of the way.
+  if (daysLeft > EXAM_WINDOW_DAYS || daysLeft < -1) return null;
 
   useEffect(() => {
     try {
@@ -84,7 +96,9 @@ export const ExamDayChecklist = () => {
             {complete ? 'Exam-day ready! 🎉' : 'Exam-Day Checklist'}
           </h3>
           <p className="text-sm text-muted-foreground">
-            {done}/{ITEMS.length} ready{complete ? ' — go crush it!' : ''}
+            {complete
+              ? `Done — ${daysLeft <= 0 ? 'good luck today!' : 'go crush it!'}`
+              : `${done}/${ITEMS.length} ready · ${daysLeft <= 0 ? 'exam is here!' : `${daysLeft}d to UTME`}`}
           </p>
         </div>
         <span className="text-xs font-bold text-primary">{pct}%</span>

@@ -7,7 +7,6 @@ import { Sparkles } from 'lucide-react';
 import { HomeSummary } from '@/components/HomeSummary';
 import { StudyPlanTodayCard } from '@/components/StudyPlanTodayCard';
 import { MasteryOverview } from '@/components/MasteryOverview';
-import { WeakTopicDrill } from '@/components/WeakTopicDrill';
 import { ExamDayChecklist } from '@/components/ExamDayChecklist';
 import { RenewalNudge } from '@/components/RenewalNudge';
 import { GoogleAdSense } from '@/components/GoogleAdSense';
@@ -84,20 +83,7 @@ export const HomeTab = ({
         onUpgrade={() => handleUpgradeClick()}
       />
 
-      {/* Weak-link auto drill */}
-      <WeakTopicDrill
-        userEmail={userEmail}
-        subjects={effectiveSubjects}
-        canPractice={hasFeature('practiceQuiz') || isTrialActive}
-        onDrillSubject={(subject) => {
-          setPracticeSubjectOverride(subject);
-          setQuizType('subject');
-          handleStartQuiz('subject');
-        }}
-        onUpgrade={() => handleUpgradeClick()}
-      />
-
-      {/* Exam-day readiness */}
+      {/* Exam-day readiness (auto-appears in exam season) */}
       <ExamDayChecklist />
 
       {/* Quick Actions */}
