@@ -54,6 +54,11 @@ export const MockExam = ({ userEmail, subjects, onExit }: MockExamProps) => {
   const endTimeRef = useRef<number>(0);
   const startTimeRef = useRef<number>(Date.now());
   const sectionStartRef = useRef<number>(Date.now());
+  // The countdown interval always calls through this ref so timeout
+  // auto-submit grades the LATEST answers, not the ones captured when the
+  // section started (stale closure would silently zero the score).
+  const submitExamRef = useRef<() => void>(() => {});
+  const submittingRef = useRef(false);
 
   const currentSection = sections[currentSectionIdx];
   const currentQuestions = useMemo(() => sectionQuestions[currentSectionIdx] || [], [sectionQuestions, currentSectionIdx]);
@@ -173,11 +178,12 @@ export const MockExam = ({ userEmail, subjects, onExit }: MockExamProps) => {
         endTimeRef.current = Date.now() + sections[fromIdx + 1].minutes * 60 * 1000;
         sectionStartRef.current = Date.now();
       } else {
-        submitExam();
+        // Last section timed out — grade with the latest answers via ref.
+        submitExamRef.current();
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [sections, sectionAnswers],
+    [sections],
   );
 
   const answerQuestion = useCallback((questionId: string, option: string) => {
@@ -208,7 +214,8 @@ export const MockExam = ({ userEmail, subjects, onExit }: MockExamProps) => {
   }, [currentQIdx]);
 
   const submitExam = useCallback(async () => {
-    if (submitting) return;
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     setSubmitting(true);
     try {
       const finalTimes: Record<string, number> = { ...sectionTimes };
@@ -220,7 +227,7 @@ export const MockExam = ({ userEmail, subjects, onExit }: MockExamProps) => {
       setPhase('results');
 
       const questionsData = sections.flatMap((section, idx) =>
-        sectionQuestions[idx].map((q) => ({ ...q, userAnswer: sectionAnswers[section.key]?.[q.id] || '' })),
+        (sectionQuestions[idx] || []).map((q) => ({ ...q, userAnswer: sectionAnswers[section.key]?.[q.id] || '' })),
       );
 
       // Offline mocks can't sync (no queue type for full mocks) — results
@@ -247,9 +254,14 @@ export const MockExam = ({ userEmail, subjects, onExit }: MockExamProps) => {
     } catch {
       toast.error('Could not save your mock attempt, but here are your results!');
     } finally {
+      submittingRef.current = false;
       setSubmitting(false);
     }
-  }, [submitting, sectionTimes, sections, sectionQuestions, sectionAnswers, userEmail]);
+  }, [sectionTimes, sections, sectionQuestions, sectionAnswers, userEmail]);
+
+  // Keep the ref pointing at the latest submit so the countdown interval
+  // below never grades stale answers.
+  submitExamRef.current = submitExam;
 
   const currentQuestion = currentQuestions[currentQIdx];
   const band = results ? scoreBand(results.totalScore) : null;
@@ -412,7 +424,7 @@ export const MockExam = ({ userEmail, subjects, onExit }: MockExamProps) => {
                 <div key={section.key}>
                   <h3 className="font-bold text-foreground text-sm mb-2 capitalize">{section.title}</h3>
                   <div className="space-y-2">
-                    {sectionQuestions[idx].map((q, qi) => {
+                    {((sectionQuestions[idx] || []) as MockQuestion[]).map((q, qi) => {
                       const userAnswer = sectionAnswers[section.key]?.[q.id] || '';
                       const correct = (userAnswer || '').toUpperCase() === (q.correct_answer || '').toUpperCase();
                       return (

@@ -193,6 +193,9 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
   const [currentSound, setCurrentSound] = useState<AmbientSound>('rain');
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const hasSubmittedRef = useRef(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const currentQidRef = useRef<string | null>(null);
+  currentQidRef.current = questions[currentIndex]?.id ?? null;
 
   // Load previously answered questions to avoid repetition
   useEffect(() => {
@@ -441,21 +444,24 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
     loadQuestions();
   }, [subjects, totalQuestions, quizMode, quizType, selectedSubjects, subjectYears, previouslyAnsweredIds, weakQuestionCounts]);
 
-  // Timer
+  // Timer (single interval; stops itself at zero instead of no-op ticking)
   useEffect(() => {
     if (!quizMode || isPaused || isLoading || isUntimed) return;
     if (timeLeft <= 0) return;
 
-    const interval = setInterval(() => {
+    timerRef.current = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
+          if (timerRef.current) clearInterval(timerRef.current);
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
 
-    return () => clearInterval(interval);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quizMode, isPaused, isLoading, isUntimed]);
 
@@ -494,19 +500,24 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
     if (quizMode === 'practice') {
       setShowAnswerFeedback(currentQuestion.correct_answer);
       
-      // Auto-fetch AI explanation if no static explanation exists
+      // Auto-fetch AI explanation if no static explanation exists.
+      // Guarded: if the user already moved on, skip — each skipped fetch
+      // saves a Groq call.
       if (!currentQuestion.explanation) {
+        const qid = currentQuestion.id;
+        const snapshot = {
+          id: currentQuestion.id,
+          question: currentQuestion.question,
+          option_a: currentQuestion.option_a,
+          option_b: currentQuestion.option_b,
+          option_c: currentQuestion.option_c,
+          option_d: currentQuestion.option_d,
+          correct_answer: currentQuestion.correct_answer,
+          subject: currentQuestion.subject,
+        };
         setTimeout(() => {
-          fetchAiExplanation({
-            id: currentQuestion.id,
-            question: currentQuestion.question,
-            option_a: currentQuestion.option_a,
-            option_b: currentQuestion.option_b,
-            option_c: currentQuestion.option_c,
-            option_d: currentQuestion.option_d,
-            correct_answer: currentQuestion.correct_answer,
-            subject: currentQuestion.subject
-          });
+          if (currentQidRef.current !== qid) return;
+          fetchAiExplanation(snapshot);
         }, 300);
       }
       
