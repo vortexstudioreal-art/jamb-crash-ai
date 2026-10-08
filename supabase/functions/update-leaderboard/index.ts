@@ -58,6 +58,19 @@ Deno.serve(async (req) => {
 
     const { correctCount, totalQuestions, timeTaken, totalTimeSeconds }: LeaderboardUpdate = await req.json();
 
+    // Validate numbers — zero/negative totals would produce NaN/Infinity points.
+    if (
+      !Number.isFinite(correctCount) || !Number.isFinite(totalQuestions) ||
+      !Number.isFinite(timeTaken) || !Number.isFinite(totalTimeSeconds) ||
+      totalQuestions <= 0 || totalTimeSeconds <= 0 ||
+      correctCount < 0 || correctCount > totalQuestions
+    ) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid quiz stats' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Calculate leaderboard points
     const timeUsedPercentage = (timeTaken / totalTimeSeconds) * 100;
     const accuracyPercent = (correctCount / totalQuestions) * 100;

@@ -22,13 +22,6 @@ function isRateLimited(identifier: string): boolean {
   return false;
 }
 
-function getUserIdentifier(req: Request, email?: string): string {
-  if (email) return email;
-  const forwarded = req.headers.get('x-forwarded-for');
-  const ip = forwarded ? forwarded.split(',')[0].trim() : 'unknown';
-  return `ip:${ip}`;
-}
-
 function buildSystemPrompt(subject: string): string {
   return `You are an expert JAMB exam question extractor. Your job is to extract ALL questions from JAMB past question papers.
 
@@ -117,6 +110,27 @@ serve(async (req) => {
   }
 
   try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Authenticated users only — keyed by user id so the limit can't be
+    // spoofed with a random body email or dodged behind shared IPs.
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Sign in to upload' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const { data: { user }, error: authError } = await supabase.auth.getUser(
+      authHeader.replace('Bearer ', ''),
+    );
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'Session expired. Please sign in again.' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const body = await req.json();
 
     if (body.test === true) {
@@ -125,9 +139,9 @@ serve(async (req) => {
       });
     }
 
-    const { imageBase64, fileType, subject, email } = body;
+    const { imageBase64, fileType, subject } = body;
 
-    const userIdentifier = getUserIdentifier(req, email);
+    const userIdentifier = `user:${user.id}`;
     if (isRateLimited(userIdentifier)) {
       return new Response(
         JSON.stringify({ error: 'Too many uploads! Max 10 per hour. Please wait. 😊', rate_limited: true }),

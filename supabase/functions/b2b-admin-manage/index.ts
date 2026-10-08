@@ -35,14 +35,13 @@ serve(async (req) => {
       });
     }
 
-    // Check admin role
-    const { data: adminCheck } = await supabase
-      .from("admin_users")
-      .select("role")
-      .eq("email", user.email!)
-      .single();
+    // Admin or owner (user_roles) — the legacy admin_users table doesn't
+    // cover all admins, so an owner-only check here 403s legitimate admins.
+    const { data: isAdmin } = await supabase.rpc("is_admin_or_owner", {
+      _user_id: user.id,
+    });
 
-    if (!adminCheck || adminCheck.role !== "owner") {
+    if (!isAdmin) {
       return new Response(JSON.stringify({ error: "Admin access required" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 403,
