@@ -365,19 +365,16 @@ export const StudyPlanGenerator = ({
     void savePlanToDb(generatedPlan);
   };
 
-  // Persist the plan so users can follow it (calendar + task tracking)
+  // Persist the plan so users can follow it (calendar + task tracking).
+  // Order matters: insert plan + tasks first, archive the old plan only on
+  // success. Otherwise a tasks failure (e.g. duplicate subject in one AI
+  // day violating the unique constraint) leaves an empty active plan while
+  // the good old one is already archived.
   const savePlanToDb = async (planToSave: DayPlan[]) => {
     if (!userEmail) return;
     setIsSaving(true);
     setSaveError(false);
     try {
-      // Archive any previous active plan
-      await supabase
-        .from('study_plans')
-        .update({ status: 'archived', updated_at: new Date().toISOString() })
-        .eq('email', userEmail)
-        .eq('status', 'active');
-
       const { data: planRow, error: planError } = await supabase
         .from('study_plans')
         .insert({
@@ -394,18 +391,28 @@ export const StudyPlanGenerator = ({
         return;
       }
 
+      const seen = new Set<string>();
       const tasks = planToSave.flatMap((day) =>
-        day.subjects.map((subject) => ({
-          plan_id: planRow.id,
-          day: day.day,
-          date: day.isoDate,
-          day_name: day.dayName,
-          subject: subject.name,
-          topics: subject.topics,
-          duration: subject.duration,
-          priority: subject.priority,
-          quiz_goal: subject.quizGoal,
-        }))
+        day.subjects
+          .filter((subject) => {
+            // AI plans occasionally repeat a subject within one day; the
+            // tasks table enforces one row per (plan, day, subject).
+            const key = `${day.day}|${subject.name}`;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          })
+          .map((subject) => ({
+            plan_id: planRow.id,
+            day: day.day,
+            date: day.isoDate,
+            day_name: day.dayName,
+            subject: subject.name,
+            topics: subject.topics,
+            duration: subject.duration,
+            priority: subject.priority,
+            quiz_goal: subject.quizGoal,
+          }))
       );
 
       const { error: tasksError } = await supabase
@@ -413,9 +420,19 @@ export const StudyPlanGenerator = ({
         .insert(tasks);
 
       if (tasksError) {
+        // Roll back the orphan plan so the previous active plan survives.
+        await supabase.from('study_plans').delete().eq('id', planRow.id);
         setSaveError(true);
         return;
       }
+
+      // Archive any previous active plan (excluding the new one).
+      await supabase
+        .from('study_plans')
+        .update({ status: 'archived', updated_at: new Date().toISOString() })
+        .eq('email', userEmail)
+        .eq('status', 'active')
+        .neq('id', planRow.id);
 
       setSavedPlanId(planRow.id);
     } catch (error) {
