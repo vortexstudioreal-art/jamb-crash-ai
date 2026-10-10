@@ -52,13 +52,13 @@ export const QuizResults = ({ results, quizType, userEmail, onRetry, onHome, onU
   const [aiQuestionId, setAiQuestionId] = useState<string | null>(null);
 
   // FIXED: Score is based on ACTUAL questions answered, not a progressive total
-  const percentage = Math.round((results.correctAnswers / results.totalQuestions) * 100);
+  const percentage = Math.round((results.correctAnswers / Math.max(results.totalQuestions, 1)) * 100);
   const scoreInfo = getScoreMessage(percentage);
 
   // Estimated JAMB score based on THIS quiz performance
   const estimatedJambScore = Math.round((percentage / 100) * 400);
 
-  const wrongCount = results.questions.filter(q => q.userAnswer && q.userAnswer !== q.correct_answer).length;
+  const wrongCount = results.questions.filter(q => q.userAnswer && (q.userAnswer || '').toUpperCase() !== (q.correct_answer || '').toUpperCase()).length;
   const skippedCount = results.questions.filter(q => !q.userAnswer).length;
 
   // Trigger confetti once per results screen for good scores
@@ -106,7 +106,7 @@ export const QuizResults = ({ results, quizType, userEmail, onRetry, onHome, onU
     });
   };
 
-  const wrongQuestions = results.questions.filter(q => q.userAnswer !== q.correct_answer);
+  const wrongQuestions = results.questions.filter(q => (q.userAnswer || '').toUpperCase() !== (q.correct_answer || '').toUpperCase());
   const displayQuestions = showAllQuestions ? results.questions : wrongQuestions.slice(0, 5);
 
   const buildScorecardData = (): ScorecardData => ({
@@ -290,7 +290,7 @@ export const QuizResults = ({ results, quizType, userEmail, onRetry, onHome, onU
 
           <div className="space-y-3">
             {displayQuestions.map((q, index) => {
-              const isCorrect = q.userAnswer === q.correct_answer;
+              const isCorrect = (q.userAnswer || '').toUpperCase() === (q.correct_answer || '').toUpperCase() && !!q.userAnswer;
               const isSkipped = !q.userAnswer;
               const isExpanded = expandedQuestions.includes(q.id);
               const isAiLoading = isLoading && aiQuestionId === q.id;
@@ -352,8 +352,8 @@ export const QuizResults = ({ results, quizType, userEmail, onRetry, onHome, onU
 
                       <div className="space-y-2 mb-4">
                         {['A', 'B', 'C', 'D'].map(letter => {
-                          const isCorrectAnswer = q.correct_answer === letter;
-                          const isUserAnswer = q.userAnswer === letter;
+                          const isCorrectAnswer = (q.correct_answer || '').toUpperCase() === letter;
+                          const isUserAnswer = (q.userAnswer || '').toUpperCase() === letter;
                           const isWrongUserAnswer = isUserAnswer && !isCorrectAnswer;
 
                           return (

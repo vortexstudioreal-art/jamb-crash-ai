@@ -74,7 +74,11 @@ export const DownloadManager = ({ userEmail, subjects }: DownloadManagerProps) =
   };
 
   const handleClearData = async () => {
-    if (!confirm('Are you sure you want to clear all offline data? This cannot be undone.')) {
+    const pending = storageInfo?.pendingSyncCount || 0;
+    const warning = pending > 0
+      ? `You have ${pending} unsynced change${pending === 1 ? '' : 's'} that will be LOST. Clear all offline data anyway?`
+      : 'Are you sure you want to clear all offline data? This cannot be undone.';
+    if (!confirm(warning)) {
       return;
     }
 

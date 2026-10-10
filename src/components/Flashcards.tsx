@@ -229,7 +229,7 @@ export const Flashcards = ({ userEmail, subjects, onBack, initialSubject }: Flas
           const topic = q.topic || 'Quiz Mistakes';
           const subject = q.subject || (attempt.subjects as string[])?.[0] || 'general';
 
-          if (userAnswer && correctAnswer && userAnswer !== correctAnswer && questionText) {
+          if (userAnswer && correctAnswer && String(userAnswer).toUpperCase() !== String(correctAnswer).toUpperCase() && questionText) {
             const front = `[${topic}] ${questionText}`;
             
             // Skip if already exists
