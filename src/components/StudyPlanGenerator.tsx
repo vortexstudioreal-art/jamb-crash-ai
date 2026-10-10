@@ -143,7 +143,7 @@ export const StudyPlanGenerator = ({
               }
               subjectStats[subject].total++;
               if (isRecent) subjectStats[subject].recentTotal++;
-              if (q.userAnswer === q.correct_answer) {
+              if ((q.userAnswer || '').toUpperCase() === (q.correct_answer || '').toUpperCase() && !!q.userAnswer) {
                 subjectStats[subject].correct++;
                 if (isRecent) subjectStats[subject].recentCorrect++;
               }

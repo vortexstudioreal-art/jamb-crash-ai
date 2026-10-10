@@ -114,7 +114,7 @@ export const TopicMasteryTracker = ({
             subject: q.subject || '',
             text: q.question || '',
             storedTopics: q.topics,
-            correct: q.userAnswer === q.correct_answer,
+            correct: (q.userAnswer || '').toUpperCase() === (q.correct_answer || '').toUpperCase() && !!q.userAnswer,
             at: attempt.created_at || new Date().toISOString(),
           });
         });

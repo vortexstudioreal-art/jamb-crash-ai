@@ -335,7 +335,7 @@ export const UploadSection = ({ onUploadComplete, userSubjects = [] }: UploadSec
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
                     {['A', 'B', 'C', 'D'].map((letter) => {
                       const optionKey = `option_${letter.toLowerCase()}` as keyof ExtractedQuestion;
-                      const isCorrect = q.correct_answer === letter;
+                      const isCorrect = (q.correct_answer || '').toUpperCase() === letter;
                       return (
                         <div
                           key={letter}

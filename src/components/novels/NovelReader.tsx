@@ -343,8 +343,14 @@ export const NovelReader = ({
 
   const checkAnswers = () => {
     setShowResults(true);
-    const correct = likelyQuestions.filter((q, i) => selectedAnswers[i] === q.correct_answer).length;
-    toast.success(`You got ${correct} out of ${likelyQuestions.length} correct!`);
+    // Only gradeable questions count: rows whose answer matched no option
+    // (correct_answer -1) are practice-only, not scoreable.
+    const gradeable = likelyQuestions.filter((q) => q.correct_answer >= 0);
+    const correct = gradeable.filter((q) => {
+      const origIdx = likelyQuestions.indexOf(q);
+      return selectedAnswers[origIdx] === q.correct_answer;
+    }).length;
+    toast.success(`You got ${correct} out of ${gradeable.length} correct!`);
   };
 
   if (loading) {
