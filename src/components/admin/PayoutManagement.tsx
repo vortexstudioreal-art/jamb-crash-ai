@@ -77,24 +77,49 @@ export const PayoutManagement = ({ isOwner, userEmail }: PayoutManagementProps) 
 
     setProcessingId(request.id);
     try {
-      // Update payout request status
-      const { error: payoutError } = await supabase
+      // Re-check the unpaid total: earnings may have grown since the request.
+      const { data: coupons } = await supabase
+        .from('coupon_codes')
+        .select('id')
+        .eq('creator_email', request.collaborator_email);
+
+      let unpaidTotal = 0;
+      if (coupons && coupons.length > 0) {
+        const { data: unpaid } = await supabase
+          .from('coupon_usage')
+          .select('creator_earning')
+          .in('coupon_id', coupons.map(c => c.id))
+          .eq('is_paid_out', false);
+        unpaidTotal = (unpaid || []).reduce((s, u) => s + (u.creator_earning || 0), 0);
+      }
+      if (unpaidTotal !== request.amount) {
+        const ok = window.confirm(
+          `Unpaid earnings are ${formatCurrency(unpaidTotal)} but the request is for ${formatCurrency(request.amount)}. Mark paid anyway?`
+        );
+        if (!ok) return;
+      }
+
+      // Status-guarded update: a second tab/session racing the same request
+      // updates zero rows instead of paying twice.
+      const { data: updated, error: payoutError } = await supabase
         .from('payout_requests')
         .update({
           status: 'paid',
           processed_at: new Date().toISOString(),
           processed_by: userEmail
         })
-        .eq('id', request.id);
+        .eq('id', request.id)
+        .eq('status', 'pending')
+        .select('id');
 
       if (payoutError) throw payoutError;
+      if (!updated || updated.length === 0) {
+        toast.info('Already processed by another session — refreshing.');
+        await fetchPayoutRequests();
+        return;
+      }
 
       // Get collaborator's coupons
-      const { data: coupons } = await supabase
-        .from('coupon_codes')
-        .select('id')
-        .eq('creator_email', request.collaborator_email);
-
       if (coupons && coupons.length > 0) {
         const couponIds = coupons.map(c => c.id);
         
@@ -177,7 +202,10 @@ export const PayoutManagement = ({ isOwner, userEmail }: PayoutManagementProps) 
   };
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-NG', {
+    if (!date) return '—';
+    const d = new Date(date);
+    if (Number.isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString('en-NG', {
       day: 'numeric',
       month: 'short',
       year: 'numeric',

@@ -132,15 +132,21 @@ export const CouponManager = () => {
     const codeToCreate = newCode.toUpperCase().replace(/\s/g, '-');
     const creatorEmail = newCreatorEmail.trim() || user?.email || '';
 
+    // Sanity-clamp discounts: negatives break math downstream and >100%
+    // silently becomes a full-price giveaway at validation time.
+    const safeAmount = Math.max(0, Math.floor(Number(discountAmount) || 0));
+    const safePct = Math.min(100, Math.max(0, Math.floor(Number(discountPercentage) || 0)));
+    const safeLimit = usageLimit == null ? null : Math.max(1, Math.floor(usageLimit));
+
     const { error } = await supabase
       .from('coupon_codes')
       .insert({
         code: codeToCreate,
         creator_email: creatorEmail,
-        discount_amount: discountAmount,
-        discount_percentage: discountPercentage,
+        discount_amount: safeAmount,
+        discount_percentage: safePct,
         coupon_type: couponType,
-        usage_limit: usageLimit,
+        usage_limit: safeLimit,
         is_active: true
       });
 
