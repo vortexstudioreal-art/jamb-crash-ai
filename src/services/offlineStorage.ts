@@ -54,7 +54,7 @@ interface SyllabusItem {
 
 interface SyncItem {
   id: string;
-  type: 'quiz_attempt' | 'flashcard_update' | 'reading_progress';
+  type: 'quiz_attempt' | 'flashcard_update' | 'reading_progress' | 'novel_progress';
   data: unknown;
   timestamp: number;
   retries: number;

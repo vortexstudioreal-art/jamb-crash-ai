@@ -22,7 +22,7 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
-import { getCachedChapter, getCachedChaptersByNovel, getCachedNovel } from '@/services/offlineStorage';
+import { getCachedChapter, getCachedChaptersByNovel, getCachedNovel, addToSyncQueue } from '@/services/offlineStorage';
 import { errorLogger } from '@/services/errorLogger';
 
 interface LikelyQuestion {
@@ -209,6 +209,24 @@ export const NovelReader = ({
   }, [chapterId, userEmail, updateProgress]);
 
   const saveReadingTime = useCallback(async (novelId: string, seconds: number) => {
+    // Offline: queue a time delta instead of dropping it. The sync worker
+    // merges it onto the server row when connectivity returns.
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      const ch = chapterRef.current;
+      const nv = novelRef.current;
+      if (ch && nv && seconds > 0) {
+        const total = allChaptersRef.current.length || 1;
+        await addToSyncQueue('novel_progress', {
+          email: userEmail,
+          novel_id: novelId,
+          current_chapter_id: ch.id,
+          chapter_number: ch.chapter_number,
+          total_chapters: total,
+          time_delta_seconds: Math.round(seconds),
+        }).catch((e) => errorLogger.error(e, { component: 'NovelReader', action: 'queue offline progress' }));
+      }
+      return;
+    }
     const { data: existingProgress } = await supabase
       .from('user_novel_progress')
       .select('total_time_spent_seconds')
@@ -238,6 +256,10 @@ export const NovelReader = ({
   useEffect(() => {
     novelRef.current = novel;
   }, [novel]);
+  const allChaptersRef = useRef(allChapters);
+  useEffect(() => {
+    allChaptersRef.current = allChapters;
+  }, [allChapters]);
   const saveReadingTimeRef = useRef(saveReadingTime);
   useEffect(() => {
     saveReadingTimeRef.current = saveReadingTime;

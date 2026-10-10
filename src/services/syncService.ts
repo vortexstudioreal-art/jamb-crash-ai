@@ -72,6 +72,39 @@ const processSyncItem = async (item: SyncItem): Promise<void> => {
       if (error) throw error;
       break;
     }
+    case 'novel_progress': {
+      // Merge time deltas onto the server row so offline reading adds up
+      // instead of overwriting newer online progress.
+      const d = item.data as {
+        email: string;
+        novel_id: string;
+        current_chapter_id: string;
+        chapter_number: number;
+        total_chapters: number;
+        time_delta_seconds: number;
+      };
+      const { data: existing } = await supabase
+        .from('user_novel_progress')
+        .select('total_time_spent_seconds')
+        .eq('email', d.email)
+        .eq('novel_id', d.novel_id)
+        .maybeSingle();
+      const total = Math.max(d.total_chapters, 1);
+      const { error } = await supabase.from('user_novel_progress').upsert(
+        {
+          email: d.email,
+          novel_id: d.novel_id,
+          current_chapter_id: d.current_chapter_id,
+          progress_percent: Math.round((d.chapter_number / total) * 100),
+          is_completed: d.chapter_number >= total,
+          total_time_spent_seconds: (existing?.total_time_spent_seconds || 0) + Math.max(0, d.time_delta_seconds),
+          last_read_at: new Date().toISOString(),
+        },
+        { onConflict: 'email,novel_id' }
+      );
+      if (error) throw error;
+      break;
+    }
   }
 };
 
