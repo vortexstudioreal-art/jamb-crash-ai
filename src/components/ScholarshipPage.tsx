@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, GraduationCap, Clock, ExternalLink, Star, Bell, Trophy, CheckCircle2, Play } from 'lucide-react';
+import { ArrowLeft, GraduationCap, Clock, ExternalLink, Star, Bell, Trophy, CheckCircle2, Play, Landmark } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +16,52 @@ interface ScholarshipPageProps {
   userId?: string | null;
   onPracticeQuiz?: () => void;
 }
+
+interface StudentLoan {
+  id: string;
+  title: string;
+  provider: string;
+  description: string;
+  amount: string | null;
+  link: string | null;
+  status: 'coming-soon' | 'open';
+  featured: boolean;
+}
+
+// Keep this list short and factual: only widely-documented programs with
+// official portals. Details change yearly — every card links out.
+const STUDENT_LOANS: StudentLoan[] = [
+  {
+    id: 'jamb-crash-ai-loan',
+    title: 'JAMB Crash AI Student Loan',
+    provider: 'JAMB Crash AI',
+    description: 'Interest-free study loans for our top-performing students — covering JAMB fees, admission costs and first-year support. Terms launch with the scholarship program.',
+    amount: 'Interest-free (3 pioneer students)',
+    link: null,
+    status: 'coming-soon',
+    featured: true,
+  },
+  {
+    id: 'nelfund',
+    title: 'NELFUND Student Loan',
+    provider: 'Nigerian Education Loan Fund (Federal Government)',
+    description: 'Interest-free federal loans for students in accredited tertiary institutions — covers institutional charges plus upkeep support. Apply on the official portal.',
+    amount: 'Charges + upkeep stipend',
+    link: 'https://nelf.gov.ng',
+    status: 'open',
+    featured: false,
+  },
+  {
+    id: 'gtb-school-fees',
+    title: 'School Fees Advance',
+    provider: 'Guaranty Trust Bank',
+    description: 'Upfront school-fees financing for parents and guardians with salary accounts — school pays directly, repayment spread over months.',
+    amount: 'Up to ₦5,000,000',
+    link: 'https://www.gtbank.com/personal-banking/loans/school-fees-advance',
+    status: 'open',
+    featured: false,
+  },
+];
 
 const QUALIFYING_RANK = 100;
 
@@ -446,6 +492,70 @@ export const ScholarshipPage = ({ onBack, userEmail, userId, onPracticeQuiz }: S
                     </div>
                   </Card>
                 </motion.div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Tips Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45 }}
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <Landmark className="w-5 h-5 text-primary" />
+              <h2 className="text-lg font-bold text-foreground">
+                Student Loans for Nigerian Students
+              </h2>
+            </div>
+
+            {STUDENT_LOANS.filter((l) => l.featured).map((loan) => (
+              <Card key={loan.id} className="p-5 mb-4 border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10">
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                  <Badge className="bg-primary text-primary-foreground">JAMB Crash AI</Badge>
+                  <Badge variant="secondary" className="bg-amber-500/20 text-amber-600 border-amber-500/30">
+                    <Clock className="w-3 h-3 mr-1" />
+                    Coming Soon
+                  </Badge>
+                </div>
+                <h3 className="font-bold text-foreground mb-1">{loan.title}</h3>
+                <p className="text-sm text-muted-foreground mb-2">{loan.description}</p>
+                {loan.amount && (
+                  <p className="text-sm font-medium text-foreground">💰 {loan.amount}</p>
+                )}
+              </Card>
+            ))}
+
+            <div className="space-y-4">
+              {STUDENT_LOANS.filter((l) => !l.featured).map((loan) => (
+                <Card key={loan.id} className="p-4 hover:shadow-lg transition-shadow">
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="font-semibold text-foreground">{loan.title}</h3>
+                        <Badge
+                          variant="outline"
+                          className="text-green-600 border-green-500/30 bg-green-500/10"
+                        >
+                          Open
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-primary font-medium mb-1">{loan.provider}</p>
+                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{loan.description}</p>
+                      {loan.amount && (
+                        <p className="text-xs text-muted-foreground">💰 {loan.amount}</p>
+                      )}
+                    </div>
+                    {loan.link && (
+                      <Button variant="outline" size="sm" asChild className="shrink-0">
+                        <a href={loan.link} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          Apply
+                        </a>
+                      </Button>
+                    )}
+                  </div>
+                </Card>
               ))}
             </div>
           </motion.div>
