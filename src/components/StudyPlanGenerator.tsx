@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Download, Calendar, Clock, BookOpen, CheckCircle, Sparkles, ArrowRight, Brain, Target, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -105,11 +105,18 @@ export const StudyPlanGenerator = ({
   // Follow-up handoff from the calendar: finished vs missed sessions from
   // the previous plan. Consumed once at mount; missed topics lead the plan.
   const [followup] = useState<PlanFollowup | null>(() => consumePlanFollowup());
+  // Returning users skip the questionnaire: previous settings carry over.
+  const planTargetScore = followup?.config?.targetScore || targetScore;
 
   // User configuration
-  const [selectedDays, setSelectedDays] = useState<string[]>(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']);
-  const [selectedSubjects, setSelectedSubjects] = useState<string[]>(subjects);
-  const [hoursPerSession, setHoursPerSession] = useState(hoursPerDay);
+  const [selectedDays, setSelectedDays] = useState<string[]>(() =>
+    followup?.config?.days?.length
+      ? followup.config.days
+      : ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']);
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>(() =>
+    followup?.config?.subjects?.length ? followup.config.subjects : subjects);
+  const [hoursPerSession, setHoursPerSession] = useState(
+    followup?.config?.hours || hoursPerDay);
   
   // Quiz performance data
   const [quizPerformance, setQuizPerformance] = useState<QuizPerformance[]>([]);
@@ -215,7 +222,12 @@ export const StudyPlanGenerator = ({
   };
 
   const generatePlan = async () => {
-    if (selectedDays.length === 0 || selectedSubjects.length === 0) return;
+    if (selectedDays.length === 0 || selectedSubjects.length === 0) {
+      // Auto mode with an empty carry-over would spin forever — fall back
+      // to the questionnaire instead.
+      if (followup?.auto) setStep('configure');
+      return;
+    }
     
     // Check daily limit for FREE users
     if (!canUseFeature('study_plan_days')) {
@@ -260,7 +272,7 @@ export const StudyPlanGenerator = ({
         subjects: selectedSubjects,
         selectedDays,
         hoursPerSession,
-        targetScore,
+        planTargetScore,
         examDate: examDate ?? null,
         quizPerformance,
         daySlots,
@@ -379,9 +391,20 @@ export const StudyPlanGenerator = ({
     setStep('display');
     // Cache locally first so the calendar works even if the DB save fails
     // (offline, RLS, inactive project). DB remains source of truth.
-    saveLocalPlan(userEmail, generatedPlan, targetScore, hoursPerSession);
+    saveLocalPlan(userEmail, generatedPlan, planTargetScore, hoursPerSession);
     void savePlanToDb(generatedPlan);
   };
+
+  // Returning users skip the questionnaire: build straight from the handoff.
+  // Guarded so re-renders (or dev double-effects) can't spend usage twice.
+  const autoStartedRef = useRef(false);
+  useEffect(() => {
+    if (followup?.auto && !autoStartedRef.current) {
+      autoStartedRef.current = true;
+      void generatePlan();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [followup]);
 
   // Persist the plan so users can follow it (calendar + task tracking).
   // Order matters: insert plan + tasks first, archive the old plan only on
@@ -398,7 +421,7 @@ export const StudyPlanGenerator = ({
         .insert({
           email: userEmail,
           plan_data: planToSave as unknown as Database['public']['Tables']['study_plans']['Insert']['plan_data'],
-          target_score: targetScore,
+          target_score: planTargetScore,
           hours_per_day: hoursPerSession,
         })
         .select('id')
@@ -466,7 +489,7 @@ export const StudyPlanGenerator = ({
       const content = `
 JAMB PERSONALIZED STUDY PLAN
 Generated for: ${userEmail}
-Target Score: ${targetScore}+
+Target Score: ${planTargetScore}+
 Generated: ${new Date().toLocaleDateString('en-NG')}
 
 ═══════════════════════════════════════════════════════
@@ -509,7 +532,7 @@ ${quizPerformance.filter(p => p.accuracy < 60).length > 0 ? `
 • Practice time management for exam conditions
 `}
 
-🎯 You've got this, future uni star! That ${targetScore}+ is yours! 💪
+🎯 You've got this, future uni star! That ${planTargetScore}+ is yours! 💪
       `.trim();
 
       const filename = `JAMB_AI_Study_Plan_${new Date().toISOString().split('T')[0]}.txt`;
@@ -999,7 +1022,7 @@ ${quizPerformance.filter(p => p.accuracy < 60).length > 0 ? `
           <Card className="bg-yellow-500/10 border-yellow-500/30 text-center">
             <CardContent className="p-4">
               <Target className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
-              <p className="text-2xl font-bold text-yellow-600">{targetScore}+</p>
+              <p className="text-2xl font-bold text-yellow-600">{planTargetScore}+</p>
               <p className="text-sm text-muted-foreground">Target Score</p>
             </CardContent>
           </Card>
@@ -1179,7 +1202,7 @@ ${quizPerformance.filter(p => p.accuracy < 60).length > 0 ? `
           transition={{ delay: 0.8 }}
           className="text-center text-lg text-muted-foreground mt-8 italic"
         >
-          "You've got this, future uni star! That {targetScore}+ is yours!" 💪🎯
+          You've got this, future uni star! That {planTargetScore}+ is yours! 💪🎯
         </motion.p>
       </div>
     </div>

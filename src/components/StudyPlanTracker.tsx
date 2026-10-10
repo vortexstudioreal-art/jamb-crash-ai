@@ -255,18 +255,32 @@ export const StudyPlanTracker = ({
 
   // Handoff for progress-aware regeneration: the next plan leads with what
   // was missed, celebrates what was finished, and never re-teaches it first.
-  const startFollowupPlan = useCallback(() => {
+  // auto=true skips the questionnaire and builds immediately (returning
+  // users); plain "New Plan" shows the classic config screen instead.
+  const startFollowupPlan = useCallback((auto: boolean) => {
     const today = todayIso();
     const bySubject = new Map<string, Set<string>>();
     const doneTopics = new Set<string>();
+    const dayNames = new Set<string>();
+    const subjectNames = new Set<string>();
     for (const t of tasks) {
       const topics = Array.isArray(t.topics) ? t.topics : [];
+      subjectNames.add(t.subject);
       if (t.completed) {
         topics.forEach((x) => doneTopics.add(`${t.subject}::${x}`));
       } else if (t.date < today) {
         if (!bySubject.has(t.subject)) bySubject.set(t.subject, new Set());
         topics.forEach((x) => bySubject.get(t.subject)!.add(x));
       }
+    }
+    const planDays = plan?.plan_data;
+    if (Array.isArray(planDays)) {
+      planDays.forEach((d) => {
+        if (d?.dayName) dayNames.add(d.dayName);
+        (d?.subjects || []).forEach((s) => {
+          if (s?.name) subjectNames.add(s.name);
+        });
+      });
     }
     writePlanFollowup({
       completedSessions: completedTasks,
@@ -276,9 +290,16 @@ export const StudyPlanTracker = ({
         .slice(0, 6),
       completedTopics: [...doneTopics].slice(0, 40),
       savedAt: Date.now(),
+      auto,
+      config: {
+        days: [...dayNames],
+        hours: plan?.hours_per_day || 4,
+        subjects: [...subjectNames],
+        targetScore: plan?.target_score || 300,
+      },
     });
     onGenerateNew();
-  }, [tasks, completedTasks, totalTasks, onGenerateNew]);
+  }, [tasks, completedTasks, totalTasks, plan, onGenerateNew]);
 
   const activeDate = useMemo(() => {
     if (selectedDate) return selectedDate;
@@ -423,7 +444,7 @@ export const StudyPlanTracker = ({
               You finished your {plannedDates.length}-day study plan. Generate a fresh one to keep the momentum going.
             </p>
             <div className="flex gap-3 justify-center">
-              <Button size="lg" onClick={startFollowupPlan} className="bg-gradient-to-r from-primary to-green-500 text-white">
+              <Button size="lg" onClick={() => startFollowupPlan(true)} className="bg-gradient-to-r from-primary to-green-500 text-white">
                 <Sparkles className="w-5 h-5 mr-2" />
                 Generate New Plan
               </Button>
@@ -760,12 +781,18 @@ export const StudyPlanTracker = ({
           </CardContent>
         </Card>
 
-        <div className="flex justify-center gap-3 pt-1">
+        <div className="flex justify-center gap-3 pt-1 flex-wrap">
           <Button variant="outline" onClick={onBack}>
             Back to Dashboard
           </Button>
-          <Button variant="outline" onClick={startFollowupPlan}>
+          <Button
+            onClick={() => startFollowupPlan(true)}
+            className="bg-gradient-to-r from-primary to-green-500 text-white"
+          >
             <Sparkles className="w-4 h-4 mr-2" />
+            Auto-renew Plan
+          </Button>
+          <Button variant="outline" onClick={onGenerateNew}>
             New Plan
           </Button>
         </div>

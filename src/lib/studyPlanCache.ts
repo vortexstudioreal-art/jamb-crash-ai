@@ -115,6 +115,15 @@ export interface PlanFollowup {
   missed: Array<{ subject: string; topics: string[] }>;
   completedTopics: string[];
   savedAt: number;
+  /** Auto-generate on arrival (returning users) vs show config screen. */
+  auto?: boolean;
+  /** Previous plan settings so regeneration needs no questionnaire. */
+  config?: {
+    days: string[];
+    hours: number;
+    subjects: string[];
+    targetScore: number;
+  };
 }
 
 const FOLLOWUP_KEY = 'study_plan_followup_v1';
