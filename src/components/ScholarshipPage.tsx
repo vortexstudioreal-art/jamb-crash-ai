@@ -194,7 +194,15 @@ export const ScholarshipPage = ({ onBack, userEmail, userId, onPracticeQuiz }: S
       const { error } = await supabase.from('scholarship_interest').insert({
         email: userEmail.toLowerCase(),
       });
-      if (error) throw error;
+      if (error) {
+        // Already on the list (double-tap / earlier join): treat as success.
+        if ((error as { code?: string }).code === '23505') {
+          setOnWaitlist(true);
+          toast.success("You're on the list! We'll notify you the moment applications open 🎓");
+          return;
+        }
+        throw error;
+      }
       setOnWaitlist(true);
       toast.success("You're on the list! We'll notify you the moment applications open 🎓");
     } catch (err) {
