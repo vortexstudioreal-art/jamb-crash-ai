@@ -272,7 +272,7 @@ export const StudyPlanGenerator = ({
         subjects: selectedSubjects,
         selectedDays,
         hoursPerSession,
-        planTargetScore,
+        targetScore: planTargetScore,
         examDate: examDate ?? null,
         quizPerformance,
         daySlots,
@@ -397,14 +397,16 @@ export const StudyPlanGenerator = ({
 
   // Returning users skip the questionnaire: build straight from the handoff.
   // Guarded so re-renders (or dev double-effects) can't spend usage twice.
+  // Waits for quiz performance first — building on mount would bake in an
+  // empty weak-subject sort and an empty AI prompt section.
   const autoStartedRef = useRef(false);
   useEffect(() => {
-    if (followup?.auto && !autoStartedRef.current) {
+    if (followup?.auto && !isLoadingPerformance && !autoStartedRef.current) {
       autoStartedRef.current = true;
       void generatePlan();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [followup]);
+  }, [followup, isLoadingPerformance]);
 
   // Persist the plan so users can follow it (calendar + task tracking).
   // Order matters: insert plan + tasks first, archive the old plan only on
