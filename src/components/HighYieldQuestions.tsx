@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 import { shuffleQuestionList } from '@/lib/quizShuffle';
 import ReactMarkdown from 'react-markdown';
 import { useAiExplanation } from '@/hooks/useAiExplanation';
+import { QuestionDiagram } from '@/components/QuestionDiagram';
 import { errorLogger } from '@/services/errorLogger';
 
 interface Question {
@@ -27,6 +28,7 @@ interface Question {
   option_d: string;
   correct_answer: string;
   explanation?: string;
+  diagram_svg?: string | null;
   subject: string;
   year?: number;
   image_url?: string | null;
@@ -464,6 +466,7 @@ const TopicQuiz = ({ questions, topicLabel, subject, onExit }: TopicQuizProps) =
                         <img src={currentQuestion.image_url} alt="Question diagram" className="max-w-full h-auto rounded-lg border border-border" style={{ maxHeight: 250 }} />
                       </div>
                     )}
+                    <QuestionDiagram svg={currentQuestion.diagram_svg} title="Question diagram" />
                   </div>
                 </div>
 

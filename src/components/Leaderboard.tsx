@@ -59,6 +59,7 @@ export const Leaderboard = ({ onBack, userEmail }: LeaderboardProps) => {
       const { data, error } = await supabase
         .from('leaderboard_scores')
         .select('id, user_id, full_name, total_score, questions_answered, average_accuracy, best_quiz_score, rank, is_placeholder')
+        .eq('is_placeholder', false)
         .order('total_score', { ascending: false })
         .limit(10);
 
@@ -79,6 +80,24 @@ export const Leaderboard = ({ onBack, userEmail }: LeaderboardProps) => {
         const userEntry = rankedData.find(e => e.user_id === user.id);
         if (userEntry) {
           setUserRank(userEntry.rank);
+        } else {
+          // Outside the top 10: rank = number of higher scores + 1.
+          const { data: mine } = await supabase
+            .from('leaderboard_scores')
+            .select('total_score')
+            .eq('user_id', user.id)
+            .eq('is_placeholder', false)
+            .maybeSingle();
+          if (mine) {
+            const { count: ahead } = await supabase
+              .from('leaderboard_scores')
+              .select('id', { count: 'exact', head: true })
+              .eq('is_placeholder', false)
+              .gt('total_score', mine.total_score);
+            setUserRank((ahead || 0) + 1);
+          } else {
+            setUserRank(null);
+          }
         }
       }
     } catch (error) {

@@ -11,6 +11,7 @@ interface Question {
   option_d: string;
   correct_answer: string;
   explanation?: string | null;
+  diagram_svg?: string | null;
   year?: number | null;
   image_url?: string | null;
   topics?: string[] | null;

@@ -9,6 +9,7 @@ import type { Database } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 import { buildMockSections, gradeMock, scoreBand, type MockQuestion, type MockSection, type MockResults } from '@/lib/mockExam';
 import { ReportQuestionButton } from '@/components/ReportQuestionButton';
+import { QuestionDiagram } from '@/components/QuestionDiagram';
 import { stripQuestionHtml } from '@/lib/sanitize';
 import { downloadScorecard, shareScorecard, type ScorecardData } from '@/lib/scorecard';
 import { pickAdaptive, collectWeakQuestionCounts } from '@/lib/adaptive';
@@ -106,7 +107,7 @@ export const MockExam = ({ userEmail, subjects, onExit }: MockExamProps) => {
         if (isOnline) {
           const { data, error } = await supabase
             .from('jamb_questions')
-            .select('id, question, option_a, option_b, option_c, option_d, correct_answer, subject, year, explanation, image_url, is_ai_generated')
+            .select('id, question, option_a, option_b, option_c, option_d, correct_answer, subject, year, explanation, image_url, diagram_svg, is_ai_generated')
             .eq('subject', section.subject as Database['public']['Enums']['jamb_subject'])
             .limit(200);
           if (error) throw error;
@@ -507,6 +508,7 @@ export const MockExam = ({ userEmail, subjects, onExit }: MockExamProps) => {
                   {currentQuestion.image_url && (
                     <img src={currentQuestion.image_url} alt="Question diagram" className="rounded-xl border max-h-56 mb-4" />
                   )}
+                  <QuestionDiagram svg={currentQuestion.diagram_svg} title="Question diagram" />
                   <div className="flex items-start justify-between gap-3 mb-4">
                     <div>
                       {currentQuestion.is_ai_generated && (

@@ -56,7 +56,7 @@ const HowItWorksSection = lazy(() => import('@/components/HowItWorksSection').th
 const PricingSection = lazy(() => import('@/components/PricingSection').then(m => ({ default: m.PricingSection })));
 const PersonalizationForm = lazy(() => import('@/components/PersonalizationForm').then(m => ({ default: m.PersonalizationForm })));
 const PaymentModal = lazy(() => import('@/components/PaymentModal').then(m => ({ default: m.PaymentModal })));const SubjectSelector = lazy(() => import('@/components/SubjectSelector').then(m => ({ default: m.SubjectSelector })));
-const QuizResults = lazy(() => import('@/components/QuizResults').then(m => ({ default: m.QuizResults })));const CourseRequirements = lazy(() => import('@/components/CourseRequirements').then(m => ({ default: m.CourseRequirements })));const Footer = lazy(() => import('@/components/Footer').then(m => ({ default: m.Footer })));
+const QuizResults = lazy(() => import('@/components/QuizResults').then(m => ({ default: m.QuizResults })));const Footer = lazy(() => import('@/components/Footer').then(m => ({ default: m.Footer })));
 const FeatureLimitReached = lazy(() => import('@/components/FeatureLimitReached').then(m => ({ default: m.FeatureLimitReached })));const LazyFallback = () => (
   <div className="min-h-screen bg-background flex items-center justify-center">
     <div className="space-y-4 w-full max-w-md px-4">
@@ -970,28 +970,6 @@ const Index = () => {
   }
 
   // Course Requirements step
-  if (currentStep === 'course-requirements' && userEmail) {
-    return (
-      <div className="min-h-screen bg-background">
-        <DashboardHeader 
-          userEmail={userEmail}
-          isOwner={effectiveOwner}
-          isCollaborator={isAdmin && !isOwner}
-          userRole={userRole}
-          onSignOut={handleSignOut}
-        />
-        <div className="pt-16">
-          <Suspense fallback={<LazyFallback />}>
-          <CourseRequirements
-            userSubjects={effectiveSubjects}
-            onBack={handleBackToDashboard}
-          />
-          </Suspense>
-        </div>
-      </div>
-    );
-  }
-
   // Study Notes step
   if (currentStep === 'notes' && userEmail) {
     return (

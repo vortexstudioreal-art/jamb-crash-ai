@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import confetti from 'canvas-confetti';
 import { useAiExplanation } from '@/hooks/useAiExplanation';
 import { downloadScorecard, shareScorecard, type ScorecardData } from '@/lib/scorecard';
+import { QuestionDiagram } from '@/components/QuestionDiagram';
 import { stripQuestionHtml } from '@/lib/sanitize';
 
 interface Question {
@@ -19,6 +20,7 @@ interface Question {
   subject: string;
   year?: number;
   image_url?: string | null;
+  diagram_svg?: string | null;
   userAnswer?: string;
 }
 
@@ -313,6 +315,7 @@ export const QuizResults = ({ results, quizType, userEmail, onRetry, onHome, onU
                     </div>
                     <div className="flex-1">
                       <p className="text-foreground font-medium line-clamp-2">{stripQuestionHtml(q.question)}</p>
+                      <QuestionDiagram svg={q.diagram_svg} title="Question diagram" />
                       <div className="flex items-center gap-2 mt-1 flex-wrap">
                         <span className={`text-sm font-medium ${isCorrect ? 'text-green-500' : isSkipped ? 'text-muted-foreground' : 'text-destructive'}`}>
                           {isSkipped ? 'You skipped this question' : `Your answer: ${q.userAnswer}. ${userAnswerText || ''}`}

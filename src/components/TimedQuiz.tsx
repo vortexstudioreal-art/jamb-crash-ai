@@ -17,6 +17,7 @@ import { shuffleQuestionList } from '@/lib/quizShuffle';
 import { useFeatureUsage } from '@/hooks/useFeatureUsage';
 import { FeatureLimitReached } from '@/components/FeatureLimitReached';
 import { ReportQuestionButton } from '@/components/ReportQuestionButton';
+import { QuestionDiagram } from '@/components/QuestionDiagram';
 import { pickAdaptive, collectWeakQuestionCounts } from '@/lib/adaptive';
 import { stripQuestionHtml } from '@/lib/sanitize';
 import { errorLogger } from '@/services/errorLogger';
@@ -33,6 +34,7 @@ interface Question {
   subject: string;
   year?: number;
   image_url?: string | null;
+  diagram_svg?: string | null;
   is_ai_generated?: boolean | null;
   [key: string]: unknown;
 }
@@ -538,11 +540,17 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
 
       // Step 1: Save quiz attempt (critical - must succeed)
       if (navigator.onLine) {
-        const { error: quizError } = await supabase.from('quiz_attempts').insert(quizData);
+        const { data: savedAttempt, error: quizError } = await supabase
+          .from('quiz_attempts')
+          .insert(quizData)
+          .select('id')
+          .single();
         if (quizError) throw quizError;
         
         // Step 2: Update leaderboard asynchronously (fire-and-forget)
-        // This runs in the background and doesn't block the UI
+        // This runs in the background and doesn't block the UI.
+        // The attempt id lets the server re-grade from the stored row
+        // instead of trusting these client-side numbers.
         const session = await supabase.auth.getSession();
         const accessToken = session.data.session?.access_token;
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -556,7 +564,8 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
             correctCount,
             totalQuestions: questions.length,
             timeTaken,
-            totalTimeSeconds
+            totalTimeSeconds,
+            quizAttemptId: savedAttempt?.id ?? null,
           })
         }).then(res => res.json()).then(data => {
           if (data.pointsEarned > 0) {
@@ -971,6 +980,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
                 />
               </div>
             )}
+            <QuestionDiagram svg={currentQuestion.diagram_svg} title="Question diagram" />
           </motion.div>
 
           {/* Answer Options */}

@@ -767,6 +767,7 @@ export type Database = {
         Row: {
           correct_answer: string
           created_at: string | null
+          diagram_svg: string | null
           explanation: string | null
           id: string
           image_url: string | null
@@ -783,6 +784,7 @@ export type Database = {
         Insert: {
           correct_answer: string
           created_at?: string | null
+          diagram_svg?: string | null
           explanation?: string | null
           id?: string
           image_url?: string | null
@@ -799,6 +801,7 @@ export type Database = {
         Update: {
           correct_answer?: string
           created_at?: string | null
+          diagram_svg?: string | null
           explanation?: string | null
           id?: string
           image_url?: string | null

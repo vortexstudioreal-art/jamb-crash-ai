@@ -18,7 +18,11 @@ interface GenQ {
   correct_answer: string;
   explanation: string;
   topic: string;
+  diagram?: string;
 }
+
+// Subjects where a figure genuinely helps (circuits, geometry, charts).
+const DIAGRAM_SUBJECTS = ["physics", "mathematics", "chemistry", "commerce", "economics"];
 
 const normalize = (q: string) =>
   q.toLowerCase().replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
@@ -35,6 +39,14 @@ function validQ(q: GenQ): boolean {
     const norm = (s: string) => s.toLowerCase().replace(/[^a-z]/g, "");
     const opts = [q.option_a, q.option_b, q.option_c, q.option_d];
     if (!opts.some((o) => norm(o) === norm(q.question))) return false;
+  }
+  // Diagrams are optional but must be safe, self-contained inline SVG.
+  if (q.diagram !== undefined && q.diagram !== null && q.diagram !== "") {
+    const d = q.diagram.trim();
+    if (!/^<svg[\s>]/i.test(d)) return false;
+    if (d.length > 6000) return false;
+    if (/<script/i.test(d)) return false;
+    if (/\son\w+\s*=/i.test(d)) return false;
   }
   return true;
 }
@@ -55,7 +67,8 @@ async function genBatch(
   apiKey: string,
   subject: string,
   topicHint: string,
-  avoid: string[]
+  avoid: string[],
+  balanceNote: string
 ): Promise<GenQ[]> {
   const topicLine = topicHint
     ? `Focus this batch on the sub-topic "${topicHint}".`
@@ -65,9 +78,15 @@ ${topicLine}
 These are "likely questions" for practice — in the style and difficulty of real JAMB questions, but newly written. Do NOT copy known past questions verbatim.
 Avoid repeating these already-covered questions: ${avoid.slice(0, 20).join(" || ").substring(0, 800) || "none"}.
 RULES: every question must be fully self-contained — never end a question with a bare colon, never reference a missing passage/word ("the word" must appear with the word), never use markdown or HTML markup. A one-word question is only allowed when the options are stress-marked variants of that same word.
+STYLE (this is what makes them indistinguishable from real JAMB):
+- State the problem directly. Use "Which of the following" at most twice per batch.
+- Keep the four options parallel in form and similar in length; the correct option must not stand out by length or specificity.
+- Distribute the correct answers across A, B, C and D as evenly as possible within the batch — never cluster on one letter.${balanceNote}
+- Numbers carry units with a space (e.g. "4 m", "100 W"); use Nigerian contexts (Naira, NEPA/PHCN grid, harmattan, local crops) where natural.
+- Distractors must be plausible: common student errors, adjacent concepts, sign/unit slips — never joke options or obvious throwaways.
 
 Return ONLY a valid JSON array, no other text. Each item exactly:
-{"question": "...", "option_a": "...", "option_b": "...", "option_c": "...", "option_d": "...", "correct_answer": "A|B|C|D", "explanation": "2-3 sentence reason the answer is correct", "topic": "short sub-topic name"}`;
+{"question": "...", "option_a": "...", "option_b": "...", "option_c": "...", "option_d": "...", "correct_answer": "A|B|C|D", "explanation": "2-3 sentence reason the answer is correct", "topic": "short sub-topic name"${DIAGRAM_SUBJECTS.includes(subject) ? `, "diagram": "optional inline <svg> figure (viewBox 0 0 400 250, no scripts, no external refs, text 12px or larger) — include ONLY for at most 2 questions per batch where a diagram genuinely helps (circuit, geometry figure, bar/line chart drawn from the question's own numbers), otherwise omit the key entirely` : ""}}`;
 
   const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
@@ -120,9 +139,41 @@ async function doGenerate(
   let inserted = 0;
   let attempts = 0;
   const maxAttempts = Math.ceil(count / BATCH_SIZE) + 3;
+
+  // Answer-position balance: real JAMB spreads A-D roughly evenly, but the
+  // model drifts (historically D-starved). Nudge each batch toward the
+  // currently scarcest letters.
+  const dist: Record<string, number> = { A: 0, B: 0, C: 0, D: 0 };
+  {
+    let dpage = 0;
+    for (;;) {
+      const { data, error } = await supabase
+        .from("jamb_questions")
+        .select("correct_answer")
+        .eq("subject", subject)
+        .eq("is_ai_generated", true)
+        .range(dpage * 1000, (dpage + 1) * 1000 - 1);
+      if (error || !data || data.length === 0) break;
+      for (const r of data as { correct_answer: string }[]) {
+        const k = (r.correct_answer || "").toUpperCase();
+        if (dist[k] !== undefined) dist[k]++;
+      }
+      if (data.length < 1000) break;
+      dpage++;
+    }
+  }
+  const balanceNote = () => {
+    const total = dist.A + dist.B + dist.C + dist.D;
+    if (total < 20) return "";
+    const avg = total / 4;
+    const starved = (["A", "B", "C", "D"] as const).filter((k) => dist[k] < avg * 0.6);
+    if (starved.length === 0) return "";
+    return ` This subject's AI questions underuse ${starved.join(" and ")} — place several correct answers there.`;
+  };
+
   while (inserted < count && attempts < maxAttempts) {
     attempts++;
-    const batch = await genBatch(apiKey, subject, topicHint, []);
+    const batch = await genBatch(apiKey, subject, topicHint, [], balanceNote());
     if (batch.length === 0) {
       await new Promise((r) => setTimeout(r, 3000));
       continue;
@@ -143,6 +194,7 @@ async function doGenerate(
       option_d: q.option_d.trim(),
       correct_answer: q.correct_answer.trim().toUpperCase(),
       explanation: q.explanation.trim(),
+      diagram_svg: q.diagram && q.diagram.trim() ? q.diagram.trim().slice(0, 6000) : null,
       topics: q.topic?.trim() ? [q.topic.trim()] : null,
       year: null,
       is_ai_generated: true,
@@ -152,6 +204,10 @@ async function doGenerate(
       console.error("[gen-batch] insert error:", error.message);
     } else {
       inserted += rows.length;
+      for (const r of rows) {
+        const k = (r.correct_answer || "").toUpperCase();
+        if (dist[k] !== undefined) dist[k]++;
+      }
       console.log(`[gen-batch] ${subject}: +${rows.length} (total ${inserted})`);
     }
     await new Promise((r) => setTimeout(r, 2000));

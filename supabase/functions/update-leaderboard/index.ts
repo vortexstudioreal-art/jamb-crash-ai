@@ -10,6 +10,8 @@ interface LeaderboardUpdate {
   totalQuestions: number;
   timeTaken: number;
   totalTimeSeconds: number;
+  /** Quiz attempt row to verify numbers against (anti-forgery). */
+  quizAttemptId?: string;
 }
 
 Deno.serve(async (req) => {
@@ -56,7 +58,34 @@ Deno.serve(async (req) => {
     // Use service role for DB operations
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { correctCount, totalQuestions, timeTaken, totalTimeSeconds }: LeaderboardUpdate = await req.json();
+    let {
+      correctCount,
+      totalQuestions,
+      timeTaken,
+      totalTimeSeconds,
+      quizAttemptId,
+    }: LeaderboardUpdate = await req.json();
+
+    // Anti-forgery: when the caller names its quiz attempt, score from the
+    // stored row (which the grader wrote) instead of client-sent numbers.
+    // A forged attempt row itself is a separate, harder attack (it requires
+    // faking a full questions_data payload that other features also read).
+    if (typeof quizAttemptId === "string" && quizAttemptId) {
+      const { data: attempt } = await supabase
+        .from("quiz_attempts")
+        .select("email, correct_answers, total_questions, time_taken_seconds")
+        .eq("id", quizAttemptId)
+        .single();
+      if (
+        attempt &&
+        (attempt.email || "").toLowerCase() === userEmail.toLowerCase() &&
+        attempt.total_questions > 0
+      ) {
+        correctCount = attempt.correct_answers;
+        totalQuestions = attempt.total_questions;
+        timeTaken = attempt.time_taken_seconds ?? timeTaken;
+      }
+    }
 
     // Validate numbers — zero/negative totals would produce NaN/Infinity points.
     if (

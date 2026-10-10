@@ -1,6 +1,6 @@
 import type { DashboardTab } from '@/components/BottomNav';
 
-export type Step = 'loading' | 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'mock' | 'study-plan' | 'study-plan-tracker' | 'study-materials' | 'syllabus' | 'lessons' | 'flashcards' | 'course-requirements' | 'novels' | 'novel-detail' | 'novel-reader' | 'news' | 'scholarships' | 'leaderboard' | 'notes' | 'speed-round' | 'streak';
+export type Step = 'loading' | 'landing' | 'subject-select' | 'upload' | 'personalize' | 'processing' | 'dashboard' | 'quiz' | 'quiz-results' | 'mock' | 'study-plan' | 'study-plan-tracker' | 'study-materials' | 'syllabus' | 'lessons' | 'flashcards' | 'novels' | 'novel-detail' | 'novel-reader' | 'news' | 'scholarships' | 'leaderboard' | 'notes' | 'speed-round' | 'streak';
 
 export type QuizType = 'full' | 'mini' | 'subject' | 'timed-practice';
 

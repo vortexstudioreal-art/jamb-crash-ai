@@ -124,10 +124,6 @@ export const StudyTab = ({
           <Flame className="w-6 h-6 text-orange-500" />
           <span className="font-bold text-sm">High-Yield Qs</span>
         </Button>
-        <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-primary hover:bg-primary/5" onClick={() => navigateStep('course-requirements')}>
-          <GraduationCap className="w-6 h-6 text-primary" />
-          <span className="font-bold text-sm">Course Reqs</span>
-        </Button>
         <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 hover:border-amber-500 hover:bg-amber-500/5" onClick={() => navigateStep('mock')}>
           <Trophy className="w-6 h-6 text-amber-500" />
           <span className="font-bold text-sm">Mock CBT</span>
