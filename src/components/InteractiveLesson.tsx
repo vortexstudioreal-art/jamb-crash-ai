@@ -503,9 +503,16 @@ function SummaryStep({ content }: { content: Record<string, unknown> }) {
   );
 }
 
+const nonEmpty = (v: unknown): boolean =>
+  typeof v === 'string' && v.trim().length > 0;
+
+const nonEmptyList = (v: unknown): boolean =>
+  Array.isArray(v) && v.length > 0;
+
 // Sections that would render empty are dropped entirely so they never
 // occupy a step (no blank cards, no question-less "Quick Check" steps,
-// no "coming soon" placeholders inside the lesson flow).
+// no empty "Watch Out!" misconception cards, no "coming soon"
+// placeholders inside the lesson flow).
 export const isSectionRenderable = (s: { type: string; content: unknown }): boolean => {
   const c = (s.content || {}) as Record<string, unknown>;
   switch (s.type) {
@@ -532,13 +539,30 @@ export const isSectionRenderable = (s: { type: string; content: unknown }): bool
     case 'hook':
     case 'intuitive_explanation':
     case 'formal_explanation':
+      return nonEmpty(c.text);
     case 'formula':
-    case 'worked_example':
+      return (
+        nonEmpty(c.formula) ||
+        nonEmptyList(c.variables) ||
+        nonEmpty(c.when_to_use) ||
+        nonEmptyList(c.common_traps)
+      );
     case 'common_misconception':
+      return nonEmpty(c.misconception) || nonEmpty(c.correction);
     case 'jamb_focus':
     case 'jamb_insight':
+      return (
+        nonEmpty(c.focus_area) ||
+        nonEmpty(c.frequency) ||
+        nonEmpty(c.trap) ||
+        nonEmpty(c.typical_question) ||
+        nonEmptyList(c.common_mistakes) ||
+        nonEmpty((c as { exam_tip?: unknown }).exam_tip) ||
+        nonEmpty((c as { tip?: unknown }).tip) ||
+        nonEmptyList((c as { related_topics?: unknown }).related_topics)
+      );
     case 'memory_hook':
-      return true;
+      return nonEmpty((c as { text?: unknown }).text) || nonEmpty((c as { hook?: unknown }).hook);
     default:
       return false;
   }
