@@ -194,8 +194,6 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const hasSubmittedRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const currentQidRef = useRef<string | null>(null);
-  currentQidRef.current = questions[currentIndex]?.id ?? null;
 
   // Load previously answered questions to avoid repetition
   useEffect(() => {
@@ -499,28 +497,9 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
 
     if (quizMode === 'practice') {
       setShowAnswerFeedback(currentQuestion.correct_answer);
-      
-      // Auto-fetch AI explanation if no static explanation exists.
-      // Guarded: if the user already moved on, skip — each skipped fetch
-      // saves a Groq call.
-      if (!currentQuestion.explanation) {
-        const qid = currentQuestion.id;
-        const snapshot = {
-          id: currentQuestion.id,
-          question: currentQuestion.question,
-          option_a: currentQuestion.option_a,
-          option_b: currentQuestion.option_b,
-          option_c: currentQuestion.option_c,
-          option_d: currentQuestion.option_d,
-          correct_answer: currentQuestion.correct_answer,
-          subject: currentQuestion.subject,
-        };
-        setTimeout(() => {
-          if (currentQidRef.current !== qid) return;
-          fetchAiExplanation(snapshot);
-        }, 300);
-      }
-      
+      // No auto-fetch: the AI button below (shown only when no written
+      // explanation exists) fires on tap. Auto-fetching every answered
+      // question burned Groq quota for content the backfill now provides.
       // Don't auto-advance in practice mode - let user read explanation and click Next
     }
   };
@@ -1075,7 +1054,9 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
                 )}
               </div>
 
-              {/* AI Explanation Section */}
+              {/* AI Explanation Section — only when no written explanation
+                  exists. Written answers cost nothing; AI calls cost quota. */}
+              {!currentQuestion.explanation && (
               <div className="border-t border-green-500/20 pt-3">
                 {aiExplanation ? (
                   <div className="space-y-2">
@@ -1144,6 +1125,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
                   </Button>
                 )}
               </div>
+              )}
             </motion.div>
           )}
         </div>

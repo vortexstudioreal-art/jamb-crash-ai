@@ -506,7 +506,9 @@ const TopicQuiz = ({ questions, topicLabel, subject, onExit }: TopicQuizProps) =
                     <p className="text-sm">{currentQuestion.explanation}</p>
                   </motion.div>
                 )}
-                {/* AI Explanation Section */}
+                {/* AI Explanation Section — only when no written explanation
+                    exists. Written answers cost nothing; AI calls cost quota. */}
+                {!currentQuestion.explanation && (
                 <div className="border-t border-primary/20 pt-3 mt-4">
                   {aiExplanation ? (
                     <div className="space-y-2">
@@ -572,7 +574,8 @@ const TopicQuiz = ({ questions, topicLabel, subject, onExit }: TopicQuizProps) =
                       )}
                     </Button>
                   )}
-                </div>              </CardContent>
+                </div>
+                )}              </CardContent>
             </Card>
           </motion.div>
         </AnimatePresence>
