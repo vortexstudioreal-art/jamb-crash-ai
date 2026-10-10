@@ -19,6 +19,12 @@ interface DaySlot {
   dayName: string;
 }
 
+interface ProgressSummary {
+  completedSessions?: number;
+  totalSessions?: number;
+  missedTopics?: string[];
+}
+
 interface RequestBody {
   subjects: string[];
   selectedDays: string[];
@@ -26,6 +32,7 @@ interface RequestBody {
   targetScore: number;
   examDate?: string | null;
   quizPerformance?: SubjectPerformance[];
+  progressSummary?: ProgressSummary | null;
   daySlots: DaySlot[];
 }
 
@@ -80,6 +87,15 @@ serve(async (req) => {
           .join("\n")
       : "No quiz data available yet";
 
+    const ps = body.progressSummary;
+    const missed = Array.isArray(ps?.missedTopics)
+      ? ps.missedTopics.filter((t) => typeof t === "string").slice(0, 24)
+      : [];
+    const progressLines =
+      ps && typeof ps.completedSessions === "number"
+        ? `Previous plan: ${ps.completedSessions}/${ps.totalSessions ?? "?"} sessions completed.\nMissed topics to schedule FIRST with high priority:\n${missed.length > 0 ? missed.map((t) => `- ${t}`).join("\n") : "(none — clean slate with momentum)"}`
+        : null;
+
     const systemPrompt = `You are a JAMB exam preparation coach for Nigerian secondary school students. You create personalized weekly study plans that students can follow day by day. You always respond with valid JSON only.`;
 
     const userPrompt = `Create a personalized JAMB study plan.
@@ -92,10 +108,11 @@ Exam date: ${body.examDate || "not set"}
 
 Student performance (from quiz history):
 ${performanceLines}
-
+${progressLines ? `\nLast plan progress:\n${progressLines}\n` : ""}
 Rules:
 - Schedule only on the study days provided, using the exact day order provided in "daySlots" (one entry per study day).
 - Prioritize weak subjects (accuracy below 60% or missing data) — give them more time and higher quiz goals.
+- When missed topics are listed above, schedule them in the earliest days with high priority before introducing new topics.
 - Cover 2 to 3 subjects per day. Do not schedule more hours than the daily budget.
 - Topics must be JAMB syllabus topics for each subject (e.g. for mathematics: Algebra, Geometry, Trigonometry, Statistics, Probability, Calculus).
 - Quiz goals: 20-25 questions for weak subjects, 10-15 for strong subjects.

@@ -28,6 +28,7 @@ import {
   localTaskKey,
   saveProgress,
   setLocalPlanStatus,
+  writePlanFollowup,
 } from '@/lib/studyPlanCache';
 
 interface StudyPlanTrackerProps {
@@ -252,6 +253,33 @@ export const StudyPlanTracker = ({
   const completedDates = plannedDates.filter((d) => (tasksByDate[d] || []).every((t) => t.completed));
   const allComplete = plannedDates.length > 0 && completedDates.length === plannedDates.length;
 
+  // Handoff for progress-aware regeneration: the next plan leads with what
+  // was missed, celebrates what was finished, and never re-teaches it first.
+  const startFollowupPlan = useCallback(() => {
+    const today = todayIso();
+    const bySubject = new Map<string, Set<string>>();
+    const doneTopics = new Set<string>();
+    for (const t of tasks) {
+      const topics = Array.isArray(t.topics) ? t.topics : [];
+      if (t.completed) {
+        topics.forEach((x) => doneTopics.add(`${t.subject}::${x}`));
+      } else if (t.date < today) {
+        if (!bySubject.has(t.subject)) bySubject.set(t.subject, new Set());
+        topics.forEach((x) => bySubject.get(t.subject)!.add(x));
+      }
+    }
+    writePlanFollowup({
+      completedSessions: completedTasks,
+      totalSessions: totalTasks,
+      missed: [...bySubject.entries()]
+        .map(([subject, set]) => ({ subject, topics: [...set].slice(0, 8) }))
+        .slice(0, 6),
+      completedTopics: [...doneTopics].slice(0, 40),
+      savedAt: Date.now(),
+    });
+    onGenerateNew();
+  }, [tasks, completedTasks, totalTasks, onGenerateNew]);
+
   const activeDate = useMemo(() => {
     if (selectedDate) return selectedDate;
     const today = todayIso();
@@ -395,7 +423,7 @@ export const StudyPlanTracker = ({
               You finished your {plannedDates.length}-day study plan. Generate a fresh one to keep the momentum going.
             </p>
             <div className="flex gap-3 justify-center">
-              <Button size="lg" onClick={onGenerateNew} className="bg-gradient-to-r from-primary to-green-500 text-white">
+              <Button size="lg" onClick={startFollowupPlan} className="bg-gradient-to-r from-primary to-green-500 text-white">
                 <Sparkles className="w-5 h-5 mr-2" />
                 Generate New Plan
               </Button>
@@ -736,7 +764,7 @@ export const StudyPlanTracker = ({
           <Button variant="outline" onClick={onBack}>
             Back to Dashboard
           </Button>
-          <Button variant="outline" onClick={onGenerateNew}>
+          <Button variant="outline" onClick={startFollowupPlan}>
             <Sparkles className="w-4 h-4 mr-2" />
             New Plan
           </Button>

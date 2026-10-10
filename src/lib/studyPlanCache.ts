@@ -108,3 +108,35 @@ export const saveProgress = (planId: string, progress: ProgressMap): void => {
     // best-effort
   }
 };
+
+export interface PlanFollowup {
+  completedSessions: number;
+  totalSessions: number;
+  missed: Array<{ subject: string; topics: string[] }>;
+  completedTopics: string[];
+  savedAt: number;
+}
+
+const FOLLOWUP_KEY = 'study_plan_followup_v1';
+
+export const writePlanFollowup = (f: PlanFollowup) => {
+  try {
+    localStorage.setItem(FOLLOWUP_KEY, JSON.stringify(f));
+  } catch {
+    // storage unavailable — generator simply starts fresh
+  }
+};
+
+/** Read once and clear, so a stale handoff never biases a later plan. */
+export const consumePlanFollowup = (): PlanFollowup | null => {
+  try {
+    const raw = localStorage.getItem(FOLLOWUP_KEY);
+    localStorage.removeItem(FOLLOWUP_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as PlanFollowup;
+    if (!parsed || !Array.isArray(parsed.missed)) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+};

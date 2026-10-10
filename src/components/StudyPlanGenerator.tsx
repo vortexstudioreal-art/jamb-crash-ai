@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import { useFeatureUsage } from '@/hooks/useFeatureUsage';
 import { FeatureLimitReached } from '@/components/FeatureLimitReached';
-import { saveLocalPlan } from '@/lib/studyPlanCache';
+import { saveLocalPlan, consumePlanFollowup, type PlanFollowup } from '@/lib/studyPlanCache';
 import { errorLogger } from '@/services/errorLogger';
 
 interface StudyPlanGeneratorProps {
@@ -102,6 +102,10 @@ export const StudyPlanGenerator = ({
   const [savedPlanId, setSavedPlanId] = useState<string | null>(null);
   const [saveError, setSaveError] = useState(false);
   
+  // Follow-up handoff from the calendar: finished vs missed sessions from
+  // the previous plan. Consumed once at mount; missed topics lead the plan.
+  const [followup] = useState<PlanFollowup | null>(() => consumePlanFollowup());
+
   // User configuration
   const [selectedDays, setSelectedDays] = useState<string[]>(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']);
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>(subjects);
@@ -260,6 +264,15 @@ export const StudyPlanGenerator = ({
         examDate: examDate ?? null,
         quizPerformance,
         daySlots,
+        progressSummary: followup
+          ? {
+              completedSessions: followup.completedSessions,
+              totalSessions: followup.totalSessions,
+              missedTopics: followup.missed.flatMap((m) =>
+                m.topics.slice(0, 6).map((t) => `${m.subject}: ${t}`)
+              ).slice(0, 24),
+            }
+          : null,
       },
     });
     setProgress(100);
@@ -295,12 +308,17 @@ export const StudyPlanGenerator = ({
       todaySubjects.forEach((subject, idx) => {
         const perf = quizPerformance.find(p => p.subject === subject);
         const isWeak = weakSubjects.includes(subject);
+        const missedForSubject = (followup?.missed.find((m) => m.subject === subject)?.topics || []).slice(0, 3);
         const topics = SUBJECT_TOPICS[subject] || ['General Topics'];
 
-        const startIdx = (dayIndex * 2) % topics.length;
-        const selectedTopics = topics.slice(startIdx, startIdx + 3);
+        // Missed topics from the last plan lead; rotation fills the rest.
+        const selectedTopics = [...missedForSubject];
         if (selectedTopics.length < 3) {
-          selectedTopics.push(...topics.slice(0, 3 - selectedTopics.length));
+          const startIdx = (dayIndex * 2) % topics.length;
+          for (const t of [...topics.slice(startIdx), ...topics.slice(0, startIdx)]) {
+            if (selectedTopics.length >= 3) break;
+            if (!selectedTopics.includes(t)) selectedTopics.push(t);
+          }
         }
 
         let quizGoal = 15;
@@ -310,8 +328,8 @@ export const StudyPlanGenerator = ({
         subjectsForDay.push({
           name: subject,
           topics: selectedTopics,
-          duration: `${Math.round(hoursPerSubject * (isWeak ? 1.3 : 1))} hour${hoursPerSubject >= 1 ? 's' : ''}`,
-          priority: isWeak ? 'high' : idx === 0 ? 'medium' : 'low',
+          duration: `${Math.round(hoursPerSubject * (isWeak || missedForSubject.length > 0 ? 1.3 : 1))} hour${hoursPerSubject >= 1 ? 's' : ''}`,
+          priority: isWeak || missedForSubject.length > 0 ? 'high' : idx === 0 ? 'medium' : 'low',
           quizGoal
         });
       });
@@ -611,6 +629,28 @@ ${quizPerformance.filter(p => p.accuracy < 60).length > 0 ? `
               Personalized based on your quiz performance
             </p>
           </motion.div>
+
+          {/* Follow-up banner: continuing from the last plan */}
+          {followup && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6"
+            >
+              <Card className="border-green-500/30 bg-green-500/5">
+                <CardContent className="pt-4 text-sm">
+                  <p className="font-semibold text-foreground mb-1">
+                    Continuing your last plan — {followup.completedSessions}/{followup.totalSessions} sessions done 🎯
+                  </p>
+                  <p className="text-muted-foreground">
+                    {followup.missed.length > 0
+                      ? `Missed topics (${followup.missed.reduce((n, m) => n + m.topics.length, 0)}) go first with high priority. Finished topics step back.`
+                      : 'Clean slate with momentum — weak quiz areas still lead.'}
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
 
           {/* Performance Summary */}
           {!isLoadingPerformance && quizPerformance.length > 0 && (

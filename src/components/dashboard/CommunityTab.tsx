@@ -52,6 +52,7 @@ export const CommunityTab = ({
         <Button variant="outline" className="h-auto py-5 flex flex-col gap-1 hover:border-amber-500 hover:bg-amber-500/5" onClick={() => navigateStep('scholarships' as never)}>
           <GraduationCap className="w-6 h-6 text-amber-500" />
           <span className="font-bold text-sm">Scholarships</span>
+          <span className="text-[10px] text-muted-foreground">+ Loans</span>
         </Button>
       </div>
 
