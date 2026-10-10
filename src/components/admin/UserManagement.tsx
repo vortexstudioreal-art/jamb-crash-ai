@@ -132,35 +132,16 @@ export const UserManagement = ({ isOwner }: UserManagementProps) => {
 
     setUpdatingUser(userEmail);
     try {
-      // Calculate expiry based on plan
-      const now = new Date();
-      let expiryDate: Date;
-      
-      switch (newPlan) {
-        case 'basic':
-        case 'pro':
-          expiryDate = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000); // 1 year
-          break;
-        case 'premium':
-          expiryDate = new Date(now.getTime() + 365 * 100 * 24 * 60 * 60 * 1000); // 100 years (forever)
-          break;
-        default:
-          throw new Error('Invalid plan');
+      // Server-side grant (owner-only edge function): client inserts into
+      // payments are denied by RLS, so the grant must come from the server.
+      const { data, error } = await supabase.functions.invoke('admin-grant', {
+        body: { email: userEmail, package: newPlan },
+      });
+      if (error || !data?.success) {
+        throw new Error(
+          (data && typeof data.error === 'string' && data.error) || 'Grant failed'
+        );
       }
-
-      // Insert a new payment record
-      const { error } = await supabase
-        .from('payments')
-        .insert({
-          email: userEmail,
-          amount: 0, // Manual upgrade
-          package: newPlan,
-          status: 'success',
-          access_expires_at: expiryDate.toISOString(),
-          paystack_reference: `ADMIN_UPGRADE_${Date.now()}`,
-        });
-
-      if (error) throw error;
 
       toast.success(`User upgraded to ${newPlan} plan!`);
       await fetchUsers();
