@@ -92,6 +92,13 @@ export const WatchAdModal = ({ isOpen, onClose, onComplete, featureType, bonusAm
         initializeForTesting: import.meta.env.DEV,
       });
 
+      // Clear stale listeners first: each watch attempt adds a fresh set,
+      // and leftovers would fire handleClaimReward multiple times for one
+      // ad (multi-granting the bonus).
+      rewardListenerRef.current?.remove();
+      dismissListenerRef.current?.remove();
+      failedListenerRef.current?.remove();
+
       // Listen for reward event — ONLY this callback grants the reward
       const rewardListener = await AdMob.addListener(RewardAdPluginEvents.Rewarded, () => {
         trackAdCompleted(userEmail, featureType, 'admob', 0);

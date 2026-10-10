@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { FEATURE_NAMES, FeatureType, useFeatureUsage } from '@/hooks/useFeatureUsage';
 import { WatchAdModal } from './WatchAdModal';
 import { UpgradeModal } from './UpgradeModal';
+import { isMobileApp } from '@/config/admob';
 import { toast } from 'sonner';
 
 interface FeatureLimitReachedProps {
@@ -30,6 +31,15 @@ export const FeatureLimitReached = ({
 
   const bonusAmount = BONUS_AMOUNTS[featureType] ?? 1;
   const featureName = FEATURE_NAMES[featureType];
+  // Rewarded ads only exist in the native app — on web the modal renders
+  // nothing, so route the tap to an explanation instead of a dead click.
+  const handleWatchAdPress = () => {
+    if (!isMobileApp()) {
+      toast.info('Reward ads live in the mobile app — download it to earn bonus uses.');
+      return;
+    }
+    setShowAdModal(true);
+  };
 
   const handleAdComplete = async () => {
     const success = await addBonusUse(featureType, bonusAmount);
@@ -63,7 +73,7 @@ export const FeatureLimitReached = ({
             <Button
               size="sm"
               variant="outline"
-              onClick={() => setShowAdModal(true)}
+              onClick={handleWatchAdPress}
               className="text-xs h-7 px-2"
             >
               <Play className="w-3 h-3 mr-1" />
@@ -120,7 +130,7 @@ export const FeatureLimitReached = ({
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Button
             variant="outline"
-            onClick={() => setShowAdModal(true)}
+            onClick={handleWatchAdPress}
             className="flex items-center gap-2"
           >
             <Play className="w-4 h-4" />
