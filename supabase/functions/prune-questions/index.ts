@@ -44,6 +44,38 @@ const isOrphanWord = (q: string, opts: string[]): boolean => {
 // The target word itself is missing, e.g. "…how to spell the word".
 const missingWord = (q: string): boolean => /spell the word\s*$/i.test(q);
 
+// References a figure/table/passage that was lost in scraping, e.g.
+// "the diagram below", "from the table above". Excludes the legitimate
+// "which/each/all/one of the following" phrasing.
+const missingFigure = (q: string): boolean => {
+  const t = q.replace(/\b(which|each|all|one)\s+of\s+the\s+following\b/gi, "");
+  const fig = /\b(diagram|figure|graph|chart|illustration|picture|image|map|passage|table)\b/i;
+  const pos = /\b(below|above|shown|given|following)\b/i;
+  return fig.test(t) && pos.test(t);
+};
+
+// Stem has no numbers but the options are numeric: the data table the
+// question computed from did not survive import (e.g. accounting
+// "depreciation of the asset" with N210m/N270m options and no figures).
+// Single subscript digits (Fe2+), bare percentages, temperatures and ratios
+// (75%, -273C, 3:1) are usually standalone knowledge, not lost data.
+const missingDataTable = (q: string, opts: string[]): boolean => {
+  if (/\d/.test(q)) return false;
+  if (/how many|what year|which year|in what year|\bwhen\b/i.test(q)) return false;
+  const isDataNumeric = (o: string) => {
+    const t = o || "";
+    if (!(/\d{3,}|₦|\d\s*(m\b|km|W\b|kg|g\b|s\b|ms\b|naira)/i.test(t))) return false;
+    if (/^[\d\s:.\/%°Co-]+$/.test(t.trim())) return false;
+    return true;
+  };
+  const numericOpts = opts.filter(isDataNumeric);
+  if (numericOpts.length < 3) return false;
+  // Year options (bare or inside names like "1963 Constitution") are
+  // answerable without a data table.
+  if (numericOpts.every((o) => /(19|20)\d{2}/.test(o))) return false;
+  return true;
+};
+
 async function audit(supabase: ReturnType<typeof createClient>) {
   const candidates: Candidate[] = [];
   let backticks = 0;
@@ -60,17 +92,22 @@ async function audit(supabase: ReturnType<typeof createClient>) {
       option_a: string; option_b: string; option_c: string; option_d: string;
     }[]) {
       const q = (r.question || "").trim();
+      const opts = [r.option_a, r.option_b, r.option_c, r.option_d];
       if (hasEmptyTarget(q)) {
         candidates.push({ id: r.id, subject: r.subject, year: r.year, question: q.slice(0, 120), reason: "empty target" });
       } else if (missingWord(q)) {
         candidates.push({ id: r.id, subject: r.subject, year: r.year, question: q.slice(0, 120), reason: "missing word" });
       } else if (
-        isOrphanWord(q, [r.option_a, r.option_b, r.option_c, r.option_d])
+        isOrphanWord(q, opts)
       ) {
         candidates.push({ id: r.id, subject: r.subject, year: r.year, question: q.slice(0, 120), reason: "orphan word" });
+      } else if (missingFigure(q)) {
+        candidates.push({ id: r.id, subject: r.subject, year: r.year, question: q.slice(0, 120), reason: "missing figure/table" });
+      } else if (missingDataTable(q, opts)) {
+        candidates.push({ id: r.id, subject: r.subject, year: r.year, question: q.slice(0, 120), reason: "missing data table" });
       }
-      const opts = [r.option_a, r.option_b, r.option_c, r.option_d].join(" ");
-      if (q.includes("`") || opts.includes("`")) backticks++;
+      const optsText = opts.join(" ");
+      if (q.includes("`") || optsText.includes("`")) backticks++;
     }
     if (data.length < 1000) break;
     page++;
