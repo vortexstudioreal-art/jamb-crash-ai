@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { CheckCircle, Loader2, Mail, ArrowRight, XCircle } from 'lucide-react';
@@ -19,6 +19,9 @@ const PaymentSuccess = () => {
     amount: number;
     package: string;
   } | null>(null);
+  // refreshAccess is re-created every auth render; without this guard the
+  // effect below re-fires and verifies the same reference repeatedly.
+  const verifiedRef = useRef(false);
 
   useSeo({
     title: 'Payment Status | Jamb Crash AI',
@@ -33,6 +36,8 @@ const PaymentSuccess = () => {
       setStatus('error');
       return;
     }
+    if (verifiedRef.current) return;
+    verifiedRef.current = true;
 
     const verify = async () => {
       try {
@@ -40,10 +45,9 @@ const PaymentSuccess = () => {
         const data = result?.data || null;
         setPaymentData(data);
         setStatus(result?.success ? 'success' : 'error');
-        // Refresh access to get latest payment status
-        if (data?.email) {
-          await refreshAccess();
-        }
+        // Refresh regardless of data shape — a success without email must
+        // still unlock the dashboard.
+        await refreshAccess();
       } catch (error) {
         errorLogger.error(error, { component: 'PaymentSuccess', action: 'verify payment' });
         setStatus('error');
