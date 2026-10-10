@@ -32,6 +32,10 @@ export default defineConfig(({ mode }) => ({
           "favicon.png",
           "robots.txt",
           "*.webmanifest",
+          // App shell: without these, a cold offline launch serves index.html
+          // whose script chunks then fail — blank screen that looks loading.
+          "assets/*.js",
+          "assets/*.css",
         ],
         cleanupOutdatedCaches: true,
         runtimeCaching: [
