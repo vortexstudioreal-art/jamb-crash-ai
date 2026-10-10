@@ -198,7 +198,9 @@ export const TrialProvider = ({ children }: { children: ReactNode }) => {
     };
 
     checkTime();
-    const interval = setInterval(checkTime, 1000);
+    // 30s ticks: the badge shows days/hours/minutes, so 1s precision only
+    // churned re-renders across the whole context tree for 7 days.
+    const interval = setInterval(checkTime, 30_000);
 
     return () => clearInterval(interval);
   }, [isAdmin, hasAccess, isTrialActive, trialExpiresAt]);

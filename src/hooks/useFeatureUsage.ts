@@ -164,48 +164,43 @@ export const useFeatureUsage = () => {
     return Math.max(0, totalLimit - usageData[feature]);
   }, [getLimit, usageData, bonusData]);
 
-  // Increment usage for a feature
+  // Increment usage for a feature (atomic server-side bump — the returned
+  // row is the source of truth, so concurrent taps can't lose counts).
   const incrementUsage = useCallback(async (feature: FeatureType): Promise<boolean> => {
     if (!userEmail) return false;
-    
+
     // Check if can use first
     if (!canUseFeature(feature)) return false;
 
-    const today = new Date().toISOString().split('T')[0];
-    
     try {
-      // Try to upsert the usage record
-      const { error } = await supabase
-        .from('feature_usage')
-        .upsert(
-          {
-            email: userEmail,
-            feature_type: feature,
-            usage_date: today,
-            usage_count: usageData[feature] + 1,
-          },
-          {
-            onConflict: 'email,feature_type,usage_date',
-          }
-        );
+      const { data, error } = await supabase.rpc('increment_feature_usage', {
+        p_feature: feature,
+        p_amount: 1,
+        p_is_bonus: false,
+      });
 
       if (error) {
         errorLogger.error(error, { component: 'useFeatureUsage', action: 'incrementUsage' });
         return false;
       }
 
-      // Update local state
-      setUsageData(prev => ({
-        ...prev,
-        [feature]: prev[feature] + 1,
-      }));
+      const row = Array.isArray(data) ? data[0] : data;
+      if (row && typeof row.usage_count === 'number') {
+        setUsageData(prev => ({ ...prev, [feature]: row.usage_count }));
+        if (typeof row.bonus_uses === 'number') {
+          setBonusData(prev => ({ ...prev, [feature]: row.bonus_uses }));
+        }
+      } else {
+        // Fallback: optimistic bump if the RPC shape surprises us.
+        setUsageData(prev => ({ ...prev, [feature]: prev[feature] + 1 }));
+      }
 
       return true;
     } catch (err) {
       errorLogger.error(err, { component: 'useFeatureUsage', action: 'incrementUsage' });
       return false;
     }
-  }, [userEmail, usageData, canUseFeature]);
+  }, [userEmail, canUseFeature]);
 
   // Get usage summary for display
   const getUsageSummary = useCallback((feature: FeatureType): { used: number; limit: number; remaining: number; bonus: number } => {
@@ -221,47 +216,43 @@ export const useFeatureUsage = () => {
     };
   }, [getLimit, usageData, bonusData]);
 
-  // Add bonus use after watching ad
+  // Add bonus use after watching ad (atomic server-side bump; never
+  // overwrites usage_count with a stale client value).
   const addBonusUse = useCallback(async (feature: FeatureType, amount: number = 1): Promise<boolean> => {
     if (!userEmail) return false;
 
-    const today = new Date().toISOString().split('T')[0];
-    
     try {
-      const newBonus = bonusData[feature] + amount;
-      
-      const { error } = await supabase
-        .from('feature_usage')
-        .upsert(
-          {
-            email: userEmail,
-            feature_type: feature,
-            usage_date: today,
-            usage_count: usageData[feature],
-            bonus_uses: newBonus,
-          },
-          {
-            onConflict: 'email,feature_type,usage_date',
-          }
-        );
+      const { data, error } = await supabase.rpc('increment_feature_usage', {
+        p_feature: feature,
+        p_amount: Math.max(1, Math.floor(amount)),
+        p_is_bonus: true,
+      });
 
       if (error) {
         errorLogger.error(error, { component: 'useFeatureUsage', action: 'addBonusUse' });
         return false;
       }
 
-      // Update local state
-      setBonusData(prev => ({
-        ...prev,
-        [feature]: prev[feature] + amount,
-      }));
+      const row = Array.isArray(data) ? data[0] : data;
+      if (row && typeof row.bonus_uses === 'number') {
+        setBonusData(prev => ({ ...prev, [feature]: row.bonus_uses }));
+        if (typeof row.usage_count === 'number') {
+          setUsageData(prev => ({ ...prev, [feature]: row.usage_count }));
+        }
+      } else {
+        // Fallback: optimistic bump if the RPC shape surprises us.
+        setBonusData(prev => ({
+          ...prev,
+          [feature]: prev[feature] + amount,
+        }));
+      }
 
       return true;
     } catch (err) {
       errorLogger.error(err, { component: 'useFeatureUsage', action: 'addBonusUse' });
       return false;
     }
-  }, [userEmail, usageData, bonusData]);
+  }, [userEmail]);
 
   return {
     usageData,

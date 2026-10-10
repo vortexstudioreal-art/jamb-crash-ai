@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       ad_analytics: {
@@ -131,6 +156,316 @@ export type Database = {
           key?: string
           updated_at?: string
           value?: Json
+        }
+        Relationships: []
+      }
+      b2b_activation_pins: {
+        Row: {
+          access_expires_at: string | null
+          buyer_id: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          order_id: string
+          pin_code: string
+          plan_type: string
+          redeemed_at: string | null
+          redeemed_by_email: string | null
+          status: Database["public"]["Enums"]["pin_status"]
+          updated_at: string
+        }
+        Insert: {
+          access_expires_at?: string | null
+          buyer_id: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          order_id: string
+          pin_code: string
+          plan_type: string
+          redeemed_at?: string | null
+          redeemed_by_email?: string | null
+          status?: Database["public"]["Enums"]["pin_status"]
+          updated_at?: string
+        }
+        Update: {
+          access_expires_at?: string | null
+          buyer_id?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          order_id?: string
+          pin_code?: string
+          plan_type?: string
+          redeemed_at?: string | null
+          redeemed_by_email?: string | null
+          status?: Database["public"]["Enums"]["pin_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "b2b_activation_pins_buyer_id_fkey"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "b2b_buyers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "b2b_activation_pins_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "b2b_bulk_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      b2b_bulk_orders: {
+        Row: {
+          buyer_id: string
+          created_at: string
+          discount_percent: number
+          id: string
+          notes: string | null
+          paystack_reference: string | null
+          plan_type: string
+          quantity: number
+          status: Database["public"]["Enums"]["bulk_order_status"]
+          total_amount: number
+          unit_price: number
+          updated_at: string
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string
+          discount_percent?: number
+          id?: string
+          notes?: string | null
+          paystack_reference?: string | null
+          plan_type: string
+          quantity: number
+          status?: Database["public"]["Enums"]["bulk_order_status"]
+          total_amount: number
+          unit_price: number
+          updated_at?: string
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string
+          discount_percent?: number
+          id?: string
+          notes?: string | null
+          paystack_reference?: string | null
+          plan_type?: string
+          quantity?: number
+          status?: Database["public"]["Enums"]["bulk_order_status"]
+          total_amount?: number
+          unit_price?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "b2b_bulk_orders_buyer_id_fkey"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "b2b_buyers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      b2b_buyers: {
+        Row: {
+          auth_user_id: string
+          buyer_type: Database["public"]["Enums"]["b2b_buyer_type"]
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          is_active: boolean
+          organization: string | null
+          phone: string | null
+          total_purchased: number
+          total_redeemed: number
+          updated_at: string
+        }
+        Insert: {
+          auth_user_id: string
+          buyer_type?: Database["public"]["Enums"]["b2b_buyer_type"]
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          is_active?: boolean
+          organization?: string | null
+          phone?: string | null
+          total_purchased?: number
+          total_redeemed?: number
+          updated_at?: string
+        }
+        Update: {
+          auth_user_id?: string
+          buyer_type?: Database["public"]["Enums"]["b2b_buyer_type"]
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          is_active?: boolean
+          organization?: string | null
+          phone?: string | null
+          total_purchased?: number
+          total_redeemed?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      b2b_pin_bulk_prices: {
+        Row: {
+          created_at: string
+          discount_percent: number
+          id: string
+          is_active: boolean
+          min_quantity: number
+          plan_type: string
+          unit_price: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          discount_percent?: number
+          id?: string
+          is_active?: boolean
+          min_quantity: number
+          plan_type: string
+          unit_price: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          discount_percent?: number
+          id?: string
+          is_active?: boolean
+          min_quantity?: number
+          plan_type?: string
+          unit_price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      b2b_pin_redemption_log: {
+        Row: {
+          access_expires_at: string | null
+          attempted_by_email: string
+          created_at: string
+          failure_reason: string | null
+          id: string
+          ip_address: string | null
+          pin_code: string
+          user_agent: string | null
+          was_successful: boolean
+        }
+        Insert: {
+          access_expires_at?: string | null
+          attempted_by_email: string
+          created_at?: string
+          failure_reason?: string | null
+          id?: string
+          ip_address?: string | null
+          pin_code: string
+          user_agent?: string | null
+          was_successful: boolean
+        }
+        Update: {
+          access_expires_at?: string | null
+          attempted_by_email?: string
+          created_at?: string
+          failure_reason?: string | null
+          id?: string
+          ip_address?: string | null
+          pin_code?: string
+          user_agent?: string | null
+          was_successful?: boolean
+        }
+        Relationships: []
+      }
+      board_replies: {
+        Row: {
+          alias: string
+          body: string
+          created_at: string
+          email: string
+          id: string
+          image_url: string | null
+          is_deleted: boolean
+          thread_id: string
+        }
+        Insert: {
+          alias: string
+          body: string
+          created_at?: string
+          email: string
+          id?: string
+          image_url?: string | null
+          is_deleted?: boolean
+          thread_id: string
+        }
+        Update: {
+          alias?: string
+          body?: string
+          created_at?: string
+          email?: string
+          id?: string
+          image_url?: string | null
+          is_deleted?: boolean
+          thread_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "board_replies_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "board_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      board_threads: {
+        Row: {
+          alias: string
+          body: string
+          created_at: string
+          email: string
+          id: string
+          image_url: string | null
+          is_deleted: boolean
+          reply_count: number
+          subject: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          alias: string
+          body: string
+          created_at?: string
+          email: string
+          id?: string
+          image_url?: string | null
+          is_deleted?: boolean
+          reply_count?: number
+          subject?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          alias?: string
+          body?: string
+          created_at?: string
+          email?: string
+          id?: string
+          image_url?: string | null
+          is_deleted?: boolean
+          reply_count?: number
+          subject?: string
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -404,6 +739,30 @@ export type Database = {
         }
         Relationships: []
       }
+      funnel_events: {
+        Row: {
+          created_at: string
+          email: string
+          event: string
+          id: string
+          meta: Json | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          event: string
+          id?: string
+          meta?: Json | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          event?: string
+          id?: string
+          meta?: Json | null
+        }
+        Relationships: []
+      }
       jamb_questions: {
         Row: {
           correct_answer: string
@@ -465,6 +824,7 @@ export type Database = {
           objectives: string[] | null
           order_index: number | null
           recommended_content: string | null
+          reference_materials: Json | null
           subject: string
           subtopic: string | null
           topic: string
@@ -479,6 +839,7 @@ export type Database = {
           objectives?: string[] | null
           order_index?: number | null
           recommended_content?: string | null
+          reference_materials?: Json | null
           subject: string
           subtopic?: string | null
           topic: string
@@ -493,6 +854,7 @@ export type Database = {
           objectives?: string[] | null
           order_index?: number | null
           recommended_content?: string | null
+          reference_materials?: Json | null
           subject?: string
           subtopic?: string | null
           topic?: string
@@ -542,6 +904,119 @@ export type Database = {
           total_score?: number
           updated_at?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      lesson_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          email: string
+          id: string
+          last_accessed_at: string | null
+          lesson_id: string | null
+          mastery_level: string | null
+          mastery_score: number | null
+          practice_attempts: Json | null
+          practice_score: number | null
+          predictions: Json | null
+          sections_viewed: Json | null
+          time_spent_seconds: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          email: string
+          id?: string
+          last_accessed_at?: string | null
+          lesson_id?: string | null
+          mastery_level?: string | null
+          mastery_score?: number | null
+          practice_attempts?: Json | null
+          practice_score?: number | null
+          predictions?: Json | null
+          sections_viewed?: Json | null
+          time_spent_seconds?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          last_accessed_at?: string | null
+          lesson_id?: string | null
+          mastery_level?: string | null
+          mastery_score?: number | null
+          practice_attempts?: Json | null
+          practice_score?: number | null
+          predictions?: Json | null
+          sections_viewed?: Json | null
+          time_spent_seconds?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lessons: {
+        Row: {
+          content_sections: Json
+          created_at: string | null
+          difficulty_level: string | null
+          estimated_minutes: number | null
+          id: string
+          learning_objectives: Json | null
+          mastery_criteria: Json | null
+          practice_questions: Json | null
+          status: string | null
+          subject: string
+          subtopic: string
+          title: string
+          topic: string
+          updated_at: string | null
+          version: number | null
+        }
+        Insert: {
+          content_sections?: Json
+          created_at?: string | null
+          difficulty_level?: string | null
+          estimated_minutes?: number | null
+          id?: string
+          learning_objectives?: Json | null
+          mastery_criteria?: Json | null
+          practice_questions?: Json | null
+          status?: string | null
+          subject: string
+          subtopic: string
+          title: string
+          topic: string
+          updated_at?: string | null
+          version?: number | null
+        }
+        Update: {
+          content_sections?: Json
+          created_at?: string | null
+          difficulty_level?: string | null
+          estimated_minutes?: number | null
+          id?: string
+          learning_objectives?: Json | null
+          mastery_criteria?: Json | null
+          practice_questions?: Json | null
+          status?: string | null
+          subject?: string
+          subtopic?: string
+          title?: string
+          topic?: string
+          updated_at?: string | null
+          version?: number | null
         }
         Relationships: []
       }
@@ -769,151 +1244,8 @@ export type Database = {
         }
         Relationships: []
       }
-      board_replies: {
+      payout_requests: {
         Row: {
-          alias: string
-          body: string
-          created_at: string
-          email: string
-          id: string
-          image_url: string | null
-          is_deleted: boolean
-          thread_id: string
-        }
-        Insert: {
-          alias: string
-          body: string
-          created_at?: string
-          email: string
-          id?: string
-          image_url?: string | null
-          is_deleted?: boolean
-          thread_id: string
-        }
-        Update: {
-          alias?: string
-          body?: string
-          created_at?: string
-          email?: string
-          id?: string
-          image_url?: string | null
-          is_deleted?: boolean
-          thread_id?: string
-        }
-        Relationships: []
-      }
-      board_threads: {
-        Row: {
-          alias: string
-          body: string
-          created_at: string
-          email: string
-          id: string
-          image_url: string | null
-          is_deleted: boolean
-          reply_count: number
-          subject: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          alias: string
-          body: string
-          created_at?: string
-          email: string
-          id?: string
-          image_url?: string | null
-          is_deleted?: boolean
-          reply_count?: number
-          subject?: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          alias?: string
-          body?: string
-          created_at?: string
-          email?: string
-          id?: string
-          image_url?: string | null
-          is_deleted?: boolean
-          reply_count?: number
-          subject?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      scholarship_interest: {
-        Row: {
-          created_at: string
-          email: string
-          id: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id?: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: string
-        }
-        Relationships: []
-      }
-      funnel_events: {
-        Row: {
-          created_at: string
-          email: string
-          event: string
-          id: string
-          meta: Json | null
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          event: string
-          id?: string
-          meta?: Json | null
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          event?: string
-          id?: string
-          meta?: Json | null
-        }
-        Relationships: []
-      }
-      push_tokens: {
-        Row: {
-          created_at: string
-          email: string
-          id: string
-          platform: string
-          token: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id?: string
-          platform?: string
-          token: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: string
-          platform?: string
-          token?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      payout_requests: {        Row: {
           account_name: string | null
           account_number: string | null
           amount: number
@@ -984,6 +1316,33 @@ export type Database = {
           id?: string
           referral_credits?: number | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      push_tokens: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          platform: string
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          platform?: string
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          platform?: string
+          token?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1180,6 +1539,113 @@ export type Database = {
           referral_code?: string
           referred_email?: string | null
           referrer_email?: string
+        }
+        Relationships: []
+      }
+      scholarship_interest: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      study_plan_tasks: {
+        Row: {
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          date: string
+          day: number
+          day_name: string
+          duration: string | null
+          id: string
+          plan_id: string
+          priority: string
+          quiz_goal: number
+          subject: string
+          topics: Json
+        }
+        Insert: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          date: string
+          day: number
+          day_name: string
+          duration?: string | null
+          id?: string
+          plan_id: string
+          priority?: string
+          quiz_goal?: number
+          subject: string
+          topics?: Json
+        }
+        Update: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          date?: string
+          day?: number
+          day_name?: string
+          duration?: string | null
+          id?: string
+          plan_id?: string
+          priority?: string
+          quiz_goal?: number
+          subject?: string
+          topics?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_plan_tasks_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "study_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      study_plans: {
+        Row: {
+          created_at: string
+          email: string
+          hours_per_day: number
+          id: string
+          plan_data: Json
+          status: string
+          target_score: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          hours_per_day?: number
+          id?: string
+          plan_data?: Json
+          status?: string
+          target_score?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          hours_per_day?: number
+          id?: string
+          plan_data?: Json
+          status?: string
+          target_score?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1554,95 +2020,6 @@ export type Database = {
         }
         Relationships: []
       }
-      study_plan_tasks: {
-        Row: {
-          completed: boolean
-          completed_at: string | null
-          created_at: string
-          date: string
-          day: number
-          day_name: string
-          duration: string | null
-          id: string
-          plan_id: string
-          priority: string
-          quiz_goal: number
-          subject: string
-          topics: Json
-        }
-        Insert: {
-          completed?: boolean
-          completed_at?: string | null
-          created_at?: string
-          date: string
-          day: number
-          day_name: string
-          duration?: string | null
-          id?: string
-          plan_id: string
-          priority?: string
-          quiz_goal?: number
-          subject: string
-          topics?: Json
-        }
-        Update: {
-          completed?: boolean
-          completed_at?: string | null
-          created_at?: string
-          date?: string
-          day?: number
-          day_name?: string
-          duration?: string | null
-          id?: string
-          plan_id?: string
-          priority?: string
-          quiz_goal?: number
-          subject?: string
-          topics?: Json
-        }
-        Relationships: [
-          {
-            foreignKeyName: "study_plan_tasks_plan_id_fkey"
-            columns: ["plan_id"]
-            isOneToOne: false
-            referencedRelation: "study_plans"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      study_plans: {
-        Row: {
-          created_at: string
-          email: string
-          hours_per_day: number
-          id: string
-          plan_data: Json
-          status: string
-          target_score: number
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          hours_per_day?: number
-          id?: string
-          plan_data: Json
-          status?: string
-          target_score?: number
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          hours_per_day?: number
-          id?: string
-          plan_data?: Json
-          status?: string
-          target_score?: number
-          updated_at?: string
-        }
-        Relationships: []
-      }
       whatsapp_reminders: {
         Row: {
           created_at: string | null
@@ -1670,339 +2047,6 @@ export type Database = {
         }
         Relationships: []
       }
-      lessons: {
-        Row: {
-          id: string
-          subject: string
-          topic: string
-          subtopic: string
-          title: string
-          learning_objectives: Json
-          difficulty_level: string | null
-          estimated_minutes: number | null
-          content_sections: Json
-          practice_questions: Json | null
-          mastery_criteria: Json | null
-          version: number | null
-          status: string | null
-          created_at: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          id?: string
-          subject: string
-          topic: string
-          subtopic: string
-          title: string
-          learning_objectives?: Json
-          difficulty_level?: string | null
-          estimated_minutes?: number | null
-          content_sections: Json
-          practice_questions?: Json | null
-          mastery_criteria?: Json | null
-          version?: number | null
-          status?: string | null
-          created_at?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          id?: string
-          subject?: string
-          topic?: string
-          subtopic?: string
-          title?: string
-          learning_objectives?: Json
-          difficulty_level?: string | null
-          estimated_minutes?: number | null
-          content_sections?: Json
-          practice_questions?: Json | null
-          mastery_criteria?: Json | null
-          version?: number | null
-          status?: string | null
-          created_at?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      lesson_progress: {
-        Row: {
-          id: string
-          email: string
-          lesson_id: string
-          sections_viewed: Json
-          predictions: Json
-          practice_attempts: Json
-          practice_score: number | null
-          mastery_level: string | null
-          mastery_score: number | null
-          time_spent_seconds: number | null
-          last_accessed_at: string | null
-          completed_at: string | null
-          created_at: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          id?: string
-          email: string
-          lesson_id: string
-          sections_viewed?: Json
-          predictions?: Json
-          practice_attempts?: Json
-          practice_score?: number | null
-          mastery_level?: string | null
-          mastery_score?: number | null
-          time_spent_seconds?: number | null
-          last_accessed_at?: string | null
-          completed_at?: string | null
-          created_at?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          id?: string
-          email?: string
-          lesson_id?: string
-          sections_viewed?: Json
-          predictions?: Json
-          practice_attempts?: Json
-          practice_score?: number | null
-          mastery_level?: string | null
-          mastery_score?: number | null
-          time_spent_seconds?: number | null
-          last_accessed_at?: string | null
-          completed_at?: string | null
-          created_at?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      b2b_buyers: {
-        Row: {
-          id: string
-          auth_user_id: string
-          email: string
-          full_name: string
-          organization: string | null
-          buyer_type: "school" | "teacher" | "reseller"
-          phone: string | null
-          is_active: boolean
-          total_purchased: number
-          total_redeemed: number
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          auth_user_id: string
-          email: string
-          full_name: string
-          organization?: string | null
-          buyer_type?: "school" | "teacher" | "reseller"
-          phone?: string | null
-          is_active?: boolean
-          total_purchased?: number
-          total_redeemed?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          auth_user_id?: string
-          email?: string
-          full_name?: string
-          organization?: string | null
-          buyer_type?: "school" | "teacher" | "reseller"
-          phone?: string | null
-          is_active?: boolean
-          total_purchased?: number
-          total_redeemed?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      b2b_bulk_orders: {
-        Row: {
-          id: string
-          buyer_id: string
-          plan_type: string
-          quantity: number
-          unit_price: number
-          discount_percent: number
-          total_amount: number
-          status:
-            | "pending_payment"
-            | "paid"
-            | "generating"
-            | "ready"
-            | "partially_redeemed"
-            | "completed"
-            | "cancelled"
-            | "refunded"
-          paystack_reference: string | null
-          notes: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          buyer_id: string
-          plan_type: string
-          quantity: number
-          unit_price: number
-          discount_percent?: number
-          total_amount: number
-          status?:
-            | "pending_payment"
-            | "paid"
-            | "generating"
-            | "ready"
-            | "partially_redeemed"
-            | "completed"
-            | "cancelled"
-            | "refunded"
-          paystack_reference?: string | null
-          notes?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          buyer_id?: string
-          plan_type?: string
-          quantity?: number
-          unit_price?: number
-          discount_percent?: number
-          total_amount?: number
-          status?:
-            | "pending_payment"
-            | "paid"
-            | "generating"
-            | "ready"
-            | "partially_redeemed"
-            | "completed"
-            | "cancelled"
-            | "refunded"
-          paystack_reference?: string | null
-          notes?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      b2b_activation_pins: {
-        Row: {
-          id: string
-          pin_code: string
-          order_id: string
-          buyer_id: string
-          plan_type: string
-          status: "available" | "redeemed" | "expired" | "revoked"
-          redeemed_by_email: string | null
-          redeemed_at: string | null
-          access_expires_at: string | null
-          expires_at: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          pin_code: string
-          order_id: string
-          buyer_id: string
-          plan_type: string
-          status?: "available" | "redeemed" | "expired" | "revoked"
-          redeemed_by_email?: string | null
-          redeemed_at?: string | null
-          access_expires_at?: string | null
-          expires_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          pin_code?: string
-          order_id?: string
-          buyer_id?: string
-          plan_type?: string
-          status?: "available" | "redeemed" | "expired" | "revoked"
-          redeemed_by_email?: string | null
-          redeemed_at?: string | null
-          access_expires_at?: string | null
-          expires_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      b2b_pin_redemption_log: {
-        Row: {
-          id: string
-          pin_code: string
-          attempted_by_email: string
-          was_successful: boolean
-          failure_reason: string | null
-          access_expires_at: string | null
-          ip_address: string | null
-          user_agent: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          pin_code: string
-          attempted_by_email: string
-          was_successful: boolean
-          failure_reason?: string | null
-          access_expires_at?: string | null
-          ip_address?: string | null
-          user_agent?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          pin_code?: string
-          attempted_by_email?: string
-          was_successful?: boolean
-          failure_reason?: string | null
-          access_expires_at?: string | null
-          ip_address?: string | null
-          user_agent?: string | null
-          created_at?: string
-        }
-        Relationships: []
-      }
-      b2b_pin_bulk_prices: {
-        Row: {
-          id: string
-          plan_type: string
-          min_quantity: number
-          discount_percent: number
-          unit_price: number
-          is_active: boolean
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          plan_type: string
-          min_quantity: number
-          discount_percent?: number
-          unit_price: number
-          is_active?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          plan_type?: string
-          min_quantity?: number
-          discount_percent?: number
-          unit_price?: number
-          is_active?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
     }
     Views: {
       topic_frequency: {
@@ -2018,6 +2062,21 @@ export type Database = {
       }
     }
     Functions: {
+      calculate_bulk_discount: {
+        Args: { p_plan_type: string; p_quantity: number }
+        Returns: {
+          discount_percent: number
+          total_amount: number
+          unit_price: number
+        }[]
+      }
+      check_referral_code: {
+        Args: { p_code: string }
+        Returns: {
+          referrer_email: string
+          valid: boolean
+        }[]
+      }
       check_user_access: {
         Args: { user_email: string }
         Returns: {
@@ -2029,13 +2088,38 @@ export type Database = {
         }[]
       }
       confirm_user_email: { Args: { user_email: string }; Returns: boolean }
-      check_referral_code: {
-        Args: { p_code: string }
-        Returns: { referrer_email: string; valid: boolean }[]
+      generate_activation_pins: {
+        Args: { p_order_id: string }
+        Returns: {
+          id: string
+          pin_code: string
+          plan_type: string
+        }[]
       }
-      redeem_referral_code: { Args: { p_code: string; p_email: string }; Returns: boolean }
       generate_referral_code: { Args: { user_email: string }; Returns: string }
+      get_admin_b2b_overview: {
+        Args: never
+        Returns: {
+          pins_by_plan: Json
+          recent_orders: Json
+          total_buyers: number
+          total_pins_generated: number
+          total_pins_redeemed: number
+          total_revenue: number
+        }[]
+      }
       get_auth_email: { Args: never; Returns: string }
+      get_reseller_dashboard_stats: {
+        Args: { p_buyer_email: string }
+        Returns: {
+          active_orders: number
+          recent_redemptions: Json
+          total_pins_available: number
+          total_pins_purchased: number
+          total_pins_redeemed: number
+          total_spent: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2043,13 +2127,43 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_buyer_purchased: {
+        Args: { p_buyer_id: string; p_quantity: number }
+        Returns: undefined
+      }
       increment_coupon_usage: {
         Args: { p_coupon_id: string }
         Returns: undefined
       }
+      increment_feature_usage: {
+        Args: { p_amount?: number; p_feature: string; p_is_bonus?: boolean }
+        Returns: {
+          bonus_uses: number
+          usage_count: number
+        }[]
+      }
       is_admin_or_owner: { Args: { _user_id: string }; Returns: boolean }
       is_owner: { Args: { _user_id: string }; Returns: boolean }
       recalculate_leaderboard_ranks: { Args: never; Returns: undefined }
+      redeem_activation_pin: {
+        Args: {
+          p_ip_address?: string
+          p_pin_code: string
+          p_user_agent?: string
+          p_user_email: string
+        }
+        Returns: {
+          access_expires_at: string
+          message: string
+          plan_type: string
+          success: boolean
+        }[]
+      }
+      redeem_referral_code: {
+        Args: { p_code: string; p_email: string }
+        Returns: boolean
+      }
+      strip_import_html: { Args: { s: string }; Returns: string }
       validate_coupon: {
         Args: { coupon_code: string }
         Returns: {
@@ -2065,6 +2179,16 @@ export type Database = {
     }
     Enums: {
       app_role: "owner" | "admin" | "collaborator"
+      b2b_buyer_type: "school" | "teacher" | "reseller"
+      bulk_order_status:
+        | "pending_payment"
+        | "paid"
+        | "generating"
+        | "ready"
+        | "partially_redeemed"
+        | "completed"
+        | "cancelled"
+        | "refunded"
       jamb_subject:
         | "english"
         | "mathematics"
@@ -2080,6 +2204,7 @@ export type Database = {
         | "accounting"
         | "commerce"
         | "agricultural_science"
+      pin_status: "available" | "redeemed" | "expired" | "revoked"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2205,9 +2330,23 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       app_role: ["owner", "admin", "collaborator"],
+      b2b_buyer_type: ["school", "teacher", "reseller"],
+      bulk_order_status: [
+        "pending_payment",
+        "paid",
+        "generating",
+        "ready",
+        "partially_redeemed",
+        "completed",
+        "cancelled",
+        "refunded",
+      ],
       jamb_subject: [
         "english",
         "mathematics",
@@ -2224,18 +2363,7 @@ export const Constants = {
         "commerce",
         "agricultural_science",
       ],
-      b2b_buyer_type: ["school", "teacher", "reseller"],
       pin_status: ["available", "redeemed", "expired", "revoked"],
-      bulk_order_status: [
-        "pending_payment",
-        "paid",
-        "generating",
-        "ready",
-        "partially_redeemed",
-        "completed",
-        "cancelled",
-        "refunded",
-      ],
     },
   },
 } as const
