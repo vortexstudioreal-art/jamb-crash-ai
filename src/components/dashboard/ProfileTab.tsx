@@ -19,6 +19,7 @@ export const ProfileTab = ({
   handleTabChange,
   handleSignOut,
   navigate,
+  navigateStep,
   setPracticeSubjectOverride,
   setQuizType,
 }: ProfileTabProps) => {
@@ -38,6 +39,7 @@ export const ProfileTab = ({
             if (!effectiveSubjects.includes(subject)) return;
             setPracticeSubjectOverride(subject);
             setQuizType('mini');
+            navigateStep('quiz');
           }}
         />
       </Suspense>

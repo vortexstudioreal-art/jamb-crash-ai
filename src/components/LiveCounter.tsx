@@ -1,16 +1,33 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Users } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+
+// Honest counter: real question-bank stats, not a fabricated "live" number.
+interface CounterStats {
+  questions: number;
+}
 
 export const LiveCounter = () => {
-  const [count, setCount] = useState(2847);
+  const [stats, setStats] = useState<CounterStats | null>(null);
 
   useEffect(() => {
-    // Simulate live counter updates
-    const interval = setInterval(() => {
-      setCount(prev => prev + Math.floor(Math.random() * 3));
-    }, 5000);
-    return () => clearInterval(interval);
+    let cancelled = false;
+    (async () => {
+      try {
+        // Exact count only (head query, no rows transferred).
+        const { count, error } = await supabase
+          .from('jamb_questions')
+          .select('id', { count: 'exact', head: true });
+        if (error || cancelled || count == null) return;
+        setStats({ questions: count });
+      } catch {
+        // offline — leave the fallback rendering below
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (
@@ -20,10 +37,14 @@ export const LiveCounter = () => {
       className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-card border border-border shadow-card"
     >
       <div className="badge-live">
-        <Users className="w-4 h-4" />
-        <span className="font-semibold">{count.toLocaleString()}</span>
+        <BookOpen className="w-4 h-4" />
+        <span className="font-semibold">
+          {stats ? stats.questions.toLocaleString() : '4,700+'}
+        </span>
       </div>
-      <span className="text-sm text-muted-foreground">students preparing right now</span>
+      <span className="text-sm text-muted-foreground">
+        real past questions to practice
+      </span>
     </motion.div>
   );
 };

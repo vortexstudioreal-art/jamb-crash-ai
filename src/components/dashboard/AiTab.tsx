@@ -75,6 +75,7 @@ export const AiTab = ({
                 setPracticeSubjectOverride(null);
                 setQuizType('mini');
               }
+              navigateStep('quiz');
             }}
             onGoToLesson={(subject, topic) => {
               if (onOpenLesson) {

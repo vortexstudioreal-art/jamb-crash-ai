@@ -187,7 +187,16 @@ const CollaboratorDashboard = () => {
           account_name: bankDetails.account_name
         });
 
-      if (error) throw error;
+      if (error) {
+        // Lost the race with another tab/session: a pending request already
+        // exists (partial unique index). Treat as already-requested.
+        if ((error as { code?: string }).code === '23505') {
+          toast.error('You already have a pending payout request');
+          setHasPendingRequest(true);
+          return;
+        }
+        throw error;
+      }
 
       toast.success('Payout request submitted! 🎉');
       setHasPendingRequest(true);
