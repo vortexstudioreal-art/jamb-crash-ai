@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Crown, Users, CreditCard, TrendingUp, Plus, Trash2, ArrowLeft, RefreshCw, Mail,
-  CheckCircle, AlertCircle, Settings, Send, Key, Activity, Database, Zap, Ticket, UserCog, Bell, DollarSign, BarChart3, Sparkles
+  CheckCircle, AlertCircle, Settings, Send, Key, Activity, Database, Zap, Ticket, UserCog, Bell, DollarSign, BarChart3, Sparkles, BookOpen
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -767,6 +767,34 @@ const AdminPanel = () => {
                             AI Batch: {subj === 'irs' ? 'IRS' : subj.charAt(0).toUpperCase() + subj.slice(1)}
                           </Button>
                         ))}
+                        <Button
+                          onClick={async () => {
+                            toast.loading('Writing explanations for 10 questions (1 AI call)...', { id: 'backfill-expl' });
+                            try {
+                              const { data, error } = await supabase.functions.invoke('backfill-explanations', {
+                                body: { limit: 10 },
+                              });
+                              if (error) throw error;
+                              if (data?.error) {
+                                toast.error(data.error, { id: 'backfill-expl' });
+                                return;
+                              }
+                              toast.success(
+                                `+${data?.updated ?? 0} explanations saved (${data?.remaining ?? '?'} still missing). Press again anytime.`,
+                                { id: 'backfill-expl' }
+                              );
+                              setTimeout(() => fetchData(), 5000);
+                            } catch (err: unknown) {
+                              toast.error('Backfill failed: ' + (err instanceof Error ? err.message : 'Unknown error'), { id: 'backfill-expl' });
+                            }
+                          }}
+                          size="sm"
+                          variant="outline"
+                          className="gap-2 border-green-500/50 text-green-600 dark:text-green-400 hover:bg-green-500/10"
+                        >
+                          <BookOpen className="w-4 h-4" />
+                          Backfill explanations ×10
+                        </Button>
                       </div>
                     )}
                   </CardTitle>
