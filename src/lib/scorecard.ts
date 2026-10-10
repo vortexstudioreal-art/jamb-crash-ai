@@ -100,23 +100,25 @@ export const renderScorecardCanvas = (
 
   // Brand header: real logo (public/logo.png) when available,
   // otherwise a drawn open-book mark in brand colors.
+  // Square badge: fits square transparent artwork and contain-fits anything
+  // else, so neither dark nor light logos clash with the gradient.
   if (logo) {
-    const logoW = 480;
-    const logoH = 172;
-    const dx = W / 2 - logoW / 2;
-    // White pill behind the logo so the dark-on-transparent artwork reads
+    const badge = 240;
+    const pad = 28;
+    const dx = W / 2 - badge / 2;
+    const dy = 28;
     try {
-      roundRect(ctx, dx - 20, 32, logoW + 40, logoH + 24, 30);
+      roundRect(ctx, dx, dy, badge, badge, 48);
       ctx.fillStyle = 'rgba(255,255,255,0.96)';
       ctx.fill();
       // Contain-fit: never stretch the artwork
       const el = logo as HTMLImageElement;
-      const iw = el.naturalWidth || logoW;
-      const ih = el.naturalHeight || logoH;
-      const s = Math.min(logoW / iw, logoH / ih);
+      const iw = el.naturalWidth || badge;
+      const ih = el.naturalHeight || badge;
+      const s = Math.min((badge - pad * 2) / iw, (badge - pad * 2) / ih);
       const dw = iw * s;
       const dh = ih * s;
-      ctx.drawImage(logo, dx + (logoW - dw) / 2, 44 + (logoH - dh) / 2, dw, dh);
+      ctx.drawImage(logo, dx + (badge - dw) / 2, dy + (badge - dh) / 2, dw, dh);
     } catch {
       drawBookMark(ctx, W / 2, 100);
     }
@@ -197,7 +199,7 @@ export const renderScorecardCanvas = (
 
   ctx.font = 'bold 34px Arial, sans-serif';
   ctx.fillStyle = '#ffffff';
-  ctx.fillText('jambcrashai.com', W / 2, H - 100);
+  ctx.fillText('jambcrash.ai', W / 2, H - 100);
 
   return canvas;
 };

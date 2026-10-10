@@ -38,7 +38,7 @@ export interface QuizResultsProps {
 
 const getScoreMessage = (percentage: number) => {
   if (percentage >= 80) return { emoji: '🏆', message: "Outstanding! You're JAMB-ready! 🔥", color: 'text-green-500' };
-  if (percentage >= 60) return { emoji: '⭐', message: "Great job! Keep pushing for that 300+!", color: 'text-primary' };
+  if (percentage >= 60) return { emoji: '⭐', message: "Great job! Keep pushing higher!", color: 'text-primary' };
   if (percentage >= 40) return { emoji: '💪', message: "Good effort! More practice = more marks!", color: 'text-yellow-500' };
   return { emoji: '📚', message: "Don't give up! Every question teaches you something!", color: 'text-orange-500' };
 };
@@ -54,9 +54,6 @@ export const QuizResults = ({ results, quizType, userEmail, onRetry, onHome, onU
   // FIXED: Score is based on ACTUAL questions answered, not a progressive total
   const percentage = Math.round((results.correctAnswers / Math.max(results.totalQuestions, 1)) * 100);
   const scoreInfo = getScoreMessage(percentage);
-
-  // Estimated JAMB score based on THIS quiz performance
-  const estimatedJambScore = Math.round((percentage / 100) * 400);
 
   const wrongCount = results.questions.filter(q => q.userAnswer && (q.userAnswer || '').toUpperCase() !== (q.correct_answer || '').toUpperCase()).length;
   const skippedCount = results.questions.filter(q => !q.userAnswer).length;
@@ -112,15 +109,15 @@ export const QuizResults = ({ results, quizType, userEmail, onRetry, onHome, onU
   const buildScorecardData = (): ScorecardData => ({
     userName: userEmail ? userEmail.split('@')[0] : 'JAMB Candidate',
     title: 'PRACTICE QUIZ RESULT',
-    score: estimatedJambScore,
-    maxScore: 400,
+    score: percentage,
+    maxScore: 100,
     bandLabel: scoreInfo.message,
     sections: [],
   });
 
   const handleShareScorecard = async () => {
     setSharing(true);
-    const text = `I scored ${results.correctAnswers}/${results.totalQuestions} (${percentage}%) on Jamb Crash AI — estimated JAMB ${estimatedJambScore}/400!`;
+    const text = `I scored ${percentage}% (${results.correctAnswers}/${results.totalQuestions}) on Jamb Crash AI practice!`;
     try {
       await shareScorecard(buildScorecardData(), text);
     } catch {
@@ -220,15 +217,15 @@ export const QuizResults = ({ results, quizType, userEmail, onRetry, onHome, onU
           </div>
         </motion.div>
 
-        {/* Estimated JAMB Score */}
+        {/* Performance note (practice quizzes are not the UTME scale) */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.6 }}
           className="bg-gradient-to-r from-primary/20 to-green-500/20 rounded-2xl p-6 mb-8 text-center border border-primary/30"
         >
-          <p className="text-muted-foreground mb-1">Estimated JAMB Score (if you maintain this performance)</p>
-          <p className="text-5xl font-bold text-foreground">{estimatedJambScore}/400</p>
+          <p className="text-muted-foreground mb-1">Your accuracy this quiz</p>
+          <p className="text-5xl font-bold text-foreground">{percentage}%</p>
           <p className="text-sm text-muted-foreground mt-2">
             Based on {results.correctAnswers} correct out of {results.totalQuestions} questions
           </p>
