@@ -4,7 +4,6 @@ import { Header } from '@/components/Header';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { UploadSection } from '@/components/UploadSection';
 import { PlanSelectionModal } from '@/components/PlanSelectionModal';
-import { PaywallGate } from '@/components/PaywallGate';
 import { AdminBadge } from '@/components/AdminBadge';
 import { SubjectChanger } from '@/components/SubjectChanger';
 import type { QuizResultsProps } from '@/components/QuizResults';
@@ -436,7 +435,7 @@ const Index = () => {
       setIsPaymentFlowLoading(false);
     }
     
-    if (step === 'dashboard' && (effectiveAccess || isTrialActive) && userEmail) {
+    if (step === 'dashboard' && userEmail) {
       startTransition(() => setCurrentStep('dashboard'));
       setSearchParams({});
       window.scrollTo({ top: 0, behavior: 'instant' });
@@ -452,12 +451,12 @@ const Index = () => {
         startTransition(() => setCurrentStep('upload'));
       }
       setSearchParams({});
-    } else if (step === 'dashboard' && userEmail && (effectiveAccess || isTrialActive)) {
+    } else if (step === 'dashboard' && userEmail) {
       startTransition(() => setCurrentStep('dashboard'));
       setSearchParams({});
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
-  }, [searchParams, setSearchParams, userEmail, userSubjects.length, isFullyLoading, effectiveAccess, effectiveAdmin, isTrialActive, user]);
+  }, [searchParams, setSearchParams, userEmail, userSubjects.length, isFullyLoading, effectiveAdmin, user]);
 
   // Save dashboard state when step changes
   useEffect(() => {
@@ -1137,10 +1136,12 @@ const Index = () => {
     );
   }
 
-  // Dashboard step
+  // Dashboard step — freemium: every signed-in user gets the dashboard.
+  // Premium features gate individually (FeatureGate + usage limits + trial),
+  // so a hard paywall here only ever trapped free users with no way home.
   if (currentStep === 'dashboard' && userEmail) {
     return (
-      <PaywallGate hasAccess={effectiveAccess || isTrialActive} isLoading={isFullyLoading} onUpgrade={handleUpgradeClick} userEmail={userEmail}>
+      <>
         <div className="min-h-screen bg-background">
           {/* Desktop Sidebar */}
           <DesktopSidebar
@@ -1394,7 +1395,7 @@ const Index = () => {
             />
           </div>
         )}
-      </PaywallGate>
+      </>
     );
   }
 

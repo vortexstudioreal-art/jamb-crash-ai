@@ -59,6 +59,9 @@ const CouponManager = lazy(() => import('@/components/CouponManager').then(m => 
 const UserManagement = lazy(() => import('@/components/admin/UserManagement').then(m => ({ default: m.UserManagement })));
 const NotificationManager = lazy(() => import('@/components/admin/NotificationManager').then(m => ({ default: m.NotificationManager })));
 const PayoutManagement = lazy(() => import('@/components/admin/PayoutManagement').then(m => ({ default: m.PayoutManagement })));
+const BankDetailsForm = lazy(() => import('@/components/collaborator/BankDetailsForm').then(m => ({ default: m.BankDetailsForm })));
+const PayoutHistory = lazy(() => import('@/components/collaborator/PayoutHistory').then(m => ({ default: m.PayoutHistory })));
+const AdminCouponDashboard = lazy(() => import('@/components/AdminCouponDashboard').then(m => ({ default: m.AdminCouponDashboard })));
 const QuestionReportsManager = lazy(() => import('@/components/admin/QuestionReportsManager').then(m => ({ default: m.QuestionReportsManager })));
 const B2BManagement = lazy(() => import('@/components/admin/B2BManagement').then(m => ({ default: m.B2BManagement })));
 const NovelLibraryManager = lazy(() => import('@/components/admin/NovelLibraryManager').then(m => ({ default: m.NovelLibraryManager })));
@@ -67,7 +70,7 @@ const BoardManager = lazy(() => import('@/components/admin/BoardManager').then(m
 
 const AdminPanel = () => {
   const navigate = useNavigate();
-  const { user, isLoading, isAdmin, isOwner: authIsOwner, userRole } = useAuth();
+  const { user, isLoading, isAdmin, isOwner: authIsOwner, userRole, roleResolved } = useAuth();
   const userEmail = user?.email || null;
   const adminRole = userRole;
 
@@ -93,10 +96,14 @@ const AdminPanel = () => {
 
   const isOwner = authIsOwner;
   const canEdit = isOwner; // Only owner can edit settings
+  // Collaborators (influencers) get a scoped panel: own coupons/earnings and
+  // own payouts only. Everything else stays owner/admin-only.
+  const isCollab = adminRole === 'collaborator';
 
   useEffect(() => {
-    // Wait for loading to complete
-    if (isLoading) return;
+    // Wait for loading AND role resolution: the role lookup lags the session,
+    // and fetching (or redirecting) before it settles misfires for everyone.
+    if (isLoading || !roleResolved) return;
     
     // Admin/Owner/Collaborator have access - bypass all other checks
     if (isAdmin || authIsOwner) {
@@ -107,9 +114,15 @@ const AdminPanel = () => {
     // No access - redirect home
     navigate('/');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAdmin, authIsOwner, isLoading, navigate]);
+  }, [isAdmin, authIsOwner, isLoading, roleResolved, navigate]);
 
   const fetchData = async () => {
+    // Collaborators load only their own scoped widgets; the global fetches
+    // would just RLS-fail and toast-spam.
+    if (adminRole === 'collaborator') {
+      setLoadingData(false);
+      return;
+    }
     setLoadingData(true);
     await Promise.all([
       fetchPayments(), 
@@ -447,57 +460,77 @@ const AdminPanel = () => {
           </Button>
         </motion.div>
 
-        {/* Tabs for different sections */}
-        <Tabs defaultValue="health" className="space-y-6">
+        {/* Tabs for different sections (collaborators see coupons + payouts only) */}
+        <Tabs defaultValue={isCollab ? "coupons" : "health"} className="space-y-6">
           <TabsList className="flex overflow-x-auto scrollbar-hide pb-1 gap-1 w-full lg:w-auto lg:inline-flex">
+            {!isCollab && (
             <TabsTrigger value="health" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
               <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="hidden xs:inline">Health</span>
             </TabsTrigger>
+            )}
+            {!isCollab && (
             <TabsTrigger value="users" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
               <UserCog className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="hidden xs:inline">Users</span>
             </TabsTrigger>
+            )}
             <TabsTrigger value="payouts" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
               <DollarSign className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span className="hidden xs:inline">Payouts</span>
+              <span className="hidden xs:inline">{isCollab ? "Earnings" : "Payouts"}</span>
             </TabsTrigger>
+            {!isCollab && (
             <TabsTrigger value="notifications" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
               <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="hidden xs:inline">Notifs</span>
             </TabsTrigger>
+            )}
             <TabsTrigger value="coupons" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
               <Ticket className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span className="hidden xs:inline">Coupons</span>
+              <span className="hidden xs:inline">{isCollab ? "My Codes" : "Coupons"}</span>
             </TabsTrigger>
+            {!isCollab && (
             <TabsTrigger value="questions" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
               <Database className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="hidden xs:inline">Questions</span>
             </TabsTrigger>
+            )}
+            {!isCollab && (
             <TabsTrigger value="reports" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
               <AlertCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="hidden xs:inline">Reports</span>
             </TabsTrigger>
+            )}
+            {!isCollab && (
             <TabsTrigger value="board" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
               <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="hidden xs:inline">Board</span>
             </TabsTrigger>
+            )}
+            {!isCollab && (
             <TabsTrigger value="ads" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
               <BarChart3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="hidden xs:inline">Ads</span>
             </TabsTrigger>
+            )}
+            {!isCollab && (
             <TabsTrigger value="b2b" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
               <Key className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="hidden xs:inline">B2B Pins</span>
             </TabsTrigger>
+            )}
+            {!isCollab && (
             <TabsTrigger value="overview" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
               <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="hidden xs:inline">Overview</span>
             </TabsTrigger>
+            )}
+            {!isCollab && (
             <TabsTrigger value="settings" className="gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
               <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="hidden xs:inline">Settings</span>
             </TabsTrigger>
+            )}
           </TabsList>
 
           {/* Health Check Tab */}
@@ -536,14 +569,21 @@ const AdminPanel = () => {
             </motion.div>
           </TabsContent>
 
-          {/* Payouts Tab */}
+          {/* Payouts Tab (collaborators: own bank + history only) */}
           <TabsContent value="payouts">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
               <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
-                <PayoutManagement isOwner={isOwner} userEmail={userEmail || ''} />
+                {isCollab ? (
+                  <div className="space-y-6">
+                    <BankDetailsForm userEmail={userEmail || ''} />
+                    <PayoutHistory userEmail={userEmail || ''} />
+                  </div>
+                ) : (
+                  <PayoutManagement isOwner={isOwner} userEmail={userEmail || ''} />
+                )}
               </Suspense>
             </motion.div>
           </TabsContent>
@@ -560,14 +600,14 @@ const AdminPanel = () => {
             </motion.div>
           </TabsContent>
 
-          {/* Coupons Tab */}
+          {/* Coupons Tab (collaborators: own codes + earnings only) */}
           <TabsContent value="coupons">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
               <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
-                <CouponManager />
+                {isCollab ? <AdminCouponDashboard /> : <CouponManager />}
               </Suspense>
             </motion.div>
           </TabsContent>
