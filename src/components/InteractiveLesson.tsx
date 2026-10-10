@@ -303,7 +303,12 @@ function PracticeStep({ content, onAnswer }: { content: InlinePracticeContent; o
   if (!content.question) return null;
 
   const optionTexts = content.options?.map(o => o.text || o.label || '') || [];
-  const correctIndex = content.options?.findIndex(o => o.label === content.answer || o.text === content.answer) ?? 0;
+  // AI-authored lessons vary in case/spacing ("b" vs "B"), so normalize
+  // before matching. findIndex returns -1 (not nullish) on no match, which
+  // ?? would miss and leave the question unanswerable — fall back to 0.
+  const norm = (s: unknown) => String(s ?? '').trim().toUpperCase();
+  const found = content.options?.findIndex(o => norm(o.label) === norm(content.answer) || norm(o.text) === norm(content.answer)) ?? -1;
+  const correctIndex = found >= 0 ? found : 0;
   const isCorrect = selected === correctIndex;
 
   const handleSubmit = () => {
