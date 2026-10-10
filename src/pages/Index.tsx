@@ -105,8 +105,8 @@ const Index = () => {
       brand: { '@type': 'Brand', name: 'Jamb Crash AI' },
       offers: {
         '@type': 'AggregateOffer',
-        lowPrice: '5000',
-        highPrice: '15000',
+        lowPrice: '1500',
+        highPrice: '7500',
         priceCurrency: 'NGN',
         availability: 'https://schema.org/InStock',
       },

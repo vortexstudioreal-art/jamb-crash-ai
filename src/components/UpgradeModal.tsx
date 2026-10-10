@@ -19,7 +19,7 @@ interface UpgradeModalProps {
 const PLAN_DETAILS = {
   basic: {
     name: 'Basic',
-    price: '₦5,000',
+    price: '₦1,500',
     icon: Zap,
     color: 'text-blue-500',
     bgColor: 'bg-blue-500/10',
@@ -27,7 +27,7 @@ const PLAN_DETAILS = {
   },
   pro: {
     name: 'ACE',
-    price: '₦10,000',
+    price: '₦3,500',
     icon: Crown,
     color: 'text-primary',
     bgColor: 'bg-primary/10',
@@ -35,7 +35,7 @@ const PLAN_DETAILS = {
   },
   premium: {
     name: 'SCHOLAR',
-    price: '₦15,000',
+    price: '₦7,500',
     icon: Star,
     color: 'text-yellow-500',
     bgColor: 'bg-yellow-500/10',
