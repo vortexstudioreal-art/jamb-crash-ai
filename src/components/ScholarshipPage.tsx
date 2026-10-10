@@ -164,7 +164,7 @@ const SCHOLARSHIPS: Scholarship[] = [
     description: 'For Nigerian undergraduates in Engineering, Sciences, Social Sciences, and Humanities at accredited universities. Must have completed first year.',
     deadline: 'Usually September-October',
     amount: 'Comprehensive Package',
-    link: 'https://www.nlng.com/Community/Scholarships.aspx',
+    link: 'https://www.nlng.com',
     status: 'open',
     featured: false,
   },
@@ -184,6 +184,7 @@ const SCHOLARSHIPS: Scholarship[] = [
 export const ScholarshipPage = ({ onBack, userEmail, userId, onPracticeQuiz }: ScholarshipPageProps) => {
   const [onWaitlist, setOnWaitlist] = useState(false);
   const [joining, setJoining] = useState(false);
+  const [tab, setTab] = useState<'scholarships' | 'loans'>('scholarships');
   const [rank, setRank] = useState<number | null>(null);
   const [totalPlayers, setTotalPlayers] = useState<number | null>(null);
 
@@ -293,6 +294,25 @@ export const ScholarshipPage = ({ onBack, userEmail, userId, onPracticeQuiz }: S
             </div>
           </motion.div>
 
+          {/* Scholarships / Loans switcher */}
+          <div className="grid grid-cols-2 gap-2 p-1 mb-8 rounded-2xl bg-muted/60 border border-border">
+            {(['scholarships', 'loans'] as const).map((t) => (
+              <button
+                key={t}
+                onClick={() => setTab(t)}
+                className={`py-2.5 rounded-xl text-sm font-bold capitalize transition-colors ${
+                  tab === t
+                    ? 'bg-primary text-primary-foreground shadow'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {t === 'scholarships' ? '🎓 Scholarships' : '🏦 Loans'}
+              </button>
+            ))}
+          </div>
+
+          {tab === 'scholarships' && (
+          <>
           {/* Featured Scholarship - JAMB Crash AI */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -495,8 +515,11 @@ export const ScholarshipPage = ({ onBack, userEmail, userId, onPracticeQuiz }: S
               ))}
             </div>
           </motion.div>
+          </>)}
 
-          {/* Tips Section */}
+          {tab === 'loans' && (
+          <>
+          {/* Loans Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -558,8 +581,16 @@ export const ScholarshipPage = ({ onBack, userEmail, userId, onPracticeQuiz }: S
                 </Card>
               ))}
             </div>
+            <Card className="p-4 mt-4 bg-amber-500/10 border-amber-500/20">
+              <p className="text-xs text-muted-foreground">
+                ⚠️ Loans must be repaid — read the interest, repayment start date and penalties on the official portal before applying. Never pay anyone to "unlock" a loan.
+              </p>
+            </Card>
           </motion.div>
+          </>)}
 
+          {tab === 'scholarships' && (
+          <>
           {/* Tips Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -588,8 +619,9 @@ export const ScholarshipPage = ({ onBack, userEmail, userId, onPracticeQuiz }: S
             transition={{ delay: 0.6 }}
             className="text-xs text-muted-foreground text-center mt-8"
           >
-            Scholarship information is provided for reference. Always verify details on official websites before applying.
+            Scholarship and loan information is provided for reference. Always verify details on official websites before applying.
           </motion.p>
+          </>)}
         </div>
       </div>
     </div>
