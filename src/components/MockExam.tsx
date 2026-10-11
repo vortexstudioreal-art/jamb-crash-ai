@@ -13,6 +13,7 @@ import { QuestionDiagram } from '@/components/QuestionDiagram';
 import { stripQuestionHtml } from '@/lib/sanitize';
 import { downloadScorecard, shareScorecard, type ScorecardData } from '@/lib/scorecard';
 import { pickAdaptive, collectWeakQuestionCounts } from '@/lib/adaptive';
+import { withTimeout } from '@/lib/withTimeout';
 import { getQuestions, saveQuestions } from '@/services/offlineStorage';
 
 interface MockExamProps {
@@ -90,14 +91,22 @@ export const MockExam = ({ userEmail, subjects, onExit }: MockExamProps) => {
       // Adaptive difficulty: learn which questions the user has missed before
       let weakCounts: Map<string, number> = new Map();
       if (isOnline) {
-        const { data: pastAttempts } = await supabase
-          .from('quiz_attempts')
-          .select('questions_data')
-          .eq('email', userEmail)
-          .order('created_at', { ascending: false })
-          .limit(10);
-        if (pastAttempts) {
-          weakCounts = collectWeakQuestionCounts(pastAttempts.map(a => a.questions_data));
+        try {
+          const { data: pastAttempts } = await withTimeout(
+            supabase
+              .from('quiz_attempts')
+              .select('questions_data')
+              .eq('email', userEmail)
+              .order('created_at', { ascending: false })
+              .limit(10),
+            12000,
+            'mock past attempts'
+          );
+          if (pastAttempts) {
+            weakCounts = collectWeakQuestionCounts(pastAttempts.map(a => a.questions_data));
+          }
+        } catch {
+          // Dead network: start without adaptive weighting.
         }
       }
 
@@ -105,20 +114,29 @@ export const MockExam = ({ userEmail, subjects, onExit }: MockExamProps) => {
       for (const section of builtSections) {
         let pool: MockQuestion[] = [];
         if (isOnline) {
-          const { data, error } = await supabase
-            .from('jamb_questions')
-            .select('id, question, option_a, option_b, option_c, option_d, correct_answer, subject, year, explanation, image_url, diagram_svg, is_ai_generated')
-            .eq('subject', section.subject as Database['public']['Enums']['jamb_subject'])
-            .limit(200);
-          if (error) throw error;
-          pool = (data || []) as MockQuestion[];
-          // Refresh the offline cache while online
-          if (pool.length > 0) {
-            try {
-              await saveQuestions(pool as unknown as Parameters<typeof saveQuestions>[0]);
-            } catch {
-              // cache is best-effort
+          try {
+            const { data, error } = await withTimeout(
+              supabase
+                .from('jamb_questions')
+                .select('id, question, option_a, option_b, option_c, option_d, correct_answer, subject, year, explanation, image_url, diagram_svg, is_ai_generated')
+                .eq('subject', section.subject as Database['public']['Enums']['jamb_subject'])
+                .limit(200),
+              12000,
+              `mock questions:${section.subject}`
+            );
+            if (error) throw error;
+            pool = (data || []) as MockQuestion[];
+            // Refresh the offline cache while online
+            if (pool.length > 0) {
+              try {
+                await saveQuestions(pool as unknown as Parameters<typeof saveQuestions>[0]);
+              } catch {
+                // cache is best-effort
+              }
             }
+          } catch {
+            // Dead network: fall through to the offline cache below.
+            pool = [];
           }
         }
         if (pool.length === 0) {

@@ -19,6 +19,7 @@ import { FeatureLimitReached } from '@/components/FeatureLimitReached';
 import { ReportQuestionButton } from '@/components/ReportQuestionButton';
 import { QuestionDiagram } from '@/components/QuestionDiagram';
 import { pickAdaptive, collectWeakQuestionCounts } from '@/lib/adaptive';
+import { withTimeout } from '@/lib/withTimeout';
 import { stripQuestionHtml } from '@/lib/sanitize';
 import { errorLogger } from '@/services/errorLogger';
 
@@ -197,15 +198,23 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
   const hasSubmittedRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Load previously answered questions to avoid repetition
+  // Load previously answered questions to avoid repetition.
+  // Skipped offline (nothing to fetch) and guarded: a hanging request must
+  // never block the quiz behind it.
   useEffect(() => {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) return;
     const loadPreviousQuestions = async () => {
-      const { data } = await supabase
-        .from('quiz_attempts')
-        .select('questions_data')
-        .eq('email', userEmail)
-        .order('created_at', { ascending: false })
-        .limit(10);
+      try {
+        const { data } = await withTimeout(
+          supabase
+            .from('quiz_attempts')
+            .select('questions_data')
+            .eq('email', userEmail)
+            .order('created_at', { ascending: false })
+            .limit(10),
+          12000,
+          'previous quiz attempts'
+        );
       
       if (data) {
         const ids = new Set<string>();
@@ -221,6 +230,10 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
         });
         setPreviouslyAnsweredIds(ids);
         setWeakQuestionCounts(collectWeakQuestionCounts(data.map(d => d.questions_data)));
+      }
+      } catch {
+        // Offline or dead network: quiz still loads, just without
+        // repetition avoidance and adaptive weighting.
       }
     };
     loadPreviousQuestions();
@@ -365,37 +378,55 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
         let allQuestions: Question[] = [];
         const isOnline = navigator.onLine;
         
-        // Try to load from Supabase if online
+        // Try to load from Supabase if online (12s cap: on dead networks
+        // the request hangs forever and the quiz sits on skeleton).
         if (isOnline) {
           // For practice mode, load per-subject with year filters
           if ((quizType === 'subject' || quizType === 'timed-practice') && Object.keys(subjectYears).length > 0) {
             for (const subject of subjectsToUse) {
               const yearConfig = subjectYears[subject] || { start: 2000, end: 2025 };
-              
-              const { data, error } = await supabase
-                .from('jamb_questions')
-                .select('*')
-                .eq('subject', subject as Database['public']['Enums']['jamb_subject'])
-                .gte('year', yearConfig.start)
-                .lte('year', yearConfig.end)
-                .limit(200);
-              
-              if (!error && data) {
-                allQuestions.push(...(data as Question[]));
+
+              try {
+                const { data, error } = await withTimeout(
+                  supabase
+                    .from('jamb_questions')
+                    .select('*')
+                    .eq('subject', subject as Database['public']['Enums']['jamb_subject'])
+                    .gte('year', yearConfig.start)
+                    .lte('year', yearConfig.end)
+                    .limit(200),
+                  12000,
+                  `questions:${subject}`
+                );
+
+                if (!error && data) {
+                  allQuestions.push(...(data as Question[]));
+                }
+              } catch {
+                // Timed out or failed: stop trying the network and use cache.
+                break;
               }
             }
           } else {
             // Standard query
-            const { data, error } = await supabase
-              .from('jamb_questions')
-              .select('*')
-              .in('subject', subjectsToUse as Database['public']['Enums']['jamb_subject'][])
-              .limit(500);
-            
-            if (!error && data) {
-              allQuestions = data as Question[];
-              // Cache questions for offline use
-              await saveQuestions(data as Question[]);
+            try {
+              const { data, error } = await withTimeout(
+                supabase
+                  .from('jamb_questions')
+                  .select('*')
+                  .in('subject', subjectsToUse as Database['public']['Enums']['jamb_subject'][])
+                  .limit(500),
+                12000,
+                'questions'
+              );
+
+              if (!error && data) {
+                allQuestions = data as Question[];
+                // Cache questions for offline use
+                await saveQuestions(data as Question[]);
+              }
+            } catch {
+              // Timed out or failed: fall through to the offline cache below.
             }
           }
         }
@@ -797,12 +828,19 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
   }
 
   if (questions.length === 0) {
+    const offlineNow = typeof navigator !== 'undefined' && !navigator.onLine;
     return (
       <div className="fixed inset-0 bg-background z-50 flex items-center justify-center p-4">
         <div className="text-center">
           <div className="text-6xl mb-4">😕</div>
-          <h3 className="text-xl font-bold mb-2">No questions available</h3>
-          <p className="text-muted-foreground mb-4">Try selecting different subjects or year range.</p>
+          <h3 className="text-xl font-bold mb-2">
+            {offlineNow ? 'No offline questions yet' : 'No questions available'}
+          </h3>
+          <p className="text-muted-foreground mb-4">
+            {offlineNow
+              ? 'Connect once and open Download Manager to save subjects for offline quizzes.'
+              : 'Try selecting different subjects or year range.'}
+          </p>
           <Button onClick={onExit}>Go Back</Button>
         </div>
       </div>

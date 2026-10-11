@@ -366,22 +366,33 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
 
     // THEN check for existing session (and clear invalid tokens)
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      // Clear stale/invalid sessions automatically
+    // Retry once: a single blip (flaky radio, resuming from sleep) must not
+    // log the user out. Only a confirmed-dead refresh token signs out, and
+    // only locally — never nuke their other devices for a local hiccup.
+    const loadSession = async (attempt: number): Promise<void> => {
+      const { data: { session }, error } = await supabase.auth.getSession();
       if (error) {
         const errorMsg = error.message?.toLowerCase() || '';
-        if (
-          errorMsg.includes('refresh token') || 
-          errorMsg.includes('invalid') ||
-          errorMsg.includes('not found')
-        ) {
-          supabase.auth.signOut();
+        const refreshDead =
+          errorMsg.includes('refresh token') &&
+          (errorMsg.includes('invalid') ||
+            errorMsg.includes('not found') ||
+            errorMsg.includes('expired') ||
+            errorMsg.includes('revoked') ||
+            errorMsg.includes('already used'));
+        if (refreshDead) {
+          await supabase.auth.signOut({ scope: 'local' });
           setRoleResolved(true);
           setIsLoading(false);
           return;
         }
+        if (attempt === 0) {
+          await new Promise((r) => setTimeout(r, 2000));
+          return loadSession(1);
+        }
+        errorLogger.error(error, { component: 'AuthContext', action: 'getSession after retry' });
       }
-      
+
       setSession(session);
       setUser(session?.user ?? null);
       
@@ -400,9 +411,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         // No session: role is definitively "none", so it counts as resolved.
         setRoleResolved(true);
       }
-      
+
       setIsLoading(false);
-    });
+    };
+
+    void loadSession(0);
 
     return () => subscription.unsubscribe();
     // eslint-disable-next-line react-hooks/exhaustive-deps
