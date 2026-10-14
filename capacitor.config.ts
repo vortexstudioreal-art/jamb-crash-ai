@@ -6,7 +6,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 const useLiveReload = process.env.CAP_LIVE_RELOAD === '1';
 
 const config: CapacitorConfig = {
-  appId: 'com.jambcrash.app',
+  appId: 'com.jambcrash.ai',
   appName: 'jamb',
   webDir: 'dist',
   server: useLiveReload
@@ -23,7 +23,7 @@ const config: CapacitorConfig = {
       appId: 'ca-app-pub-3175040135445213~2811266017',
     },
     BackgroundRunner: {
-      label: 'com.jambcrash.app.background',
+      label: 'com.jambcrash.ai.background',
       src: 'background.js',
       event: 'jambSyncEvent',
       repeat: true,
