@@ -1,0 +1,2 @@
+# AdMob app authorization (crawled from the developer website set in AdMob/Play)
+google.com, pub-3175040135445213, DIRECT, f90db1f64fff4a4d
