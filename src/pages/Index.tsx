@@ -750,6 +750,7 @@ const Index = () => {
               quizType={quizType}
               onComplete={handleQuizComplete}
               onExit={handleBackToDashboard}
+              onUpgradeClick={handleUpgradeClick}
             />
           </Suspense>
         </div>
@@ -804,6 +805,7 @@ const Index = () => {
             userEmail={userEmail || ''}
             onRetry={handleBackToDashboard}
             onHome={handleBackToDashboard}
+            onUpgrade={handleUpgradeClick}
           />
           </Suspense>
         </div>
@@ -1355,6 +1357,11 @@ const Index = () => {
             onClose={() => setIsPlanSelectionOpen(false)}
             planName={plans[selectedPlan].name}
             planPrice={plans[selectedPlan].price}
+            planKey={selectedPlan}
+            availablePlans={Object.entries(plans).map(([key, p]) => ({ key, ...p }))}
+            onSelectPlan={(key) => {
+              if (key in plans) setSelectedPlan(key as keyof typeof plans);
+            }}
             onContinuePayment={handlePaymentFromPlanModal}
             canStartTrial={canStartTrial}
             onStartTrial={handleStartTrialFlow}
@@ -1377,6 +1384,7 @@ const Index = () => {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
             <FeatureLimitReached
               featureType="subject_change"
+              onUpgrade={handleUpgradeClick}
               onBonusEarned={() => {
                 setShowSubjectChangeLimitModal(false);
               }}
@@ -1390,6 +1398,7 @@ const Index = () => {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
             <FeatureLimitReached
               featureType="quick_quiz"
+              onUpgrade={handleUpgradeClick}
               onBonusEarned={() => {
                 setShowQuizLimitModal(false);
                 if (canUseFeature('quick_quiz')) {
@@ -1474,6 +1483,11 @@ const Index = () => {
               onClose={() => setIsPlanSelectionOpen(false)}
               planName={plans[selectedPlan].name}
               planPrice={plans[selectedPlan].price}
+              planKey={selectedPlan}
+              availablePlans={Object.entries(plans).map(([key, p]) => ({ key, ...p }))}
+              onSelectPlan={(key) => {
+                if (key in plans) setSelectedPlan(key as keyof typeof plans);
+              }}
               onContinuePayment={handlePaymentFromPlanModal}
               canStartTrial={canStartTrial}
               onStartTrial={handleStartTrialFlow}

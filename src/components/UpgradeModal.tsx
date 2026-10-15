@@ -79,16 +79,16 @@ export const UpgradeModal = ({
   onUpgrade,
   currentUsage,
 }: UpgradeModalProps) => {
-  const planDetails = PLAN_DETAILS[requiredPlan];
-  const Icon = planDetails.icon;
+  const requiredDetails = PLAN_DETAILS[requiredPlan];
+  const planOrder: Array<'basic' | 'pro' | 'premium'> = ['basic', 'pro', 'premium'];
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <div className={`p-2 rounded-lg ${planDetails.bgColor}`}>
-              <Lock className={`w-5 h-5 ${planDetails.color}`} />
+            <div className={`p-2 rounded-lg ${requiredDetails.bgColor}`}>
+              <Lock className={`w-5 h-5 ${requiredDetails.color}`} />
             </div>
             Feature Locked
           </DialogTitle>
@@ -96,9 +96,9 @@ export const UpgradeModal = ({
 
         <div className="space-y-4">
           {/* Feature info */}
-          <div className={`p-4 rounded-xl ${planDetails.bgColor} ${planDetails.borderColor} border`}>
+          <div className={`p-4 rounded-xl ${requiredDetails.bgColor} ${requiredDetails.borderColor} border`}>
             <p className="text-foreground font-medium mb-2">
-              {feature} requires {planDetails.name} plan
+              {feature} requires {requiredDetails.name} plan or higher
             </p>
             {currentUsage && currentUsage.limit > 0 && (
               <p className="text-sm text-muted-foreground">
@@ -107,39 +107,56 @@ export const UpgradeModal = ({
             )}
           </div>
 
-          {/* Plan features */}
+          {/* All three plans — required one highlighted */}
           <div className="space-y-2">
-            <h4 className={`font-semibold ${planDetails.color} flex items-center gap-2`}>
-              <Icon className="w-4 h-4" />
-              {planDetails.name} Plan - {planDetails.price}
-            </h4>
-            <ul className="space-y-1.5">
-              {PLAN_FEATURES[requiredPlan].map((feat, idx) => (
-                <li key={idx} className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Check className="w-4 h-4 text-primary flex-shrink-0" />
-                  {feat}
-                </li>
-              ))}
-            </ul>
+            {planOrder.map((key) => {
+              const details = PLAN_DETAILS[key];
+              const Icon = details.icon;
+              const isRequired = key === requiredPlan;
+              return (
+                <div
+                  key={key}
+                  className={`p-4 rounded-xl border-2 transition-colors ${
+                    isRequired
+                      ? `${details.bgColor} ${details.borderColor}`
+                      : 'border-border bg-card'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <h4 className={`font-semibold ${details.color} flex items-center gap-2`}>
+                      <Icon className="w-4 h-4" />
+                      {details.name} — {details.price}
+                    </h4>
+                    {isRequired && (
+                      <span className="text-[10px] font-bold uppercase tracking-wide bg-primary text-primary-foreground rounded-full px-2 py-0.5">
+                        Unlocks this
+                      </span>
+                    )}
+                  </div>
+                  <ul className="space-y-1 mb-3">
+                    {PLAN_FEATURES[key].slice(0, 4).map((feat, idx) => (
+                      <li key={idx} className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                        {feat}
+                      </li>
+                    ))}
+                  </ul>
+                  <Button
+                    variant={isRequired ? 'default' : 'outline'}
+                    className={`w-full ${isRequired ? 'gradient-primary text-primary-foreground' : ''}`}
+                    onClick={() => onUpgrade(key)}
+                  >
+                    <Icon className="w-4 h-4 mr-2" />
+                    Choose {details.name}
+                  </Button>
+                </div>
+              );
+            })}
           </div>
 
-          {/* Action buttons */}
-          <div className="flex gap-3 pt-2">
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={onClose}
-            >
-              Maybe Later
-            </Button>
-            <Button
-              className="flex-1 gradient-primary text-primary-foreground"
-              onClick={() => onUpgrade(requiredPlan)}
-            >
-              <Icon className="w-4 h-4 mr-2" />
-              Upgrade Now
-            </Button>
-          </div>
+          <Button variant="ghost" onClick={onClose} className="w-full">
+            Maybe Later
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

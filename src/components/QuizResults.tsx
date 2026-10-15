@@ -35,7 +35,7 @@ export interface QuizResultsProps {
   userEmail?: string;
   onRetry: () => void;
   onHome: () => void;
-  onUpgrade?: () => void;
+  onUpgrade?: (plan?: string) => void;
 }
 
 const getScoreMessage = (percentage: number) => {
@@ -50,7 +50,7 @@ export const QuizResults = ({ results, quizType, userEmail, onRetry, onHome, onU
   const [showAllQuestions, setShowAllQuestions] = useState(false);
   const [confettiFired, setConfettiFired] = useState(false);
   const [sharing, setSharing] = useState(false);
-  const { explanation, isLoading, error, explain, cancel, limitModal, remaining: aiRemaining } = useGatedAiExplanation();
+  const { explanation, isLoading, error, explain, cancel, limitModal, remaining: aiRemaining } = useGatedAiExplanation(onUpgrade);
   const [aiQuestionId, setAiQuestionId] = useState<string | null>(null);
 
   // FIXED: Score is based on ACTUAL questions answered, not a progressive total
@@ -264,7 +264,7 @@ export const QuizResults = ({ results, quizType, userEmail, onRetry, onHome, onU
             <p className="text-muted-foreground mb-4">
               Get unlimited quizzes, PDF uploads, personalized study plans, and more!
             </p>
-            <Button onClick={onUpgrade} variant="hero" size="lg">
+            <Button onClick={() => onUpgrade?.()} variant="hero" size="lg">
               Choose a Package →
             </Button>
           </motion.div>

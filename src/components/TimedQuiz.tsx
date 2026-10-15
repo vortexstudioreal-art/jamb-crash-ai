@@ -46,6 +46,8 @@ interface TimedQuizProps {
   quizType: 'full' | 'mini' | 'demo' | 'subject' | 'timed-practice';
   onComplete: (results: QuizResults) => void;
   onExit: () => void;
+  /** Opens plan selection/payment for the chosen plan. */
+  onUpgradeClick?: (plan?: string) => void;
 }
 
 interface QuizResults {
@@ -127,7 +129,7 @@ const TIME_OPTIONS = [
 // Question count options
 const QUESTION_OPTIONS = [5, 10, 15, 20, 25, 30, 40, 50, 60];
 
-export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }: TimedQuizProps) => {
+export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit, onUpgradeClick }: TimedQuizProps) => {
   // Quiz config based on type
   const getQuizConfig = () => {
     switch (quizType) {
@@ -186,7 +188,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
     cancel: cancelAiExplanation,
     limitModal: aiLimitModal,
     remaining: aiRemaining,
-  } = useGatedAiExplanation();
+  } = useGatedAiExplanation(onUpgradeClick);
 
   // Cancel AI explanation when moving to another question
   useEffect(() => {
@@ -1254,6 +1256,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
       {showQuizLimitModal && (
         <FeatureLimitReached
           featureType="quick_quiz"
+          onUpgrade={onUpgradeClick}
           onBonusEarned={() => {
             setShowQuizLimitModal(false);
             if (canUseFeature('quick_quiz')) {

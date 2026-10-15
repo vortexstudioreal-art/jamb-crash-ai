@@ -56,7 +56,8 @@ export const ProfileTab = ({
         {!effectiveAccess && !effectiveAdmin && (
           <Button className="h-auto py-4 flex flex-col gap-1 col-span-2 gradient-primary text-primary-foreground" onClick={() => handleUpgradeClick()}>
             <Crown className="w-5 h-5" />
-            <span className="font-bold text-sm">Upgrade to SCHOLAR</span>
+            <span className="font-bold text-sm">View Upgrade Plans</span>
+            <span className="text-xs opacity-80">Basic • ACE • SCHOLAR</span>
           </Button>
         )}
         <Button variant="outline" className="h-auto py-4 flex flex-col gap-1 col-span-2 text-destructive hover:text-destructive" onClick={handleSignOut}>

@@ -18,7 +18,7 @@ import { useFeatureUsage } from '@/hooks/useFeatureUsage';
  * - When capped, `limitModal` renders the watch-ad / upgrade path and
  *   auto-retries the pending question after a bonus is earned.
  */
-export const useGatedAiExplanation = () => {
+export const useGatedAiExplanation = (onUpgrade?: (plan: string) => void) => {
   const ai = useAiExplanation();
   const { canUseFeature, incrementUsage, getRemainingUses } = useFeatureUsage();
   const [limitOpen, setLimitOpen] = useState(false);
@@ -53,6 +53,7 @@ export const useGatedAiExplanation = () => {
     <FeatureLimitReached
       featureType="syllabus_ai_explanation"
       onBonusEarned={handleBonusEarned}
+      onUpgrade={onUpgrade}
     />
   ) : null;
 

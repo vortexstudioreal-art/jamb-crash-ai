@@ -27,7 +27,7 @@ interface FeatureGateProps {
   children: ReactNode;
   feature: PlanFeature;
   fallback?: ReactNode;
-  onUpgrade?: () => void;
+  onUpgrade?: (plan?: string) => void;
 }
 
 // Map feature names to package property keys
@@ -167,9 +167,9 @@ export const FeatureGate = ({ children, feature, fallback, onUpgrade }: FeatureG
         onClose={() => setShowUpgradeModal(false)}
         feature={featureNames[feature]}
         requiredPlan={requiredPackage[feature]}
-        onUpgrade={(_plan) => {
+        onUpgrade={(plan) => {
           setShowUpgradeModal(false);
-          if (onUpgrade) onUpgrade();
+          if (onUpgrade) onUpgrade(plan);
         }}
       />
     </>

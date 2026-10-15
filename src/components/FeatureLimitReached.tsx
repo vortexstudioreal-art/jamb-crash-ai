@@ -13,6 +13,9 @@ interface FeatureLimitReachedProps {
   onBonusEarned: () => void;
   className?: string;
   compact?: boolean;
+  /** When provided, choosing a plan in the upgrade modal jumps straight to
+      payment for that plan. Otherwise the modal just closes (legacy). */
+  onUpgrade?: (plan: string) => void;
 }
 
 const BONUS_AMOUNTS: Partial<Record<FeatureType, number>> = {
@@ -24,6 +27,7 @@ export const FeatureLimitReached = ({
   onBonusEarned,
   className = '',
   compact = false,
+  onUpgrade,
 }: FeatureLimitReachedProps) => {
   const [showAdModal, setShowAdModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -54,7 +58,11 @@ export const FeatureLimitReached = ({
 
   const handleUpgrade = (_plan: string) => {
     setShowUpgradeModal(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (onUpgrade) {
+      onUpgrade(_plan);
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   if (compact) {
@@ -141,7 +149,7 @@ export const FeatureLimitReached = ({
             className="flex items-center gap-2 bg-primary hover:bg-primary/90"
           >
             <Sparkles className="w-4 h-4" />
-            Upgrade to ACE
+            View Plans
           </Button>
         </div>
 

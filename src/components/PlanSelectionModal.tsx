@@ -10,6 +10,11 @@ interface PlanSelectionModalProps {
   onContinuePayment: () => void;
   canStartTrial?: boolean;
   onStartTrial?: () => void;
+  /** When provided, renders a plan switcher so users can compare and pick
+      between Basic / ACE / SCHOLAR instead of being stuck on one plan. */
+  planKey?: string;
+  availablePlans?: Array<{ key: string; name: string; price: number }>;
+  onSelectPlan?: (key: string) => void;
 }
 
 export const PlanSelectionModal = ({
@@ -20,6 +25,9 @@ export const PlanSelectionModal = ({
   onContinuePayment,
   canStartTrial,
   onStartTrial,
+  planKey,
+  availablePlans,
+  onSelectPlan,
 }: PlanSelectionModalProps) => {
   if (!isOpen) return null;
 
@@ -57,6 +65,32 @@ export const PlanSelectionModal = ({
 
               {/* Content */}
               <div className="p-6 lg:p-8 space-y-4">
+                {availablePlans && availablePlans.length > 1 && onSelectPlan && (
+                  <div className="grid grid-cols-3 gap-2">
+                    {availablePlans.map((p) => {
+                      const active = planKey ? p.key === planKey : p.name === planName;
+                      return (
+                        <button
+                          key={p.key}
+                          type="button"
+                          onClick={() => onSelectPlan(p.key)}
+                          className={`rounded-xl border-2 px-2 py-3 text-center transition-all ${
+                            active
+                              ? 'border-primary bg-primary/10'
+                              : 'border-border bg-card hover:border-primary/50'
+                          }`}
+                        >
+                          <p className={`text-sm font-bold ${active ? 'text-primary' : 'text-foreground'}`}>
+                            {p.name}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            ₦{p.price.toLocaleString()}
+                          </p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
                 <div className="text-center mb-6">
                   <p className="text-muted-foreground">
                     You selected <span className="font-bold text-foreground">{planName}</span> plan
