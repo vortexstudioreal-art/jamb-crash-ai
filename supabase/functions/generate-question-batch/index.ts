@@ -53,6 +53,18 @@ function validQ(q: GenQ): boolean {
   return true;
 }
 
+// The model wraps physics symbols in backticks (`g`, `m/s`) despite the
+// no-markup rule. They render as literal ticks downstream, so strip them
+// here instead of voiding the question (validQ keeps rejecting strays as
+// a second net).
+const stripTicks = (s: string) => (s || "").replace(/`/g, "").trim();
+
+interface BatchResult {
+  items: GenQ[];
+  http: number;
+  parsed: number;
+}
+
 const CONTROL_CHARS = new RegExp(
   "[" + String.fromCharCode(0) + "-" + String.fromCharCode(31) + "]",
   "g"
@@ -71,7 +83,7 @@ function tryParseQuestion(raw: string): GenQ | null {
   }
 }
 
-function extractJsonArray(text: string): GenQ[] {
+function extractJsonArrayRaw(text: string): GenQ[] {
   const cleaned = text.replace(/```json|```/g, "");
   const m = cleaned.match(/\[[\s\S]*\]/);
   if (m) {
@@ -145,11 +157,23 @@ Return ONLY a valid JSON array, no other text. Each item exactly:
   });
   if (!res.ok) {
     console.error(`[gen-batch] groq ${res.status}`);
-    return [];
+    return { items: [], http: res.status, parsed: 0 };
   }
   const data = await res.json();
   const text = data.choices?.[0]?.message?.content || "";
-  return extractJsonArray(text).filter(validQ);
+  const parsed = extractJsonArrayRaw(text);
+  // Strip model backticks BEFORE validation so a `g` in one stem doesn't
+  // void an otherwise good question (validQ keeps rejecting strays).
+  const cleaned = parsed.map((q) => ({
+    ...q,
+    question: stripTicks(q.question),
+    option_a: stripTicks(q.option_a),
+    option_b: stripTicks(q.option_b),
+    option_c: stripTicks(q.option_c),
+    option_d: stripTicks(q.option_d),
+    explanation: stripTicks(q.explanation),
+  }));
+  return { items: cleaned.filter(validQ), http: 200, parsed: parsed.length };
 }
 
 async function doGenerate(
@@ -177,6 +201,10 @@ async function doGenerate(
 
   let inserted = 0;
   let attempts = 0;
+  let groqCalls = 0;
+  let groqErrors = 0;
+  let parsedTotal = 0;
+  let freshTotal = 0;
   const maxAttempts = Math.ceil(count / BATCH_SIZE) + 3;
 
   // Answer-position balance: real JAMB spreads A-D roughly evenly, but the
@@ -212,7 +240,11 @@ async function doGenerate(
 
   while (inserted < count && attempts < maxAttempts) {
     attempts++;
-    const batch = await genBatch(apiKey, subject, topicHint, [], balanceNote());
+    groqCalls++;
+    const result = await genBatch(apiKey, subject, topicHint, [], balanceNote());
+    if (result.http !== 200) groqErrors++;
+    parsedTotal += result.parsed;
+    const batch = result.items;
     if (batch.length === 0) {
       await new Promise((r) => setTimeout(r, 3000));
       continue;
@@ -223,16 +255,17 @@ async function doGenerate(
       seen.add(key);
       return true;
     });
+    freshTotal += fresh.length;
     if (fresh.length === 0) continue;
     const rows = fresh.map((q) => ({
       subject,
-      question: q.question.trim(),
-      option_a: q.option_a.trim(),
-      option_b: q.option_b.trim(),
-      option_c: q.option_c.trim(),
-      option_d: q.option_d.trim(),
+      question: stripTicks(q.question),
+      option_a: stripTicks(q.option_a),
+      option_b: stripTicks(q.option_b),
+      option_c: stripTicks(q.option_c),
+      option_d: stripTicks(q.option_d),
       correct_answer: q.correct_answer.trim().toUpperCase(),
-      explanation: q.explanation.trim(),
+      explanation: stripTicks(q.explanation),
       diagram_svg: q.diagram && q.diagram.trim() ? q.diagram.trim().slice(0, 6000) : null,
       topics: q.topic?.trim() ? [q.topic.trim()] : null,
       year: null,
@@ -252,7 +285,7 @@ async function doGenerate(
     await new Promise((r) => setTimeout(r, 2000));
   }
   console.log(`[gen-batch] done ${subject}: inserted=${inserted}`);
-  return { inserted };
+  return { inserted, attempts, groqCalls, groqErrors, parsedTotal, freshTotal };
 }
 
 serve(async (req) => {
@@ -301,6 +334,16 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "subject required" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 400,
+      });
+    }
+
+    // Small batches run synchronously and report exactly what happened
+    // (groq calls/errors, parsed/fresh/inserted) so silent zero-yield runs
+    // are diagnosable in one tap. Large batches stay background.
+    if (count <= 10) {
+      const result = await doGenerate(supabase, apiKey, subject, count, topicHint);
+      return new Response(JSON.stringify({ status: "done", subject, count, ...result }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
