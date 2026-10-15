@@ -407,6 +407,15 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
                 break;
               }
             }
+            // Opportunistic offline cache: every online quiz run tops up the
+            // offline bank so studying later needs no manual download.
+            if (allQuestions.length > 0) {
+              try {
+                await saveQuestions(allQuestions);
+              } catch {
+                // cache is best-effort
+              }
+            }
           } else {
             // Standard query
             try {
@@ -838,7 +847,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
           </h3>
           <p className="text-muted-foreground mb-4">
             {offlineNow
-              ? 'Connect once and open Download Manager to save subjects for offline quizzes.'
+              ? 'Connect once and your study pack saves automatically — then quizzes work without internet.'
               : 'Try selecting different subjects or year range.'}
           </p>
           <Button onClick={onExit}>Go Back</Button>

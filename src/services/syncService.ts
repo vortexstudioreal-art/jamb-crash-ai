@@ -10,9 +10,11 @@ import {
   saveSyllabus,
   saveNovels,
   saveNovelChapters,
+  saveLessons,
   getMetadata,
   setMetadata,
-  type SyncItem 
+  type SyncItem,
+  type CachedLesson,
 } from './offlineStorage';
 
 const MAX_RETRIES = 10;
@@ -168,7 +170,34 @@ export const downloadAllForOffline = async (
 
     onProgress?.({ stage: 'Downloading novels...', percent: 85 });
 
-    // Stage 4: Download novels and chapters
+    // Stage 4: Download lessons (full rows for the user's subjects — the
+    // whole published corpus is small enough to keep offline).
+    const { data: lessons, error: lessonsError } = await supabase
+      .from('lessons')
+      .select('*')
+      .eq('status', 'published')
+      .in('subject', subjects.map(s => s.toLowerCase()));
+
+    if (lessonsError) throw lessonsError;
+
+    if (lessons && lessons.length > 0) {
+      const cached: CachedLesson[] = (lessons as Array<Record<string, unknown>>).map((l) => ({
+        id: String(l.id),
+        subject: String((l as { subject?: unknown }).subject ?? ''),
+        topic: String((l as { topic?: unknown }).topic ?? ''),
+        subtopic: (l as { subtopic?: unknown }).subtopic as string | null ?? null,
+        title: String((l as { title?: unknown }).title ?? ''),
+        difficulty_level: ((l as { difficulty_level?: unknown }).difficulty_level as string | null) ?? null,
+        estimated_minutes: ((l as { estimated_minutes?: unknown }).estimated_minutes as number | null) ?? null,
+        status: ((l as { status?: unknown }).status as string | null) ?? null,
+        row: l as unknown as CachedLesson['row'],
+      }));
+      await saveLessons(cached);
+    }
+
+    onProgress?.({ stage: 'Downloading books...', percent: 90 });
+
+    // Stage 5: Download novels and chapters
     const { data: novels } = await supabase
       .from('novels')
       .select('*');

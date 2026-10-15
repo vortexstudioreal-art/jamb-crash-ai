@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { InteractiveLesson, isSectionRenderable } from '@/components/InteractiveLesson';
 import { useLessonProgress } from '@/hooks/useLessonProgress';
 import { errorLogger } from '@/services/errorLogger';
+import { getLessonById, getLessons } from '@/services/offlineStorage';
 import type { Lesson, MasteryLevel } from '@/types/lesson';
 
 /** Lightweight row for the list. Full content is fetched on open. */
@@ -141,9 +142,33 @@ export function LessonLibrary({
     } catch (err) {
       errorLogger.error(err, { component: 'LessonLibrary', action: 'load lessons' });
       const offline = typeof navigator !== 'undefined' && !navigator.onLine;
+      if (offline) {
+        // Offline: serve the auto-downloaded lesson summaries instead of
+        // blanking the library.
+        try {
+          const cached = await getLessons(wantedSubjects);
+          if (cached.length > 0) {
+            setLessons(
+              cached.map((l) => ({
+                id: l.id,
+                subject: l.subject,
+                topic: l.topic,
+                subtopic: l.subtopic ?? '',
+                title: l.title,
+                difficulty_level: l.difficulty_level ?? 'medium',
+                estimated_minutes: l.estimated_minutes ?? 0,
+              })) as LessonSummary[]
+            );
+            setLoadError(null);
+            return;
+          }
+        } catch {
+          // fall through to the empty-state message below
+        }
+      }
       setLoadError(
         offline
-          ? 'You are offline. Lessons need a connection — your downloaded novels, syllabus and quizzes still work.'
+          ? 'You are offline and lessons have not been saved yet. Connect once — your study pack downloads automatically.'
           : err instanceof Error ? err.message : 'Could not load lessons.'
       );
       setLessons([]);
@@ -170,6 +195,16 @@ export function LessonLibrary({
       if (data) setOpenLesson(data as unknown as Lesson);
     } catch (err) {
       errorLogger.error(err, { component: 'LessonLibrary', action: 'open lesson' });
+      // Offline: open the saved copy.
+      try {
+        const cached = await getLessonById(lessonId);
+        if (cached?.row) {
+          setOpenLesson(cached.row as unknown as Lesson);
+          return;
+        }
+      } catch {
+        // fall through
+      }
     } finally {
       setOpeningId(null);
     }

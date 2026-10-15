@@ -29,6 +29,7 @@ import { HomeTab } from '@/components/dashboard/HomeTab';
 import { reconcileReminder, parseReminderTime } from '@/lib/reminders';
 import { trackFunnel } from '@/lib/funnel';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { useAutoOfflineSeed } from '@/hooks/useAutoOfflineSeed';
 import { StudyTab } from '@/components/dashboard/StudyTab';
 import { AiTab } from '@/components/dashboard/AiTab';
 import { CommunityTab } from '@/components/dashboard/CommunityTab';
@@ -395,6 +396,10 @@ const Index = () => {
     }
   });
   usePushNotifications({ userEmail, enabled: pushOptIn });
+
+  // Silently prepare the offline study pack on first online run so quizzes,
+  // lessons and books work without internet — no manual download needed.
+  useAutoOfflineSeed(userEmail, effectiveSubjects);
 
   // Silently re-arm the daily study reminder (no permission prompt here —
   // only schedules if the OS already granted permission).

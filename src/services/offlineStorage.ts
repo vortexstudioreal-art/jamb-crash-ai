@@ -92,6 +92,22 @@ interface CachedChapter {
   created_at: string | null;
 }
 
+// Full lesson row cached for offline study. `row` holds the complete
+// record (content_sections, practice_questions, ...) so an offline open
+// renders exactly like the online one.
+interface CachedLesson {
+  id: string;
+  subject: string;
+  topic: string;
+  subtopic: string | null;
+  title: string;
+  difficulty_level: string | null;
+  estimated_minutes: number | null;
+  status: string | null;
+  row: Json;
+  updated_at?: string | null;
+}
+
 interface JambOfflineDB extends DBSchema {
   questions: {
     key: string;
@@ -127,10 +143,15 @@ interface JambOfflineDB extends DBSchema {
     value: CachedChapter;
     indexes: { 'by-novel': string };
   };
+  lessons: {
+    key: string;
+    value: CachedLesson;
+    indexes: { 'by-subject': string };
+  };
 }
 
 const DB_NAME = 'jamb-offline-db';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 let dbPromise: Promise<IDBPDatabase<JambOfflineDB>> | null = null;
 
@@ -178,6 +199,12 @@ const getDB = async (): Promise<IDBPDatabase<JambOfflineDB>> => {
         if (!db.objectStoreNames.contains('novelChapters')) {
           const chaptersStore = db.createObjectStore('novelChapters', { keyPath: 'id' });
           chaptersStore.createIndex('by-novel', 'novel_id');
+        }
+
+        // Lessons store (added v3: offline lesson library)
+        if (!db.objectStoreNames.contains('lessons')) {
+          const lessonsStore = db.createObjectStore('lessons', { keyPath: 'id' });
+          lessonsStore.createIndex('by-subject', 'subject');
         }
       },
     });
@@ -322,6 +349,39 @@ export const getNovelChaptersCount = async (): Promise<number> => {
   return db.count('novelChapters');
 };
 
+// Lessons (full rows; the list view reads the summary fields, the reader
+// uses `row` so offline opens match online opens exactly)
+export const saveLessons = async (lessons: CachedLesson[]): Promise<void> => {
+  const db = await getDB();
+  const tx = db.transaction('lessons', 'readwrite');
+  await Promise.all([
+    ...lessons.map(l => tx.store.put(l)),
+    tx.done,
+  ]);
+  await setMetadata('lessons_last_sync', Date.now());
+};
+
+export const getLessons = async (subjects?: string[]): Promise<CachedLesson[]> => {
+  const db = await getDB();
+  const allLessons = await db.getAll('lessons');
+
+  if (subjects && subjects.length > 0) {
+    const lowered = subjects.map(s => s.toLowerCase());
+    return allLessons.filter(l => lowered.includes((l.subject || '').toLowerCase()));
+  }
+  return allLessons;
+};
+
+export const getLessonById = async (id: string): Promise<CachedLesson | undefined> => {
+  const db = await getDB();
+  return db.get('lessons', id);
+};
+
+export const getLessonsCount = async (): Promise<number> => {
+  const db = await getDB();
+  return db.count('lessons');
+};
+
 // Sync Queue
 export const addToSyncQueue = async (type: SyncItem['type'], data: unknown): Promise<void> => {
   const db = await getDB();
@@ -384,6 +444,7 @@ export const clearAllData = async (): Promise<void> => {
     db.clear('metadata'),
     db.clear('novels'),
     db.clear('novelChapters'),
+    db.clear('lessons'),
   ]);
 };
 
@@ -395,15 +456,17 @@ export const getStorageInfo = async (): Promise<{
   pendingSyncCount: number;
   novelsCount: number;
   novelChaptersCount: number;
+  lessonsCount: number;
   lastSync: number | null;
 }> => {
-  const [questionsCount, flashcardsCount, syllabusCount, pendingSyncCount, novelsCount, novelChaptersCount, lastSync] = await Promise.all([
+  const [questionsCount, flashcardsCount, syllabusCount, pendingSyncCount, novelsCount, novelChaptersCount, lessonsCount, lastSync] = await Promise.all([
     getQuestionsCount(),
     getFlashcardsCount(),
     getSyllabusCount(),
     getSyncQueueCount(),
     getNovelsCount(),
     getNovelChaptersCount(),
+    getLessonsCount(),
     getMetadata<number | null>('questions_last_sync'),
   ]);
 
@@ -414,6 +477,7 @@ export const getStorageInfo = async (): Promise<{
     pendingSyncCount,
     novelsCount,
     novelChaptersCount,
+    lessonsCount,
     lastSync,
   };
 };
@@ -427,4 +491,4 @@ export const isDataStale = async (): Promise<boolean> => {
   return Date.now() - lastSync > staleThreshold;
 };
 
-export type { Question, Flashcard, SyllabusItem, SyncItem, CachedNovel, CachedChapter };
+export type { Question, Flashcard, SyllabusItem, SyncItem, CachedNovel, CachedChapter, CachedLesson };
