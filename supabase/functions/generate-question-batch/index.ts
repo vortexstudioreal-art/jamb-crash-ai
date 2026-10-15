@@ -241,8 +241,9 @@ async function doGenerate(
   };
 
   // Groq errors (usually 429s) must not burn the attempt budget: back off
-  // for the server's retry-after (min 30s) and try again. Only successful
-  // calls consume attempts; error budget is separate and generous.
+  // and try again. Bounded: the edge runtime kills long responses, so stop
+  // waiting after ~100s and report partial progress with diagnostics.
+  const t0 = Date.now();
   let errorStreak = 0;
   const maxErrors = 12;
   while (inserted < count && attempts < maxAttempts && errorStreak < maxErrors) {
@@ -251,7 +252,9 @@ async function doGenerate(
     if (result.http !== 200) {
       groqErrors++;
       errorStreak++;
-      await new Promise((r) => setTimeout(r, Math.max(30000, (result.retryAfter || 0) * 1000)));
+      if (Date.now() - t0 > 100000) break;
+      const waitMs = Math.min(30000, Math.max(15000, (result.retryAfter || 0) * 1000));
+      await new Promise((r) => setTimeout(r, waitMs));
       continue;
     }
     errorStreak = 0;
