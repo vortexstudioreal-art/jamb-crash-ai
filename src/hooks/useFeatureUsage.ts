@@ -169,6 +169,12 @@ export const useFeatureUsage = () => {
   const incrementUsage = useCallback(async (feature: FeatureType): Promise<boolean> => {
     if (!userEmail) return false;
 
+    // Offline: arcade-style features (games) must stay playable without a
+    // connection. Usage simply isn't counted until reconnect — games cost
+    // no AI quota, so there is nothing to protect. AI features fail at
+    // their own network call before this matters.
+    if (typeof navigator !== 'undefined' && !navigator.onLine) return true;
+
     // Check if can use first
     if (!canUseFeature(feature)) return false;
 
