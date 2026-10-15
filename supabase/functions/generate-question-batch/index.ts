@@ -63,6 +63,7 @@ interface BatchResult {
   items: GenQ[];
   http: number;
   parsed: number;
+  retryAfter: number;
 }
 
 const CONTROL_CHARS = new RegExp(
@@ -157,7 +158,8 @@ Return ONLY a valid JSON array, no other text. Each item exactly:
   });
   if (!res.ok) {
     console.error(`[gen-batch] groq ${res.status}`);
-    return { items: [], http: res.status, parsed: 0 };
+    const retryAfter = parseInt(res.headers.get("retry-after") || "0", 10);
+    return { items: [], http: res.status, parsed: 0, retryAfter: isNaN(retryAfter) ? 0 : retryAfter };
   }
   const data = await res.json();
   const text = data.choices?.[0]?.message?.content || "";
@@ -173,7 +175,7 @@ Return ONLY a valid JSON array, no other text. Each item exactly:
     option_d: stripTicks(q.option_d),
     explanation: stripTicks(q.explanation),
   }));
-  return { items: cleaned.filter(validQ), http: 200, parsed: parsed.length };
+  return { items: cleaned.filter(validQ), http: 200, parsed: parsed.length, retryAfter: 0 };
 }
 
 async function doGenerate(
@@ -238,11 +240,22 @@ async function doGenerate(
     return ` This subject's AI questions underuse ${starved.join(" and ")} — place several correct answers there.`;
   };
 
-  while (inserted < count && attempts < maxAttempts) {
-    attempts++;
-    groqCalls++;
+  // Groq errors (usually 429s) must not burn the attempt budget: back off
+  // for the server's retry-after (min 30s) and try again. Only successful
+  // calls consume attempts; error budget is separate and generous.
+  let errorStreak = 0;
+  const maxErrors = 12;
+  while (inserted < count && attempts < maxAttempts && errorStreak < maxErrors) {
     const result = await genBatch(apiKey, subject, topicHint, [], balanceNote());
-    if (result.http !== 200) groqErrors++;
+    groqCalls++;
+    if (result.http !== 200) {
+      groqErrors++;
+      errorStreak++;
+      await new Promise((r) => setTimeout(r, Math.max(30000, (result.retryAfter || 0) * 1000)));
+      continue;
+    }
+    errorStreak = 0;
+    attempts++;
     parsedTotal += result.parsed;
     const batch = result.items;
     if (batch.length === 0) {
