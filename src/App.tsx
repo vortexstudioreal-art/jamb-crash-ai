@@ -23,6 +23,8 @@ const RepeatedQuestionsPage = lazy(() => import("./pages/RepeatedQuestionsPage")
 const GamesPage = lazy(() => import("./pages/GamesPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const About = lazy(() => import("./pages/About"));
+const Contact = lazy(() => import("./pages/Contact"));
 const JambRepeatsPastQuestions = lazy(() => import("./pages/JambRepeatsPastQuestions"));
 const ResellerDashboard = lazy(() => import("./pages/ResellerDashboard"));
 const PinRedeemPage = lazy(() => import("./pages/PinRedeemPage"));
@@ -78,6 +80,8 @@ const App = () => {
                   <Route path="/reseller" element={<ProtectedRoute><ResellerDashboard /></ProtectedRoute>} />
                   <Route path="/redeem-pin" element={<PinRedeemPage />} />
                   <Route path="/privacy" element={<PrivacyPolicy />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/contact" element={<Contact />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>

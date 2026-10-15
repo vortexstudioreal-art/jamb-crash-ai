@@ -22,11 +22,19 @@ export const Footer = () => {
 
           <div className="flex flex-col sm:flex-row gap-8">
             <div>
+              <h4 className="font-semibold mb-4">Company</h4>
+              <ul className="space-y-2 text-sm text-background/70">
+                <li><Link to="/about" className="hover:text-background transition-colors">About Us</Link></li>
+                <li><Link to="/contact" className="hover:text-background transition-colors">Contact Us</Link></li>
+              </ul>
+            </div>
+
+            <div>
               <h4 className="font-semibold mb-4">Contact</h4>
               <ul className="space-y-2 text-sm text-background/70">
                 <li className="flex items-center gap-2">
                   <Mail className="w-4 h-4" />
-                  support@jambcrash.ai
+                  <Link to="/contact" className="hover:text-background transition-colors">support@jambcrash.ai</Link>
                 </li>
               </ul>
             </div>
