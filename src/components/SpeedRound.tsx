@@ -6,9 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { BackButton } from '@/components/BackButton';
 import { DashboardHeader } from '@/components/DashboardHeader';
-import { supabase } from '@/integrations/supabase/client';
-import type { Database } from '@/integrations/supabase/types';
-import { shuffleQuestionList } from '@/lib/quizShuffle';
+import { loadGameQuestions } from '@/lib/gameQuestions';
 import { useFeatureUsage } from '@/hooks/useFeatureUsage';
 import { FeatureLimitReached } from '@/components/FeatureLimitReached';
 
@@ -54,17 +52,9 @@ export const SpeedRound = ({ userEmail, subjects, isOwner, isAdmin, userRole, on
   const { canUseFeature, incrementUsage } = useFeatureUsage();
 
   const loadQuestions = useCallback(async () => {
-    const { data } = await supabase
-      .from('jamb_questions')
-      .select('id, question, option_a, option_b, option_c, option_d, correct_answer, subject')
-      .in('subject', subjects as Database['public']['Enums']['jamb_subject'][])
-      .limit(100);
-
-    if (data) {
-      // Shuffle
-      const shuffled = data.sort(() => Math.random() - 0.5);
-      setQuestions(shuffleQuestionList(shuffled as Question[]));
-    }
+    // Offline-first: cached study pack, Supabase top-up when online.
+    const pool = await loadGameQuestions(subjects, 100);
+    setQuestions(pool as Question[]);
   }, [subjects]);
 
   useEffect(() => {

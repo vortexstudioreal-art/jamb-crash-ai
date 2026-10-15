@@ -6,9 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { BackButton } from '@/components/BackButton';
 import { DashboardHeader } from '@/components/DashboardHeader';
-import { supabase } from '@/integrations/supabase/client';
-import type { Database } from '@/integrations/supabase/types';
-import { shuffleQuestionList } from '@/lib/quizShuffle';
+import { loadGameQuestions } from '@/lib/gameQuestions';
 import { useFeatureUsage } from '@/hooks/useFeatureUsage';
 import { FeatureLimitReached } from '@/components/FeatureLimitReached';
 
@@ -57,15 +55,9 @@ export const StreakChallenge = ({ userEmail, subjects, isOwner, isAdmin, userRol
   const { canUseFeature, incrementUsage } = useFeatureUsage();
 
   const loadQuestions = useCallback(async () => {
-    const { data } = await supabase
-      .from('jamb_questions')
-      .select('id, question, option_a, option_b, option_c, option_d, correct_answer, subject, explanation')
-      .in('subject', subjects as Database['public']['Enums']['jamb_subject'][])
-      .limit(200);
-
-    if (data) {
-      setQuestions(shuffleQuestionList(data.sort(() => Math.random() - 0.5) as Question[]));
-    }
+    // Offline-first: cached study pack, Supabase top-up when online.
+    const pool = await loadGameQuestions(subjects, 200);
+    setQuestions(pool as Question[]);
   }, [subjects]);
 
   useEffect(() => { loadQuestions(); }, [loadQuestions]);

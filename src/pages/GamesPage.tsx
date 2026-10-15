@@ -5,13 +5,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowLeft, Zap, Flame, Gamepad2, Lock } from 'lucide-react';
+import { ArrowLeft, Zap, Flame, Gamepad2, Lock, CheckCheck, GraduationCap } from 'lucide-react';
 
 import { useEffect } from 'react';
 import { useSeo } from '@/hooks/useSeo';
 
 const SpeedRound = lazy(() => import('@/components/SpeedRound').then(m => ({ default: m.SpeedRound })));
 const StreakChallenge = lazy(() => import('@/components/StreakChallenge').then(m => ({ default: m.StreakChallenge })));
+const TrueFalseRush = lazy(() => import('@/components/TrueFalseRush').then(m => ({ default: m.TrueFalseRush })));
+const SubjectSort = lazy(() => import('@/components/SubjectSort').then(m => ({ default: m.SubjectSort })));
 
 const LazyFallback = () => (
   <div className="min-h-screen bg-background flex items-center justify-center">
@@ -22,7 +24,7 @@ const LazyFallback = () => (
   </div>
 );
 
-type GameMode = 'menu' | 'speed-round' | 'streak';
+type GameMode = 'menu' | 'speed-round' | 'streak' | 'true-false' | 'subject-sort';
 
 const GamesPage = () => {
   const { user, isAdmin, isOwner, isLoading } = useAuth();
@@ -124,6 +126,38 @@ const GamesPage = () => {
     );
   }
 
+  if (gameMode === 'true-false') {
+    return (
+      <Suspense fallback={<LazyFallback />}>
+        <TrueFalseRush
+          userEmail={userEmail}
+          subjects={effectiveSubjects}
+          isOwner={effectiveOwner}
+          isAdmin={isAdmin}
+          userRole={userRole}
+          onSignOut={handleSignOut}
+          onBack={() => setGameMode('menu')}
+        />
+      </Suspense>
+    );
+  }
+
+  if (gameMode === 'subject-sort') {
+    return (
+      <Suspense fallback={<LazyFallback />}>
+        <SubjectSort
+          userEmail={userEmail}
+          subjects={effectiveSubjects}
+          isOwner={effectiveOwner}
+          isAdmin={isAdmin}
+          userRole={userRole}
+          onSignOut={handleSignOut}
+          onBack={() => setGameMode('menu')}
+        />
+      </Suspense>
+    );
+  }
+
   const games = [
     {
       id: 'speed-round' as GameMode,
@@ -142,6 +176,24 @@ const GamesPage = () => {
       color: 'text-orange-500',
       borderColor: 'border-orange-500/30 hover:border-orange-500',
       bgColor: 'hover:bg-orange-500/5',
+    },
+    {
+      id: 'true-false' as GameMode,
+      title: '✅❌ True / False Rush',
+      description: 'Judge claims under pressure — 60 seconds, streaks earn bonus!',
+      icon: CheckCheck,
+      color: 'text-green-500',
+      borderColor: 'border-green-500/30 hover:border-green-500',
+      bgColor: 'hover:bg-green-500/5',
+    },
+    {
+      id: 'subject-sort' as GameMode,
+      title: '🎓 Which Subject?',
+      description: 'Answers hidden! Name the subject each question belongs to.',
+      icon: GraduationCap,
+      color: 'text-violet-500',
+      borderColor: 'border-violet-500/30 hover:border-violet-500',
+      bgColor: 'hover:bg-violet-500/5',
     },
   ];
 
