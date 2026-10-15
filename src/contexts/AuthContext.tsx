@@ -226,10 +226,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       if (error) {
         errorLogger.error(error, { component: 'AuthContext', action: 'checkUserAccess' });
-        if (navigator.onLine) {
+        // A failed RPC means no usable network even when the OS claims we're
+        // online (captive portal, dead radio). Restore the last known access
+        // instead of stranding the user; only default to basic when online
+        // with genuinely no cache.
+        const restored = restoreCachedAccess(email.toLowerCase());
+        if (!restored && navigator.onLine) {
           setUserPackage('basic');
-        } else {
-          restoreCachedAccess(email.toLowerCase());
         }
         return;
       }
@@ -272,10 +275,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
     } catch (err) {
       errorLogger.error(err, { component: 'AuthContext', action: 'checkUserAccess' });
-      if (navigator.onLine) {
+      const restored = restoreCachedAccess(email.toLowerCase());
+      if (!restored && navigator.onLine) {
         setUserPackage('basic');
-      } else {
-        restoreCachedAccess(email.toLowerCase());
       }
     }
   };
@@ -331,6 +333,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           }, 0);
         } else {
           // No session: the role is definitively "none", so it counts as resolved.
+          // BUT: when offline (or the radio is lying), a null event usually
+          // means a failed silent token refresh — not a real logout. Never
+          // wipe the cached session or strand the user on landing then.
+          if (typeof navigator !== 'undefined' && !navigator.onLine) {
+            setIsLoading(false);
+            return;
+          }
           setHasAccess(false);
           setIsAdmin(false);
           setUserRole(null);
@@ -382,6 +391,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             errorMsg.includes('already used'));
         if (refreshDead) {
           await supabase.auth.signOut({ scope: 'local' });
+          try {
+            localStorage.removeItem('jamb_supabase_session');
+          } catch {
+            // ignore
+          }
+          setSession(null);
+          setUser(null);
+          setHasAccess(false);
+          setIsAdmin(false);
+          setUserRole(null);
+          setIsOwner(false);
+          setUserPackage(null);
           setRoleResolved(true);
           setIsLoading(false);
           return;
@@ -391,6 +412,29 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           return loadSession(1);
         }
         errorLogger.error(error, { component: 'AuthContext', action: 'getSession after retry' });
+      }
+
+      // No usable session from storage (expired token + failed refresh, or a
+      // lying onLine flag with no real connectivity): fall back to the last
+      // known session so an offline user is never bounced to landing.
+      // Explicit sign-outs clear this cache, so a real logout still sticks.
+      if (!session) {
+        try {
+          const cachedSession = localStorage.getItem('jamb_supabase_session');
+          if (cachedSession) {
+            const parsed = JSON.parse(cachedSession);
+            if (parsed?.user?.email) {
+              setSession(parsed);
+              setUser(parsed.user);
+              restoreCachedAccess(parsed.user.email.toLowerCase());
+              setRoleResolved(true);
+              setIsLoading(false);
+              return;
+            }
+          }
+        } catch (e) {
+          errorLogger.error(e, { component: 'AuthContext', action: 'fallbackCachedSession' });
+        }
       }
 
       setSession(session);

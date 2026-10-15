@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { useSeo } from '@/hooks/useSeo';
+import { useOfflineStatus } from '@/hooks/useOfflineStatus';
 import { errorLogger } from '@/services/errorLogger';
 
 // Stricter email validation - blocks disposable/fake emails
@@ -53,10 +54,14 @@ export default function Auth() {
   });
 
   const { signIn, signUp, user, isLoading, isOwner, isAdmin, hasAccess } = useAuth();
+  const { isOnline } = useOfflineStatus();
   const navigate = useNavigate();
 
-  // Clear invalid sessions on mount to prevent glitches
+  // Clear invalid sessions on mount to prevent glitches.
+  // Skipped offline: a failed refresh without connectivity is not proof the
+  // session is dead, and signing out would strand the user.
   useEffect(() => {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) return;
     const clearInvalidSession = async () => {
       try {
         const { error } = await supabase.auth.getSession();
@@ -263,6 +268,13 @@ export default function Auth() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Every auth operation needs the network — fail fast with a clear
+    // message instead of a hanging spinner.
+    if (!isOnline) {
+      toast.error('You need internet to sign in. Your saved study data still works offline once you are signed in.');
+      return;
+    }
     
     if (view === 'forgot-password') {
       await handleForgotPassword();
@@ -426,6 +438,11 @@ export default function Auth() {
 
         {/* Form Card */}
         <div className="card-elevated p-6 rounded-2xl">
+          {!isOnline && (
+            <div className="mb-4 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-200">
+              No internet connection. Sign-in needs internet — connect, sign in once, and your study pack then works fully offline.
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             {view === 'signup' && (
               <div>
