@@ -33,13 +33,17 @@ const writeCachedExplanation = (id: string | undefined, text: string) => {
   }
 };
 
+export const isExplanationCached = (id?: string): boolean => readCachedExplanation(id) !== null;
+
+export type AiExplanationOutcome = 'fresh' | 'cached' | 'failed';
+
 export const useAiExplanation = () => {
   const [explanation, setExplanation] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const getExplanation = useCallback(async (q: UseAiExplanationProps, retries = 1) => {
+  const getExplanation = useCallback(async (q: UseAiExplanationProps, retries = 1): Promise<AiExplanationOutcome> => {
     setIsLoading(true);
     setExplanation('');
     setError(null);
@@ -49,7 +53,7 @@ export const useAiExplanation = () => {
     if (cached) {
       setExplanation(cached);
       setIsLoading(false);
-      return;
+      return 'cached';
     }
 
     // Cancel any previous requests
@@ -132,9 +136,10 @@ Keep it short and focused: Just explain why the correct answer is right and very
       }
       // Cache the complete answer for repeat views (zero future calls)
       writeCachedExplanation(q.id, assistantContent);
+      return 'fresh';
     } catch (err: unknown) {
       if (err instanceof Error && err.name === 'AbortError') {
-        return;
+        return 'failed';
       }
       // One automatic retry — the shared AI key is often briefly rate-limited
       if (retries > 0) {
@@ -143,6 +148,7 @@ Keep it short and focused: Just explain why the correct answer is right and very
       }
       errorLogger.error(err, { component: 'useAiExplanation', action: 'generate AI explanation' });
       setError(err instanceof Error ? err.message : 'An unexpected error occurred');
+      return 'failed';
     } finally {
       setIsLoading(false);
       abortControllerRef.current = null;

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Trophy, Target, Clock, CheckCircle, XCircle, ChevronDown, ChevronUp, Share2, RotateCcw, Home, Sparkles, MinusCircle, Loader2, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import confetti from 'canvas-confetti';
-import { useAiExplanation } from '@/hooks/useAiExplanation';
+import { useGatedAiExplanation } from '@/hooks/useGatedAiExplanation';
 import { downloadScorecard, shareScorecard, type ScorecardData } from '@/lib/scorecard';
 import { QuestionDiagram } from '@/components/QuestionDiagram';
 import { stripQuestionHtml } from '@/lib/sanitize';
@@ -50,7 +50,7 @@ export const QuizResults = ({ results, quizType, userEmail, onRetry, onHome, onU
   const [showAllQuestions, setShowAllQuestions] = useState(false);
   const [confettiFired, setConfettiFired] = useState(false);
   const [sharing, setSharing] = useState(false);
-  const { explanation, isLoading, error, getExplanation, cancel } = useAiExplanation();
+  const { explanation, isLoading, error, explain, cancel, limitModal, remaining: aiRemaining } = useGatedAiExplanation();
   const [aiQuestionId, setAiQuestionId] = useState<string | null>(null);
 
   // FIXED: Score is based on ACTUAL questions answered, not a progressive total
@@ -93,7 +93,7 @@ export const QuizResults = ({ results, quizType, userEmail, onRetry, onHome, onU
       return;
     }
     setAiQuestionId(q.id);
-    getExplanation({
+    void explain({
       id: q.id,
       question: q.question,
       option_a: q.option_a,
@@ -404,14 +404,17 @@ export const QuizResults = ({ results, quizType, userEmail, onRetry, onHome, onU
                           ) : aiQuestionId === q.id && error ? (
                             <p className="text-sm text-destructive">{error}</p>
                           ) : (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleAiExplain(q)}
-                            >
-                              <Sparkles className="w-4 h-4 mr-2 text-primary" />
-                              Get AI Explanation
-                            </Button>
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleAiExplain(q)}
+                              >
+                                <Sparkles className="w-4 h-4 mr-2 text-primary" />
+                                Get AI Explanation{Number.isFinite(aiRemaining) ? ` (${aiRemaining} left)` : ''}
+                              </Button>
+                              {limitModal}
+                            </>
                           )}
                         </div>
                       )}

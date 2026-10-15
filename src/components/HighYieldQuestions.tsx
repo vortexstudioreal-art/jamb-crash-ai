@@ -15,7 +15,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { shuffleQuestionList } from '@/lib/quizShuffle';
 import ReactMarkdown from 'react-markdown';
-import { useAiExplanation } from '@/hooks/useAiExplanation';
+import { useGatedAiExplanation } from '@/hooks/useGatedAiExplanation';
 import { QuestionDiagram } from '@/components/QuestionDiagram';
 import { errorLogger } from '@/services/errorLogger';
 
@@ -330,14 +330,17 @@ const TopicQuiz = ({ questions, topicLabel, subject, onExit }: TopicQuizProps) =
   const currentQuestion = shuffledQuestions[currentIndex];
   const progress = ((currentIndex + 1) / shuffledQuestions.length) * 100;
 
-  // AI explanation hook
+  // AI explanation hook (gated: device cache free, fresh calls spend the
+  // shared daily AI-explanation allowance, failures cost nothing)
   const {
     explanation: aiExplanation,
     isLoading: isAiLoading,
     error: aiError,
-    getExplanation: fetchAiExplanation,
+    explain: fetchAiExplanation,
     cancel: cancelAi,
-  } = useAiExplanation();
+    limitModal: aiLimitModal,
+    remaining: aiRemaining,
+  } = useGatedAiExplanation();
 
   // Reset AI explanation when moving to a new question
   useEffect(() => {
@@ -554,6 +557,7 @@ const TopicQuiz = ({ questions, topicLabel, subject, onExit }: TopicQuizProps) =
                       disabled={isAiLoading}
                       onClick={() =>
                         fetchAiExplanation({
+                          id: currentQuestion.id,
                           question: currentQuestion.question,
                           option_a: currentQuestion.option_a,
                           option_b: currentQuestion.option_b,
@@ -572,11 +576,12 @@ const TopicQuiz = ({ questions, topicLabel, subject, onExit }: TopicQuizProps) =
                       ) : (
                         <>
                           <Sparkles className="w-3.5 h-3.5 text-yellow-500" />
-                          Explain with AI
+                          Explain with AI{Number.isFinite(aiRemaining) ? ` (${aiRemaining} left)` : ''}
                         </>
                       )}
                     </Button>
                   )}
+                  {aiLimitModal}
                 </div>
                 )}              </CardContent>
             </Card>

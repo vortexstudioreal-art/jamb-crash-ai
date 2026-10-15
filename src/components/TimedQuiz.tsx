@@ -6,7 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import ReactMarkdown from 'react-markdown';
-import { useAiExplanation } from '@/hooks/useAiExplanation';
+import { useGatedAiExplanation } from '@/hooks/useGatedAiExplanation';
 import { toast } from 'sonner';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -182,9 +182,11 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
     explanation: aiExplanation, 
     isLoading: isAiLoading, 
     error: aiError, 
-    getExplanation: fetchAiExplanation, 
-    cancel: cancelAiExplanation 
-  } = useAiExplanation();
+    explain: fetchAiExplanation, 
+    cancel: cancelAiExplanation,
+    limitModal: aiLimitModal,
+    remaining: aiRemaining,
+  } = useGatedAiExplanation();
 
   // Cancel AI explanation when moving to another question
   useEffect(() => {
@@ -1176,11 +1178,12 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit }:
                     ) : (
                       <>
                         <Sparkles className="w-3.5 h-3.5 text-yellow-500" />
-                        Explain with AI
+                        Explain with AI{Number.isFinite(aiRemaining) ? ` (${aiRemaining} left)` : ''}
                       </>
                     )}
                   </Button>
                 )}
+                {aiLimitModal}
               </div>
               )}
             </motion.div>
