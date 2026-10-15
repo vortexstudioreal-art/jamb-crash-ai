@@ -64,6 +64,7 @@ interface BatchResult {
   http: number;
   parsed: number;
   retryAfter: number;
+  bodySnippet: string;
 }
 
 const CONTROL_CHARS = new RegExp(
@@ -159,7 +160,8 @@ Return ONLY a valid JSON array, no other text. Each item exactly:
   if (!res.ok) {
     console.error(`[gen-batch] groq ${res.status}`);
     const retryAfter = parseInt(res.headers.get("retry-after") || "0", 10);
-    return { items: [], http: res.status, parsed: 0, retryAfter: isNaN(retryAfter) ? 0 : retryAfter };
+    const errBody = await res.text().catch(() => "");
+    return { items: [], http: res.status, parsed: 0, retryAfter: isNaN(retryAfter) ? 0 : retryAfter, bodySnippet: errBody.slice(0, 300) };
   }
   const data = await res.json();
   const text = data.choices?.[0]?.message?.content || "";
@@ -175,7 +177,7 @@ Return ONLY a valid JSON array, no other text. Each item exactly:
     option_d: stripTicks(q.option_d),
     explanation: stripTicks(q.explanation),
   }));
-  return { items: cleaned.filter(validQ), http: 200, parsed: parsed.length, retryAfter: 0 };
+  return { items: cleaned.filter(validQ), http: 200, parsed: parsed.length, retryAfter: 0, bodySnippet: "" };
 }
 
 async function doGenerate(
@@ -245,6 +247,7 @@ async function doGenerate(
   // waiting after ~100s and report partial progress with diagnostics.
   const t0 = Date.now();
   let errorStreak = 0;
+  let firstError = "";
   const maxErrors = 12;
   while (inserted < count && attempts < maxAttempts && errorStreak < maxErrors) {
     const result = await genBatch(apiKey, subject, topicHint, [], balanceNote());
@@ -252,6 +255,7 @@ async function doGenerate(
     if (result.http !== 200) {
       groqErrors++;
       errorStreak++;
+      if (!firstError) firstError = `${result.http}: ${result.bodySnippet}`;
       if (Date.now() - t0 > 100000) break;
       const waitMs = Math.min(30000, Math.max(15000, (result.retryAfter || 0) * 1000));
       await new Promise((r) => setTimeout(r, waitMs));
@@ -301,7 +305,7 @@ async function doGenerate(
     await new Promise((r) => setTimeout(r, 2000));
   }
   console.log(`[gen-batch] done ${subject}: inserted=${inserted}`);
-  return { inserted, attempts, groqCalls, groqErrors, parsedTotal, freshTotal };
+  return { inserted, attempts, groqCalls, groqErrors, parsedTotal, freshTotal, firstError };
 }
 
 serve(async (req) => {
