@@ -17,18 +17,55 @@ interface ExplRow {
   explanation: string;
 }
 
+// Control characters (raw newlines from multi-line maths working, tabs)
+// are illegal inside JSON strings. Built from char codes so no fragile
+// escape sequences can be corrupted in transit.
+const CONTROL_CHARS = new RegExp(
+  "[" + String.fromCharCode(0) + "-" + String.fromCharCode(31) + "]",
+  "g"
+);
+
+// Lone backslashes (LaTeX \frac, \Delta) are illegal JSON escapes.
+// Escape only those; valid escapes (\n, \u00b0, ...) pass through untouched.
+function sanitizeJson(s: string): string {
+  return s.replace(/\\(?!["\\/bfnrtu])/g, "\\\\");
+}
+
+function tryParseItem(raw: string): ExplRow | null {
+  try {
+    return JSON.parse(sanitizeJson(raw)) as ExplRow;
+  } catch {
+    // ignore, try neutralized below
+  }
+  try {
+    return JSON.parse(sanitizeJson(raw).replace(CONTROL_CHARS, " ")) as ExplRow;
+  } catch {
+    return null;
+  }
+}
+
 function extractJsonArray(text: string): ExplRow[] {
   const cleaned = text.replace(/```json|```/g, "");
+  // Fast path: the whole array parses.
   const m = cleaned.match(/\[[\s\S]*\]/);
-  if (!m) return [];
-  try {
-    // Science explanations carry LaTeX (\\frac, \\Delta); a lone backslash
-    // is an illegal JSON escape that voids the whole array.
-    const arr = JSON.parse(m[0].replace(/\\(?!["\\/bfnrtu])/g, "\\\\"));
-    return Array.isArray(arr) ? arr : [];
-  } catch {
-    return [];
+  if (m) {
+    try {
+      const arr = JSON.parse(sanitizeJson(m[0]));
+      if (Array.isArray(arr)) return arr;
+    } catch {
+      // Fall through to per-item recovery below.
+    }
   }
+  // Recovery: parse each {...} separately so one corrupt item (raw
+  // newlines, stray prose) can't void the other 14.
+  const out: ExplRow[] = [];
+  const itemRe = /\{[^{}]*\}/g;
+  let im: RegExpExecArray | null;
+  while ((im = itemRe.exec(cleaned)) !== null) {
+    const item = tryParseItem(im[0]);
+    if (item) out.push(item);
+  }
+  return out;
 }
 
 function validExplanation(e: string): boolean {

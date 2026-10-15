@@ -53,16 +53,45 @@ function validQ(q: GenQ): boolean {
   return true;
 }
 
+const CONTROL_CHARS = new RegExp(
+  "[" + String.fromCharCode(0) + "-" + String.fromCharCode(31) + "]",
+  "g"
+);
+
+function tryParseQuestion(raw: string): GenQ | null {
+  try {
+    return JSON.parse(sanitizeJson(raw)) as GenQ;
+  } catch {
+    // ignore, try neutralized below
+  }
+  try {
+    return JSON.parse(sanitizeJson(raw).replace(CONTROL_CHARS, " ")) as GenQ;
+  } catch {
+    return null;
+  }
+}
+
 function extractJsonArray(text: string): GenQ[] {
   const cleaned = text.replace(/```json|```/g, "");
   const m = cleaned.match(/\[[\s\S]*\]/);
-  if (!m) return [];
-  try {
-    const arr = JSON.parse(sanitizeJson(m[0]));
-    return Array.isArray(arr) ? arr : [];
-  } catch {
-    return [];
+  if (m) {
+    try {
+      const arr = JSON.parse(sanitizeJson(m[0]));
+      if (Array.isArray(arr)) return arr;
+    } catch {
+      // Fall through to per-item recovery below.
+    }
   }
+  // Recovery: one corrupt item (LaTeX backslashes, raw newlines from
+  // multi-line working) must not void the other nine.
+  const out: GenQ[] = [];
+  const itemRe = /\{[^{}]*\}/g;
+  let im: RegExpExecArray | null;
+  while ((im = itemRe.exec(cleaned)) !== null) {
+    const item = tryParseQuestion(im[0]);
+    if (item) out.push(item);
+  }
+  return out;
 }
 
 // Science answers come back with LaTeX (\\frac, \\vec, \\Delta). A lone
