@@ -31,8 +31,11 @@ function extractJsonArray(text: string): ExplRow[] {
 
 function validExplanation(e: string): boolean {
   const t = (e || "").trim();
-  if (t.length < 20 || t.length > 800) return false;
-  if (/[<>`]/.test(t)) return false;
+  if (t.length < 20 || t.length > 1200) return false;
+  // Maths/science need < > (inequalities, formulas). They render as plain
+  // text downstream (stripQuestionHtml / escaped markdown), so only
+  // backticks — which corrupt markdown code spans — are rejected.
+  if (/`/.test(t)) return false;
   return true;
 }
 
@@ -142,11 +145,15 @@ serve(async (req) => {
     const parsed = extractJsonArray(text);
 
     let updated = 0;
+    let rejected = 0;
     for (const item of parsed) {
       const idx = (item.n || 0) - 1;
       if (idx < 0 || idx >= rows.length) continue;
       const expl = (item.explanation || "").trim();
-      if (!validExplanation(expl)) continue;
+      if (!validExplanation(expl)) {
+        rejected++;
+        continue;
+      }
       // Only fill still-empty rows — never overwrite (race-safe).
       const { data: upd, error } = await supabase
         .from("jamb_questions")
@@ -159,7 +166,7 @@ serve(async (req) => {
 
     // NOTE: updates are verified per-row via .select("id") above.
     return new Response(
-      JSON.stringify({ updated, attempted: rows.length, remaining: remaining ?? 0 }),
+      JSON.stringify({ updated, attempted: rows.length, parsed: parsed.length, rejected, remaining: remaining ?? 0 }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {

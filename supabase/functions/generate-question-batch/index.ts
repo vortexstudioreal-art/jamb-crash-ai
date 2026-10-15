@@ -32,7 +32,9 @@ function validQ(q: GenQ): boolean {
   if (![q.option_a, q.option_b, q.option_c, q.option_d].every((o) => o?.trim())) return false;
   if (!/^[a-dA-D]$/.test((q.correct_answer || "").trim())) return false;
   if (!q.explanation?.trim()) return false;
-  if (/[<>`]/.test(q.question)) return false;
+  // Backticks corrupt markdown rendering downstream; < > are legitimate in
+  // maths/science stems (inequalities, formulas) and render as plain text.
+  if (/`/.test(q.question)) return false;
   if (/: *$/.test(q.question.trim())) return false;
   if (/spell the word\s*$/i.test(q.question)) return false;
   if (!/[\s:]/.test(q.question.trim())) {
@@ -86,7 +88,7 @@ STYLE (this is what makes them indistinguishable from real JAMB):
 - Distractors must be plausible: common student errors, adjacent concepts, sign/unit slips — never joke options or obvious throwaways.
 
 Return ONLY a valid JSON array, no other text. Each item exactly:
-{"question": "...", "option_a": "...", "option_b": "...", "option_c": "...", "option_d": "...", "correct_answer": "A|B|C|D", "explanation": "2-3 sentence reason the answer is correct", "topic": "short sub-topic name"${DIAGRAM_SUBJECTS.includes(subject) ? `, "diagram": "optional inline <svg> figure (viewBox 0 0 400 250, no scripts, no external refs, text 12px or larger) — include ONLY for at most 2 questions per batch where a diagram genuinely helps (circuit, geometry figure, bar/line chart drawn from the question's own numbers), otherwise omit the key entirely` : ""}}`;
+{"question": "...", "option_a": "...", "option_b": "...", "option_c": "...", "option_d": "...", "correct_answer": "A|B|C|D", "explanation": "2-3 sentence reason the answer is correct", "topic": "short sub-topic name"${DIAGRAM_SUBJECTS.includes(subject) ? `, "diagram": "inline <svg> figure (viewBox 0 0 400 250, no scripts, no external refs, text 12px or larger) — REQUIRED on 2-4 questions in this batch where a figure helps (geometry figure, circuit, graph/chart drawn from the question's own numbers, data table); omit the key ONLY for purely verbal questions` : ""}}`;
 
   const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
