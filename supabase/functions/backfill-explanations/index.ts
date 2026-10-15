@@ -22,7 +22,9 @@ function extractJsonArray(text: string): ExplRow[] {
   const m = cleaned.match(/\[[\s\S]*\]/);
   if (!m) return [];
   try {
-    const arr = JSON.parse(m[0]);
+    // Science explanations carry LaTeX (\\frac, \\Delta); a lone backslash
+    // is an illegal JSON escape that voids the whole array.
+    const arr = JSON.parse(m[0].replace(/\\(?!["\\/bfnrtu])/g, "\\\\"));
     return Array.isArray(arr) ? arr : [];
   } catch {
     return [];

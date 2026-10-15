@@ -58,11 +58,19 @@ function extractJsonArray(text: string): GenQ[] {
   const m = cleaned.match(/\[[\s\S]*\]/);
   if (!m) return [];
   try {
-    const arr = JSON.parse(m[0]);
+    const arr = JSON.parse(sanitizeJson(m[0]));
     return Array.isArray(arr) ? arr : [];
   } catch {
     return [];
   }
+}
+
+// Science answers come back with LaTeX (\\frac, \\vec, \\Delta). A lone
+// backslash is an illegal JSON escape and kills the whole parse — so the
+// entire batch scores zero. Escape only the illegal ones; valid escapes
+// (\\n, \\u00b0, ...) pass through untouched.
+function sanitizeJson(s: string): string {
+  return s.replace(/\\(?!["\\/bfnrtu])/g, "\\\\");
 }
 
 async function genBatch(
