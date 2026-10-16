@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { BackButton } from '@/components/BackButton';
 import { DashboardHeader } from '@/components/DashboardHeader';
-import { loadGameQuestions, type GameQuestion } from '@/lib/gameQuestions';
+import { loadGameQuestions, rememberQuestionIds, type GameQuestion, ALL_GAME_SUBJECTS } from '@/lib/gameQuestions';
 import { stripQuestionHtml } from '@/lib/sanitize';
 import { useFeatureUsage } from '@/hooks/useFeatureUsage';
 import { FeatureLimitReached } from '@/components/FeatureLimitReached';
@@ -27,17 +27,11 @@ type GameState = 'ready' | 'playing' | 'finished';
 const GAME_DURATION = 60;
 const BEST_KEY = 'jamb_subject_sort_best';
 
-const ALL_SUBJECTS = [
-  'english', 'mathematics', 'physics', 'chemistry', 'biology',
-  'literature', 'government', 'economics', 'crs', 'irs',
-  'geography', 'accounting', 'commerce', 'agricultural_science',
-];
-
 const label = (s: string) =>
   s.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
 const pickDistractors = (correct: string): string[] => {
-  const pool = ALL_SUBJECTS.filter((s) => s !== correct).sort(() => Math.random() - 0.5);
+  const pool = ALL_GAME_SUBJECTS.filter((s) => s !== correct).sort(() => Math.random() - 0.5);
   return pool.slice(0, 3);
 };
 
@@ -128,6 +122,7 @@ export const SubjectSort = ({ userEmail, subjects, isOwner, isAdmin, userRole, o
   const answer = (subject: string) => {
     const q = questions[currentIndex];
     if (!q || gameState !== 'playing') return;
+    rememberQuestionIds([q.id]);
     const correct = subject === q.subject;
     setLastAnswer(correct ? 'correct' : 'wrong');
     if (correct) setScore((s) => s + 1);

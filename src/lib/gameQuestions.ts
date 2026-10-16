@@ -16,6 +16,23 @@ export interface GameQuestion {
   [key: string]: unknown;
 }
 
+export const ALL_GAME_SUBJECTS = [
+  'english', 'mathematics', 'physics', 'chemistry', 'biology',
+  'literature', 'government', 'economics', 'crs', 'irs',
+  'geography', 'accounting', 'commerce', 'agricultural_science',
+];
+
+// Recently served question IDs (in-memory). Excluded from fresh pools so
+// restarts and back-to-back rounds stop repeating the same questions.
+const recentIds: string[] = [];
+
+export const rememberQuestionIds = (ids: string[]) => {
+  for (const id of ids) {
+    if (id && !recentIds.includes(id)) recentIds.push(id);
+  }
+  while (recentIds.length > 300) recentIds.shift();
+};
+
 const optionOf = (q: GameQuestion, letter: string): string =>
   (q[`option_${letter.toLowerCase()}`] as string) || '';
 
@@ -64,7 +81,15 @@ export const loadGameQuestions = async (
     }
   }
 
-  return shuffleQuestionList(pool).slice(0, limit) as GameQuestion[];
+  return shuffleQuestionList(preferFresh(pool)).slice(0, limit) as GameQuestion[];
+};
+
+const preferFresh = (pool: GameQuestion[]): GameQuestion[] => {
+  if (recentIds.length === 0) return pool;
+  const fresh = pool.filter((q) => !recentIds.includes(q.id));
+  // Keep at least 10 cards; if memory ate the pool, fall back to full pool
+  // rather than an empty game.
+  return fresh.length >= 10 ? fresh : pool;
 };
 
 export const gameOptionOf = optionOf;

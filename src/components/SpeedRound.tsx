@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { BackButton } from '@/components/BackButton';
 import { DashboardHeader } from '@/components/DashboardHeader';
-import { loadGameQuestions } from '@/lib/gameQuestions';
+import { loadGameQuestions, rememberQuestionIds } from '@/lib/gameQuestions';
 import { useFeatureUsage } from '@/hooks/useFeatureUsage';
 import { FeatureLimitReached } from '@/components/FeatureLimitReached';
 
@@ -95,6 +95,7 @@ export const SpeedRound = ({ userEmail, subjects, isOwner, isAdmin, userRole, on
     const q = questions[currentIndex];
     if (!q) return;
 
+    rememberQuestionIds([q.id]);
     const isCorrect = answer === q.correct_answer;
     setLastAnswer(isCorrect ? 'correct' : 'wrong');
     if (isCorrect) setScore(prev => prev + 1);

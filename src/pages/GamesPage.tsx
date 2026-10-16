@@ -9,6 +9,7 @@ import { ArrowLeft, Zap, Flame, Gamepad2, Lock, CheckCheck, GraduationCap } from
 
 import { useEffect } from 'react';
 import { useSeo } from '@/hooks/useSeo';
+import { ALL_GAME_SUBJECTS } from '@/lib/gameQuestions';
 
 const SpeedRound = lazy(() => import('@/components/SpeedRound').then(m => ({ default: m.SpeedRound })));
 const StreakChallenge = lazy(() => import('@/components/StreakChallenge').then(m => ({ default: m.StreakChallenge })));
@@ -92,7 +93,9 @@ const GamesPage = () => {
     return null;
   }
 
-  const effectiveSubjects = userSubjects.length > 0 ? userSubjects : ['english', 'mathematics'];
+  // Arcade games want variety: with no subjects picked (e.g. owner/test
+  // accounts), serve the full catalogue instead of collapsing to two.
+  const effectiveSubjects = userSubjects.length > 0 ? userSubjects : ALL_GAME_SUBJECTS;
 
   if (gameMode === 'speed-round') {
     return (

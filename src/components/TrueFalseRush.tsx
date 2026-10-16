@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { BackButton } from '@/components/BackButton';
 import { DashboardHeader } from '@/components/DashboardHeader';
-import { loadGameQuestions, gameOptionOf, type GameQuestion } from '@/lib/gameQuestions';
+import { loadGameQuestions, gameOptionOf, rememberQuestionIds, type GameQuestion } from '@/lib/gameQuestions';
 import { stripQuestionHtml } from '@/lib/sanitize';
 import { useFeatureUsage } from '@/hooks/useFeatureUsage';
 import { FeatureLimitReached } from '@/components/FeatureLimitReached';
@@ -128,6 +128,7 @@ export const TrueFalseRush = ({ userEmail, subjects, isOwner, isAdmin, userRole,
   const answer = (saidTrue: boolean) => {
     const claim = claims[currentIndex];
     if (!claim || gameState !== 'playing') return;
+    rememberQuestionIds([claim.question.id]);
     const correct = saidTrue === claim.isTrue;
     setLastAnswer(correct ? 'correct' : 'wrong');
     if (correct) {
