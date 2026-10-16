@@ -8,19 +8,14 @@ import {
   BookOpen,
   Flame,
   Zap,
-  Search,
   Sparkles,
   Play,
   Filter,
-  X,
-  ArrowRight,
-  ShieldAlert,
   Award
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { errorLogger } from '@/services/errorLogger';
 import {
   computeMastery,
@@ -91,7 +86,6 @@ export const TopicMasteryTracker = ({
   const [expandedSubjects, setExpandedSubjects] = useState<Set<string>>(new Set());
   const [selectedSubjectTab, setSelectedSubjectTab] = useState<string>('all');
   const [masteryFilter, setMasteryFilter] = useState<'all' | 'weak' | 'learning' | 'mastered' | 'high_weight'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchTopicData = useCallback(async () => {
     try {
@@ -238,21 +232,12 @@ export const TopicMasteryTracker = ({
         topics = topics.filter(t => t.isHighWeight);
       }
 
-      // Filter by Search Query
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase();
-        topics = topics.filter(t => 
-          t.topic.toLowerCase().includes(query) || 
-          t.subject.toLowerCase().includes(query)
-        );
-      }
-
       return {
         ...s,
         topics,
       };
     }).filter(s => s.topics.length > 0);
-  }, [subjectTopics, selectedSubjectTab, masteryFilter, searchQuery]);
+  }, [subjectTopics, selectedSubjectTab, masteryFilter]);
 
   if (loading) {
     return (
@@ -381,93 +366,16 @@ export const TopicMasteryTracker = ({
         )}
       </div>
 
-      {/* QUICK STATS CARDS */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="bg-red-500/10 rounded-2xl p-4 border border-red-500/20 text-center relative overflow-hidden">
-          <div className="flex items-center justify-between text-red-500 mb-1">
-            <span className="text-xs font-bold uppercase tracking-wider">Critical Weak</span>
-            <ShieldAlert className="w-4 h-4" />
-          </div>
-          <p className="text-3xl font-black text-red-500">{weakTopics}</p>
-          <p className="text-[11px] text-red-500/80 font-medium">Needs Attention (&lt;40%)</p>
-        </div>
-
-        <div className="bg-amber-500/10 rounded-2xl p-4 border border-amber-500/20 text-center relative overflow-hidden">
-          <div className="flex items-center justify-between text-amber-500 mb-1">
-            <span className="text-xs font-bold uppercase tracking-wider">In Progress</span>
-            <TrendingUp className="w-4 h-4" />
-          </div>
-          <p className="text-3xl font-black text-amber-500">{learningTopics}</p>
-          <p className="text-[11px] text-amber-500/80 font-medium font-medium">Building Skill (40-79%)</p>
-        </div>
-
-        <div className="bg-emerald-500/10 rounded-2xl p-4 border border-emerald-500/20 text-center relative overflow-hidden">
-          <div className="flex items-center justify-between text-emerald-500 mb-1">
-            <span className="text-xs font-bold uppercase tracking-wider">Mastered</span>
-            <Flame className="w-4 h-4" />
-          </div>
-          <p className="text-3xl font-black text-emerald-500">{masteredTopics}</p>
-          <p className="text-[11px] text-emerald-500/80 font-medium">Exam Ready (80%+)</p>
-        </div>
-
-        <div className="bg-purple-500/10 rounded-2xl p-4 border border-purple-500/20 text-center relative overflow-hidden">
-          <div className="flex items-center justify-between text-purple-500 mb-1">
-            <span className="text-xs font-bold uppercase tracking-wider">High UTME Weight</span>
-            <Sparkles className="w-4 h-4" />
-          </div>
-          <p className="text-3xl font-black text-purple-500">
-            {subjectTopics.reduce((sum, s) => sum + s.topics.filter(t => t.isHighWeight).length, 0)}
-          </p>
-          <p className="text-[11px] text-purple-500/80 font-medium">Frequent Exam Qs</p>
-        </div>
+      {/* QUICK STATS STRIP */}
+      <div className="flex items-center justify-center gap-4 text-center rounded-2xl bg-muted/40 border border-border/60 px-4 py-3">
+        <span className="text-xs font-bold text-red-500">{weakTopics} weak</span>
+        <span className="w-1 h-1 rounded-full bg-muted-foreground/40" />
+        <span className="text-xs font-bold text-amber-500">{learningTopics} in progress</span>
+        <span className="w-1 h-1 rounded-full bg-muted-foreground/40" />
+        <span className="text-xs font-bold text-emerald-500">{masteredTopics} mastered</span>
       </div>
 
-      {/* TOP WEAK TOPICS REMEDIAL BOOSTER BANNER */}
-      {topWeakTopics.length > 0 && (
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="p-4 rounded-2xl bg-gradient-to-r from-red-500/15 via-amber-500/10 to-transparent border border-red-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
-        >
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-xl bg-red-500/20 text-red-500 flex items-center justify-center shrink-0 mt-0.5">
-              <Zap className="w-5 h-5 animate-pulse" />
-            </div>
-            <div>
-              <p className="font-bold text-sm text-foreground flex items-center gap-2">
-                Recommended Remedial Focus
-                <Badge variant="secondary" className="bg-red-500/20 text-red-500 text-[10px] uppercase font-bold border-none">
-                  High Priority
-                </Badge>
-              </p>
-              <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                {topWeakTopics.map((t) => (
-                  <span 
-                    key={`${t.subject}-${t.topic}`}
-                    className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-background/80 border border-border font-semibold text-foreground"
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
-                    <span className="capitalize text-muted-foreground">{formatSubjectName(t.subject)}:</span>
-                    <span className="text-foreground">{t.topic}</span>
-                    <span className="text-[10px] text-red-500 font-bold ml-1">({t.percentage}%)</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {onStartPracticeTopic && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onStartPracticeTopic(topWeakTopics[0].subject, topWeakTopics[0].topic)}
-              className="w-full md:w-auto border-red-500/40 text-red-500 hover:bg-red-500/10 font-bold shrink-0 text-xs"
-            >
-              Start 10-Q Target Remedial <ArrowRight className="w-3.5 h-3.5 ml-1" />
-            </Button>
-          )}
-        </motion.div>
-      )}
+      {/* SUBJECT PILL TABS & FILTER BAR */}
 
       {/* SUBJECT PILL TABS & FILTER BAR */}
       <div className="space-y-3 pt-2">
@@ -507,25 +415,6 @@ export const TopicMasteryTracker = ({
 
         {/* Search & Filter Bar */}
         <div className="flex flex-col sm:flex-row items-center gap-3">
-          {/* Search Box */}
-          <div className="relative w-full sm:flex-1">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search topics by keyword (e.g. Algebra, Organic, Mechanics)..."
-              className="pl-9 pr-8 text-xs h-9 bg-muted/40 rounded-xl border-border/80 focus:ring-primary"
-            />
-            {searchQuery && (
-              <button 
-                onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-
           {/* Filter Chips */}
           <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
             <button
@@ -592,12 +481,11 @@ export const TopicMasteryTracker = ({
           <div className="text-center py-10 bg-muted/20 rounded-2xl border border-dashed border-border">
             <Filter className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-50" />
             <p className="text-sm font-semibold text-foreground">No matching topics found</p>
-            <p className="text-xs text-muted-foreground mt-1">Try clearing your search query or filter chips</p>
+            <p className="text-xs text-muted-foreground mt-1">Try a different filter chip</p>
             <Button
               size="sm"
               variant="outline"
               onClick={() => {
-                setSearchQuery('');
                 setMasteryFilter('all');
                 setSelectedSubjectTab('all');
               }}

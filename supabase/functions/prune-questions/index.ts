@@ -76,6 +76,27 @@ const missingDataTable = (q: string, opts: string[]): boolean => {
   return true;
 };
 
+// Cites a poem/stanza/extract that isn't in the bank, e.g. "From the poem
+// above, shadow means". Scoped to literature/English (unseen-text questions
+// live there; "line" elsewhere means geometry). Only short bare references
+// flag: quoted material or a long stem means the text is embedded inline,
+// and named poems ("in the poem If—") are legitimate prescribed-text study.
+const missingPassage = (subject: string, q: string): boolean => {
+  const s = (subject || "").toLowerCase();
+  if (s !== "literature" && s !== "english") return false;
+  const t = (q || "").toLowerCase();
+  const hasRef =
+    /\b(passage|poem|stanza|extract)\s+(above|below)\b/.test(t) ||
+    /\b(above|below)\s+(passage|poem|stanza|extract)\b/.test(t) ||
+    /\bthis\s+(passage|extract)\b/.test(t) ||
+    /\bthe\s+(stanza|extract)\b/.test(t) ||
+    /\b(theme|tone|subject)\s+of\s+the\s+poem\b/.test(t);
+  if (!hasRef) return false;
+  if (/["'“”‘’]([^"'“”‘’]{20,}?)["'“”‘’]/.test(q || "")) return false;
+  if ((q || "").length > 120) return false;
+  return true;
+};
+
 async function audit(supabase: ReturnType<typeof createClient>) {
   const candidates: Candidate[] = [];
   let backticks = 0;
@@ -105,6 +126,8 @@ async function audit(supabase: ReturnType<typeof createClient>) {
         candidates.push({ id: r.id, subject: r.subject, year: r.year, question: q.slice(0, 120), reason: "missing figure/table" });
       } else if (missingDataTable(q, opts)) {
         candidates.push({ id: r.id, subject: r.subject, year: r.year, question: q.slice(0, 120), reason: "missing data table" });
+      } else if (missingPassage(r.subject, q)) {
+        candidates.push({ id: r.id, subject: r.subject, year: r.year, question: q.slice(0, 120), reason: "missing passage" });
       }
       const optsText = opts.join(" ");
       if (q.includes("`") || optsText.includes("`")) backticks++;
