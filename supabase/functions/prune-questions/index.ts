@@ -44,6 +44,30 @@ const isOrphanWord = (q: string, opts: string[]): boolean => {
 // The target word itself is missing, e.g. "…how to spell the word".
 const missingWord = (q: string): boolean => /spell the word\s*$/i.test(q);
 
+// Two or more options are the same answer, which makes the question
+// unanswerable (guessing correct = automatic pass, guessing wrong =
+// automatic fail). Scraped/OCR banks collapse near-identical spellings
+// ("privilege"/"previlege" typos, repeated option text, case-only
+// duplicates). Stress-pattern rows legitimately differ only by casing,
+// so those are excluded by the caller.
+const duplicateOptions = (opts: string[]): boolean => {
+  const norm = opts
+    .map((o) => (o || "").trim().toLowerCase().replace(/[.,;:]+$/, "").replace(/\s+/g, " "))
+    .filter((o) => o.length > 0);
+  if (norm.length < 4) return false;
+  return new Set(norm).size < norm.length;
+};
+
+// Broken OCR stem: a lone fragment split mid-word ("Scoo led", "wai st",
+// "ch ateau"). Scoped to short stems so real short questions survive.
+const garbledStem = (q: string): boolean => {
+  const t = (q || "").trim();
+  if (t.length > 15 || t.length < 4) return false;
+  const words = t.split(/\s+/);
+  if (words.length < 2) return false;
+  return words.every((w) => /^[a-z]+$/i.test(w) && w.length <= 5);
+};
+
 // References a figure/table/passage that was lost in scraping, e.g.
 // "the diagram below", "from the table above". Excludes the legitimate
 // "which/each/all/one of the following" phrasing.
@@ -128,6 +152,10 @@ async function audit(supabase: ReturnType<typeof createClient>) {
         candidates.push({ id: r.id, subject: r.subject, year: r.year, question: q.slice(0, 120), reason: "missing data table" });
       } else if (missingPassage(r.subject, q)) {
         candidates.push({ id: r.id, subject: r.subject, year: r.year, question: q.slice(0, 120), reason: "missing passage" });
+      } else if (!/stress/i.test(q) && duplicateOptions(opts)) {
+        candidates.push({ id: r.id, subject: r.subject, year: r.year, question: q.slice(0, 120), reason: "duplicate options" });
+      } else if (garbledStem(q)) {
+        candidates.push({ id: r.id, subject: r.subject, year: r.year, question: q.slice(0, 120), reason: "garbled stem" });
       }
       const optsText = opts.join(" ");
       if (q.includes("`") || optsText.includes("`")) backticks++;
