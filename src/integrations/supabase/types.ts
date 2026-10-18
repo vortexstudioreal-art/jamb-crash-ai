@@ -2145,6 +2145,25 @@ export type Database = {
           usage_count: number
         }[]
       }
+      /** Rewarded-ad bonus. The amount is chosen server-side by
+          bonus_amount_for() and rate-limited; p_grants is ignored. */
+      grant_bonus_use: {
+        Args: { p_feature: string; p_grants?: number }
+        Returns: {
+          bonus_uses: number
+          granted: number
+          usage_count: number
+        }[]
+      }
+      bonus_amount_for: { Args: { p_feature: string }; Returns: number }
+      /** Starts the one-per-account trial. Duration is owned by the database. */
+      start_trial: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          expires_at: string
+          started: boolean
+        }[]
+      }
       is_admin_or_owner: { Args: { _user_id: string }; Returns: boolean }
       is_owner: { Args: { _user_id: string }; Returns: boolean }
       recalculate_leaderboard_ranks: { Args: never; Returns: undefined }

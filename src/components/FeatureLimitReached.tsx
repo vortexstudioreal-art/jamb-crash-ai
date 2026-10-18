@@ -46,12 +46,15 @@ export const FeatureLimitReached = ({
   };
 
   const handleAdComplete = async () => {
-    const success = await addBonusUse(featureType, bonusAmount);
-    if (success) {
-      toast.success(`+${bonusAmount} ${featureName} ${bonusAmount > 1 ? 'uses' : 'use'} added!`);
+    const result = await addBonusUse(featureType, bonusAmount);
+    if (result.ok) {
+      // Report the server's number, not the figure this component asked for.
+      toast.success(`+${result.granted} ${featureName} ${result.granted > 1 ? 'uses' : 'use'} added!`);
       onBonusEarned();
     } else {
-      toast.error('Failed to add bonus use');
+      // The hook already explained cadence/ceiling refusals; only surface a
+      // generic failure when we have no server explanation to give.
+      toast.error('Could not add the bonus use. Please try again.');
     }
     setShowAdModal(false);
   };

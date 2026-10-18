@@ -164,6 +164,10 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit, o
   // Previously answered question IDs to avoid repetition
   const [previouslyAnsweredIds, setPreviouslyAnsweredIds] = useState<Set<string>>(new Set());
   const [weakQuestionCounts, setWeakQuestionCounts] = useState<Map<string, number>>(new Map());
+  // Question loading is gated on this: without it, the async history fetch
+  // resolving mid-quiz re-ran loadQuestions and reshuffled the paper under
+  // the student, orphaning their answers and breaking the progress count.
+  const [historyLoaded, setHistoryLoaded] = useState(false);
   
   // Quiz state
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -206,7 +210,12 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit, o
   // Skipped offline (nothing to fetch) and guarded: a hanging request must
   // never block the quiz behind it.
   useEffect(() => {
-    if (typeof navigator !== 'undefined' && !navigator.onLine) return;
+    // Offline there is no history to fetch, so mark it settled immediately —
+    // question loading waits on this flag and must not stall.
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      setHistoryLoaded(true);
+      return;
+    }
     const loadPreviousQuestions = async () => {
       try {
         const { data } = await withTimeout(
@@ -238,6 +247,8 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit, o
       } catch {
         // Offline or dead network: quiz still loads, just without
         // repetition avoidance and adaptive weighting.
+      } finally {
+        setHistoryLoaded(true);
       }
     };
     loadPreviousQuestions();
@@ -372,6 +383,9 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit, o
   // Load questions with year filtering and anti-repetition
   useEffect(() => {
     if (!quizMode) return;
+    // Wait for the history fetch (or its offline fast-path) so the paper is
+    // built exactly once, in the right order.
+    if (!historyLoaded) return;
     
     const loadQuestions = async () => {
       try {
@@ -486,7 +500,7 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit, o
     };
 
     loadQuestions();
-  }, [subjects, totalQuestions, quizMode, quizType, selectedSubjects, subjectYears, previouslyAnsweredIds, weakQuestionCounts]);
+  }, [historyLoaded, subjects, totalQuestions, quizMode, quizType, selectedSubjects, subjectYears, previouslyAnsweredIds, weakQuestionCounts]);
 
   // Timer (single interval; stops itself at zero instead of no-op ticking)
   useEffect(() => {

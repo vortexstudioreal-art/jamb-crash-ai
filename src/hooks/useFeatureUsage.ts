@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth, UserPackage } from '@/contexts/AuthContext';
 import { useTrialContext } from '@/contexts/TrialContext';
 import { errorLogger } from '@/services/errorLogger';
+import { toast } from 'sonner';
 
 export type FeatureType = 
   | 'pdf_upload'
@@ -222,21 +223,22 @@ export const useFeatureUsage = () => {
     };
   }, [getLimit, usageData, bonusData]);
 
-  // Add bonus use after watching ad (atomic server-side bump; never
-  // overwrites usage_count with a stale client value).
-  const addBonusUse = useCallback(async (feature: FeatureType, amount: number = 1): Promise<boolean> => {
-    if (!userEmail) return false;
+  // Add bonus use after watching ad. Returns what the server actually granted,
+  // because the amount is owned server-side (bonus_amount_for) — the client
+  // previously asked increment_feature_usage for bonus uses, which anyone could
+  // call from the console to mint unlimited extra allowances.
+  const addBonusUse = useCallback(async (feature: FeatureType, _amount: number = 1): Promise<{ ok: boolean; granted: number }> => {
+    if (!userEmail) return { ok: false, granted: 0 };
 
     try {
-      const { data, error } = await supabase.rpc('increment_feature_usage', {
+      const { data, error } = await supabase.rpc('grant_bonus_use', {
         p_feature: feature,
-        p_amount: Math.max(1, Math.floor(amount)),
-        p_is_bonus: true,
+        p_grants: 1,
       });
 
       if (error) {
         errorLogger.error(error, { component: 'useFeatureUsage', action: 'addBonusUse' });
-        return false;
+        return { ok: false, granted: 0 };
       }
 
       const row = Array.isArray(data) ? data[0] : data;
@@ -245,18 +247,19 @@ export const useFeatureUsage = () => {
         if (typeof row.usage_count === 'number') {
           setUsageData(prev => ({ ...prev, [feature]: row.usage_count }));
         }
-      } else {
-        // Fallback: optimistic bump if the RPC shape surprises us.
-        setBonusData(prev => ({
-          ...prev,
-          [feature]: prev[feature] + amount,
-        }));
       }
 
-      return true;
+      // Server declined (cadence or daily ceiling) — tell the user rather
+      // than silently pretending the ad earned something.
+      if (!row || row.granted === 0) {
+        toast.info('Bonus not available right now — try again in a moment.');
+        return { ok: false, granted: 0 };
+      }
+
+      return { ok: true, granted: Number(row.granted) };
     } catch (err) {
       errorLogger.error(err, { component: 'useFeatureUsage', action: 'addBonusUse' });
-      return false;
+      return { ok: false, granted: 0 };
     }
   }, [userEmail]);
 

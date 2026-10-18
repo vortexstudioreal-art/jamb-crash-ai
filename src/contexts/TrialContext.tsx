@@ -3,7 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { errorLogger } from '@/services/errorLogger';
 
-const TRIAL_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+// The 7-day duration now lives in the database (start_trial() RPC) so it can't
+// be tampered with client-side.
 const TRIAL_CACHE_PREFIX = 'jamb_trial_cache_';
 
 type CachedTrial = {
@@ -136,34 +137,40 @@ export const TrialProvider = ({ children }: { children: ReactNode }) => {
     }
 
     try {
-      const expiresAt = new Date(Date.now() + TRIAL_DURATION_MS);
-      
-      const { error } = await supabase
-        .from('user_trials')
-        .insert({
-          email: userEmail,
-          trial_started_at: new Date().toISOString(),
-          trial_expires_at: expiresAt.toISOString(),
-          trial_used: true,
-          subscription_plan: 'premium',
-        });
+      // Duration and one-per-account are enforced server-side. The client
+      // used to INSERT its own row with a browser-computed expiry, which let
+      // anyone grant themselves an arbitrarily long trial.
+      const { data, error } = await supabase.rpc('start_trial');
 
       if (error) {
-        if (error.code === '23505') {
-          setHasTrialUsed(true);
-          return false;
-        }
         errorLogger.error(error, { component: 'TrialContext', action: 'startTrial' });
+        return false;
+      }
+
+      const row = Array.isArray(data) ? data[0] : data;
+      const started = row?.started === true;
+      const serverExpiresAt = row?.expires_at ? new Date(row.expires_at) : new Date();
+
+      if (!started) {
+        // Already had one — reflect the real expiry instead of pretending.
+        setHasTrialUsed(true);
+        setTrialExpiresAt(serverExpiresAt);
+        const now = new Date();
+        if (serverExpiresAt > now) {
+          setIsTrialActive(true);
+          setIsTrialExpired(false);
+          setTimeRemaining(serverExpiresAt.getTime() - now.getTime());
+        }
         return false;
       }
 
       setIsTrialActive(true);
       setHasTrialUsed(true);
       setSubscriptionPlan('premium');
-      setTrialExpiresAt(expiresAt);
-      setTimeRemaining(TRIAL_DURATION_MS);
+      setTrialExpiresAt(serverExpiresAt);
+      setTimeRemaining(Math.max(0, serverExpiresAt.getTime() - Date.now()));
       setIsTrialExpired(false);
-      
+
       return true;
     } catch (err) {
       errorLogger.error(err instanceof Error ? err : new Error(String(err)), { component: 'TrialContext', action: 'startTrial' });

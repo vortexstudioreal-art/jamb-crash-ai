@@ -125,6 +125,26 @@ serve(async (req) => {
       const accessExpiresAt = new Date();
       accessExpiresAt.setDate(accessExpiresAt.getDate() + 365);
 
+      // Claim the coupon BEFORE granting access. This is the authoritative
+      // limit check: it re-verifies active/expiry/usage_limit atomically and
+      // returns false when another request already took the last use. Checking
+      // times_used earlier and incrementing afterwards let concurrent requests
+      // all pass, minting unlimited free premium from a single-use coupon.
+      const { data: claimed, error: claimError } = await db.rpc("increment_coupon_usage", {
+        p_coupon_id: coupon.id,
+      });
+      if (claimError) {
+        console.error("[claim-reward] coupon claim failed:", claimError);
+        return new Response(JSON.stringify({ error: "Could not redeem this coupon" }), {
+          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (!claimed) {
+        return new Response(JSON.stringify({ error: "This coupon has already been fully used" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       const { error: payError } = await db.from("payments").insert({
         email: emailKey,
         package: packageName,
@@ -134,7 +154,11 @@ serve(async (req) => {
         paystack_reference: reference,
         access_expires_at: accessExpiresAt.toISOString(),
       });
-      if (payError) throw new Error("Failed to grant access");
+      if (payError) {
+        // Give the use back so a transient failure doesn't burn the coupon.
+        await db.rpc("release_coupon_claim", { p_coupon_id: coupon.id });
+        throw new Error("Failed to grant access");
+      }
 
       await db.from("coupon_usage").insert({
         coupon_id: coupon.id,
@@ -145,7 +169,6 @@ serve(async (req) => {
         commission_percentage: 0,
         commission_payable: false,
       });
-      await db.rpc("increment_coupon_usage", { p_coupon_id: coupon.id });
 
       if (referralCode) {
         await db.rpc("redeem_referral_code", { p_code: referralCode, p_email: emailKey });
