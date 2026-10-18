@@ -53,6 +53,22 @@ function isValidEmail(email: string): boolean {
   return emailRegex.test(email);
 }
 
+// A coupon use is claimed before the customer is sent to Paystack, so every
+// path that doesn't reach a live transaction has to hand the use back —
+// otherwise a declined or abandoned checkout silently burns one of a limited
+// coupon's few uses.
+const releaseCoupon = async (couponId: string | null) => {
+  if (!couponId) return;
+  const url = Deno.env.get("SUPABASE_URL")!;
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  try {
+    const c = createClient(url, key);
+    await c.rpc("release_coupon_claim", { p_coupon_id: couponId });
+  } catch (err) {
+    console.error("[paystack-initialize] failed to release coupon claim:", err);
+  }
+};
+
 serve(async (req) => {
   console.log("[paystack-initialize] Function called, method:", req.method);
   
@@ -110,11 +126,12 @@ serve(async (req) => {
     const dbEarly = createClient(supabaseUrlEarly, supabaseServiceKeyEarly);
 
     let provenDiscount = 0;
+    let claimedCouponId: string | null = null;
 
     if (couponCode) {
       const { data: coupon } = await dbEarly
         .from("coupon_codes")
-        .select("discount_amount, discount_percentage, is_active, expiry_date, usage_limit, times_used")
+        .select("id, discount_amount, discount_percentage, is_active, expiry_date, usage_limit, times_used")
         .eq("code", String(couponCode).toUpperCase().trim())
         .maybeSingle();
 
@@ -130,6 +147,27 @@ serve(async (req) => {
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
+
+      // Claim the use now. Previously the limit was only read here and never
+      // consumed on the Paystack path, so a single-use coupon could discount
+      // unlimited repeat purchases. The atomic claim is the real check.
+      const { data: claimed, error: claimError } = await dbEarly.rpc("increment_coupon_usage", {
+        p_coupon_id: coupon.id,
+      });
+      if (claimError) {
+        console.error("[paystack-initialize] coupon claim failed:", claimError.message);
+        return new Response(
+          JSON.stringify({ error: "Could not redeem this coupon" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (!claimed) {
+        return new Response(
+          JSON.stringify({ error: "This coupon has already been fully used" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      claimedCouponId = coupon.id;
 
       const couponDiscount = coupon.discount_percentage && coupon.discount_percentage > 0
         ? Math.floor(expectedPrice * (coupon.discount_percentage / 100))
@@ -158,6 +196,7 @@ serve(async (req) => {
     const lawfulPrice = Math.max(0, expectedPrice - provenDiscount);
     if (lawfulPrice <= 0 || amount !== lawfulPrice) {
       console.error("[paystack-initialize] Amount mismatch:", { amount, lawfulPrice, expectedPrice, provenDiscount });
+      await releaseCoupon(claimedCouponId);
       return new Response(
         JSON.stringify({ error: "Amount does not match the plan price after discounts" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -166,6 +205,7 @@ serve(async (req) => {
 
     // Check rate limiting
     if (isRateLimited(email)) {
+      await releaseCoupon(claimedCouponId);
       return new Response(
         JSON.stringify({ error: "Too many payment attempts. Please try again later." }),
         { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -175,6 +215,7 @@ serve(async (req) => {
     const paystackSecretKey = Deno.env.get("PAYSTACK_SECRET_KEY");
     if (!paystackSecretKey) {
       console.error("[paystack-initialize] PAYSTACK_SECRET_KEY not configured");
+      await releaseCoupon(claimedCouponId);
       return new Response(
         JSON.stringify({ error: "Payment service not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -215,6 +256,7 @@ serve(async (req) => {
 
     if (!paystackData.status) {
       console.error("[paystack-initialize] Paystack error:", paystackData.message);
+      await releaseCoupon(claimedCouponId);
       return new Response(
         JSON.stringify({ error: paystackData.message || "Payment initialization failed" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -232,10 +274,19 @@ serve(async (req) => {
       amount,
       status: "pending",
       paystack_reference: reference,
+      coupon_id: claimedCouponId,
     });
 
     if (dbError) {
       console.error("[paystack-initialize] Database error:", dbError);
+      // The pending row is what paystack-verify validates the paid amount
+      // against, so without it a successful payment could not be verified.
+      // Hand the coupon use back rather than stranding it.
+      await releaseCoupon(claimedCouponId);
+      return new Response(
+        JSON.stringify({ error: "Could not start payment" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     return new Response(

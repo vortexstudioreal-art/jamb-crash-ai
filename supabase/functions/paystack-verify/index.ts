@@ -143,6 +143,40 @@ serve(async (req) => {
       console.log("[paystack-verify] Payment record updated:", updateData);
     }
 
+    // Record the coupon redemption so creator commission is accounted for.
+    // The use itself was already claimed atomically at initialize time; this
+    // only writes the audit/commission row. Guarded so the webhook (which also
+    // marks payments successful) can't double-count.
+    const emailKey = String(paystackData.data.customer?.email ?? "").toLowerCase();
+    const paidRow = Array.isArray(updateData) ? updateData[0] : null;
+    if (paidRow?.coupon_id) {
+      const { data: alreadyLogged } = await supabase
+        .from("coupon_usage")
+        .select("id")
+        .eq("coupon_id", paidRow.coupon_id)
+        .eq("used_by_email", emailKey)
+        .maybeSingle();
+      if (!alreadyLogged) {
+        const { data: cp } = await supabase
+          .from("coupon_codes")
+          .select("creator_email, commission_percentage")
+          .eq("id", paidRow.coupon_id)
+          .maybeSingle();
+        const { error: usageErr } = await supabase.from("coupon_usage").insert({
+          coupon_id: paidRow.coupon_id,
+          used_by_email: emailKey,
+          amount_paid: paidNaira,
+          discount_applied: expectedPrice - paidNaira,
+          creator_earning: 0,
+          commission_percentage: cp?.commission_percentage ?? 0,
+          commission_payable: false,
+        });
+        if (usageErr) {
+          console.error("[paystack-verify] coupon_usage insert failed:", usageErr.message);
+        }
+      }
+    }
+
     // Backup referral credit: the client also redeems on success, but if
     // that call failed (network), the referrer still earns here. Idempotent.
     const referralCode = paystackData.data.metadata?.referralCode;
