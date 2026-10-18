@@ -48,7 +48,29 @@ serve(async (req) => {
       messages: Array<{ role: string; content: string }>;
       userContext?: UserContext;
     };
-    
+
+    // Bound the conversation before it reaches Groq. The whole message array is
+    // forwarded as prompt context, so an unbounded payload (or a single huge
+    // string) could burn a large slice of the shared daily token allowance in
+    // one request. Keep the most recent turns, which is what the model needs.
+    const MAX_TURNS = 20;
+    const MAX_CONTENT_CHARS = 4000;
+    const MAX_CONTEXT_CHARS = 500;
+
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return new Response(JSON.stringify({ error: "No messages provided" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const trimmedMessages = messages
+      .filter((m) => m && typeof m.content === "string")
+      .slice(-MAX_TURNS)
+      .map((m) => ({
+        role: m.role === "assistant" ? "assistant" : "user",
+        content: m.content.slice(0, MAX_CONTENT_CHARS),
+      }));
+
     const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
 
     if (!GROQ_API_KEY) {
@@ -59,9 +81,9 @@ serve(async (req) => {
     let userInfo = "";
     if (userContext) {
       const parts = [];
-      if (userContext.name) parts.push(`The student's name is ${userContext.name}.`);
+      if (userContext.name) parts.push(`The student's name is ${String(userContext.name).slice(0, 100)}.`);
       if (userContext.subjects?.length > 0) {
-        parts.push(`They are studying: ${userContext.subjects.join(", ")}.`);
+        parts.push(`They are studying: ${userContext.subjects.slice(0, 15).join(", ").slice(0, 300)}.`);
       }
       if (userContext.package) {
         parts.push(`They have the ${userContext.package} subscription plan.`);
@@ -113,7 +135,7 @@ GUIDELINES:
         model: "openai/gpt-oss-120b",
         messages: [
           { role: "system", content: systemPrompt },
-          ...messages,
+          ...trimmedMessages,
         ],
         stream: true,
         // Capped: chat answers stay short, token burn stays flat
