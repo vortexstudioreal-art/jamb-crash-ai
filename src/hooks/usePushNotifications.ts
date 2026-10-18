@@ -36,7 +36,7 @@ export const usePushNotifications = ({ userEmail, enabled }: UsePushNotification
   const saveToken = useCallback(async (email: string, token: string) => {
     try {
       const platform = Capacitor.getPlatform();
-      await supabase.from('push_tokens').upsert(
+      const { error } = await supabase.from('push_tokens').upsert(
         {
           email: email.toLowerCase(),
           token,
@@ -45,6 +45,11 @@ export const usePushNotifications = ({ userEmail, enabled }: UsePushNotification
         },
         { onConflict: 'token' }
       );
+      // Supabase returns errors in the response, not by throwing — without
+      // this the token silently never registers and push never arrives.
+      if (error) {
+        errorLogger.error(error, { component: 'usePushNotifications', action: 'save token' });
+      }
     } catch (err) {
       errorLogger.error(err, { component: 'usePushNotifications', action: 'save token' });
     }
@@ -117,7 +122,10 @@ export const usePushNotifications = ({ userEmail, enabled }: UsePushNotification
 /** Remove this device's tokens on sign-out so ex-users get nothing. */
 export const clearPushTokens = async (email: string): Promise<void> => {
   try {
-    await supabase.from('push_tokens').delete().eq('email', email.toLowerCase());
+    const { error } = await supabase.from('push_tokens').delete().eq('email', email.toLowerCase());
+    if (error) {
+      errorLogger.error(error, { component: 'usePushNotifications', action: 'clear tokens' });
+    }
   } catch (err) {
     errorLogger.error(err, { component: 'usePushNotifications', action: 'clear tokens' });
   }

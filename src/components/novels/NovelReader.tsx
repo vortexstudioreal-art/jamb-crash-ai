@@ -208,6 +208,22 @@ export const NovelReader = ({
     loadChapter();
   }, [chapterId, userEmail, updateProgress]);
 
+  // Flush reading time on unmount — reads latest values via refs so this
+  // effect never needs chapter/novel/saveReadingTime in its deps.
+  // Declared before saveReadingTime, which closes over them.
+  const chapterRef = useRef(chapter);
+  useEffect(() => {
+    chapterRef.current = chapter;
+  }, [chapter]);
+  const novelRef = useRef(novel);
+  useEffect(() => {
+    novelRef.current = novel;
+  }, [novel]);
+  const allChaptersRef = useRef(allChapters);
+  useEffect(() => {
+    allChaptersRef.current = allChapters;
+  }, [allChapters]);
+
   const saveReadingTime = useCallback(async (novelId: string, seconds: number) => {
     // Offline: queue a time delta instead of dropping it. The sync worker
     // merges it onto the server row when connectivity returns.
@@ -236,7 +252,7 @@ export const NovelReader = ({
 
     const currentTime = existingProgress?.total_time_spent_seconds || 0;
     
-    await supabase
+    const { error: updateError } = await supabase
       .from('user_novel_progress')
       .update({
         total_time_spent_seconds: currentTime + seconds,
@@ -244,22 +260,25 @@ export const NovelReader = ({
       })
       .eq('email', userEmail)
       .eq('novel_id', novelId);
+
+    // A dead-but-"online" radio would otherwise discard reading time with no
+    // trace. Queue the same delta the offline branch uses so it lands later.
+    if (updateError) {
+      const ch = chapterRef.current;
+      const nv = novelRef.current;
+      if (ch && nv && seconds > 0) {
+        await addToSyncQueue('novel_progress', {
+          email: userEmail,
+          novel_id: novelId,
+          current_chapter_id: ch.id,
+          chapter_number: ch.chapter_number,
+          total_chapters: allChaptersRef.current.length || 1,
+          time_delta_seconds: Math.round(seconds),
+        }).catch((e) => errorLogger.error(e, { component: 'NovelReader', action: 'queue progress after failed update' }));
+      }
+    }
   }, [userEmail]);
 
-  // Flush reading time on unmount — reads latest values via refs so this
-  // effect never needs chapter/novel/saveReadingTime in its deps
-  const chapterRef = useRef(chapter);
-  useEffect(() => {
-    chapterRef.current = chapter;
-  }, [chapter]);
-  const novelRef = useRef(novel);
-  useEffect(() => {
-    novelRef.current = novel;
-  }, [novel]);
-  const allChaptersRef = useRef(allChapters);
-  useEffect(() => {
-    allChaptersRef.current = allChapters;
-  }, [allChapters]);
   const saveReadingTimeRef = useRef(saveReadingTime);
   useEffect(() => {
     saveReadingTimeRef.current = saveReadingTime;

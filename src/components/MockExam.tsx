@@ -256,7 +256,10 @@ export const MockExam = ({ userEmail, subjects, onExit }: MockExamProps) => {
         return;
       }
 
-      await supabase.from('mock_attempts').insert({
+      // Supabase returns errors in the response rather than throwing, so an
+      // un-checked insert fails silently and the student thinks their mock
+      // was recorded. Check the error explicitly.
+      const { error: mockError } = await supabase.from('mock_attempts').insert({
         email: userEmail,
         mock_name: 'UTME Mock',
         total_score: graded.totalScore,
@@ -270,6 +273,9 @@ export const MockExam = ({ userEmail, subjects, onExit }: MockExamProps) => {
         questions_data: questionsData as unknown as Database['public']['Tables']['mock_attempts']['Row']['questions_data'],
         time_taken_seconds: graded.timeTakenSec,
       });
+      if (mockError) {
+        throw mockError;
+      }
     } catch {
       toast.error('Could not save your mock attempt, but here are your results!');
     } finally {

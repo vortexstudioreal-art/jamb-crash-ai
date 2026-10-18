@@ -278,7 +278,10 @@ export default function Settings() {
     } catch (error) {
       errorLogger.error(error, { component: 'Settings', action: 'update name' });
       setIsEditingName(false);
-      toast.success('Name saved locally! ✨');
+      // Nothing was cached locally — saying so would hide a real failure.
+      // Revert the field to the stored name so the UI matches reality.
+      toast.error('Could not save your name. Check your connection and try again.');
+      setFullName(loadSettings(userEmail).fullName || '');
     }
   };
 
@@ -289,17 +292,23 @@ export default function Settings() {
 
     if (userEmail) {
       try {
-        await supabase
+        const { error } = await supabase
           .from('whatsapp_reminders')
           .upsert({
             email: userEmail,
             phone_number: whatsappNumber || '',
             is_active: enabled
           }, { onConflict: 'email' });
-        
+
+        if (error) throw error;
         toast.success(enabled ? 'WhatsApp reminders enabled!' : 'WhatsApp reminders disabled');
       } catch (error) {
         errorLogger.error(error, { component: 'Settings', action: 'update WhatsApp settings' });
+        // Roll the toggle and local cache back — the server state is
+        // authoritative and it still says otherwise.
+        setWhatsappEnabled(!enabled);
+        saveSettings(userEmail, { ...currentSettings, whatsappEnabled: !enabled });
+        toast.error('Could not save your WhatsApp setting. Check your connection and try again.');
       }
     }
   };

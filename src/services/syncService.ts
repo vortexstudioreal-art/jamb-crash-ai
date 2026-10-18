@@ -59,7 +59,12 @@ export const syncPendingItems = async (): Promise<{ synced: number; failed: numb
 const processSyncItem = async (item: SyncItem): Promise<void> => {
   switch (item.type) {
     case 'quiz_attempt': {
-      const { error } = await supabase.from('quiz_attempts').insert(item.data as Database['public']['Tables']['quiz_attempts']['Insert']);
+      // ignoreDuplicates: a retried attempt whose original insert actually
+      // landed must not create a second row (it would double-count scores).
+      const { error } = await supabase.from('quiz_attempts').upsert(
+        item.data as Database['public']['Tables']['quiz_attempts']['Insert'],
+        { onConflict: 'id', ignoreDuplicates: true }
+      );
       if (error) throw error;
       break;
     }

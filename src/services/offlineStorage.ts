@@ -225,12 +225,31 @@ export const saveQuestions = async (questions: Question[]): Promise<void> => {
 
 export const getQuestions = async (subjects?: string[]): Promise<Question[]> => {
   const db = await getDB();
-  const allQuestions = await db.getAll('questions');
-  
+
   if (subjects && subjects.length > 0) {
-    return allQuestions.filter(q => subjects.includes(q.subject));
+    // Per-subject index reads beat one getAll + JS filter on low-end
+    // phones once the cache holds thousands of rows. Matching is
+    // case-insensitive: callers pass UI labels ("English") while the
+    // cache stores enum values ("english").
+    const wanted = subjects.map((s) => s.toLowerCase());
+    const seen = new Set<string>();
+    const out: Question[] = [];
+    for (const subject of wanted) {
+      const rows = await db.getAllFromIndex('questions', 'by-subject', subject);
+      for (const r of rows) {
+        if (seen.has(r.id)) continue;
+        seen.add(r.id);
+        out.push(r);
+      }
+    }
+    if (out.length > 0) return out;
+    // Fall back to a scan when the exact-case lookup missed (cache written
+    // under mixed-case subjects by an older build).
+    const all = await db.getAll('questions');
+    return all.filter((q) => wanted.includes((q.subject || '').toLowerCase()));
   }
-  return allQuestions;
+
+  return db.getAll('questions');
 };
 
 export const getQuestionsBySubject = async (subject: string): Promise<Question[]> => {

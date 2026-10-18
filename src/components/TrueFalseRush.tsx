@@ -62,6 +62,7 @@ export const TrueFalseRush = ({ userEmail, subjects, isOwner, isAdmin, userRole,
   });
   const [showQuizLimitModal, setShowQuizLimitModal] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval>>();
+  const scoreRef = useRef(0);
   const { canUseFeature, incrementUsage } = useFeatureUsage();
 
   const loadClaims = useCallback(async () => {
@@ -76,22 +77,21 @@ export const TrueFalseRush = ({ userEmail, subjects, isOwner, isAdmin, userRole,
   const finish = useCallback(() => {
     clearInterval(timerRef.current);
     setGameState('finished');
-    setScore((s) => {
-      try {
-        const prev = Number(localStorage.getItem(`${BEST_KEY}_${userEmail}`) || 0);
-        if (s > prev) localStorage.setItem(`${BEST_KEY}_${userEmail}`, String(s));
-      } catch {
-        // ignore
+    // Persist the best and refresh the badge from the SAME value. Writing
+    // inside setScore's updater and reading in setBest's updater raced, so a
+    // fresh personal best could display the previous score.
+    try {
+      const final = scoreRef.current;
+      const prev = Number(localStorage.getItem(`${BEST_KEY}_${userEmail}`) || 0);
+      if (final > prev) {
+        localStorage.setItem(`${BEST_KEY}_${userEmail}`, String(final));
+        setBest(final);
+      } else {
+        setBest(prev);
       }
-      return s;
-    });
-    setBest(() => {
-      try {
-        return Number(localStorage.getItem(`${BEST_KEY}_${userEmail}`) || 0);
-      } catch {
-        return 0;
-      }
-    });
+    } catch {
+      // storage blocked: keep the in-memory score only
+    }
   }, [userEmail]);
 
   const startGame = async () => {
@@ -110,6 +110,7 @@ export const TrueFalseRush = ({ userEmail, subjects, isOwner, isAdmin, userRole,
     setGameState('playing');
     setCurrentIndex(0);
     setScore(0);
+    scoreRef.current = 0;
     setStreak(0);
     setAnswered(0);
     setTimeLeft(GAME_DURATION);
@@ -135,7 +136,11 @@ export const TrueFalseRush = ({ userEmail, subjects, isOwner, isAdmin, userRole,
       const nextStreak = streak + 1;
       setStreak(nextStreak);
       // Streak bonus: every 5th straight correct earns a bonus point.
-      setScore((s) => s + (nextStreak % 5 === 0 ? 2 : 1));
+      setScore((s) => {
+        const next = s + (nextStreak % 5 === 0 ? 2 : 1);
+        scoreRef.current = next;
+        return next;
+      });
     } else {
       setStreak(0);
     }

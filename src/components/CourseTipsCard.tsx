@@ -74,16 +74,18 @@ export const CourseTipsCard = ({ userEmail, userSubjects }: CourseTipsCardProps)
         .eq('email', userEmail)
         .maybeSingle();
 
-      if (existing) {
-        await supabase
-          .from('user_study_preferences')
-          .update({ selected_course_id: course.id })
-          .eq('email', userEmail);
-      } else {
-        await supabase
-          .from('user_study_preferences')
-          .insert({ email: userEmail, selected_course_id: course.id });
-      }
+      // Supabase reports errors in the response rather than throwing, so an
+      // unchecked write reported success while silently dropping the choice.
+      const { error: prefError } = existing
+        ? await supabase
+            .from('user_study_preferences')
+            .update({ selected_course_id: course.id })
+            .eq('email', userEmail)
+        : await supabase
+            .from('user_study_preferences')
+            .insert({ email: userEmail, selected_course_id: course.id });
+
+      if (prefError) throw prefError;
 
       setSelectedCourse(course);
       setCourseTip(getCourseTip(course.course));

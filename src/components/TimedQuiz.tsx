@@ -573,6 +573,10 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit, o
 
     try {
       const quizData = {
+        // Client-generated id makes the queued insert idempotent: if the
+        // server accepted a previous attempt but the response was lost, the
+        // retry hits the primary key instead of double-counting the score.
+        id: crypto.randomUUID(),
         email: userEmail,
         quiz_type: quizType,
         subjects: subjectsUsed,
@@ -589,7 +593,12 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit, o
           .insert(quizData)
           .select('id')
           .single();
-        if (quizError) throw quizError;
+        // A dead-but-"online" radio, an RLS rejection or a blip must not
+        // silently discard the attempt — queue it so the score survives.
+        if (quizError) {
+          await addToSyncQueue('quiz_attempt', quizData);
+          toast('Saved for sync', { description: "We couldn't reach the server — your result will upload automatically." });
+        } else {
         
         // Step 2: Update leaderboard asynchronously (fire-and-forget)
         // This runs in the background and doesn't block the UI.
@@ -612,11 +621,13 @@ export const TimedQuiz = ({ userEmail, subjects, quizType, onComplete, onExit, o
             quizAttemptId: savedAttempt?.id ?? null,
           })
         }).then(res => res.json()).then(data => {
-          if (data.pointsEarned > 0) {
+          if (data?.pointsEarned > 0) {
             toast(`+${data.pointsEarned} leaderboard points earned!`, { description: `${correctCount}/${questions.length} correct answers` });
           }
         }).catch(() => {
+          // Leaderboard is non-critical: the attempt is already stored.
         });
+        }
       } else {
         // Queue for sync when back online
         await addToSyncQueue('quiz_attempt', quizData);

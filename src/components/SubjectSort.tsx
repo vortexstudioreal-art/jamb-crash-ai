@@ -54,6 +54,7 @@ export const SubjectSort = ({ userEmail, subjects, isOwner, isAdmin, userRole, o
   });
   const [showQuizLimitModal, setShowQuizLimitModal] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval>>();
+  const scoreRef = useRef(0);
   const { canUseFeature, incrementUsage } = useFeatureUsage();
 
   const loadRound = useCallback(async () => {
@@ -71,22 +72,21 @@ export const SubjectSort = ({ userEmail, subjects, isOwner, isAdmin, userRole, o
   const finish = useCallback(() => {
     clearInterval(timerRef.current);
     setGameState('finished');
-    setScore((s) => {
-      try {
-        const prev = Number(localStorage.getItem(`${BEST_KEY}_${userEmail}`) || 0);
-        if (s > prev) localStorage.setItem(`${BEST_KEY}_${userEmail}`, String(s));
-      } catch {
-        // ignore
+    // Persist the best and refresh the badge from the SAME value: writing
+    // inside setScore's updater and reading in setBest's updater raced, so
+    // a fresh personal best could display the previous score.
+    try {
+      const final = scoreRef.current;
+      const prev = Number(localStorage.getItem(`${BEST_KEY}_${userEmail}`) || 0);
+      if (final > prev) {
+        localStorage.setItem(`${BEST_KEY}_${userEmail}`, String(final));
+        setBest(final);
+      } else {
+        setBest(prev);
       }
-      return s;
-    });
-    setBest(() => {
-      try {
-        return Number(localStorage.getItem(`${BEST_KEY}_${userEmail}`) || 0);
-      } catch {
-        return 0;
-      }
-    });
+    } catch {
+      // storage blocked: keep the in-memory score only
+    }
   }, [userEmail]);
 
   const startGame = async () => {
@@ -105,6 +105,7 @@ export const SubjectSort = ({ userEmail, subjects, isOwner, isAdmin, userRole, o
     setGameState('playing');
     setCurrentIndex(0);
     setScore(0);
+    scoreRef.current = 0;
     setAnswered(0);
     setTimeLeft(GAME_DURATION);
     setLastAnswer(null);
@@ -125,7 +126,10 @@ export const SubjectSort = ({ userEmail, subjects, isOwner, isAdmin, userRole, o
     rememberQuestionIds([q.id]);
     const correct = subject === q.subject;
     setLastAnswer(correct ? 'correct' : 'wrong');
-    if (correct) setScore((s) => s + 1);
+    if (correct) {
+      scoreRef.current += 1;
+      setScore((s) => s + 1);
+    }
     setAnswered((a) => a + 1);
     setTimeout(() => {
       setLastAnswer(null);

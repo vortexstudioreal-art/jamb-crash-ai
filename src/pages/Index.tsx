@@ -368,15 +368,26 @@ const Index = () => {
         // Keep only the latest entry per email
         const byEmail = new Map<string, string[]>();
         queue.forEach((q) => byEmail.set(q.email, q.subjects));
+        const synced = new Set<string>();
         for (const [email, subjects] of byEmail) {
-          await supabase.from('user_subjects').upsert(
+          const { error } = await supabase.from('user_subjects').upsert(
             { email, subjects: subjects as Database['public']['Enums']['jamb_subject'][], updated_at: new Date().toISOString() },
             { onConflict: 'email' },
           );
+          // Supabase reports failures in the response rather than throwing,
+          // so an unchecked upsert looked successful and the queue was wiped
+          // anyway — losing the student's subject selection for good.
+          if (!error) synced.add(email);
         }
-        localStorage.removeItem('jamb_pending_subjects');
+        if (synced.size === 0) return; // keep the queue for the next attempt
+        const remaining = queue.filter((q) => !synced.has(q.email));
+        if (remaining.length === 0) {
+          localStorage.removeItem('jamb_pending_subjects');
+        } else {
+          localStorage.setItem('jamb_pending_subjects', JSON.stringify(remaining));
+        }
       } catch {
-        // ignore flush errors
+        // ignore flush errors — the queue survives for the next attempt
       }
     };
     flushPendingSubjects();
