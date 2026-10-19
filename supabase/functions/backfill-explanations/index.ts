@@ -68,6 +68,44 @@ function extractJsonArray(text: string): ExplRow[] {
   return out;
 }
 
+// Parse the model's reply and write each accepted explanation. Shared by the
+// first attempt and the in-function rate-limit retry so both paths report
+// identical diagnostics.
+async function applyExplanations(
+  supabase: any,
+  text: string,
+  rows: Array<{ id: string }>,
+  remaining: number | null,
+): Promise<Response> {
+  const parsed = extractJsonArray(text);
+
+  let updated = 0;
+  let rejected = 0;
+  for (const item of parsed) {
+    const idx = (item.n || 0) - 1;
+    if (idx < 0 || idx >= rows.length) continue;
+    const expl = (item.explanation || "").trim();
+    if (!validExplanation(expl)) {
+      rejected++;
+      continue;
+    }
+    // Only fill still-empty rows - never overwrite (race-safe).
+    const { data: upd, error } = await supabase
+      .from("jamb_questions")
+      .update({ explanation: expl })
+      .eq("id", rows[idx].id)
+      .is("explanation", null)
+      .select("id");
+    if (!error && upd && upd.length > 0) updated++;
+  }
+
+  // NOTE: updates are verified per-row via .select("id") above.
+  return new Response(
+    JSON.stringify({ updated, attempted: rows.length, parsed: parsed.length, rejected, remaining: remaining ?? 0 }),
+    { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+  );
+}
+
 function validExplanation(e: string): boolean {
   const t = (e || "").trim();
   // Floor raised from 20 to 50. Short explanations were being stored that just
@@ -190,45 +228,60 @@ Return ONLY a valid JSON array, no other text. Each item exactly: {"n": <questio
     });
     if (!res.ok) {
       const retryAfter = res.headers.get("retry-after");
+      // Transient rate limits are common when a run is paced at 30s. Retry once
+      // in-function after the advised delay so a single blip doesn't silently
+      // drop a whole batch - previously a 429 returned HTTP 200 with
+      // updated:0, which the caller could not distinguish from a real result.
+      if (res.status === 429) {
+        const waitMs = Math.min(parseInt(retryAfter || "0", 10) || 8, 60) * 1000;
+        await new Promise((r) => setTimeout(r, waitMs));
+        const retry = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "openai/gpt-oss-120b",
+            messages: [
+              { role: "system", content: "You are a JAMB teacher writing concise answer explanations. You output only valid JSON arrays." },
+              { role: "user", content: prompt },
+            ],
+            max_tokens: 2000,
+            temperature: 0.2,
+          }),
+        });
+        if (!retry.ok) {
+          return new Response(
+            JSON.stringify({
+              updated: 0,
+              attempted: rows.length,
+              remaining: remaining ?? 0,
+              rateLimited: true,
+              error: `Rate limited twice (Groq ${retry.status})`,
+            }),
+            { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        const retryData = await retry.json();
+        const retryText = retryData.choices?.[0]?.message?.content || "";
+        return await applyExplanations(supabase, retryText, rows, remaining);
+      }
+      // Non-429 failure: report it as a real HTTP error so the caller stops
+      // rather than treating it as a successful zero-progress batch.
       return new Response(
         JSON.stringify({
           updated: 0,
           attempted: rows.length,
           remaining: remaining ?? 0,
-          error: res.status === 429 ? `Rate limited${retryAfter ? `, retry after ${retryAfter}s` : ""}. Try again later.` : `Groq error ${res.status}`,
+          error: `Groq error ${res.status}`,
         }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
     const data = await res.json();
     const text = data.choices?.[0]?.message?.content || "";
-    const parsed = extractJsonArray(text);
-
-    let updated = 0;
-    let rejected = 0;
-    for (const item of parsed) {
-      const idx = (item.n || 0) - 1;
-      if (idx < 0 || idx >= rows.length) continue;
-      const expl = (item.explanation || "").trim();
-      if (!validExplanation(expl)) {
-        rejected++;
-        continue;
-      }
-      // Only fill still-empty rows — never overwrite (race-safe).
-      const { data: upd, error } = await supabase
-        .from("jamb_questions")
-        .update({ explanation: expl })
-        .eq("id", rows[idx].id)
-        .is("explanation", null)
-        .select("id");
-      if (!error && upd && upd.length > 0) updated++;
-    }
-
-    // NOTE: updates are verified per-row via .select("id") above.
-    return new Response(
-      JSON.stringify({ updated, attempted: rows.length, parsed: parsed.length, rejected, remaining: remaining ?? 0 }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return await applyExplanations(supabase, text, rows, remaining);
   } catch (err) {
     console.error("backfill-explanations error:", err);
     return new Response(JSON.stringify({ error: String(err) }), {
