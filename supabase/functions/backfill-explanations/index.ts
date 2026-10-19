@@ -70,11 +70,18 @@ function extractJsonArray(text: string): ExplRow[] {
 
 function validExplanation(e: string): boolean {
   const t = (e || "").trim();
-  if (t.length < 20 || t.length > 1200) return false;
+  // Floor raised from 20 to 50. Short explanations were being stored that just
+  // restated the answer ("This is an idiom expressing jealousy") instead of
+  // teaching the reasoning. A rejected row is not lost - it stays null and is
+  // picked up by a later pass.
+  if (t.length < 50 || t.length > 1200) return false;
   // Maths/science need < > (inequalities, formulas). They render as plain
   // text downstream (stripQuestionHtml / escaped markdown), so only
   // backticks — which corrupt markdown code spans — are rejected.
   if (/`/.test(t)) return false;
+  // A single short clause with no full stop is a label, not an explanation.
+  const sentences = t.split(/[.!?]/).filter((s) => s.trim().length > 0);
+  if (sentences.length < 2) return false;
   return true;
 }
 
@@ -149,7 +156,21 @@ serve(async (req) => {
       )
       .join("\n");
 
-    const prompt = `Write a short explanation for each JAMB UTME multiple-choice question below: 2-3 plain sentences saying why the correct option is right (show key working for maths/physics). Plain text only, no markdown, no HTML, no quotes around the whole text.\n\n${numbered}\n\nReturn ONLY a valid JSON array, no other text. Each item exactly: {"n": <question number>, "explanation": "..."}`;
+    const prompt = `Write a short explanation for each JAMB UTME multiple-choice question below.
+
+Rules:
+- 2-3 plain sentences, always at least 2. Minimum 60 characters.
+- TEACH, do not restate the answer. Never write "This is an idiom expressing jealousy" or "The answer is X" - instead give the reasoning a student can reuse on the next question. Name the rule, principle, or definition being tested, and say briefly why the tempting wrong options fail when they are genuinely tempting.
+- For calculation subjects show the key working and the final answer.
+- Plain text only. No markdown, no HTML, no bullet points, no quotes around the whole text.
+
+Examples of the difference:
+  Weak: "This is an idiom expressing jealousy."
+  Good: "Green with envy is an idiom, not a literal description. Figurative idioms describe a state through a literal image, so 'green' signals jealousy while 'with envy' names the emotion directly."
+
+${numbered}
+
+Return ONLY a valid JSON array, no other text. Each item exactly: {"n": <question number>, "explanation": "..."}`;
 
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",

@@ -24,9 +24,12 @@ interface MockExamProps {
 
 type Phase = 'setup' | 'exam' | 'results';
 
+// UTME subjects only. Commerce and Accounting are WAEC subjects - JAMB never
+// examines them, so offering them here wasted a quarter of the question bank on
+// material that cannot appear in the exam.
 const ALL_SUBJECTS: Database['public']['Enums']['jamb_subject'][] = [
   'mathematics', 'physics', 'chemistry', 'biology', 'literature', 'government',
-  'economics', 'crs', 'irs', 'geography', 'accounting', 'commerce', 'agricultural_science',
+  'economics', 'crs', 'irs', 'geography', 'agricultural_science',
 ];
 
 const formatTime = (totalSec: number): string => {

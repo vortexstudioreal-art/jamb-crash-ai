@@ -36,7 +36,9 @@ interface StudyBoardProps {
   subjects: string[];
 }
 
-const SUBJECTS = ['general', 'english', 'mathematics', 'physics', 'chemistry', 'biology', 'literature', 'government', 'economics', 'crs', 'irs', 'geography', 'accounting', 'commerce', 'agricultural_science'];
+// UTME subjects only - commerce/accounting are WAEC subjects (never examined by
+// JAMB) and are deliberately not offered here.
+const SUBJECTS = ['general', 'english', 'mathematics', 'physics', 'chemistry', 'biology', 'literature', 'government', 'economics', 'crs', 'irs', 'geography', 'agricultural_science'];
 
 const timeAgo = (iso: string): string => {
   const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);

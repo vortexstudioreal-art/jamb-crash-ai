@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Check, BookOpen, Calculator, Atom, FlaskConical, Leaf, BookText, Building2, TrendingUp, Church, Globe, Receipt, ShoppingCart, Wheat, CheckCircle, GraduationCap, AlertTriangle } from 'lucide-react';
+import { Check, BookOpen, Calculator, Atom, FlaskConical, Leaf, BookText, Building2, TrendingUp, Church, Globe, Wheat, CheckCircle, GraduationCap, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,8 +30,6 @@ const SUBJECTS = [
   { id: 'crs', name: 'CRS', icon: Church },
   { id: 'irs', name: 'IRS', icon: Church },
   { id: 'geography', name: 'Geography', icon: Globe },
-  { id: 'accounting', name: 'Accounting', icon: Receipt },
-  { id: 'commerce', name: 'Commerce', icon: ShoppingCart },
   { id: 'agricultural_science', name: 'Agric Science', icon: Wheat },
 ];
 

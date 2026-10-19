@@ -16,10 +16,12 @@ export interface GameQuestion {
   [key: string]: unknown;
 }
 
+// UTME subjects only - commerce/accounting are WAEC subjects, never examined
+// by JAMB, and commerce alone was holding 737 questions of the bank.
 export const ALL_GAME_SUBJECTS = [
   'english', 'mathematics', 'physics', 'chemistry', 'biology',
   'literature', 'government', 'economics', 'crs', 'irs',
-  'geography', 'accounting', 'commerce', 'agricultural_science',
+  'geography', 'agricultural_science',
 ];
 
 // Recently served question IDs (in-memory). Excluded from fresh pools so

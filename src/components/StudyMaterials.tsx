@@ -1638,8 +1638,6 @@ const ALL_SUBJECTS = [
   'literature',
   'government',
   'economics',
-  'commerce',
-  'accounting',
   'crs',
   'irs',
   'agricultural science',
