@@ -55,6 +55,7 @@ const HeroSection = lazy(() => import('@/components/HeroSection').then(m => ({ d
 const HowItWorksSection = lazy(() => import('@/components/HowItWorksSection').then(m => ({ default: m.HowItWorksSection })));
 const PricingSection = lazy(() => import('@/components/PricingSection').then(m => ({ default: m.PricingSection })));
 const PersonalizationForm = lazy(() => import('@/components/PersonalizationForm').then(m => ({ default: m.PersonalizationForm })));
+  const PastQuestionsPreview = lazy(() => import('@/components/PastQuestionsPreview').then(m => ({ default: m.PastQuestionsPreview })));
 const PaymentModal = lazy(() => import('@/components/PaymentModal').then(m => ({ default: m.PaymentModal })));const SubjectSelector = lazy(() => import('@/components/SubjectSelector').then(m => ({ default: m.SubjectSelector })));
 const QuizResults = lazy(() => import('@/components/QuizResults').then(m => ({ default: m.QuizResults })));const Footer = lazy(() => import('@/components/Footer').then(m => ({ default: m.Footer })));
 const FeatureLimitReached = lazy(() => import('@/components/FeatureLimitReached').then(m => ({ default: m.FeatureLimitReached })));const LazyFallback = () => (
@@ -1483,6 +1484,12 @@ const Index = () => {
         />
         <HowItWorksSection onStartTrial={startTrial} />
         <PricingSection onSelectPlan={handleSelectPlan} highlightStandard={highlightStandard} />
+        </Suspense>
+
+        {/* Real past questions on the landing page, so the first page a crawler
+            sees is a genuine content page rather than marketing alone. */}
+        <Suspense fallback={null}>
+          <PastQuestionsPreview />
         </Suspense>
 
         {/* Plan + payment modals must also render on landing — otherwise

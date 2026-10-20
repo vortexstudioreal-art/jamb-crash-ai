@@ -23,6 +23,10 @@ PASSWORD
 .env.local
 .env.*.local
 
+# Backfill runner output (local logs + lock file)
+scripts/backfill*.log
+scripts/backfill.lock
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

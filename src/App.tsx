@@ -26,6 +26,8 @@ const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const About = lazy(() => import("./pages/About"));
 const Contact = lazy(() => import("./pages/Contact"));
 const JambRepeatsPastQuestions = lazy(() => import("./pages/JambRepeatsPastQuestions"));
+const PastQuestions = lazy(() => import("./pages/PastQuestions"));
+const Terms = lazy(() => import("./pages/Terms"));
 const ResellerDashboard = lazy(() => import("./pages/ResellerDashboard"));
 const PinRedeemPage = lazy(() => import("./pages/PinRedeemPage"));
 
@@ -77,6 +79,12 @@ const App = () => {
                   <Route path="/repeated-questions" element={<RepeatedQuestionsPage />} />
                   <Route path="/games" element={<ProtectedRoute><GamesPage /></ProtectedRoute>} />
                   <Route path="/jamb-repeats-past-questions" element={<JambRepeatsPastQuestions />} />
+                  {/* Public past-question browser. These pages are the site's real,
+                      crawlable content - the bank was publicly readable in the
+                      database but was never rendered anywhere. */}
+                  <Route path="/past-questions" element={<PastQuestions />} />
+                  <Route path="/past-questions/:subject" element={<PastQuestions />} />
+                  <Route path="/terms" element={<Terms />} />
                   <Route path="/reseller" element={<ProtectedRoute><ResellerDashboard /></ProtectedRoute>} />
                   <Route path="/redeem-pin" element={<PinRedeemPage />} />
                   <Route path="/privacy" element={<PrivacyPolicy />} />

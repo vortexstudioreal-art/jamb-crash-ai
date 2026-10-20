@@ -1,47 +1,103 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  NOTE: every URL here must be a route that actually exists. /jamb-cbt-practice was
+  listed and did not exist, so it served a 404 to crawlers reviewing the site.
+  Public content pages are listed first because they are the pages with real
+  substance behind the ads.
+-->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://jambcrash.ai/</loc>
+    <loc>https://jamb-crash-ai.vercel.app/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://jambcrash.ai/jamb-repeats-past-questions</loc>
+    <loc>https://jamb-crash-ai.vercel.app/past-questions</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://jamb-crash-ai.vercel.app/past-questions/english</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://jamb-crash-ai.vercel.app/past-questions/mathematics</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://jamb-crash-ai.vercel.app/past-questions/physics</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://jamb-crash-ai.vercel.app/past-questions/chemistry</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://jamb-crash-ai.vercel.app/past-questions/biology</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://jamb-crash-ai.vercel.app/past-questions/literature</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jamb-crash-ai.vercel.app/past-questions/government</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jamb-crash-ai.vercel.app/past-questions/economics</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jamb-crash-ai.vercel.app/past-questions/geography</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jamb-crash-ai.vercel.app/past-questions/agricultural_science</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://jamb-crash-ai.vercel.app/jamb-repeats-past-questions</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://jambcrash.ai/repeated-questions</loc>
+    <loc>https://jamb-crash-ai.vercel.app/repeated-questions</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jambcrash.ai/jamb-cbt-practice</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://jambcrash.ai/games</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://jambcrash.ai/auth</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
-  </url>
-  <url>
-    <loc>https://jambcrash.ai/privacy</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-  </url>
-  <url>
-    <loc>https://jambcrash.ai/about</loc>
+    <loc>https://jamb-crash-ai.vercel.app/games</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://jambcrash.ai/contact</loc>
+    <loc>https://jamb-crash-ai.vercel.app/about</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://jamb-crash-ai.vercel.app/contact</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://jamb-crash-ai.vercel.app/terms</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://jamb-crash-ai.vercel.app/privacy</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>

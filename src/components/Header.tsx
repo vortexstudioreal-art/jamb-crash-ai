@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { BookOpen, User, Key } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
   onGetStarted: () => void;
@@ -30,6 +30,12 @@ export const Header = ({ onGetStarted }: HeaderProps) => {
         </div>
 
         <nav className="hidden md:flex items-center gap-8">
+          <Link
+            to="/past-questions"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Past Questions
+          </Link>
           <a href="#pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             Pricing
           </a>
