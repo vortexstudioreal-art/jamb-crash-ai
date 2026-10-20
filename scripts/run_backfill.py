@@ -79,8 +79,14 @@ def get_token():
 
 
 def remaining(tok):
+    """UTME subjects only. Commerce is excluded from the backfill, so counting it
+    would make the runner report work it is deliberately not doing."""
     H = {'apikey': KEY, 'Authorization': 'Bearer ' + tok, 'Prefer': 'count=exact'}
-    r = req(HOST + '/rest/v1/jamb_questions?select=id&explanation=is.null', headers=H)
+    r = req(
+        HOST + '/rest/v1/jamb_questions?select=id&explanation=is.null'
+        '&subject=in.(%s)' % ','.join(SUBJECTS),
+        headers=H,
+    )
     if isinstance(r, urllib.error.HTTPError) or isinstance(r, Exception):
         return None
     try:
@@ -162,24 +168,28 @@ def run():
                 time.sleep(SPACING)
                 continue
 
-            parsed = d.get('parsed', d.get('written', 0)) or 0
+            updated = d.get('updated', 0) or 0
+            parsed = d.get('parsed', 0) or 0
             rejected = d.get('rejected', 0) or 0
-            written = parsed
-            total_written += written
+            attempted = d.get('attempted', 0) or 0
+            total_written += updated
             left = remaining(tok)
 
-            log('%s: parsed=%s rejected=%s | total written=%d | remaining=%s'
-                % (subject, parsed, rejected, total_written, left))
+            log('%s: attempted=%s parsed=%s updated=%s rejected=%s | total updated=%d | remaining=%s'
+                % (subject, attempted, parsed, updated, rejected, total_written, left))
 
             if left is not None and left <= 0:
-                log('ALL EXPLANATIONS DONE - %d written across %d calls' % (total_written, calls))
+                log('ALL EXPLANATIONS DONE - %d updated across %d calls' % (total_written, calls))
                 return
 
-            # No rows left for this subject: a few in a row means we are done.
-            if parsed == 0 and rejected == 0 and (left is None or d.get('remaining', 1) == 0):
+            # attempted == 0 means the function found no unfilled rows for this
+            # subject - it is done. This must be checked here: the global
+            # "remaining" count never reaches 0 until every subject is finished,
+            # so the old check spun on a finished subject forever.
+            if attempted == 0:
                 empty_streak += 1
                 if empty_streak >= 2:
-                    log('%s exhausted' % subject)
+                    log('%s exhausted (%d unfilled)' % (subject, left if left is not None else -1))
                     break
             else:
                 empty_streak = 0
