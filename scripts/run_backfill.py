@@ -101,7 +101,7 @@ def main():
     lockfile = os.path.join(ROOT, 'scripts', 'backfill.lock')
     if os.path.exists(lockfile):
         age = time.time() - os.path.getmtime(lockfile)
-        if age < 3600:
+        if age < 900:
             log('another run is active (lock %ds old) - exiting' % age)
             return
         log('clearing stale lock (%ds old)' % age)

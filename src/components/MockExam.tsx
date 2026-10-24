@@ -121,7 +121,7 @@ export const MockExam = ({ userEmail, subjects, onExit }: MockExamProps) => {
             const { data, error } = await withTimeout(
               supabase
                 .from('jamb_questions')
-                .select('id, question, option_a, option_b, option_c, option_d, correct_answer, subject, year, explanation, image_url, diagram_svg, is_ai_generated')
+                .select('id, passage, question, option_a, option_b, option_c, option_d, correct_answer, subject, year, explanation, image_url, diagram_svg, is_ai_generated')
                 .eq('subject', section.subject as Database['public']['Enums']['jamb_subject'])
                 .limit(200),
               12000,
@@ -532,6 +532,27 @@ export const MockExam = ({ userEmail, subjects, onExit }: MockExamProps) => {
             >
               {currentQuestion && (
                 <>
+                  <div className="mb-4">
+                    {currentQuestion.passage ? (
+                      <>
+                        <p className="text-xs font-medium text-primary mb-1">
+                          Read the passage and answer the question that follows.
+                        </p>
+                        <div className="rounded-xl border border-blue-50/30 bg-blue-50/40 p-4 mb-4">
+                          <p className="text-sm leading-relaxed text-foreground">
+                            {stripQuestionHtml(currentQuestion.passage)}
+                          </p>
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
+                        {currentQuestion.subject.replace('_', ' ')} &bull; Question {currentQIdx + 1}
+                      </p>
+                    )}
+                    <p className="font-semibold text-foreground text-base leading-relaxed">
+                      {currentQIdx + 1}. {stripQuestionHtml(currentQuestion.question)}
+                    </p>
+                  </div>
                   {currentQuestion.image_url && (
                     <img src={currentQuestion.image_url} alt="Question diagram" className="rounded-xl border max-h-56 mb-4" />
                   )}
@@ -541,9 +562,6 @@ export const MockExam = ({ userEmail, subjects, onExit }: MockExamProps) => {
                       {currentQuestion.is_ai_generated && (
                         <Badge className="bg-violet-500/10 text-violet-500 border-violet-500/30 mb-2">AI Practice</Badge>
                       )}
-                      <p className="font-semibold text-foreground text-base leading-relaxed">
-                        {currentQIdx + 1}. {stripQuestionHtml(currentQuestion.question)}
-                      </p>
                     </div>
                     <ReportQuestionButton questionId={currentQuestion.id} userEmail={userEmail} compact />
                   </div>

@@ -5,6 +5,7 @@ export type MockSubject = Database['public']['Enums']['jamb_subject'];
 export interface MockQuestion {
   id: string;
   question: string;
+  passage?: string | null;       // unseen poem/extract — shown before the question in Mock mode only
   option_a: string;
   option_b: string;
   option_c: string;

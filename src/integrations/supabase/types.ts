@@ -776,6 +776,7 @@ export type Database = {
           option_b: string
           option_c: string
           option_d: string
+          passage?: string | null
           question: string
           subject: Database["public"]["Enums"]["jamb_subject"]
           topics: string[] | null
@@ -793,6 +794,7 @@ export type Database = {
           option_b: string
           option_c: string
           option_d: string
+          passage?: string | null
           question: string
           subject: Database["public"]["Enums"]["jamb_subject"]
           topics?: string[] | null
@@ -810,6 +812,7 @@ export type Database = {
           option_b?: string
           option_c?: string
           option_d?: string
+          passage?: string | null
           question?: string
           subject?: Database["public"]["Enums"]["jamb_subject"]
           topics?: string[] | null
