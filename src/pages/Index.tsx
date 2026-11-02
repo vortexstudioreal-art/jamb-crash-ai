@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, lazy, Suspense, startTransition, useCallback } from 'react';
+import { useState, useEffect, lazy, Suspense, startTransition, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { DashboardHeader } from '@/components/DashboardHeader';
@@ -250,12 +250,13 @@ const Index = () => {
     }
   }, [userSubjects, currentStep]);
 
-  // Set initial step after auth and subjects are resolved to avoid landing flash
-  const initialStepDoneRef = useRef(false);
+  // Set initial step after auth and subjects are resolved to avoid landing flash.
+  // Runs on every change to userEmail/userSubjects/effectiveAdmin so that:
+  // 1. First load: sets landing or dashboard based on auth state
+  // 2. Login/logout: transitions between landing and dashboard correctly
+  // 3. Offline auth blip: if userEmail briefly goes null then back, we re-evaluate
   useEffect(() => {
     if (isFullyLoading) return; // wait for loading to finish
-    if (initialStepDoneRef.current) return; // only set step once
-    initialStepDoneRef.current = true;
     if (userEmail) {
       if (userSubjects.length === 0 && !effectiveAdmin) {
         setCurrentStep('subject-select');

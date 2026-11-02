@@ -304,6 +304,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
+        // When offline and Supabase returns a null session (e.g. failed silent
+        // token refresh), do NOT wipe the user — keep the cached session so
+        // the app doesn't strand the user on the landing page.
+        if (session === null && typeof navigator !== 'undefined' && !navigator.onLine) {
+          setIsLoading(false);
+          return;
+        }
+
         setSession(session);
         setUser(session?.user ?? null);
         

@@ -1,0 +1,76 @@
+{
+  "completed_subjects": [
+    "mathematics",
+    "physics"
+  ],
+  "total_inserted": 1307,
+  "subject_progress": {
+    "mathematics": {
+      "last_page": 100,
+      "inserted": 500
+    },
+    "physics": {
+      "last_page": 16,
+      "inserted": 80
+    },
+    "chemistry": {
+      "last_page": 89,
+      "inserted": 445
+    },
+    "agricultural-science": {
+      "last_page": 8,
+      "inserted": 40
+    },
+    "economics": {
+      "last_page": 8,
+      "inserted": 40
+    },
+    "government": {
+      "last_page": 14,
+      "inserted": 70
+    },
+    "literature-in-english": {
+      "last_page": 16,
+      "inserted": 80
+    },
+    "biology": {
+      "last_page": 32,
+      "inserted": 102
+    },
+    "computer-studies": {
+      "last_page": 0,
+      "inserted": 0
+    },
+    "french": {
+      "last_page": 1,
+      "inserted": 5
+    },
+    "history": {
+      "last_page": 1,
+      "inserted": 5
+    },
+    "music": {
+      "last_page": 1,
+      "inserted": 5
+    },
+    "art": {
+      "last_page": 0,
+      "inserted": 0
+    },
+    "islamic-religious-studies-irs": {
+      "last_page": 8,
+      "inserted": 40
+    },
+    "christian-religious-studies-crs": {
+      "last_page": 1,
+      "inserted": 5
+    }
+  },
+  "failures": {
+    "biology": 0,
+    "islamic-religious-studies-irs": 0,
+    "history": 0,
+    "french": 0,
+    "music": 0
+  }
+}

@@ -26,6 +26,11 @@ PASSWORD
 # Backfill runner output (local logs + lock file)
 scripts/backfill*.log
 scripts/backfill.lock
+scripts/scrape-worker.log
+scrape-worker.log
+scripts/.scrape_worker.lock
+.scrape_worker.lock
+__pycache__/
 
 # Editor directories and files
 .vscode/*
