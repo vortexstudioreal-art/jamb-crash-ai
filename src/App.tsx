@@ -28,6 +28,7 @@ const Contact = lazy(() => import("./pages/Contact"));
 const JambRepeatsPastQuestions = lazy(() => import("./pages/JambRepeatsPastQuestions"));
 const PastQuestions = lazy(() => import("./pages/PastQuestions"));
 const Terms = lazy(() => import("./pages/Terms"));
+const EditorialPage = lazy(() => import("./pages/EditorialPage"));
 const ResellerDashboard = lazy(() => import("./pages/ResellerDashboard"));
 const PinRedeemPage = lazy(() => import("./pages/PinRedeemPage"));
 
@@ -85,6 +86,10 @@ const App = () => {
                   <Route path="/past-questions" element={<PastQuestions />} />
                   <Route path="/past-questions/:subject" element={<PastQuestions />} />
                   <Route path="/terms" element={<Terms />} />
+                  {/* Editorial pages: exam guide + curation policy. AdSense review
+                      asks for evidence of curation and structural maintenance. */}
+                  <Route path="/jamb-utme-guide" element={<EditorialPage route="/jamb-utme-guide" />} />
+                  <Route path="/how-we-curate-questions" element={<EditorialPage route="/how-we-curate-questions" />} />
                   <Route path="/reseller" element={<ProtectedRoute><ResellerDashboard /></ProtectedRoute>} />
                   <Route path="/redeem-pin" element={<PinRedeemPage />} />
                   <Route path="/privacy" element={<PrivacyPolicy />} />

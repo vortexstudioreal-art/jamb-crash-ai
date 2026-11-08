@@ -1,24 +1,30 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 import { visualizer } from "rollup-plugin-visualizer";
+import { prerenderPublicPages } from "./scripts/prerender-public-pages";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), "");
+
+  return {
   server: {
     host: "::",
     port: 8080,
   },
   plugins: [
     react(),
-    mode === "development" && componentTagger(),
+    ...(mode === "development" ? [componentTagger()] : []),
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: null,
       filename: "sw.js",
-      includeAssets: ["favicon.ico", "favicon.png", "robots.txt"],
+      // robots.txt is generated at build time (scripts/prerender-public-pages.ts),
+      // after the service worker manifest is written — so it is not listed here.
+      includeAssets: ["favicon.ico", "favicon.png"],
       manifest: false, // We use our own manifest.webmanifest
       workbox: {
         navigateFallback: "/index.html",
@@ -126,8 +132,11 @@ export default defineConfig(({ mode }) => ({
         ],
       },
     }),
-    process.env.ANALYZE && visualizer({ open: true, gzipSize: true }),
-  ].filter(Boolean),
+    // Emits crawlable HTML for every public route as part of the build, so the
+    // deployed site is never an empty SPA shell to search engines or AdSense.
+    prerenderPublicPages(env),
+    ...(process.env.ANALYZE ? [visualizer({ open: true, gzipSize: true })] : []),
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -181,4 +190,5 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
-}));
+  };
+});

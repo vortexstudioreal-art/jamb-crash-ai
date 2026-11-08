@@ -13,6 +13,7 @@ spread a batch across several subjects instead of draining one.
 """
 
 import argparse
+import html
 import json
 import os
 import re
@@ -107,12 +108,13 @@ def clean_text(s):
     if not s:
         return s
     s = re.sub(r"<[^>]+>", " ", s)
-    s = re.sub(r"&nbsp;", " ", s)
-    s = re.sub(r"&amp;", "&", s)
-    s = re.sub(r"&lt;", "<", s)
-    s = re.sub(r"&gt;", ">", s)
-    s = re.sub(r"&quot;", '"', s)
-    s = re.sub(r"&#39;", "'", s)
+    s = html.unescape(s)
+    # schoolngr publishes UTF-8 that arrives as cp1252 mojibake ("â†’" for "→").
+    # Repair it when it round-trips cleanly, otherwise leave the text as-is.
+    try:
+        s = s.encode("cp1252").decode("utf-8")
+    except (UnicodeEncodeError, UnicodeDecodeError):
+        pass
     s = re.sub(r"\s+", " ", s).strip()
     return s
 
@@ -140,15 +142,17 @@ def scrape_listing_page(slug, page_num):
         year_match = re.search(r"examyear=(\d{4})", block)
         year = int(year_match.group(1)) if year_match else None
         options = {}
+        # schoolngr serves five options (A-E); four are stored, so capture all
+        # five and let build_row pick which one to drop.
         opt_matches = re.findall(
-            r"<li data-option='([A-D])'(?: data-correct=[\"']true[\"'])?>"
-            r"<span class='option-label'>[A-D]</span>(.*?)</li>",
+            r"<li data-option='([A-E])'(?: data-correct=[\"']true[\"'])?>"
+            r"<span class='option-label'>[A-E]</span>(.*?)</li>",
             block,
         )
         for opt_letter, opt_text in opt_matches:
             options[opt_letter] = clean_text(opt_text)
         correct = None
-        correct_match = re.search(r"<li data-option='([A-D])' data-correct=[\"']true[\"']>", block)
+        correct_match = re.search(r"<li data-option='([A-E])' data-correct=[\"']true[\"']>", block)
         if correct_match:
             correct = correct_match.group(1)
         detail_match = re.search(r"href='/classroom/[a-z0-9_-]+/(\d+)'", block)
@@ -191,6 +195,50 @@ def scrape_detail_page(slug, detail_id):
         if not explanation or explanation == "<br/>":
             explanation = None
     return correct, explanation
+
+
+def build_row(slug, q):
+    """Turn a scraped question into a row the bank can actually store.
+
+    The table holds four options (option_a..option_d) but schoolngr serves
+    five. Dropping ``option_e`` blindly would write questions whose
+    correct_answer is "E" with no such option stored, so when E is the answer
+    it is kept and renumbered D, discarding D's distractor instead.
+
+    Returns None when the question cannot be represented faithfully.
+    """
+    options = q.get("options") or {}
+    correct = (q.get("correct_answer") or "").strip().upper()
+    text = (q.get("question") or "").strip()
+
+    if len(text) < 5 or correct not in ("A", "B", "C", "D", "E"):
+        return None
+    if not all(options.get(letter) for letter in ("A", "B", "C", "D")):
+        return None
+
+    if correct == "E":
+        if not options.get("E"):
+            return None
+        picked = [options["A"], options["B"], options["C"], options["E"]]
+        correct = "D"
+    else:
+        picked = [options["A"], options["B"], options["C"], options["D"]]
+
+    return {
+        "subject": SLUG_TO_SUBJECT[slug],
+        "question": text,
+        "option_a": picked[0],
+        "option_b": picked[1],
+        "option_c": picked[2],
+        "option_d": picked[3],
+        "correct_answer": correct,
+        "explanation": q.get("explanation") or "",
+        "year": q.get("year"),
+        "is_ai_generated": False,
+        "topics": [SLUG_TO_SUBJECT[slug]],
+        "image_url": None,
+        "diagram_svg": None,
+    }
 
 
 def process_subject(slug, subject_name, progress, max_pages=None):
@@ -243,24 +291,15 @@ def process_subject(slug, subject_name, progress, max_pages=None):
                 time.sleep(0.05)
 
         rows = []
+        kept = []
         for q in qs:
-            rows.append(
-                {
-                    "subject": subject_name,
-                    "question": q["question"],
-                    "option_a": q["options"].get("A", ""),
-                    "option_b": q["options"].get("B", ""),
-                    "option_c": q["options"].get("C", ""),
-                    "option_d": q["options"].get("D", ""),
-                    "correct_answer": q["correct_answer"] or "",
-                    "explanation": q.get("explanation") or "",
-                    "year": q["year"],
-                    "is_ai_generated": False,
-                    "topics": [subject_name],
-                    "image_url": None,
-                    "diagram_svg": None,
-                }
-            )
+            row = build_row(slug, q)
+            if row is None:
+                continue
+            rows.append(row)
+            kept.append(q)
+        if len(kept) < len(qs):
+            log(f"    Skipped {len(qs) - len(kept)} unusable question(s)")
 
         if rows:
             status, body = supabase_insert(rows)

@@ -1,5 +1,6 @@
 import type { Config } from "tailwindcss";
 import tailwindcssAnimate from "tailwindcss-animate";
+import typography from "@tailwindcss/typography";
 
 export default {
   darkMode: ["class"],
@@ -106,5 +107,8 @@ export default {
       },
     },
   },
-  plugins: [tailwindcssAnimate],
+  // `prose` is used by the editorial pages, About, Terms, Privacy and Contact.
+  // Without this plugin those classes compile to nothing and long-form text
+  // renders as unstyled body copy.
+  plugins: [tailwindcssAnimate, typography],
 } satisfies Config;

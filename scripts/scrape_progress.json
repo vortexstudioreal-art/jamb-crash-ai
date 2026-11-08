@@ -1,9 +1,17 @@
 {
   "completed_subjects": [
     "mathematics",
-    "physics"
+    "physics",
+    "arabic",
+    "hausa",
+    "igbo",
+    "yoruba",
+    "physical-health-education",
+    "music",
+    "french",
+    "art"
   ],
-  "total_inserted": 1307,
+  "total_inserted": 3297,
   "subject_progress": {
     "mathematics": {
       "last_page": 100,
@@ -14,56 +22,64 @@
       "inserted": 80
     },
     "chemistry": {
-      "last_page": 89,
-      "inserted": 445
+      "last_page": 134,
+      "inserted": 575
     },
     "agricultural-science": {
-      "last_page": 8,
-      "inserted": 40
+      "last_page": 55,
+      "inserted": 149
     },
     "economics": {
-      "last_page": 8,
-      "inserted": 40
+      "last_page": 60,
+      "inserted": 127
     },
     "government": {
-      "last_page": 14,
-      "inserted": 70
+      "last_page": 69,
+      "inserted": 77
     },
     "literature-in-english": {
-      "last_page": 16,
-      "inserted": 80
+      "last_page": 66,
+      "inserted": 246
     },
     "biology": {
-      "last_page": 32,
-      "inserted": 102
+      "last_page": 98,
+      "inserted": 359
     },
     "computer-studies": {
-      "last_page": 0,
-      "inserted": 0
-    },
-    "french": {
-      "last_page": 1,
-      "inserted": 5
+      "last_page": 45,
+      "inserted": 129
     },
     "history": {
-      "last_page": 1,
-      "inserted": 5
-    },
-    "music": {
-      "last_page": 1,
-      "inserted": 5
-    },
-    "art": {
-      "last_page": 0,
-      "inserted": 0
+      "last_page": 46,
+      "inserted": 135
     },
     "islamic-religious-studies-irs": {
-      "last_page": 8,
-      "inserted": 40
+      "last_page": 68,
+      "inserted": 190
     },
     "christian-religious-studies-crs": {
-      "last_page": 1,
-      "inserted": 5
+      "last_page": 56,
+      "inserted": 150
+    },
+    "english-language": {
+      "last_page": 50,
+      "inserted": 104
+    },
+    "geography": {
+      "last_page": 50,
+      "inserted": 100
+    },
+    "accounts-principles-of-accounts": {
+      "last_page": 45,
+      "inserted": 121
+    },
+    "commerce": {
+      "last_page": 45,
+      "inserted": 112
+    },
+    "home-economics": {
+      "last_page": 45,
+      "inserted": 131
     }
   },
   "failures": {
@@ -71,6 +87,19 @@
     "islamic-religious-studies-irs": 0,
     "history": 0,
     "french": 0,
-    "music": 0
+    "music": 0,
+    "christian-religious-studies-crs": 0,
+    "government": 0,
+    "economics": 0,
+    "literature-in-english": 0,
+    "english-language": 0,
+    "geography": 0,
+    "agricultural-science": 0,
+    "accounts-principles-of-accounts": 0,
+    "commerce": 0,
+    "chemistry": 0,
+    "computer-studies": 0,
+    "art": 0,
+    "home-economics": 0
   }
 }

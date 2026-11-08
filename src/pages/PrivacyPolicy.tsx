@@ -71,7 +71,48 @@ const PrivacyPolicy = () => {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold">5. Data Storage &amp; Security</h2>
+            <h2 className="text-xl font-semibold">5. Cookies &amp; Advertising</h2>
+            <p>
+              Free users see ads served by Google AdSense. Google and its partners use cookies
+              to serve ads based on your prior visits to this site and other sites on the
+              internet. We do not serve ads to paying users, and ads never interrupt an active
+              quiz or mock exam.
+            </p>
+            <ul className="list-disc pl-6 space-y-1">
+              <li>
+                You can opt out of personalised advertising in{' '}
+                <a
+                  href="https://www.google.com/settings/ads"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Google Ads Settings
+                </a>
+                .
+              </li>
+              <li>
+                You can opt out of third-party vendors' use of cookies for personalised
+                advertising at{' '}
+                <a
+                  href="https://www.aboutads.info/choices/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  aboutads.info
+                </a>
+                .
+              </li>
+              <li>
+                You can block or delete cookies in your browser settings at any time; the app
+                still works without them.
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold">6. Data Storage &amp; Security</h2>
             <p>
               Your data is stored securely on Supabase with row-level security enforced.
               Payments are processed by Paystack over encrypted connections. Passwords are
@@ -80,7 +121,7 @@ const PrivacyPolicy = () => {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold">6. Offline Mode</h2>
+            <h2 className="text-xl font-semibold">7. Offline Mode</h2>
             <p>
               When you enable offline mode, some of your study content and session data are
               cached on your device so you can continue learning without internet.
@@ -89,7 +130,7 @@ const PrivacyPolicy = () => {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold">7. Your Rights</h2>
+            <h2 className="text-xl font-semibold">8. Your Rights</h2>
             <ul className="list-disc pl-6 space-y-1">
               <li>Access, update, or delete your account data at any time from Settings.</li>
               <li>Request a full data export by emailing us.</li>
@@ -98,7 +139,7 @@ const PrivacyPolicy = () => {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold">8. Children's Privacy</h2>
+            <h2 className="text-xl font-semibold">9. Children's Privacy</h2>
             <p>
               Our app is intended for students preparing for JAMB. If you are under 13,
               please use the app with the consent of a parent or guardian.
@@ -106,7 +147,7 @@ const PrivacyPolicy = () => {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold">9. Changes to This Policy</h2>
+            <h2 className="text-xl font-semibold">10. Changes to This Policy</h2>
             <p>
               We may update this policy from time to time. Material changes will be
               announced inside the app.
@@ -114,7 +155,7 @@ const PrivacyPolicy = () => {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold">10. Contact Us</h2>
+            <h2 className="text-xl font-semibold">11. Contact Us</h2>
             <p>
               Questions about privacy? Email us at{' '}
               <a href="mailto:support@jambcrash.ai" className="text-primary hover:underline">

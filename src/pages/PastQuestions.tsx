@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import { useSeo } from '@/hooks/useSeo';
 import { GoogleAdSense } from '@/components/GoogleAdSense';
+import { PUBLIC_SUBJECTS, SUBJECT_BLURBS, SUBJECT_LABELS, type PublicSubject } from '@/data/publicSubjects';
 
 /**
  * Public JAMB past-question browser.
@@ -20,45 +21,8 @@ import { GoogleAdSense } from '@/components/GoogleAdSense';
  * the offline app. Showing the questions is what makes the site substantial.
  */
 
-// UTME subjects only. commerce/accounting are WAEC subjects (never examined by
-// JAMB) and are excluded everywhere else in the app now, so keep them out here.
-export const PUBLIC_SUBJECTS = [
-  'english', 'mathematics', 'physics', 'chemistry', 'biology',
-  'literature', 'government', 'economics', 'crs', 'irs',
-  'geography', 'agricultural_science',
-] as const;
-
-type PublicSubject = (typeof PUBLIC_SUBJECTS)[number];
-
-const SUBJECT_LABELS: Record<string, string> = {
-  english: 'English',
-  mathematics: 'Mathematics',
-  physics: 'Physics',
-  chemistry: 'Chemistry',
-  biology: 'Biology',
-  literature: 'Literature in English',
-  government: 'Government',
-  economics: 'Economics',
-  crs: 'Christian Religious Studies',
-  irs: 'Islamic Religious Studies',
-  geography: 'Geography',
-  agricultural_science: 'Agricultural Science',
-};
-
-const SUBJECT_BLURBS: Record<string, string> = {
-  english: 'Comprehension, lexis and structure, oral English and the unseen passage.',
-  mathematics: 'Number and numeration, algebra, geometry, trigonometry and statistics.',
-  physics: 'Measurements, mechanics, fields, waves, electricity and modern physics.',
-  chemistry: 'Atomic structure, bonding, energetics, equilibria and organic chemistry.',
-  biology: 'Cell biology, ecology, genetics, physiology and evolution.',
-  literature: 'Prose, drama and poetry, including the set texts and unseen extracts.',
-  government: 'Constitutional development, political institutions and international relations.',
-  economics: 'Microeconomics, macroeconomics, economic development and trade.',
-  crs: 'Old and New Testament narratives and Christian doctrine.',
-  irs: 'Quranic passages, Hadith and Islamic jurisprudence.',
-  geography: 'Physical geography, map work, human geography and Nigerian geography.',
-  agricultural_science: 'Crop and animal production, soil science and agricultural economics.',
-};
+// Subject metadata lives in src/data/publicSubjects.ts so the build-time
+// prerenderer generates exactly the pages this component renders.
 
 interface QuestionRow {
   id: string;
@@ -101,16 +65,20 @@ const SubjectIndex = () => {
     let alive = true;
     (async () => {
       try {
-        const { data } = await supabase
-          .from('jamb_questions')
-          .select('subject')
-          .in('subject', PUBLIC_SUBJECTS as unknown as Database['public']['Enums']['jamb_subject'][]);
+        // Count server-side per subject. Selecting the rows instead is capped at
+        // 1000 by PostgREST, which silently undercounts a bank this size.
+        const entries = await Promise.all(
+          PUBLIC_SUBJECTS.map(async (subject) => {
+            const { count } = await supabase
+              .from('jamb_questions')
+              .select('id', { count: 'exact', head: true })
+              .eq('subject', subject as Database['public']['Enums']['jamb_subject'])
+              .eq('is_ai_generated', false);
+            return [subject, count ?? 0] as const;
+          }),
+        );
         if (!alive) return;
-        const tally: Record<string, number> = {};
-        (data || []).forEach((r) => {
-          if (r.subject) tally[r.subject] = (tally[r.subject] || 0) + 1;
-        });
-        setCounts(tally);
+        setCounts(Object.fromEntries(entries));
       } finally {
         if (alive) setLoading(false);
       }
@@ -221,7 +189,7 @@ const SubjectPage = ({ subject }: { subject: PublicSubject }) => {
         .eq('subject', subject)
         .eq('is_ai_generated', false)
         .order('year', { ascending: false })
-        .limit(400);
+        .limit(1000);
       if (err) throw err;
       setQuestions(data || []);
     } catch (e) {

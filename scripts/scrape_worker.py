@@ -30,6 +30,7 @@ Stop it with Ctrl+C. Nothing is lost.
 
 import argparse
 import datetime as dt
+import html
 import json
 import os
 import re
@@ -246,12 +247,14 @@ def clean_text(s):
     if not s:
         return s
     s = re.sub(r"<[^>]+>", " ", s)
-    s = re.sub(r"&nbsp;", " ", s)
-    s = re.sub(r"&amp;", "&", s)
-    s = re.sub(r"&lt;", "<", s)
-    s = re.sub(r"&gt;", ">", s)
-    s = re.sub(r"&quot;", '"', s)
-    s = re.sub(r"&#39;", "'", s)
+    s = html.unescape(s)
+    # schoolngr publishes UTF-8 that arrives as cp1252 mojibake ("â†’" for "→").
+    # Repair it when it round-trips cleanly, otherwise leave the text as-is and
+    # let the quality gate below decide.
+    try:
+        s = s.encode("cp1252").decode("utf-8")
+    except (UnicodeEncodeError, UnicodeDecodeError):
+        pass
     s = re.sub(r"\s+", " ", s).strip()
     return s
 
@@ -265,13 +268,15 @@ def scrape_listing_page(slug, page_num):
         q_text = clean_text(q_match.group(1)) if q_match else ""
         year_match = re.search(r"examyear=(\d{4})", block)
         options = {}
+        # schoolngr serves five options (A-E). Four are stored, so capture all
+        # five and let build_row pick which one to drop.
         for letter, text in re.findall(
-            r"<li data-option='([A-D])'(?: data-correct=[\"']true[\"'])?>"
-            r"<span class='option-label'>[A-D]</span>(.*?)</li>",
+            r"<li data-option='([A-E])'(?: data-correct=[\"']true[\"'])?>"
+            r"<span class='option-label'>[A-E]</span>(.*?)</li>",
             block,
         ):
             options[letter] = clean_text(text)
-        correct_match = re.search(r"<li data-option='([A-D])' data-correct=[\"']true[\"']>", block)
+        correct_match = re.search(r"<li data-option='([A-E])' data-correct=[\"']true[\"']>", block)
         detail_match = re.search(r"href='/classroom/[a-z0-9_-]+/(\d+)'", block)
         if q_text and options:
             questions.append(
@@ -304,12 +309,57 @@ def scrape_detail_page(slug, detail_id):
     return correct, explanation
 
 
+def build_row(slug, q):
+    """Turn a scraped question into a row the bank can actually store.
+
+    The table holds four options (option_a..option_d) but schoolngr serves
+    five. Dropping ``option_e`` blindly would write questions whose
+    correct_answer is "E" with no such option stored, so when E is the answer
+    it is kept and renumbered D, discarding D's distractor instead.
+
+    Returns None when the question cannot be represented faithfully.
+    """
+    options = q.get("options") or {}
+    correct = (q.get("correct_answer") or "").strip().upper()
+    text = (q.get("question") or "").strip()
+
+    if len(text) < 5 or correct not in ("A", "B", "C", "D", "E"):
+        return None
+    if not all(options.get(letter) for letter in ("A", "B", "C", "D")):
+        return None
+
+    if correct == "E":
+        if not options.get("E"):
+            return None
+        picked = [options["A"], options["B"], options["C"], options["E"]]
+        correct = "D"
+    else:
+        picked = [options["A"], options["B"], options["C"], options["D"]]
+
+    return {
+        "subject": SLUG_TO_SUBJECT[slug],
+        "question": text,
+        "option_a": picked[0],
+        "option_b": picked[1],
+        "option_c": picked[2],
+        "option_d": picked[3],
+        "correct_answer": correct,
+        "explanation": q.get("explanation") or "",
+        "year": q.get("year"),
+        "is_ai_generated": False,
+        "topics": [SLUG_TO_SUBJECT[slug]],
+        "image_url": None,
+        "diagram_svg": None,
+    }
+
+
 def visit_subject(slug, progress, known, pages_per_visit):
     """Scrape up to N pages of one subject. Returns 'ok'|'done'|'error'."""
     state = progress["subject_progress"].setdefault(slug, {"last_page": 0, "inserted": 0})
     page = state["last_page"] + 1
     if page > MAX_PAGE:
         return "done"
+    dup_pages = 0
 
     for _ in range(pages_per_visit):
         if STOP:
@@ -342,6 +392,23 @@ def visit_subject(slug, progress, known, pages_per_visit):
         if skipped:
             log(f"{slug} page {page}: skipped {skipped} duplicate(s)")
 
+        # schoolngr keeps paginating long after the bank already holds the
+        # questions, and duplicates cluster (up to ~9 pages seen) before new
+        # content resumes. Ten all-duplicate pages in a row means the rest of
+        # the subject is imported, so stop walking instead of grinding through
+        # another 200 pages of no-ops.
+        if not fresh:
+            dup_pages += 1
+            if dup_pages >= 10:
+                log(f"{slug}: {dup_pages} pages with nothing new - treating as exhausted")
+                progress["subject_progress"].pop(slug, None)
+                if slug not in progress["completed_subjects"]:
+                    progress["completed_subjects"].append(slug)
+                save_json(PROGRESS_FILE, progress)
+                return "done"
+        else:
+            dup_pages = 0
+
         if fresh:
             for q in fresh:
                 if q["detail_id"]:
@@ -351,35 +418,28 @@ def visit_subject(slug, progress, known, pages_per_visit):
                     q["explanation"] = explanation
                     time.sleep(0.05)
 
-            rows = [
-                {
-                    "subject": SLUG_TO_SUBJECT[slug],
-                    "question": q["question"],
-                    "option_a": q["options"].get("A", ""),
-                    "option_b": q["options"].get("B", ""),
-                    "option_c": q["options"].get("C", ""),
-                    "option_d": q["options"].get("D", ""),
-                    "correct_answer": q["correct_answer"] or "",
-                    "explanation": q.get("explanation") or "",
-                    "year": q["year"],
-                    "is_ai_generated": False,
-                    "topics": [SLUG_TO_SUBJECT[slug]],
-                    "image_url": None,
-                    "diagram_svg": None,
-                }
-                for q in fresh
-            ]
-
-            status, body = supabase_insert(rows)
-            if status != 201:
-                log(f"{slug} page {page}: INSERT FAILED {status} {body}")
-                return "error"
-
+            rows = []
+            kept = []
             for q in fresh:
-                known.add(q["question"])
-            state["inserted"] = state.get("inserted", 0) + len(rows)
-            progress["total_inserted"] = progress.get("total_inserted", 0) + len(rows)
-            log(f"{slug} page {page}: inserted {len(rows)}")
+                row = build_row(slug, q)
+                if row is None:
+                    continue
+                rows.append(row)
+                kept.append(q)
+            if len(kept) < len(fresh):
+                log(f"{slug} page {page}: skipped {len(fresh) - len(kept)} unusable question(s)")
+
+            if rows:
+                status, body = supabase_insert(rows)
+                if status != 201:
+                    log(f"{slug} page {page}: INSERT FAILED {status} {body}")
+                    return "error"
+
+                for q in kept:
+                    known.add(q["question"])
+                state["inserted"] = state.get("inserted", 0) + len(rows)
+                progress["total_inserted"] = progress.get("total_inserted", 0) + len(rows)
+                log(f"{slug} page {page}: inserted {len(rows)}")
 
         state["last_page"] = page
         save_json(PROGRESS_FILE, progress)
@@ -464,6 +524,12 @@ def main():
             if result == "done":
                 log(f"{slug}: complete")
                 failures[slug] = 0
+                # "done" also covers hitting MAX_PAGE, which never touches
+                # completed_subjects. Record it here or the queue hands the
+                # same subject straight back (a tight, log-spamming loop).
+                if slug not in progress.get("completed_subjects", []):
+                    progress.setdefault("completed_subjects", []).append(slug)
+                    save_json(PROGRESS_FILE, progress)
                 continue
 
             if result == "error":

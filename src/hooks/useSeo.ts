@@ -1,6 +1,13 @@
 import { useEffect, useRef } from 'react';
 
-const SITE_URL = 'https://jambcrash.ai';
+// Must match the origin the site is actually served from: a canonical pointing
+// at a different domain makes the crawled page look like a duplicate of a site
+// that does not serve it, which is an AdSense review problem. Single source is
+// VITE_SITE_URL (also used by the build-time prerenderer and sitemap).
+const SITE_URL = (
+  (import.meta.env.VITE_SITE_URL as string | undefined) ||
+  (typeof window !== 'undefined' ? window.location.origin : 'https://jambcrash-ai.vercel.app')
+).replace(/\/$/, '');
 const DEFAULT_IMAGE = `${SITE_URL}/og-image.jpg`;
 const SITE_NAME = 'Jamb Crash AI';
 
