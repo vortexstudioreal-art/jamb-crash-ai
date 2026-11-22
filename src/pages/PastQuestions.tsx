@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import { useSeo } from '@/hooks/useSeo';
 import { GoogleAdSense } from '@/components/GoogleAdSense';
-import { PUBLIC_SUBJECTS, SUBJECT_BLURBS, SUBJECT_LABELS, type PublicSubject } from '@/data/publicSubjects';
+import { PUBLIC_SUBJECTS, SUBJECT_BLURBS, SUBJECT_GUIDES, SUBJECT_LABELS, MIN_PUBLISHED_QUESTIONS, type PublicSubject } from '@/data/publicSubjects';
 
 /**
  * Public JAMB past-question browser.
@@ -73,7 +73,9 @@ const SubjectIndex = () => {
               .from('jamb_questions')
               .select('id', { count: 'exact', head: true })
               .eq('subject', subject as Database['public']['Enums']['jamb_subject'])
-              .eq('is_ai_generated', false);
+              .eq('is_ai_generated', false)
+              .not('explanation', 'is', null)
+              .neq('explanation', '');
             return [subject, count ?? 0] as const;
           }),
         );
@@ -89,6 +91,24 @@ const SubjectIndex = () => {
   const total = useMemo(
     () => PUBLIC_SUBJECTS.reduce((sum, s) => sum + (counts[s] || 0), 0),
     [counts],
+  );
+
+  // Only link subjects that have enough explained questions to be worth a
+  // visit. Linking a page holding three questions from the index is how a site
+  // ends up looking like a doorway, which is what the review objected to.
+  const publishedSubjects = useMemo(
+    () =>
+      loading
+        ? PUBLIC_SUBJECTS
+        : PUBLIC_SUBJECTS.filter((s) => (counts[s] || 0) >= MIN_PUBLISHED_QUESTIONS),
+    [counts, loading],
+  );
+  const pendingSubjects = useMemo(
+    () =>
+      loading
+        ? []
+        : PUBLIC_SUBJECTS.filter((s) => (counts[s] || 0) < MIN_PUBLISHED_QUESTIONS),
+    [counts, loading],
   );
 
   return (
@@ -107,12 +127,21 @@ const SubjectIndex = () => {
           JAMB UTME Past Questions by Subject
         </h1>
         <p className="mt-3 text-muted-foreground max-w-2xl">
-          Real past questions with the correct option and a plain-language explanation for
-          each one. Choose a subject below to start revising. Nothing here needs an account.
+          Real UTME past questions, published with the correct option and an explanation of why
+          it is right. We only publish a question once we can explain it, so every page here is
+          worked material rather than a bare answer key. Nothing needs an account.
+        </p>
+        <p className="mt-3 text-muted-foreground max-w-2xl">
+          Each subject page opens with what that paper actually tests, the traps that recur, and a
+          method for working the questions instead of reading them. New to the exam? Start with the{' '}
+          <Link to="/jamb-utme-guide" className="text-primary hover:underline">
+            UTME format and scoring guide
+          </Link>
+          .
         </p>
 
         <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {PUBLIC_SUBJECTS.map((subject) => (
+          {publishedSubjects.map((subject) => (
             <Link
               key={subject}
               to={`/past-questions/${subject}`}
@@ -131,15 +160,29 @@ const SubjectIndex = () => {
           ))}
         </div>
 
+        {pendingSubjects.length > 0 && (
+          <p className="mt-4 text-xs text-muted-foreground">
+            {pendingSubjects.map((s) => SUBJECT_LABELS[s] || s).join(', ')}{' '}
+            {pendingSubjects.length === 1 ? 'is' : 'are'} still having explanations written; those
+            pages publish as the work is finished.
+          </p>
+        )}
+
         <div className="mt-10 rounded-xl border border-border/70 bg-card p-5 text-sm text-muted-foreground">
           <p>
-            <strong className="text-foreground">{total.toLocaleString()} past questions</strong>{' '}
-            across the twelve UTME subjects. Each question shows the four options, the correct
-            answer and a short explanation of why it is correct.
+            <strong className="text-foreground">{total.toLocaleString()} explained past questions</strong>{' '}
+            across the UTME subjects. Each entry shows the four options, the correct answer and a
+            short explanation of why it is correct. Questions we cannot yet explain stay in the
+            app and are not published here.
+          </p>
+          <p className="mt-2">
+            <Link to="/how-we-curate-questions" className="text-primary hover:underline">
+              How these questions are sourced and checked
+            </Link>
           </p>
         </div>
 
-        <GoogleAdSense className="my-8" />
+        {total >= 10 && <GoogleAdSense className="my-8" />}
 
         <section className="mt-8 rounded-xl border border-border/70 bg-card p-6">
           <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -163,12 +206,7 @@ const SubjectIndex = () => {
 
 const SubjectPage = ({ subject }: { subject: PublicSubject }) => {
   const label = SUBJECT_LABELS[subject] || subject;
-
-  useSeo({
-    title: `${label} Past Questions and Answers | Jamb Crash AI`,
-    description: `${SUBJECT_BLURBS[subject] || label} Real ${label} JAMB UTME past questions with the correct options and explanations. Free, no sign-up.`,
-    path: `/past-questions/${subject}`,
-  });
+  const guide = SUBJECT_GUIDES[subject];
 
   const [questions, setQuestions] = useState<QuestionRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -176,18 +214,33 @@ const SubjectPage = ({ subject }: { subject: PublicSubject }) => {
   const [query, setQuery] = useState('');
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
 
+  // A subject still waiting on explanations is not a page worth indexing: it is
+  // a few questions plus a guide. Keep it reachable for anyone who has the link,
+  // but out of the index until the count clears the threshold.
+  const thin = !loading && !error && questions.length < MIN_PUBLISHED_QUESTIONS;
+
+  useSeo({
+    title: `${label} Past Questions and Answers | Jamb Crash AI`,
+    description: `${SUBJECT_BLURBS[subject] || label} Real ${label} JAMB UTME past questions with the correct options and explanations. Free, no sign-up.`,
+    path: `/past-questions/${subject}`,
+    noindex: thin,
+  });
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      // Real UTME past questions only (is_ai_generated = false). Those are public
-      // domain and are what makes this page substantial and authentic. AI-written
-      // practice items stay inside the app where they belong.
+      // Real UTME past questions with an explanation. AI-written practice items
+      // stay inside the app; so do questions we cannot explain yet, because a
+      // page of bare copied questions is replicated exam material with nothing
+      // added, which is what AdSense's "low value content" finding describes.
       const { data, error: err } = await supabase
         .from('jamb_questions')
         .select('id, subject, question, option_a, option_b, option_c, option_d, correct_answer, explanation, year, topics, is_ai_generated')
         .eq('subject', subject)
         .eq('is_ai_generated', false)
+        .not('explanation', 'is', null)
+        .neq('explanation', '')
         .order('year', { ascending: false })
         .limit(1000);
       if (err) throw err;
@@ -228,9 +281,55 @@ const SubjectPage = ({ subject }: { subject: PublicSubject }) => {
       <main className="container max-w-4xl px-4 py-10">
         <h1 className="text-3xl font-bold tracking-tight">{label} Past Questions</h1>
         <p className="mt-3 text-muted-foreground max-w-2xl">
-          {SUBJECT_BLURBS[subject]}. Real UTME past questions with answers and explanations.
-          Try each one before revealing the answer.
+          {SUBJECT_BLURBS[subject]} Real UTME past questions, each published with the correct
+          option and an explanation of why it is right. Try each one before revealing the answer.
         </p>
+
+        {guide && (
+          <section className="mt-8 rounded-xl border border-border/70 bg-card p-6">
+            <h2 className="text-xl font-semibold">{guide.heading}</h2>
+            {guide.paragraphs.map((p) => (
+              <p key={p.slice(0, 24)} className="mt-3 text-sm text-muted-foreground leading-relaxed">
+                {p}
+              </p>
+            ))}
+            <h3 className="mt-5 text-sm font-semibold">Traps that cost marks</h3>
+            <ul className="mt-2 space-y-1.5 text-sm text-muted-foreground">
+              {guide.traps.map((t) => (
+                <li key={t.slice(0, 24)} className="flex gap-2">
+                  <span className="text-primary">•</span>
+                  <span>{t}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 text-xs text-muted-foreground">
+              Reviewed by the Jamb Crash editorial team. Questions and explanations are corrected
+              as errors are reported —{' '}
+              <Link to="/how-we-curate-questions" className="text-primary hover:underline">
+                how these questions are curated
+              </Link>
+              .
+            </p>
+          </section>
+        )}
+
+        {!loading && !error && (
+          <p className="mt-6 text-sm text-muted-foreground">
+            {thin ? (
+              <>
+                <strong className="text-foreground">{questions.length}</strong>{' '}
+                {questions.length === 1 ? 'question is' : 'questions are'} published with an
+                explanation so far. The rest of the {label} bank is in the app and appears here as
+                each explanation is written and reviewed.
+              </>
+            ) : (
+              <>
+                <strong className="text-foreground">{questions.length}</strong> explained {label}{' '}
+                questions below, newest first.
+              </>
+            )}
+          </p>
+        )}
 
         {!loading && !error && (
           <div className="mt-6 relative">
@@ -328,7 +427,9 @@ const SubjectPage = ({ subject }: { subject: PublicSubject }) => {
           })}
         </ol>
 
-        <GoogleAdSense className="my-8" />
+        {!thin && questions.length >= MIN_PUBLISHED_QUESTIONS && (
+          <GoogleAdSense className="my-8" />
+        )}
 
         <section className="mt-8 rounded-xl border border-border/70 bg-card p-6">
           <h2 className="text-xl font-semibold">Practise {label} under exam conditions</h2>

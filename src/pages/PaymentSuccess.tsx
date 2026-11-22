@@ -7,6 +7,7 @@ import { usePaystack } from '@/hooks/usePaystack';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSeo } from '@/hooks/useSeo';
 import { errorLogger } from '@/services/errorLogger';
+import { SUPPORT_EMAIL } from '@/config/site';
 
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
@@ -109,7 +110,7 @@ const PaymentSuccess = () => {
               variant="outline"
               size="lg"
               className="w-full"
-              onClick={() => window.location.href = 'mailto:support@jambcrash.ai'}
+              onClick={() => window.location.href = `mailto:${SUPPORT_EMAIL}`}
             >
               Contact Support
             </Button>

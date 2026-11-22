@@ -68,6 +68,11 @@ export const DownloadManager = ({ userEmail, subjects }: DownloadManagerProps) =
       toast.success('All data downloaded for offline use! 📱');
       await loadStorageInfo();
       setNeedsRefresh(false);
+    } else if (result.partial) {
+      toast.warning('Saved part of your offline pack', {
+        description: `Still missing: ${result.warnings.join(', ')}. Download again when your connection is stable.`,
+      });
+      await loadStorageInfo();
     } else {
       toast.error(result.error || 'Failed to download data');
     }

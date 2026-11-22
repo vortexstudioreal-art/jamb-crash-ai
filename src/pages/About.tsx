@@ -61,7 +61,7 @@ const About = () => {
               </li>
               <li className="flex gap-3">
                 <Brain className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                <span><strong>AI tutoring and explanations</strong> for every question, with diagrams for science and mathematics topics.</span>
+                <span><strong>Explanations you can learn from</strong> — every question in the app carries an explanation of the rule behind the answer, and AI tutoring is there when you want to go deeper.</span>
               </li>
               <li className="flex gap-3">
                 <Target className="w-5 h-5 text-primary shrink-0 mt-0.5" />

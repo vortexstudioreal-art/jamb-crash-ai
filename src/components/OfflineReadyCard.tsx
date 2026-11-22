@@ -60,6 +60,11 @@ export const OfflineReadyCard = ({ userEmail, subjects }: OfflineReadyCardProps)
     if (result.success) {
       toast.success('Study data saved. You can now use Jamb Crash offline.');
       refresh();
+    } else if (result.partial) {
+      toast.warning('Most of your study data was saved', {
+        description: `Still missing: ${result.warnings.join(', ')}. Tap download again when your connection is stable.`,
+      });
+      refresh();
     } else {
       toast.error(result.error || 'Download failed. Try again.');
     }

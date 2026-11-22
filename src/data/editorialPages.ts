@@ -56,31 +56,34 @@ const GUIDE_HTML = `
 </ol>
 
 <h2>What you will find on this site</h2>
-<p>Every subject below has a free, browsable set of past questions with the correct option marked and an explanation where one exists. Nothing is behind an account. If you want the questions timed, scored and tracked by topic, that is what the app adds — but the raw material is here, open, and it is enough to start.</p>
+<p>Every subject below has a free, browsable set of past questions with the correct option marked and an explanation of why it is right. Nothing is behind an account. If you want the questions timed, scored and tracked by topic, that is what the app adds — but the raw material is here, open, and it is enough to start.</p>
 <p><a href="/past-questions">Browse past questions by subject</a> · <a href="/how-we-curate-questions">How we curate these questions</a></p>
 `;
 
 const CURATION_HTML = `
 <h2>Where the questions come from</h2>
-<p>The questions published on the public pages are transcribed from publicly available UTME past papers. They are not invented, paraphrased or machine-generated. Each item is typed from the paper, then checked against the source before it enters the bank, because transcription errors — a dropped "not", a swapped option, a mislabelled answer — are the most common way a past-question site becomes useless.</p>
+<p>The questions published on these pages are real UTME past-paper questions, compiled from publicly available past-question archives rather than written for this site. They are reproduced for revision. We do not claim to have re-typed every paper from a primary JAMB document, and where a compiled source contains an error, the error can reach us too — which is why corrections are handled in public, below.</p>
 
 <h2>What we check before publishing</h2>
 <ul>
   <li><strong>Four options, one answer.</strong> Every question must have exactly four answer options and exactly one of them must be correct. An item that fails this is held back rather than published.</li>
-  <li><strong>The answer must exist.</strong> A question whose recorded correct option has no matching option text is rejected. This sounds obvious; it is the failure mode that produces unanswerable questions on scraped sites.</li>
-  <li><strong>Duplicates are dropped.</strong> The same question often appears across several papers. Only one copy is published per subject.</li>
+  <li><strong>The answer must exist.</strong> A question whose recorded correct option has no matching option text is rejected. This is the failure mode that produces unanswerable questions on scraped sites.</li>
+  <li><strong>An explanation must exist.</strong> We publish a question only when it carries an explanation of why the correct option is right. Questions without one stay inside the app until an explanation is written, because a bare question with no commentary adds nothing to the paper it was copied from.</li>
+  <li><strong>Duplicates are dropped.</strong> The same question often appears across several papers. Only one copy is kept, so a subject page does not repeat itself.</li>
   <li><strong>Text is cleaned, not rewritten.</strong> Encoding artefacts and stray markup are repaired. The wording of the question itself is left alone, because the wording is the exam.</li>
-  <li><strong>Explanations are added where we have them.</strong> Where no explanation exists, the answer is still shown. We would rather publish a correct answer with no commentary than a confident guess dressed up as an explanation.</li>
 </ul>
 
+<h2>How the explanations are written</h2>
+<p>Explanations are written for this site by the editorial team. Some are drafted with AI assistance and then checked and edited before publication; none is published unreviewed. They are meant to teach the rule behind the answer, not to restate it, and a short one-line gloss is treated as unfinished work rather than a finished explanation. When an explanation cannot be written confidently, the question is not published rather than being published with a guess.</p>
+
 <h2>What is not published here</h2>
-<p>Practice questions written for the app are kept inside the app. The public pages carry past-paper questions only, which is what makes them worth reading and worth citing.</p>
+<p>Practice questions written for the app are kept inside the app. The public pages carry past-paper questions only, each with its explanation, which is what makes them worth reading and worth citing.</p>
 
 <h2>Corrections</h2>
-<p>Question banks go wrong. A wrong answer key is worse than no answer key, because students memorise it. If you find a question with a wrong answer, a garbled option or a duplicate, email <a href="mailto:support@jambcrash.ai?subject=Question%20correction">support@jambcrash.ai</a> with the subject and the question text. Corrections are applied to the bank, and the public page regenerates from the corrected bank on the next deploy.</p>
+<p>Question banks go wrong. A wrong answer key is worse than no answer key, because students memorise it. If you find a question with a wrong answer, a garbled option or a duplicate, tell us through the <a href="/contact">contact page</a> with the subject and the question text. Corrections are applied to the bank, and the public page regenerates from the corrected bank on the next deploy.</p>
 
 <h2>How the bank is maintained</h2>
-<p>The public pages are generated from the live question bank at build time, not hand-edited, so a correction in the bank cannot leave a stale copy on the site. Questions are reviewed each exam cycle, and new papers are added as they become available. Counts shown on each subject page come from the bank itself rather than a marketing figure.</p>
+<p>The public pages are generated from the live question bank at build time, not hand-edited, so a correction in the bank cannot leave a stale copy on the site. New papers are added as they become available, and explanation coverage is the constraint on what gets published: the bank grows faster than the explanations do, and the public pages deliberately lag behind it. Counts shown on each subject page come from the bank itself rather than a marketing figure.</p>
 
 <h2>Independence</h2>
 <p>Jamb Crash AI is not affiliated with, endorsed by or connected to the Joint Admissions and Matriculation Board. Past questions are reproduced for revision purposes. Always confirm syllabus details against official JAMB publications.</p>

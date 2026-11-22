@@ -1,13 +1,8 @@
 import { useEffect, useRef } from 'react';
+import { SITE_URL } from '@/config/site';
 
-// Must match the origin the site is actually served from: a canonical pointing
-// at a different domain makes the crawled page look like a duplicate of a site
-// that does not serve it, which is an AdSense review problem. Single source is
-// VITE_SITE_URL (also used by the build-time prerenderer and sitemap).
-const SITE_URL = (
-  (import.meta.env.VITE_SITE_URL as string | undefined) ||
-  (typeof window !== 'undefined' ? window.location.origin : 'https://jambcrash-ai.vercel.app')
-).replace(/\/$/, '');
+// SITE_URL comes from src/config/site.ts so canonicals, Open Graph URLs,
+// JSON-LD and the share card all point at the same origin.
 const DEFAULT_IMAGE = `${SITE_URL}/og-image.jpg`;
 const SITE_NAME = 'Jamb Crash AI';
 

@@ -9,9 +9,16 @@
     "physical-health-education",
     "music",
     "french",
-    "art"
+    "art",
+    "chemistry",
+    "computer-studies",
+    "history",
+    "home-economics",
+    "islamic-religious-studies-irs",
+    "christian-religious-studies-crs",
+    "biology"
   ],
-  "total_inserted": 3297,
+  "total_inserted": 6428,
   "subject_progress": {
     "mathematics": {
       "last_page": 100,
@@ -22,44 +29,36 @@
       "inserted": 80
     },
     "chemistry": {
-      "last_page": 134,
-      "inserted": 575
+      "last_page": 200,
+      "inserted": 895
     },
     "agricultural-science": {
-      "last_page": 55,
-      "inserted": 149
+      "last_page": 61,
+      "inserted": 179
     },
     "economics": {
       "last_page": 60,
       "inserted": 127
     },
     "government": {
-      "last_page": 69,
-      "inserted": 77
+      "last_page": 169,
+      "inserted": 575
     },
     "literature-in-english": {
       "last_page": 66,
       "inserted": 246
     },
     "biology": {
-      "last_page": 98,
-      "inserted": 359
-    },
-    "computer-studies": {
-      "last_page": 45,
-      "inserted": 129
-    },
-    "history": {
-      "last_page": 46,
-      "inserted": 135
+      "last_page": 200,
+      "inserted": 867
     },
     "islamic-religious-studies-irs": {
-      "last_page": 68,
-      "inserted": 190
+      "last_page": 200,
+      "inserted": 714
     },
     "christian-religious-studies-crs": {
-      "last_page": 56,
-      "inserted": 150
+      "last_page": 200,
+      "inserted": 866
     },
     "english-language": {
       "last_page": 50,
@@ -70,16 +69,12 @@
       "inserted": 100
     },
     "accounts-principles-of-accounts": {
-      "last_page": 45,
-      "inserted": 121
+      "last_page": 53,
+      "inserted": 161
     },
     "commerce": {
-      "last_page": 45,
-      "inserted": 112
-    },
-    "home-economics": {
-      "last_page": 45,
-      "inserted": 131
+      "last_page": 48,
+      "inserted": 127
     }
   },
   "failures": {
@@ -89,11 +84,11 @@
     "french": 0,
     "music": 0,
     "christian-religious-studies-crs": 0,
-    "government": 0,
-    "economics": 0,
-    "literature-in-english": 0,
-    "english-language": 0,
-    "geography": 0,
+    "government": 1,
+    "economics": 1,
+    "literature-in-english": 1,
+    "english-language": 1,
+    "geography": 1,
     "agricultural-science": 0,
     "accounts-principles-of-accounts": 0,
     "commerce": 0,

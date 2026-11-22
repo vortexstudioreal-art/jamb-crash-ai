@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Shield } from 'lucide-react';
 import { useSeo } from '@/hooks/useSeo';
+import { SUPPORT_EMAIL } from '@/config/site';
 
 const PrivacyPolicy = () => {
   useSeo({
@@ -158,8 +159,8 @@ const PrivacyPolicy = () => {
             <h2 className="text-xl font-semibold">11. Contact Us</h2>
             <p>
               Questions about privacy? Email us at{' '}
-              <a href="mailto:support@jambcrash.ai" className="text-primary hover:underline">
-                support@jambcrash.ai
+              <a href={`mailto:${SUPPORT_EMAIL}`} className="text-primary hover:underline">
+                {SUPPORT_EMAIL}
               </a>
               .
             </p>

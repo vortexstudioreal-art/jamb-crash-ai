@@ -2229,6 +2229,17 @@ export type Database = {
         | "accounting"
         | "commerce"
         | "agricultural_science"
+        | "arabic"
+        | "art"
+        | "computer_studies"
+        | "french"
+        | "hausa"
+        | "history"
+        | "home_economics"
+        | "igbo"
+        | "music"
+        | "physical_health_education"
+        | "yoruba"
       pin_status: "available" | "redeemed" | "expired" | "revoked"
     }
     CompositeTypes: {
@@ -2387,6 +2398,17 @@ export const Constants = {
         "accounting",
         "commerce",
         "agricultural_science",
+        "arabic",
+        "art",
+        "computer_studies",
+        "french",
+        "hausa",
+        "history",
+        "home_economics",
+        "igbo",
+        "music",
+        "physical_health_education",
+        "yoruba",
       ],
       pin_status: ["available", "redeemed", "expired", "revoked"],
     },

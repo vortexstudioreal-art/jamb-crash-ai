@@ -22,6 +22,7 @@ import { DashboardSkeleton } from '@/components/DashboardSkeleton';
 import { BottomNav, type DashboardTab } from '@/components/BottomNav';
 import { DesktopSidebar } from '@/components/DesktopSidebar';
 import { useSeo } from '@/hooks/useSeo';
+import { SITE_URL } from '@/config/site';
 import { useFeatureAccess } from '@/components/FeatureGate';
 import type { Step, QuizType } from '@/types/dashboard';
 import { errorLogger } from '@/services/errorLogger';
@@ -95,14 +96,14 @@ const Index = () => {
 
   useSeo({
     title: 'Jamb Crash AI | AI-Powered JAMB & UTME Preparation',
-    description: 'Master JAMB with AI-powered study plans, past questions from 2000-2024, personalized timetables, flashcards, and daily WhatsApp reminders. Score 300+ guaranteed.',
+    description: 'Master JAMB with AI-powered study plans, real past questions with explanations, personalised timetables and flashcards. Works offline.',
     path: '/',
     jsonLd: {
       '@context': 'https://schema.org',
       '@type': 'Product',
       name: 'Jamb Crash AI',
       description: 'AI-powered JAMB and UTME preparation platform with past questions, study plans, flashcards, and score prediction.',
-      url: 'https://jambcrash.ai/',
+      url: `${SITE_URL}/`,
       brand: { '@type': 'Brand', name: 'Jamb Crash AI' },
       offers: {
         '@type': 'AggregateOffer',
@@ -316,13 +317,16 @@ const Index = () => {
       
       setSubjectsLoading(false);
 
-      // Load weak subject from quiz history
-      const { data: quizData } = await supabase
-        .from('quiz_attempts')
-        .select('subjects, correct_answers, total_questions')
-        .eq('email', userEmail)
-        .order('created_at', { ascending: false })
-        .limit(5);
+      // Load weak subject from quiz history (online only — offline this would
+      // just hang on a dead connection and delay the first render).
+      const quizData = navigator.onLine
+        ? (await supabase
+            .from('quiz_attempts')
+            .select('subjects, correct_answers, total_questions')
+            .eq('email', userEmail)
+            .order('created_at', { ascending: false })
+            .limit(5)).data
+        : null;
 
       if (quizData && quizData.length > 0) {
         const subjectScores: Record<string, { correct: number; total: number }> = {};

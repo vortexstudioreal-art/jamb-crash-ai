@@ -4,7 +4,6 @@ import { startTransition, useState } from 'react';import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { DashboardTab } from '@/components/BottomNav';
-import { GoogleAdSense } from '@/components/GoogleAdSense';
 
 type QuickStartStep = 'quiz' | 'mock' | 'study-plan';
 
@@ -181,11 +180,6 @@ export const DesktopSidebar = ({
         </div>
         )}
       </nav>
-
-      {/* AdSense — Sidebar */}
-      <div className="px-3 py-3 shrink-0">
-        <GoogleAdSense className="rounded-xl overflow-hidden" />
-      </div>
 
       {/* Bottom Actions */}
       <div className="px-3 py-3 border-t border-border space-y-1 shrink-0">

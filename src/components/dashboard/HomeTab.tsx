@@ -9,7 +9,6 @@ import { StudyPlanTodayCard } from '@/components/StudyPlanTodayCard';
 import { MasteryOverview } from '@/components/MasteryOverview';
 import { ExamDayChecklist } from '@/components/ExamDayChecklist';
 import { RenewalNudge } from '@/components/RenewalNudge';
-import { GoogleAdSense } from '@/components/GoogleAdSense';
 import type { DashboardContext } from '@/types/dashboard';
 
 interface HomeTabProps extends DashboardContext {
@@ -148,9 +147,6 @@ export const HomeTab = ({
         </div>
         <Target className="w-10 h-10 text-primary/70 shrink-0" />
       </div>
-
-      {/* AdSense */}
-      <GoogleAdSense className="my-4" />
     </motion.div>
   );
 };

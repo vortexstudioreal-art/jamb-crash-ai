@@ -2,11 +2,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type { Plugin } from 'vite';
 import {
+  MIN_PUBLISHED_QUESTIONS,
   PUBLIC_SUBJECTS,
   SUBJECT_LABELS,
   SUBJECT_BLURBS,
+  SUBJECT_GUIDES,
 } from '../src/data/publicSubjects';
 import { EDITORIAL_PAGES } from '../src/data/editorialPages';
+import { resolveSupportEmail } from '../src/data/supportEmail';
 
 /**
  * Prerender the public, content-bearing routes to static HTML *during*
@@ -51,6 +54,13 @@ interface Page {
   body: string;
   /** Minimum visible characters for the page to count as substantive. */
   minChars: number;
+  /**
+   * Keep the page out of the index and the sitemap. Used for subject pages whose
+   * explained-question count is still below MIN_PUBLISHED_QUESTIONS: the guide
+   * is genuine content, but a page with a handful of questions is thin and
+   * should not be submitted for review as if it were a complete subject.
+   */
+  noindex?: boolean;
 }
 
 const escapeHtml = (value: string): string =>
@@ -80,10 +90,15 @@ async function fetchQuestions(
   supabaseKey: string,
   subject: string,
 ): Promise<QuestionRow[]> {
+  // Only questions we can explain are published. A page of bare copied questions
+  // with an answer key is replicated exam material with nothing added to it, and
+  // that is precisely what "low value content" describes. The explanation is the
+  // added value, so it is a publication requirement, not a nice-to-have.
   const base =
     `${supabaseUrl.replace(/\/$/, '')}/rest/v1/jamb_questions` +
     `?select=question,option_a,option_b,option_c,option_d,correct_answer,explanation,year` +
     `&subject=eq.${encodeURIComponent(subject)}&is_ai_generated=eq.false` +
+    `&explanation=not.is.null&explanation=neq.` +
     `&order=year.desc.nullslast,id.desc`;
 
   const rows: QuestionRow[] = [];
@@ -112,8 +127,27 @@ async function fetchQuestions(
   return rows;
 }
 
-function questionList(rows: QuestionRow[], label: string): string {
-  if (rows.length === 0) return '';
+/**
+ * The editorial introduction for a subject page. Written for this site, shared
+ * with the React page through src/data/publicSubjects.ts, and the reason a
+ * subject page is more than a copied question list.
+ */
+function subjectGuideHtml(subject: string): string {
+  const guide = SUBJECT_GUIDES[subject];
+  if (!guide) return '';
+  return (
+    `<h2>${escapeHtml(guide.heading)}</h2>` +
+    guide.paragraphs.map((p) => `<p>${escapeHtml(p)}</p>`).join('') +
+    `<h3>Traps that cost marks</h3><ul>` +
+    guide.traps.map((t) => `<li>${escapeHtml(t)}</li>`).join('') +
+    `</ul>` +
+    `<p><small>Reviewed by the Jamb Crash editorial team. Questions and explanations are ` +
+    `corrected as errors are reported — <a href="/how-we-curate-questions">how these questions ` +
+    `are curated</a>.</small></p>`
+  );
+}
+
+function questionList(rows: QuestionRow[], label: string): string {  if (rows.length === 0) return '';
   return `<ol>${rows
     .map((row) => {
       const correct = (row.correct_answer || '').trim().toUpperCase();
@@ -151,6 +185,7 @@ export function prerenderPublicPages(env: Record<string, string>): Plugin {
       }
 
       const siteUrl = (env.VITE_SITE_URL || SITE_URL_FALLBACK).replace(/\/$/, '');
+      const supportEmail = resolveSupportEmail(env.VITE_SUPPORT_EMAIL);
       const supabaseUrl = env.VITE_SUPABASE_URL;
       const supabaseKey = env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
@@ -206,10 +241,28 @@ export function prerenderPublicPages(env: Record<string, string>): Plugin {
       }
 
       // ---- pages -----------------------------------------------------------
-      const subjectLinks = PUBLIC_SUBJECTS.map(
-        (subject) =>
-          `<li><a href="/past-questions/${subject}">${SUBJECT_LABELS[subject]}</a> — ${counts[subject]} questions. ${SUBJECT_BLURBS[subject]}</li>`,
-      ).join('');
+      // A subject page is only "published" once it carries enough explained
+      // questions to be worth a visitor's time. Thin subjects still get a page
+      // (guide + honest note), but noindexed and out of the sitemap.
+      const publishedSubjects = PUBLIC_SUBJECTS.filter(
+        (subject) => (counts[subject] || 0) >= MIN_PUBLISHED_QUESTIONS,
+      );
+      const pendingSubjects = PUBLIC_SUBJECTS.filter(
+        (subject) => (counts[subject] || 0) < MIN_PUBLISHED_QUESTIONS,
+      );
+
+      const subjectLinks = publishedSubjects
+        .map(
+          (subject) =>
+            `<li><a href="/past-questions/${subject}">${SUBJECT_LABELS[subject]}</a> — ${counts[subject]} questions with explanations. ${SUBJECT_BLURBS[subject]}</li>`,
+        )
+        .join('');
+      const pendingNote =
+        pendingSubjects.length > 0
+          ? `<p><small>${pendingSubjects
+              .map((s) => SUBJECT_LABELS[s])
+              .join(', ')} ${pendingSubjects.length === 1 ? 'is' : 'are'} still having explanations written. Those pages publish as the work is finished.</small></p>`
+          : '';
 
       const pages: Page[] = [
         {
@@ -223,14 +276,15 @@ export function prerenderPublicPages(env: Record<string, string>): Plugin {
 <p>Jamb Crash AI is a revision platform for the Nigerian JAMB UTME. It publishes real UTME past questions with the correct answers and plain-language explanations, then turns them into timed practice, mock exams and study plans that adapt to the topics you keep getting wrong.</p>
 <h2>What you can do here</h2>
 <ul>
-  <li><strong>Browse past questions by subject</strong> — twelve UTME subjects, with answers and explanations, no account needed.</li>
+  <li><strong>Browse past questions by subject</strong> — every core UTME subject, with answers and explanations, no account needed.</li>
   <li><strong>Take timed quizzes and full mock exams</strong> that follow the real UTME structure: English plus three subjects.</li>
   <li><strong>Get AI explanations</strong> for the questions you miss, with a daily free allowance.</li>
   <li><strong>Study offline</strong> — the app caches your material so revision does not stop when data runs out.</li>
 </ul>
 <h2>Past questions by subject</h2>
 <ul>${subjectLinks}</ul>
-<p>${total.toLocaleString()} past questions and answers are published here for free.</p>
+${pendingNote}
+<p>${total.toLocaleString()} past questions with explanations are published here for free.</p>
 <h2>How to use it</h2>
 <ol>
   <li>Pick a subject and work through the questions. Every one shows the correct option and why.</li>
@@ -248,9 +302,10 @@ export function prerenderPublicPages(env: Record<string, string>): Plugin {
           minChars: 700,
           body: wrap(`
 <h1>JAMB UTME Past Questions by Subject</h1>
-<p>Real past questions with the correct option and a plain-language explanation for each one. Choose a subject below to start revising. Nothing here needs an account.</p>
+<p>Real past questions, each published with the correct option and an explanation of why it is right. Choose a subject below to start revising. Nothing here needs an account.</p>
 <ul>${subjectLinks}</ul>
-<p><strong>${total.toLocaleString()} past questions</strong> across the twelve UTME subjects. Each question shows the four options, the correct answer and a short explanation of why it is correct.</p>
+${pendingNote}
+<p><strong>${total.toLocaleString()} explained past questions</strong> across the UTME subjects. Each entry shows the four options, the correct answer and an explanation of why it is correct. Questions we cannot yet explain stay in the app and are not published here.</p>
 <h2>Practice properly</h2>
 <p>Browsing past questions is only half the work. The Jamb Crash app times you under real exam conditions, adapts to the topics you keep getting wrong, and works fully offline.</p>
 <p><a href="/auth">Start practising free</a></p>
@@ -259,19 +314,28 @@ export function prerenderPublicPages(env: Record<string, string>): Plugin {
         ...PUBLIC_SUBJECTS.map((subject): Page => {
           const label = SUBJECT_LABELS[subject];
           const rows = questionsBySubject[subject] || [];
+          const published = rows.length >= MIN_PUBLISHED_QUESTIONS;
           return {
             route: `/past-questions/${subject}`,
             title: `${label} Past Questions and Answers | Jamb Crash AI`,
             description: `${SUBJECT_BLURBS[subject]} Real ${label} JAMB UTME past questions with the correct options and explanations. Free, no sign-up.`,
             minChars: 700,
+            noindex: !published,
             body: wrap(`
 <p><a href="/past-questions">All subjects</a> · <a href="/">Home</a></p>
 <h1>${label} Past Questions</h1>
-<p>${SUBJECT_BLURBS[subject]} Real UTME past questions with answers and explanations. Try each one before reading the answer.</p>
-<p><strong>${rows.length} ${label} past questions</strong> published here, newest first.</p>
-<p>Transcribed from past UTME papers and checked for a single correct option before publication. <a href="/how-we-curate-questions">How we curate these questions</a>. New to the exam? Read the <a href="/jamb-utme-guide">UTME format and scoring guide</a>.</p>
-${questionList(rows, label)}
-<p><a href="/auth">Practise ${label} under exam conditions</a></p>
+<p>${escapeHtml(SUBJECT_BLURBS[subject])} Real UTME past questions, each published with the correct option and an explanation of why it is right. Try each one before reading the answer.</p>
+${subjectGuideHtml(subject)}
+${
+  published
+    ? `<h2>${escapeHtml(label)} questions with explanations</h2>
+<p><strong>${rows.length} explained ${escapeHtml(label)} past questions</strong>, newest first. Every question below is a real UTME past-paper question, published only because we can explain the answer. <a href="/how-we-curate-questions">How we curate these questions</a> · <a href="/jamb-utme-guide">UTME format and scoring guide</a>.</p>
+${questionList(rows, label)}`
+    : `<h2>Explanations for ${escapeHtml(label)} are still being written</h2>
+<p><strong>${rows.length} ${rows.length === 1 ? 'question is' : 'questions are'} published so far.</strong> The rest of the ${escapeHtml(label)} bank is in the app but stays off this page until each question carries a reviewed explanation. A page of bare questions with an answer key adds nothing to the paper it was copied from, so those items wait. <a href="/how-we-curate-questions">How we curate these questions</a>.</p>
+${questionList(rows, label)}`
+}
+<p><a href="/auth">Practise ${escapeHtml(label)} under exam conditions</a></p>
 `),
           };
         }),
@@ -298,13 +362,13 @@ ${page.html}
           minChars: 500,
           body: wrap(`
 <h1>About Jamb Crash AI</h1>
-<p>Jamb Crash AI is a JAMB UTME preparation platform built for Nigerian students. The foundation is a curated bank of real UTME past questions, transcribed from past papers and published free with answers and explanations, which we check and correct each exam cycle. Candidates walk into the exam hall having already met the question formats the paper uses.</p>
+<p>Jamb Crash AI is a JAMB UTME preparation platform built for Nigerian students. The foundation is a curated bank of real UTME past-paper questions, compiled from publicly available past-question archives and published free with answers and explanations. The explanations are written by our editorial team, some drafted with AI assistance and all reviewed before publication, and the bank is corrected each exam cycle as errors are reported. Candidates walk into the exam hall having already met the question formats the paper uses.</p>
 <h2>Why we exist</h2>
 <p>Every year over a million candidates sit the UTME and most score below 200 — not for lack of effort, but for lack of structured, exam-focused preparation. Textbooks are broad, lesson notes are scattered, and data is expensive. We built Jamb Crash AI so a student with a single phone, even on an unreliable connection, can study the right things, track real progress, and predict their score before exam day.</p>
 <h2>What you get</h2>
 <ul>
   <li><strong>Real past questions</strong> across all UTME subjects, free to browse on this site — see <a href="/how-we-curate-questions">how the bank is curated</a>.</li>
-  <li><strong>AI tutoring and explanations</strong> for every question, with diagrams for science and mathematics topics.</li>
+  <li><strong>Explanations you can learn from</strong> — every question in the app carries an explanation of the rule behind the answer, and AI tutoring is there when you want to go deeper.</li>
   <li><strong>Score prediction and study plans</strong> that adapt to your weak topics and exam date.</li>
   <li><strong>Timed quizzes, mock exams and leaderboards</strong> that simulate real exam pressure.</li>
   <li><strong>Offline study packs</strong> — download once and keep studying with no data, plus novels, syllabus and lessons.</li>
@@ -324,16 +388,16 @@ ${page.html}
 <h1>Contact Us</h1>
 <p>Support, feedback, partnerships and reseller enquiries.</p>
 <h2>Email support</h2>
-<p>For account issues, payments, bug reports and everything else, email <a href="mailto:support@jambcrash.ai">support@jambcrash.ai</a>. Include your account email and a screenshot where possible — it halves the back-and-forth. We reply within 24 hours on school days and 48 hours at weekends.</p>
+<p>For account issues, payments, bug reports and everything else, email <a href="mailto:${supportEmail}">${supportEmail}</a>. Include your account email and a screenshot where possible — it halves the back-and-forth. We reply within 24 hours on school days and 48 hours at weekends.</p>
 <h2>Community channels</h2>
 <ul>
   <li><a href="https://whatsapp.com/channel/0029VbBXiJs1nozBfLioDZ1X">WhatsApp Channel</a> — study reminders and announcements.</li>
   <li><a href="https://www.tiktok.com/@jamb.crash.ai">TikTok</a> — quick JAMB tips and walkthroughs.</li>
 </ul>
 <h2>Schools and resellers</h2>
-<p>Want Jamb Crash AI for your school, tutorial centre or as a reseller? Email <a href="mailto:support@jambcrash.ai?subject=School%20partnership">support@jambcrash.ai</a> with the subject "School partnership" and tell us about your students — we offer bulk access and PIN-based enrolment.</p>
+<p>Want Jamb Crash AI for your school, tutorial centre or as a reseller? Email <a href="mailto:${supportEmail}?subject=School%20partnership">${supportEmail}</a> with the subject "School partnership" and tell us about your students — we offer bulk access and PIN-based enrolment.</p>
 <h2>Advertising enquiries</h2>
-<p>We show clearly labelled ads on our free tier to keep core practice free for students. For direct advertising enquiries, email <a href="mailto:support@jambcrash.ai?subject=Advertising">support@jambcrash.ai</a> with the subject "Advertising".</p>
+<p>We show clearly labelled ads on our free tier to keep core practice free for students. For direct advertising enquiries, email <a href="mailto:${supportEmail}?subject=Advertising">${supportEmail}</a> with the subject "Advertising".</p>
 `),
         },
         {
@@ -387,7 +451,7 @@ ${page.html}
 <h2>Your rights</h2>
 <p>You can access, update or delete your account data from Settings, request a full export by emailing us, and withdraw consent for optional processing at any time.</p>
 <h2>Contact</h2>
-<p>Questions about privacy? Email <a href="mailto:support@jambcrash.ai">support@jambcrash.ai</a>.</p>
+<p>Questions about privacy? Email <a href="mailto:${supportEmail}">${supportEmail}</a>.</p>
 `),
         },
       ];
@@ -402,7 +466,7 @@ ${page.html}
           .replace(/<title>[\s\S]*?<\/title>/, `<title>${escapeHtml(page.title)}</title>`)
           .replace(
             /<meta name="description"[^>]*>/,
-            `<meta name="description" content="${escapeHtml(page.description)}" />\n    <meta name="robots" content="index, follow" />`,
+            `<meta name="description" content="${escapeHtml(page.description)}" />\n    <meta name="robots" content="${page.noindex ? 'noindex, follow' : 'index, follow'}" />`,
           )
           .replace(
             /<meta property="og:title"[^>]*>/,
@@ -450,6 +514,7 @@ ${page.html}
         path.join(distDir, 'sitemap.xml'),
         `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
           pages
+            .filter((page) => !page.noindex)
             .map(
               (page) =>
                 `  <url>\n    <loc>${siteUrl}${page.route === '/' ? '/' : page.route}</loc>\n` +

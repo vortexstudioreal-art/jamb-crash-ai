@@ -42,6 +42,12 @@ export default defineConfig(({ mode }) => {
           // whose script chunks then fail — blank screen that looks loading.
           "assets/*.js",
           "assets/*.css",
+          // Static artwork: without it the offline shell renders, but every
+          // logo/icon request fails and the page looks broken (blank boxes /
+          // missing branding).
+          "logo.png",
+          "*.jpg",
+          "*.svg",
         ],
         cleanupOutdatedCaches: true,
         runtimeCaching: [

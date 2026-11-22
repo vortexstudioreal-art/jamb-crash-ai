@@ -305,7 +305,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         // When offline and Supabase returns a null session (e.g. failed silent
-        // token refresh), do NOT wipe the user — keep the cached session so
+        // token refresh), do NOT wipe the user ï¿½ keep the cached session so
         // the app doesn't strand the user on the landing page.
         if (session === null && typeof navigator !== 'undefined' && !navigator.onLine) {
           setIsLoading(false);
@@ -315,18 +315,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Cache session for offline use
+        // Cache session for offline use. Never delete the cache on a null
+        // event: "null" also happens when a silent token refresh fails on a
+        // dead-but-"online" connection, and wiping it would sign the user out
+        // for good. Real sign-outs clear the cache explicitly in signOut().
         if (session) {
           try {
             localStorage.setItem('jamb_supabase_session', JSON.stringify(session));
           } catch (e) {
             errorLogger.error(e, { component: 'AuthContext', action: 'cacheSessionOnAuthChange' });
-          }
-        } else {
-          try {
-            localStorage.removeItem('jamb_supabase_session');
-          } catch (e) {
-            // ignore
           }
         }
         

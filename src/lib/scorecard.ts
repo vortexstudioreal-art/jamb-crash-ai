@@ -1,3 +1,5 @@
+import { SITE_HOST } from '@/config/site';
+
 export interface ScorecardData {
   userName: string;
   title: string;
@@ -199,7 +201,7 @@ export const renderScorecardCanvas = (
 
   ctx.font = 'bold 34px Arial, sans-serif';
   ctx.fillStyle = '#ffffff';
-  ctx.fillText('jambcrash.ai', W / 2, H - 100);
+  ctx.fillText(SITE_HOST, W / 2, H - 100);
 
   return canvas;
 };

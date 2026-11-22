@@ -1,8 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Mail, MessageCircle, Music2, Clock } from 'lucide-react';
 import { useSeo } from '@/hooks/useSeo';
-
-const SUPPORT_EMAIL = 'support@jambcrash.ai';
+import { SUPPORT_EMAIL } from '@/config/site';
 
 const Contact = () => {
   useSeo({

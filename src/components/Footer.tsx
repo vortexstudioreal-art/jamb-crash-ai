@@ -1,6 +1,7 @@
 import { BookOpen, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SocialFollowLinks } from './SocialFollowBanner';
+import { SUPPORT_EMAIL } from '@/config/site';
 
 export const Footer = () => {
   return (
@@ -15,7 +16,7 @@ export const Footer = () => {
               <span className="font-bold text-lg">Jamb Crash AI</span>
             </div>
             <p className="text-sm text-background/70 mb-4">
-              AI-powered JAMB preparation to help you score 300+ in just 48 hours of focused study.
+              AI-powered JAMB preparation built on real past questions — so focused study goes further.
             </p>
             <SocialFollowLinks />
           </div>
@@ -34,7 +35,7 @@ export const Footer = () => {
               <ul className="space-y-2 text-sm text-background/70">
                 <li className="flex items-center gap-2">
                   <Mail className="w-4 h-4" />
-                  <Link to="/contact" className="hover:text-background transition-colors">support@jambcrash.ai</Link>
+                  <Link to="/contact" className="hover:text-background transition-colors">{SUPPORT_EMAIL}</Link>
                 </li>
               </ul>
             </div>

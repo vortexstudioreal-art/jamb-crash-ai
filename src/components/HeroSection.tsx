@@ -60,7 +60,7 @@ export const HeroSection = ({ onGetStarted,  onSeeHowItWorks }: HeroSectionProps
             className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto"
           >
             Upload your past questions, get AI-analyzed topics, personalized timetable, 
-            and daily WhatsApp reminders. Score 300+ guaranteed.
+            and daily WhatsApp reminders. Revise with a plan instead of guessing.
           </motion.p>
 
           {/* CTA Buttons - Always visible, scrolls to pricing */}

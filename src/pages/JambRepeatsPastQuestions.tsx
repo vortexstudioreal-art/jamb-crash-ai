@@ -1,6 +1,7 @@
 import { useSeo } from '@/hooks/useSeo';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, Sparkles, BookOpen, TrendingUp } from 'lucide-react';
+import { SITE_URL } from '@/config/site';
 
 const FAQ_JSONLD = {
   '@context': 'https://schema.org',
@@ -51,9 +52,9 @@ const GUIDE_JSONLD = {
   publisher: {
     '@type': 'Organization',
     name: 'Jamb Crash AI',
-    url: 'https://jambcrash.ai/',
+    url: `${SITE_URL}/`,
   },
-  mainEntityOfPage: 'https://jambcrash.ai/jamb-repeats-past-questions',
+  mainEntityOfPage: `${SITE_URL}/jamb-repeats-past-questions`,
 };
 
 const JambRepeatsPastQuestions = () => {

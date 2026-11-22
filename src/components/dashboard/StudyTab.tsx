@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Target, Layers, StickyNote, FileText, BookOpen, Library, Flame, GraduationCap, Trophy, RefreshCw } from 'lucide-react';
 import { OfflineReadyCard } from '@/components/OfflineReadyCard';
-import { GoogleAdSense } from '@/components/GoogleAdSense';
 import { FeatureGate } from '@/components/FeatureGate';
 import { StudyMaterials } from '@/components/StudyMaterials';
 import { CourseTipsCard } from '@/components/CourseTipsCard';
@@ -137,9 +136,6 @@ export const StudyTab = ({
           <StudyMaterials subjects={effectiveSubjects} />
         </FeatureGate>
       )}
-
-      {/* AdSense */}
-      <GoogleAdSense className="my-4" />
 
       {/* AI Tip */}
       <Suspense fallback={<Skeleton className="h-32 w-full rounded-xl" />}>

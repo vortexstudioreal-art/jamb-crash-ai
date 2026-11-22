@@ -3,9 +3,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Wifi, WifiOff, CheckCircle2, Loader2, X, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { isMobileApp } from '@/config/admob';
 
 const DISMISS_KEY = 'jamb_offline_ready_dismissed';
 const READY_KEY = 'jamb_offline_ready_v1';
+
+// The Capacitor build ships the whole app inside the APK, so the shell is
+// offline-capable without a service worker. Only the data pack needs to be
+// downloaded, and useAutoOfflineSeed handles that.
+const isNative = typeof window !== 'undefined' && isMobileApp();
 
 type Step = {
   id: 'online' | 'sw' | 'cached';
@@ -24,8 +30,8 @@ export const OfflineReadyChecklist = () => {
   const [online, setOnline] = useState<boolean>(
     typeof navigator !== 'undefined' ? navigator.onLine : true,
   );
-  const [swReady, setSwReady] = useState(false);
-  const [cacheReady, setCacheReady] = useState(false);
+  const [swReady, setSwReady] = useState(isNative);
+  const [cacheReady, setCacheReady] = useState(isNative);
   const [dismissed, setDismissed] = useState(
     () => localStorage.getItem(DISMISS_KEY) === '1',
   );
@@ -47,6 +53,7 @@ export const OfflineReadyChecklist = () => {
 
   // Watch for the service worker
   useEffect(() => {
+    if (isNative) return;
     if (!('serviceWorker' in navigator)) return;
     let cancelled = false;
     navigator.serviceWorker.ready
@@ -73,6 +80,7 @@ export const OfflineReadyChecklist = () => {
 
   // Check the cache storage for our precached shell
   useEffect(() => {
+    if (isNative) return;
     if (!swReady || !('caches' in window)) return;
     let cancelled = false;
     const check = async () => {
@@ -109,18 +117,23 @@ export const OfflineReadyChecklist = () => {
 
   // Don't render in unsupported environments
   if (typeof window === 'undefined') return null;
-  if (!('serviceWorker' in navigator)) return null;
+  if (!isNative && !('serviceWorker' in navigator)) return null;
   if (dismissed) return null;
 
   // If everything is already ready from a previous visit, show a one-shot
   // success toast then hide forever.
   const allDone = online && swReady && cacheReady;
 
-  const steps: Step[] = [
-    { id: 'online', label: 'Connect to the internet', done: online },
-    { id: 'sw', label: 'Install offline engine', done: swReady },
-    { id: 'cached', label: 'Cache the app for offline use', done: cacheReady },
-  ];
+  const steps: Step[] = isNative
+    ? [
+        { id: 'online', label: 'Connect to the internet', done: online },
+        { id: 'cached', label: 'App is installed on this device', done: true },
+      ]
+    : [
+        { id: 'online', label: 'Connect to the internet', done: online },
+        { id: 'sw', label: 'Install offline engine', done: swReady },
+        { id: 'cached', label: 'Cache the app for offline use', done: cacheReady },
+      ];
 
   const handleDismiss = () => {
     localStorage.setItem(DISMISS_KEY, '1');
@@ -168,8 +181,9 @@ export const OfflineReadyChecklist = () => {
             {allDone ? (
               <>
                 <p className="text-sm text-muted-foreground mb-3">
-                  The app shell, quizzes you download, and your session are
-                  saved on this device. You can use Jamb Crash without internet.
+                  {isNative
+                    ? 'The app is installed on this device and your downloaded quizzes, lessons and books are saved for offline use.'
+                    : 'The app shell, quizzes you download, and your session are saved on this device. You can use Jamb Crash without internet.'}
                 </p>
                 <Button size="sm" className="w-full" onClick={handleDismiss}>
                   <CheckCircle2 className="w-4 h-4 mr-1" />
